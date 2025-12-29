@@ -19,27 +19,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check if app changed
-        id: changed
-        run: |
-          if git rev-parse ${{ github.event.before }} >/dev/null 2>&1; then
-            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^apps/${{ matrix.app }}/"; then
-              echo "changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "changed=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            # 이전 커밋이 없으면(예: 첫 커밋, force push 등) 무조건 true
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        if: steps.changed.outputs.changed == 'true'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: steps.changed.outputs.changed == 'true'
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -48,10 +32,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        if: steps.changed.outputs.changed == 'true'
 
       - name: Build and push Docker image
-        if: steps.changed.outputs.changed == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: proseed-${{ matrix.app }}
