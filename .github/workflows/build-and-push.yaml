@@ -5,6 +5,7 @@ on:
     paths:
       - "apps/web/**"
       - "apps/api/**"
+      - ".github/workflows/build-and-push.yaml"
     branches:
       - main
 
