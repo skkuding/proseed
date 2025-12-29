@@ -3,8 +3,8 @@ name: Build and Push Docker ECR
 on:
   push:
     paths:
-      - 'apps/web/**'
-      - 'apps/api/**'
+      - "apps/web/**"
+      - "apps/api/**"
     branches:
       - main
 
@@ -21,10 +21,15 @@ jobs:
       - name: Check if app changed
         id: changed
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^apps/${{ matrix.app }}/"; then
-            echo "changed=true" >> $GITHUB_OUTPUT
+          if git rev-parse ${{ github.event.before }} >/dev/null 2>&1; then
+            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^apps/${{ matrix.app }}/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "changed=false" >> $GITHUB_OUTPUT
+            # 이전 커밋이 없으면(예: 첫 커밋, force push 등) 무조건 true
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Set up Docker Buildx
