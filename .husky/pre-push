@@ -1,0 +1,7 @@
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if ! echo "$branch" | grep -qE "^(main|feat/|fix/|docs/|chore/|refactor/)"; then
+  echo "❌ 브랜치명이 컨벤션에 맞지 않습니다: $branch"
+  echo "허용: main, feat/*, fix/*, docs/*, chore/*, refactor/*"
+  exit 1
+fi
