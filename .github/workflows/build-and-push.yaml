@@ -39,5 +39,5 @@ jobs:
           ECR_REPOSITORY: proseed-${{ matrix.app }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/${{ matrix.app }}/Dockerfile apps/${{ matrix.app }}
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f apps/${{ matrix.app }}/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
