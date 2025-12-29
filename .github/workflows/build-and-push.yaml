@@ -3,9 +3,9 @@ name: Build and Push Docker ECR
 on:
   push:
     paths:
-      - "apps/web/**"
-      - "apps/api/**"
-      - ".github/workflows/build-and-push.yaml"
+      - 'apps/web/**'
+      - 'apps/api/**'
+      - '.github/workflows/build-and-push.yaml'
     branches:
       - main
 
