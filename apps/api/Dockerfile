@@ -23,14 +23,15 @@ RUN corepack enable pnpm && pnpm --filter api build
 
 # Production image
 FROM base AS runner
-WORKDIR /app
+WORKDIR /app/apps/api
 
 ENV NODE_ENV=production
 
 COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/apps/api/node_modules ./node_modules
 COPY --from=builder /app/apps/api/package.json ./package.json
 
-EXPOSE 3000
+EXPOSE 4000
 
 CMD ["node", "dist/main.js"]
