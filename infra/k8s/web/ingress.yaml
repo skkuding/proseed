@@ -10,10 +10,10 @@ spec:
   ingressClassName: traefik
   tls:
     - hosts:
-        - proseed.lab.skkuding.dev
+        - proseednow.com
       secretName: web-tls
   rules:
-    - host: proseed.lab.skkuding.dev
+    - host: proseednow.com
       http:
         paths:
           - path: /
