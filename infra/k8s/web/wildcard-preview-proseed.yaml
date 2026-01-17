@@ -9,4 +9,4 @@ spec:
     name: letsencrypt-dns01
     kind: ClusterIssuer
   dnsNames:
-    - "*.preview.proseednow.com"
+    - '*.preview.proseednow.com'
