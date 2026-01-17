@@ -74,8 +74,11 @@ resource "aws_iam_user_policy" "lab_route53" {
         ]
       },
       {
-        Effect   = "Allow"
-        Action   = "route53:ListHostedZones"
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZones",
+          "route53:ListHostedZonesByName"
+        ]
         Resource = "*"
       }
     ]
