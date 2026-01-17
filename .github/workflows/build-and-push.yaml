@@ -12,6 +12,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Client-side OTEL endpoint (injected at build time)
+  NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'
 
 jobs:
   build-and-push:
@@ -45,3 +47,6 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:latest
+          build-args: |
+            NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=${{ env.NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT }}
+            NEXT_PUBLIC_APP_ENV=production

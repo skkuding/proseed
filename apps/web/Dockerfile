@@ -19,6 +19,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
 
+# Build-time environment variables for client-side
+ARG NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT
+ARG NEXT_PUBLIC_APP_ENV=production
+ENV NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=$NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT
+ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
+
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable pnpm && pnpm run build
 

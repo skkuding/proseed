@@ -9,3 +9,4 @@ data:
   NEXT_URL: 'https://proseed.lab.skkuding.dev'
   NEXTAUTH_URL: 'https://proseed.lab.skkuding.dev/next-auth/api/auth'
   MEDIA_BUCKET_NAME: 'proseed-media'
+  OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'
