@@ -22,6 +22,16 @@ resource "aws_route53_record" "root" {
   ttl     = 300
 }
 
+# Preview environment wildcard subdomain
+# Allows dynamic preview URLs like pr-42.proseednow.com
+resource "aws_route53_record" "preview_wildcard" {
+  name    = "*.preview.proseednow.com"
+  zone_id = aws_route53_zone.main.zone_id
+  type    = "A"
+  records = local.lab_cluster_ip
+  ttl     = 300
+}
+
 # OTEL Collector endpoint for client-side telemetry
 # Points to the Kubernetes cluster's OTEL collector ingress
 resource "aws_route53_record" "otel" {

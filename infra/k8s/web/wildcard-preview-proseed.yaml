@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-preview-proseednow
+  namespace: proseed
+spec:
+  secretName: wildcard-preview-proseednow-tls
+  issuerRef:
+    name: letsencrypt-dns01
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.preview.proseednow.com"
