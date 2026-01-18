@@ -42,7 +42,7 @@ spec:
                 name: api-env
             - secretRef:
                 name: aws-credentials
-            # - secretRef:
-            #     name: database-credentials
+            - secretRef:
+                name: database-credentials
             # - secretRef:
             #     name: security-keys
