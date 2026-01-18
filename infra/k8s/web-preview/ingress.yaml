@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-preview-ingress
+  namespace: proseed-preview
+  annotations:
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - '*.preview.proseednow.com'
+      secretName: wildcard-preview-tls
+  rules:
+    - host: pr-0.preview.proseednow.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-preview
+                port:
+                  number: 3000
