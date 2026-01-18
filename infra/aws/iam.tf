@@ -97,3 +97,42 @@ output "lab_route53_secret_access_key" {
   value     = aws_iam_access_key.lab_route53.secret
   sensitive = true
 }
+
+# IAM user for External Secrets Operator to access Secrets Manager
+resource "aws_iam_user" "external_secrets" {
+  name = "proseed-external-secrets"
+}
+
+resource "aws_iam_user_policy" "external_secrets" {
+  name = "proseed-external-secrets-policy"
+  user = aws_iam_user.external_secrets.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:rds!*",
+          "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:proseed/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "external_secrets" {
+  user = aws_iam_user.external_secrets.name
+}
+
+output "external_secrets_access_key_id" {
+  value = aws_iam_access_key.external_secrets.id
+}
+
+output "external_secrets_secret_access_key" {
+  value     = aws_iam_access_key.external_secrets.secret
+  sensitive = true
+}
