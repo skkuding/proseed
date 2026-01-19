@@ -42,8 +42,6 @@ spec:
                 name: api-env
             - secretRef:
                 name: database-credentials
-            # - secretRef:
-            #     name: security-keys
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:

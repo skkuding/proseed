@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: proseed
 
 resources:
+  - aws-credentials.yaml
   - configmap.yaml
   - deployment.yaml
   - external-secret.yaml
