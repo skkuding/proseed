@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthController } from './health.controller';
 import { PrismaModule } from './prisma/prisma.module';
+import { StorageModule } from './storage/storage.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -13,6 +14,7 @@ import { validate } from './config/env.validation';
       isGlobal: true,
     }),
     PrismaModule,
+    StorageModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
