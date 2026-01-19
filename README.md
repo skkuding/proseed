@@ -4,24 +4,40 @@
 
 ## 기술 스택
 
-| 영역     | 기술                      |
-| -------- | ------------------------- |
-| Frontend | NextJS, React, TypeScript |
-| Styling  | Tailwind CSS              |
-| State    | Zustand                   |
-| Backend  | NestJS                    |
-| Infra    | AWS, GitHub Actions       |
+| 영역     | 기술                                  |
+| -------- | ------------------------------------- |
+| Frontend | Next.js 16, React 19, TypeScript      |
+| Styling  | Tailwind CSS 4                        |
+| State    | Zustand                               |
+| Backend  | NestJS 11, Prisma, PostgreSQL         |
+| Storage  | AWS S3 / MinIO (local)                |
+| Infra    | Terraform, Kubernetes, GitHub Actions |
 
 ## 프로젝트 구조
 
 ```
 proseed/
 ├── apps/
-│   ├── web/              # NextJS 웹앱 (PWA)
+│   ├── web/              # Next.js 웹앱 (PWA)
 │   └── api/              # NestJS API 서버
 ├── infra/
-│   └── aws/              # AWS 인프라 코드
+│   ├── aws/              # Terraform (RDS, S3, IAM)
+│   └── k8s/              # Kubernetes manifests
 └── .github/workflows/    # CI/CD
+```
+
+## 시작하기
+
+```bash
+# 의존성 설치
+pnpm install
+
+# Prisma 클라이언트 생성
+pnpm --filter api prisma generate
+
+# 개발 서버 실행
+pnpm dev                        # Web (port 3000)
+pnpm --filter api start:dev     # API (port 4000, docker compose 포함)
 ```
 
 ## 컨벤션
