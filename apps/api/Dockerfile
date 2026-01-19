@@ -19,7 +19,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY . .
 
-RUN corepack enable pnpm && pnpm --filter api build
+RUN corepack enable pnpm && pnpm --filter api prisma generate && pnpm --filter api build
 
 # Production image
 FROM base AS runner
