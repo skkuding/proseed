@@ -1,65 +1,15 @@
-resource "aws_iam_user" "github_actions" {
-  name = "github-actions-ecr"
+# Unified IAM user for proseed project (Route53, Secrets Manager, S3, etc.)
+resource "aws_iam_user" "proseed" {
+  name = "proseed"
 }
 
-resource "aws_iam_user_policy" "github_actions_ecr" {
-  name = "github-actions-ecr-policy"
-  user = aws_iam_user.github_actions.name
+resource "aws_iam_user_policy" "proseed" {
+  name = "proseed-policy"
+  user = aws_iam_user.proseed.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ecr:GetAuthorizationToken",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:CompleteLayerUpload",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:InitiateLayerUpload",
-          "ecr:PutImage",
-          "ecr:UploadLayerPart",
-          "ecr:BatchGetImage",
-          "ecr:CreateRepository"
-        ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:CreateLogGroup"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_access_key" "github_actions" {
-  user = aws_iam_user.github_actions.name
-}
-
-output "github_actions_access_key_id" {
-  value = aws_iam_access_key.github_actions.id
-}
-
-output "github_actions_secret_access_key" {
-  value     = aws_iam_access_key.github_actions.secret
-  sensitive = true
-}
-
-# IAM user for skkuding/lab repository to manage Route53 DNS records
-resource "aws_iam_user" "lab_route53" {
-  name = "skkuding-lab-route53"
-}
-
-resource "aws_iam_user_policy" "lab_route53" {
-  name = "skkuding-lab-route53-policy"
-  user = aws_iam_user.lab_route53.name
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+      # Route53
       {
         Effect = "Allow"
         Action = [
@@ -80,35 +30,8 @@ resource "aws_iam_user_policy" "lab_route53" {
           "route53:ListHostedZonesByName"
         ]
         Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_access_key" "lab_route53" {
-  user = aws_iam_user.lab_route53.name
-}
-
-output "lab_route53_access_key_id" {
-  value = aws_iam_access_key.lab_route53.id
-}
-
-output "lab_route53_secret_access_key" {
-  value     = aws_iam_access_key.lab_route53.secret
-  sensitive = true
-}
-
-# IAM user for External Secrets Operator to access Secrets Manager
-resource "aws_iam_user" "external_secrets" {
-  name = "proseed-external-secrets"
-}
-
-resource "aws_iam_user_policy" "external_secrets" {
-  name = "proseed-external-secrets-policy"
-  user = aws_iam_user.external_secrets.name
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
+      },
+      # Secrets Manager
       {
         Effect = "Allow"
         Action = [
@@ -119,20 +42,34 @@ resource "aws_iam_user_policy" "external_secrets" {
           "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:rds!*",
           "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:proseed/*"
         ]
+      },
+      # S3 (for future use)
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::proseed-*",
+          "arn:aws:s3:::proseed-*/*"
+        ]
       }
     ]
   })
 }
 
-resource "aws_iam_access_key" "external_secrets" {
-  user = aws_iam_user.external_secrets.name
+resource "aws_iam_access_key" "proseed" {
+  user = aws_iam_user.proseed.name
 }
 
-output "external_secrets_access_key_id" {
-  value = aws_iam_access_key.external_secrets.id
+output "proseed_access_key_id" {
+  value = aws_iam_access_key.proseed.id
 }
 
-output "external_secrets_secret_access_key" {
-  value     = aws_iam_access_key.external_secrets.secret
+output "proseed_secret_access_key" {
+  value     = aws_iam_access_key.proseed.secret
   sensitive = true
 }
