@@ -49,13 +49,23 @@ enum ProjectCategory {
   AI
 }
 
+enum JobType {
+  Planner
+  Designer
+  Developer
+  Other
+}
+
 model User {
   id               Int      @id @default(autoincrement())
   name             String
-  phoneNumber      String   @map("phone_number")
   email            String
   createdAt        DateTime @default(now()) @map("created_at")
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
+  jobType          JobType
+  bio              String?
+  birth            String?
+  profileImageUrl  String?
 
   projectRoles ProjectRole[]
   feedbacks    Feedback[]
@@ -76,21 +86,49 @@ model UserOAuth {
   @@map("user_oauth")
 }
 
+enum ProjectType {
+  APP
+  WEB
+}
+
+enum ProjectStatus {
+  Available
+  MVP
+  Ongoing
+  Hiring
+}
+
 model Project {
   id                 Int             @id @default(autoincrement())
   title              String
+  type               ProjectType
+  status             ProjectStatus
   oneLineDescription String          @map("one_line_description")
   description        String
   category           ProjectCategory
-  status             String
   contactPath        String          @map("contact_path")
   projectLink        String          @map("project_link")
+
+  iconUrl String? @map("icon_url")
 
   growthRecords     GrowthRecord[]
   projectRoles      ProjectRole[]
   feedbackQuestions FeedbackQuestion[]
+  images            ProjectImage[]
 
   @@map("project")
+}
+
+model ProjectImage {
+  id        Int      @id @default(autoincrement())
+  projectId Int      @map("project_id")
+  url       String // S3 URL 또는 key
+  order     Int      @default(0) // 정렬 순서
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_image")
 }
 
 model GrowthRecord {
@@ -138,11 +176,11 @@ model FeedbackQuestion {
 }
 
 model GrowthRecordContent {
-  id                Int     @id @default(autoincrement())
-  growthRecordId    Int     @map("growth_record_id")
-  title             String
-  content           String
-  isDefault         Boolean @default(false) @map("is_default")
+  id             Int     @id @default(autoincrement())
+  growthRecordId Int     @map("growth_record_id")
+  title          String
+  content        String
+  isDefault      Boolean @default(false) @map("is_default")
 
   growthRecord GrowthRecord @relation(fields: [growthRecordId], references: [id], onDelete: Cascade)
 
@@ -150,11 +188,12 @@ model GrowthRecordContent {
 }
 
 model Feedback {
-  id         Int    @id @default(autoincrement())
-  questionId Int    @map("question_id")
-  projectId  Int    @map("project_id")
-  userId     Int    @map("user_id")
+  id         Int      @id @default(autoincrement())
+  questionId Int      @map("question_id")
+  projectId  Int      @map("project_id")
+  userId     Int      @map("user_id")
   content    String
+  createdAt  DateTime @default(now()) @map("created_at")
 
   question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
