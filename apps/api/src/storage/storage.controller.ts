@@ -7,12 +7,12 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
-import { StorageService } from './storage.service';
+} from '@nestjs/common'
+import { StorageService } from './storage.service'
 
 class GetUploadUrlDto {
-  filename: string;
-  contentType: string;
+  filename: string
+  contentType: string
 }
 
 @Controller('storage')
@@ -21,29 +21,29 @@ export class StorageController {
 
   @Get('health')
   async checkHealth() {
-    return this.storageService.getBucketStatus();
+    return this.storageService.getBucketStatus()
   }
 
   @Post('upload-url')
   async getUploadUrl(@Body() dto: GetUploadUrlDto) {
-    const key = `uploads/${Date.now()}-${dto.filename}`;
+    const key = `uploads/${Date.now()}-${dto.filename}`
     const url = await this.storageService.getSignedUploadUrl(
       key,
       dto.contentType,
-    );
+    )
 
-    return { url, key };
+    return { url, key }
   }
 
   @Get('download-url/*key')
   async getDownloadUrl(@Param('key') key: string) {
-    const url = await this.storageService.getSignedDownloadUrl(key);
-    return { url };
+    const url = await this.storageService.getSignedDownloadUrl(key)
+    return { url }
   }
 
   @Delete('*key')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteFile(@Param('key') key: string) {
-    await this.storageService.deleteFile(key);
+    await this.storageService.deleteFile(key)
   }
 }
