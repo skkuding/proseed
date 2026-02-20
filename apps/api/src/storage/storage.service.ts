@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import {
   S3Client,
   PutObjectCommand,
@@ -6,18 +6,18 @@ import {
   DeleteObjectCommand,
   HeadBucketCommand,
   ListObjectsV2Command,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 @Injectable()
 export class StorageService implements OnModuleInit {
-  private readonly logger = new Logger(StorageService.name);
-  private readonly s3Client: S3Client;
-  private readonly bucketName: string;
+  private readonly logger = new Logger(StorageService.name)
+  private readonly s3Client: S3Client
+  private readonly bucketName: string
 
   constructor() {
-    this.bucketName = process.env.S3_BUCKET_NAME!;
-    const endpoint = process.env.S3_ENDPOINT;
+    this.bucketName = process.env.S3_BUCKET_NAME!
+    const endpoint = process.env.S3_ENDPOINT
 
     this.s3Client = new S3Client({
       region: process.env.AWS_REGION || 'ap-northeast-2',
@@ -27,21 +27,21 @@ export class StorageService implements OnModuleInit {
       },
       // MinIO requires endpoint and forcePathStyle
       ...(endpoint && { endpoint, forcePathStyle: true }),
-    });
+    })
   }
 
   async onModuleInit() {
     try {
       await this.s3Client.send(
         new HeadBucketCommand({ Bucket: this.bucketName }),
-      );
-      this.logger.log(`S3 bucket '${this.bucketName}' connection established`);
+      )
+      this.logger.log(`S3 bucket '${this.bucketName}' connection established`)
     } catch (error) {
       this.logger.error(
         `Failed to connect to S3 bucket '${this.bucketName}'`,
         error,
-      );
-      throw error;
+      )
+      throw error
     }
   }
 
@@ -57,9 +57,9 @@ export class StorageService implements OnModuleInit {
         Body: body,
         ContentType: contentType,
       }),
-    );
+    )
 
-    return key;
+    return key
   }
 
   async getSignedUploadUrl(
@@ -71,18 +71,18 @@ export class StorageService implements OnModuleInit {
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
-    });
+    })
 
-    return getSignedUrl(this.s3Client, command, { expiresIn });
+    return getSignedUrl(this.s3Client, command, { expiresIn })
   }
 
   async getSignedDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
-    });
+    })
 
-    return getSignedUrl(this.s3Client, command, { expiresIn });
+    return getSignedUrl(this.s3Client, command, { expiresIn })
   }
 
   async deleteFile(key: string): Promise<void> {
@@ -91,7 +91,7 @@ export class StorageService implements OnModuleInit {
         Bucket: this.bucketName,
         Key: key,
       }),
-    );
+    )
   }
 
   async getBucketStatus() {
@@ -100,12 +100,12 @@ export class StorageService implements OnModuleInit {
         Bucket: this.bucketName,
         MaxKeys: 1,
       }),
-    );
+    )
 
     return {
       bucket: this.bucketName,
       status: 'ok',
       objectCount: result.KeyCount ?? 0,
-    };
+    }
   }
 }
