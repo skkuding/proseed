@@ -1,14 +1,160 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GrowthRecordCategory {
+  DEVELOPMENT
+  DESIGN
+  PLAN
+  OTHER
+}
+
+enum ProjectRoleType {
+  ADMIN
+  MEMBER
+}
+
+enum Provider {
+  KAKAO
+  NAVER
+  GOOGLE
+}
+
+enum FeedbackQuestionCategory {
+  USABILITY
+  DESIGN
+  FUNCTION
+  OTHER
+}
+
+enum ProjectCategory {
+  HEALTHCARE
+  FINANCE
+  PUBLIC
+  COMMERCE
+  EDUCATION
+  ENTERTAINMENT
+  MOBILITY
+  ENERGY
+  REALESTATE
+  LIFESTYLE
+  PRODUCTIVITY
+  COMMUNITY
+  AI
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  name             String
+  phoneNumber      String
+  email            String
+  createdAt        DateTime @default(now())
+  ownedTicketCount Int      @default(0)
+
+  projectRoles ProjectRole[]
+  feedbacks    Feedback[]
+  userOAuth    UserOAuth[]
+}
+
+model UserOAuth {
+  id         String // social ID (OAuth 서비스로부터 제공받는 id)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int      @map("user_id")
+  provider   Provider
+  createTime DateTime @default(now()) @map("create_time")
+  updateTime DateTime @updatedAt @map("update_time")
+
+  @@id([id, provider])
+  @@map("user_oauth")
+}
+
+model Project {
+  id                 Int              @id @default(autoincrement())
+  title              String?
+  oneLineDescription String?
+  description        String?
+  category           ProjectCategory?
+  status             String?
+  contactPath        String?
+  projectLink        String?
+
+  growthRecords        GrowthRecord[]
+  projectRoles         ProjectRole[]
+  feedbackQuestions    FeedbackQuestion[]
+  growthRecordContents GrowthRecordContent[]
+}
+
+model GrowthRecord {
+  id            Int                   @default(autoincrement())
+  projectId     Int
+  version       String?
+  category      GrowthRecordCategory?
+  updateGoal    String?
+  createdAt     DateTime?             @default(now())
+  updatedAt     DateTime?             @updatedAt
+  updateResults String[]
+
+  project  Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contents GrowthRecordContent[]
+
+  @@id([id, projectId])
+}
+
+model ProjectRole {
+  id        Int              @default(autoincrement())
+  userId    Int
+  projectId Int
+  role      ProjectRoleType?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([id, userId, projectId])
+}
+
+model FeedbackQuestion {
+  id          Int                       @default(autoincrement())
+  projectId   Int
+  category    FeedbackQuestionCategory?
+  title       String?
+  description String?
+  sortOrder   Int?                      @default(0)
+  isRequired  Boolean?                  @default(false)
+
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  feedbacks Feedback[]
+
+  @@id([id, projectId])
+}
+
+model GrowthRecordContent {
+  id                Int      @default(autoincrement())
+  growthRecordId    Int
+  projectId         Int
+  title             String?
+  content           String?  @db.Text
+  isDefaultQuestion Boolean? @default(false)
+
+  growthRecord GrowthRecord @relation(fields: [growthRecordId, projectId], references: [id, projectId], onDelete: Cascade)
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([id, growthRecordId, projectId])
+}
+
+model Feedback {
+  id           Int     @default(autoincrement())
+  questionId   Int
+  projectId    Int
+  authorUserId Int
+  content      String? @db.Text
+
+  question FeedbackQuestion @relation(fields: [questionId, projectId], references: [id, projectId], onDelete: Cascade)
+  author   User             @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@id([id, questionId, projectId, authorUserId])
 }
