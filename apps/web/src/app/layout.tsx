@@ -1,6 +1,14 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import localFont from 'next/font/local'
+
+const pretendard = localFont({
+  src: '../font/PretendardVariable.woff2',
+  display: 'swap',
+  weight: '100 900',
+  variable: '--font-pretendard',
+})
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -23,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+    <html lang="en" className={`${pretendard.variable}`}>
+      <body className={pretendard.className}>{children}</body>
     </html>
   )
 }

@@ -1,22 +1,16 @@
 import type { Config } from 'tailwindcss'
 
-/**
- * Design System Typography Tokens
- *
- * Naming convention: {category}{level}_{weight}_{size}
- *   category : head | body | label | caption
- *   level    : 0, 1, 2, 3, ...
- *   weight   : sb (semibold/600) | b (bold/700) | m (medium/500) | r (regular/400)
- *   size     : font-size in px
- *
- * Values: [fontSize, { lineHeight, letterSpacing, fontWeight }]
- *   letterSpacing: Figma % → em  (e.g. -4% = -0.04em)
- *
- * Usage: className="text-head0_sb_52"
- */
 const config: Config = {
+  content: [
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
   theme: {
     extend: {
+      fontFamily: {
+        pretendard: ['var(--font-pretendard)'],
+      },
       fontSize: {
         // ── Heading ──────────────────────────────────────────
         head0_sb_52: ['52px', { lineHeight: '130%', letterSpacing: '-0.04em', fontWeight: '600' }],
