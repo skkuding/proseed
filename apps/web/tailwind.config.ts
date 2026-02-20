@@ -91,6 +91,9 @@ const config: Config = {
           10: '#191A1A',
           5: '#141414',
         },
+        backGround: {
+          normal: '#F4F4F6',
+        },
       },
     },
   },
