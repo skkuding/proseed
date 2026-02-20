@@ -33,8 +33,9 @@ ENV NODE_ENV=production
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 
-# Copy node_modules (pnpm hoists to root)
+# Copy node_modules (pnpm requires workspace-level symlinks)
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 
 # Copy prisma client
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
