@@ -47,14 +47,31 @@ export class ProjectService {
         _count: {
           select: {
             versions: true,
-            feedbacks: true,
+          },
+        },
+        versions: {
+          select: {
+            _count: {
+              select: { feedbacks: true },
+            },
           },
         },
       },
     })
 
     const hasNextPage = projects.length > take
-    const data = hasNextPage ? projects.slice(0, take) : projects
+    const sliced = hasNextPage ? projects.slice(0, take) : projects
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const data = sliced.map((project: any) => {
+      const { versions, ...rest } = project
+      const feedbackCount = versions.reduce(
+        (sum: number, v: any) => sum + v._count.feedbacks,
+        0,
+      )
+      return { ...rest, feedbackCount }
+    })
+
     const nextCursor = hasNextPage ? data[data.length - 1]?.id : null
 
     return {
@@ -62,10 +79,11 @@ export class ProjectService {
       nextCursor,
       hasNextPage,
     }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   }
 
   async getMyProjects(userId: number) {
-    return this.prisma.project.findMany({
+    const projects = await this.prisma.project.findMany({
       where: {
         createdById: userId,
       },
@@ -78,11 +96,28 @@ export class ProjectService {
         _count: {
           select: {
             versions: true,
-            feedbacks: true,
+          },
+        },
+        versions: {
+          select: {
+            _count: {
+              select: { feedbacks: true },
+            },
           },
         },
       },
     })
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    return projects.map((project: any) => {
+      const { versions, ...rest } = project
+      const feedbackCount = versions.reduce(
+        (sum: number, v: any) => sum + v._count.feedbacks,
+        0,
+      )
+      return { ...rest, feedbackCount }
+    })
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   }
 
   async getProjectById(userId: number, projectId: number) {
