@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={pretendard.variable}>
-      <body className={pretendard.className}>
+      <body className={`${pretendard.className} bg-backGround-normal`}>
         <div className="mx-auto max-w-310 px-10">{children}</div>
       </body>
     </html>
