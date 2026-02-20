@@ -114,6 +114,8 @@ model Project {
   projectLink        String            @map("project_link")
   iconUrl            String            @map("icon_url")
   thumbnailUrl       String            @map("thumbnail_url")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
 
   growthRecords     GrowthRecord[]
   projectRoles      ProjectRole[]

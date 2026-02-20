@@ -5,10 +5,12 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Req,
 } from '@nestjs/common'
 import type { AuthenticatedRequest } from 'libs/auth/src/authenticated-request.interface'
 import { CreateProjectDto } from './dto/create-project.dto'
+import { GetProjectsDto } from './dto/get-projects.dto'
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto'
 import { ProjectService } from './project.service'
 
@@ -25,6 +27,11 @@ export class ProjectController {
   }
 
   @Get()
+  async getProjects(@Query() query: GetProjectsDto) {
+    return this.projectService.getProjects(query)
+  }
+
+  @Get('my')
   async getMyProjects(@Req() req: AuthenticatedRequest) {
     return this.projectService.getMyProjects(req.user.id)
   }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import type { Prisma } from '@prisma/client'
 import { ProjectRoleType } from '@prisma/client'
 import {
   EntityNotExistException,
@@ -6,10 +7,62 @@ import {
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateProjectDto } from './dto/create-project.dto'
+import type { GetProjectsDto } from './dto/get-projects.dto'
 
 @Injectable()
 export class ProjectService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getProjects(dto: GetProjectsDto) {
+    const { search, category, take = 9, cursor } = dto
+
+    const where: Prisma.ProjectWhereInput = {
+      ...(search && {
+        title: {
+          contains: search,
+          mode: 'insensitive' as const,
+        },
+      }),
+      ...(category && {
+        category: {
+          has: category,
+        },
+      }),
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where,
+      take: take + 1,
+      ...(cursor && {
+        cursor: { id: cursor },
+        skip: 1,
+      }),
+      orderBy: { id: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        oneLineDescription: true,
+        category: true,
+        thumbnailUrl: true,
+        _count: {
+          select: {
+            growthRecords: true,
+            feedbacks: true,
+          },
+        },
+      },
+    })
+
+    const hasNextPage = projects.length > take
+    const data = hasNextPage ? projects.slice(0, take) : projects
+    const nextCursor = hasNextPage ? data[data.length - 1]?.id : null
+
+    return {
+      data,
+      nextCursor,
+      hasNextPage,
+    }
+  }
 
   async getMyProjects(userId: number) {
     return this.prisma.project.findMany({
@@ -21,7 +74,6 @@ export class ProjectService {
         title: true,
         oneLineDescription: true,
         category: true,
-        iconUrl: true,
         thumbnailUrl: true,
         _count: {
           select: {
