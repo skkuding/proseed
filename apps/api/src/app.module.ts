@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { HealthController } from './health.controller';
-import { PrismaModule } from './prisma/prisma.module';
-import { StorageModule } from './storage/storage.module';
-import { validate } from './config/env.validation';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { validate } from './config/env.validation'
+import { HealthController } from './health.controller'
+import { PrismaModule } from './prisma/prisma.module'
+import { StorageModule } from './storage/storage.module'
+import { UserModule } from './user/user.module'
 
 @Module({
   imports: [
