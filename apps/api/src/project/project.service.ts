@@ -46,7 +46,7 @@ export class ProjectService {
         thumbnailUrl: true,
         _count: {
           select: {
-            growthRecords: true,
+            versions: true,
             feedbacks: true,
           },
         },
@@ -77,7 +77,7 @@ export class ProjectService {
         thumbnailUrl: true,
         _count: {
           select: {
-            growthRecords: true,
+            versions: true,
             feedbacks: true,
           },
         },
