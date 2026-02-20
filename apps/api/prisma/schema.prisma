@@ -8,9 +8,10 @@ datasource db {
 }
 
 enum GrowthRecordCategory {
-  DEVELOPMENT
-  DESIGN
   PLAN
+  DESIGN
+  FRONTEND
+  BACKEND
   OTHER
 }
 
@@ -26,10 +27,10 @@ enum Provider {
 }
 
 enum FeedbackQuestionCategory {
-  USABILITY
+  PLAN
   DESIGN
-  FUNCTION
-  OTHER
+  DEVELOPMENT
+  GENERAL
 }
 
 enum ProjectCategory {
@@ -51,18 +52,20 @@ enum ProjectCategory {
 model User {
   id               Int      @id @default(autoincrement())
   name             String
-  phoneNumber      String
+  phoneNumber      String   @map("phone_number")
   email            String
-  createdAt        DateTime @default(now())
-  ownedTicketCount Int      @default(0)
+  createdAt        DateTime @default(now()) @map("created_at")
+  ownedTicketCount Int      @default(0) @map("owned_ticket_count")
 
   projectRoles ProjectRole[]
   feedbacks    Feedback[]
-  userOAuth    UserOAuth[]
+  userOAuths   UserOAuth[]
+
+  @@map("user")
 }
 
 model UserOAuth {
-  id         String // social ID (OAuth 서비스로부터 제공받는 id)
+  id         String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     Int      @map("user_id")
   provider   Provider
@@ -74,87 +77,87 @@ model UserOAuth {
 }
 
 model Project {
-  id                 Int              @id @default(autoincrement())
-  title              String?
-  oneLineDescription String?
-  description        String?
-  category           ProjectCategory?
-  status             String?
-  contactPath        String?
-  projectLink        String?
+  id                 Int             @id @default(autoincrement())
+  title              String
+  oneLineDescription String          @map("one_line_description")
+  description        String
+  category           ProjectCategory
+  status             String
+  contactPath        String          @map("contact_path")
+  projectLink        String          @map("project_link")
 
-  growthRecords        GrowthRecord[]
-  projectRoles         ProjectRole[]
-  feedbackQuestions    FeedbackQuestion[]
-  growthRecordContents GrowthRecordContent[]
+  growthRecords     GrowthRecord[]
+  projectRoles      ProjectRole[]
+  feedbackQuestions FeedbackQuestion[]
+
+  @@map("project")
 }
 
 model GrowthRecord {
-  id            Int                   @default(autoincrement())
-  projectId     Int
-  version       String?
-  category      GrowthRecordCategory?
-  updateGoal    String?
-  createdAt     DateTime?             @default(now())
-  updatedAt     DateTime?             @updatedAt
-  updateResults String[]
+  id            Int                  @id @default(autoincrement())
+  projectId     Int                  @map("project_id")
+  version       String
+  category      GrowthRecordCategory
+  updateGoal    String               @map("update_goal")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+  updateResults String[]             @map("update_results")
 
   project  Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
   contents GrowthRecordContent[]
 
-  @@id([id, projectId])
+  @@map("growth_record")
 }
 
 model ProjectRole {
-  id        Int              @default(autoincrement())
-  userId    Int
-  projectId Int
-  role      ProjectRoleType?
+  id        Int             @id @default(autoincrement())
+  userId    Int             @map("user_id")
+  projectId Int             @map("project_id")
+  role      ProjectRoleType
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@id([id, userId, projectId])
+  @@unique([userId, projectId])
+  @@map("project_role")
 }
 
 model FeedbackQuestion {
-  id          Int                       @default(autoincrement())
-  projectId   Int
-  category    FeedbackQuestionCategory?
-  title       String?
-  description String?
-  sortOrder   Int?                      @default(0)
-  isRequired  Boolean?                  @default(false)
+  id          Int                      @id @default(autoincrement())
+  projectId   Int                      @map("project_id")
+  category    FeedbackQuestionCategory
+  title       String
+  description String
+  order       Int                      @default(0)
+  isRequired  Boolean                  @default(false) @map("is_required")
 
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   feedbacks Feedback[]
 
-  @@id([id, projectId])
+  @@map("feedback_question")
 }
 
 model GrowthRecordContent {
-  id                Int      @default(autoincrement())
-  growthRecordId    Int
-  projectId         Int
-  title             String?
-  content           String?  @db.Text
-  isDefaultQuestion Boolean? @default(false)
+  id                Int     @id @default(autoincrement())
+  growthRecordId    Int     @map("growth_record_id")
+  title             String
+  content           String
+  isDefault         Boolean @default(false) @map("is_default")
 
-  growthRecord GrowthRecord @relation(fields: [growthRecordId, projectId], references: [id, projectId], onDelete: Cascade)
-  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  growthRecord GrowthRecord @relation(fields: [growthRecordId], references: [id], onDelete: Cascade)
 
-  @@id([id, growthRecordId, projectId])
+  @@map("growth_record_content")
 }
 
 model Feedback {
-  id           Int     @default(autoincrement())
-  questionId   Int
-  projectId    Int
-  authorUserId Int
-  content      String? @db.Text
+  id         Int    @id @default(autoincrement())
+  questionId Int    @map("question_id")
+  projectId  Int    @map("project_id")
+  userId     Int    @map("user_id")
+  content    String
 
-  question FeedbackQuestion @relation(fields: [questionId, projectId], references: [id, projectId], onDelete: Cascade)
-  author   User             @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([id, questionId, projectId, authorUserId])
+  @@map("feedback")
 }
