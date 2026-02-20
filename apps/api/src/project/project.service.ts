@@ -45,6 +45,18 @@ export class ProjectService {
               url: true,
             },
           },
+          projectRoles: {
+            select: {
+              id: true,
+              user: {
+                select: {
+                  name: true,
+                  profileImageUrl: true,
+                },
+              },
+              role: true,
+            },
+          },
         },
       }),
       this.prisma.projectRole.findUnique({
