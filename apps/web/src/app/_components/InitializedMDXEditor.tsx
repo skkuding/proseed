@@ -1,34 +1,9 @@
-'use client'
-// InitializedMDXEditor.tsx
-import type { ForwardedRef } from 'react'
-import {
-  headingsPlugin,
-  listsPlugin,
-  quotePlugin,
-  thematicBreakPlugin,
-  markdownShortcutPlugin,
-  MDXEditor,
-  type MDXEditorMethods,
-  type MDXEditorProps,
-} from '@mdxeditor/editor'
-
-// Only import this to the next file
-export default function InitializedMDXEditor({
-  editorRef,
-  ...props
-}: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
+export function InitializedMDXEditor() {
   return (
-    <MDXEditor
-      plugins={[
-        // Example Plugin Usage
-        headingsPlugin(),
-        listsPlugin(),
-        quotePlugin(),
-        thematicBreakPlugin(),
-        markdownShortcutPlugin(),
-      ]}
-      {...props}
-      ref={editorRef}
-    />
+    <div className="w-full h-125 border rounded-md">
+      <div className="flex items-center justify-center w-full h-full text-gray-500">
+        MDX Editor Initialized
+      </div>
+    </div>
   )
 }
