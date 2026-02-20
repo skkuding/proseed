@@ -157,9 +157,22 @@ model GrowthRecord {
 
   version  ProjectVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
   contents GrowthRecordContent[]
+  images   GrowthRecordImage[]
 
   @@unique([versionId, category])
   @@map("growth_record")
+}
+
+model GrowthRecordImage {
+  id             Int      @id @default(autoincrement())
+  growthRecordId Int      @map("growth_record_id")
+  url            String
+  order          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  growthRecord GrowthRecord @relation(fields: [growthRecordId], references: [id], onDelete: Cascade)
+
+  @@map("growth_record_image")
 }
 
 model ProjectRole {
