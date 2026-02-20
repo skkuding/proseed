@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-preview-env
+  namespace: proseed-preview
+data:
+  NEXT_URL: 'https://pr-0.preview.proseednow.com'
+  NEXTAUTH_URL: 'https://pr-0.preview.proseednow.com/next-auth/api/auth'
+  MEDIA_BUCKET_NAME: 'proseed-media'
+  OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'

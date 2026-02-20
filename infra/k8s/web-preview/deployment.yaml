@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-preview
+  namespace: proseed-preview
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-preview
+  template:
+    metadata:
+      labels:
+        app: web-preview
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/skkuding/proseed/web:pr-0
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          envFrom:
+            - configMapRef:
+                name: web-preview-env
+          env:
+            - name: APP_ENV
+              value: 'preview'

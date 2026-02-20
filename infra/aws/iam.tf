@@ -1,50 +1,76 @@
-resource "aws_iam_user" "github_actions" {
-  name = "github-actions-ecr"
+# Unified IAM user for proseed project (Route53, Secrets Manager, S3, etc.)
+resource "aws_iam_user" "proseed" {
+  name = "proseed"
 }
 
-resource "aws_iam_user_policy" "github_actions_ecr" {
-  name = "github-actions-ecr-policy"
-  user = aws_iam_user.github_actions.name
+resource "aws_iam_user_policy" "proseed" {
+  name = "proseed-policy"
+  user = aws_iam_user.proseed.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # Route53
       {
         Effect = "Allow"
         Action = [
-          "ecr:GetAuthorizationToken",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:CompleteLayerUpload",
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:InitiateLayerUpload",
-          "ecr:PutImage",
-          "ecr:UploadLayerPart",
-          "ecr:BatchGetImage",
-          "ecr:CreateRepository"
+          "route53:GetHostedZone",
+          "route53:ListResourceRecordSets",
+          "route53:ChangeResourceRecordSets",
+          "route53:GetChange"
         ]
-        Resource = "*"
+        Resource = [
+          aws_route53_zone.main.arn,
+          "arn:aws:route53:::change/*"
+        ]
       },
       {
         Effect = "Allow"
         Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:CreateLogGroup"
+          "route53:ListHostedZones",
+          "route53:ListHostedZonesByName"
         ]
         Resource = "*"
+      },
+      # Secrets Manager
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = [
+          "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:rds!*",
+          "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:proseed/*"
+        ]
+      },
+      # S3
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = [
+          "arn:aws:s3:::proseed-*",
+          "arn:aws:s3:::proseed-*/*"
+        ]
       }
     ]
   })
 }
 
-resource "aws_iam_access_key" "github_actions" {
-  user = aws_iam_user.github_actions.name
+resource "aws_iam_access_key" "proseed" {
+  user = aws_iam_user.proseed.name
 }
 
-output "github_actions_access_key_id" {
-  value = aws_iam_access_key.github_actions.id
+output "proseed_access_key_id" {
+  value = aws_iam_access_key.proseed.id
 }
 
-output "github_actions_secret_access_key" {
-  value     = aws_iam_access_key.github_actions.secret
+output "proseed_secret_access_key" {
+  value     = aws_iam_access_key.proseed.secret
   sensitive = true
 }

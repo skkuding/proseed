@@ -18,7 +18,3 @@ resource "aws_s3_bucket_versioning" "tfstate_versioning" {
     status = "Enabled"
   }
 }
-
-# TODO: 도메인 구매 후 Route53 설정 추가
-# resource "aws_route53_record" "root" {
-# }
