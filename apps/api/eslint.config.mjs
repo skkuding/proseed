@@ -13,15 +13,24 @@ export default tseslint.config(
   eslintPluginPrettierRecommended,
   {
     languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: true,
+        emitDecoratorMetadata: true,
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
       globals: {
         ...globals.node,
-        ...globals.jest,
       },
-      sourceType: 'commonjs',
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+    },
+    rules: {
+      'object-shorthand': ['warn', 'always'],
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-inferrable-types': 'warn',
+      '@typescript-eslint/consistent-type-imports': 'warn',
+      '@typescript-eslint/no-import-type-side-effects': 'error',
     },
   },
   {
