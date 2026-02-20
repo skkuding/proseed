@@ -43,11 +43,10 @@ export class ProjectService {
         title: true,
         oneLineDescription: true,
         category: true,
-        iconUrl: true,
         thumbnailUrl: true,
-        status: true,
         _count: {
           select: {
+            growthRecords: true,
             feedbacks: true,
           },
         },
@@ -75,7 +74,6 @@ export class ProjectService {
         title: true,
         oneLineDescription: true,
         category: true,
-        iconUrl: true,
         thumbnailUrl: true,
         _count: {
           select: {
