@@ -7,12 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum GrowthRecordCategory {
+// 성장기록, 피드백 카테고리 통일
+enum RecordCategory {
   PLAN
   DESIGN
-  FRONTEND
-  BACKEND
-  OTHER
+  DEVELOPMENT
+  GENERAL
 }
 
 //TODO: MVP에서는 프로젝트 생성자 제외하고 모두 같은 MEMBER, 추후 팀장 권한 확대
@@ -25,13 +25,6 @@ enum Provider {
   KAKAO
   NAVER
   GOOGLE
-}
-
-enum FeedbackQuestionCategory {
-  PLAN
-  DESIGN
-  DEVELOPMENT
-  GENERAL
 }
 
 enum ProjectCategory {
@@ -117,7 +110,7 @@ model Project {
   createdAt          DateTime          @default(now()) @map("created_at")
   updatedAt          DateTime          @updatedAt @map("updated_at")
 
-  growthRecords     GrowthRecord[]
+  versions          ProjectVersion[]
   projectRoles      ProjectRole[]
   feedbackQuestions FeedbackQuestion[]
   images            ProjectImage[]
@@ -138,19 +131,34 @@ model ProjectImage {
   @@map("project_image")
 }
 
-model GrowthRecord {
-  id            Int                  @id @default(autoincrement())
-  projectId     Int                  @map("project_id")
+model ProjectVersion {
+  id            Int       @id @default(autoincrement())
+  projectId     Int       @map("project_id")
   version       String
-  category      GrowthRecordCategory
-  updateGoal    String               @map("update_goal")
-  createdAt     DateTime             @default(now()) @map("created_at")
-  updatedAt     DateTime             @updatedAt @map("updated_at")
-  updateResults String[]             @map("update_results")
+  updateGoal    String    @map("update_goal")
+  updateResults String[]  @map("update_results")
+  releasedAt    DateTime? @map("released_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  project  Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  growthRecords GrowthRecord[]
+
+  @@unique([projectId, version])
+  @@map("project_version")
+}
+
+model GrowthRecord {
+  id        Int            @id @default(autoincrement())
+  versionId Int            @map("version_id")
+  category  RecordCategory
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  version  ProjectVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
   contents GrowthRecordContent[]
 
+  @@unique([versionId, category])
   @@map("growth_record")
 }
 
@@ -168,13 +176,13 @@ model ProjectRole {
 }
 
 model FeedbackQuestion {
-  id          Int                      @id @default(autoincrement())
-  projectId   Int                      @map("project_id")
-  category    FeedbackQuestionCategory
+  id          Int            @id @default(autoincrement())
+  projectId   Int            @map("project_id")
+  category    RecordCategory
   title       String
   description String
-  order       Int                      @default(0)
-  isRequired  Boolean                  @default(false) @map("is_required")
+  order       Int            @default(0)
+  isRequired  Boolean        @default(false) @map("is_required")
 
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   feedbacks Feedback[]
