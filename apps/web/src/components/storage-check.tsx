@@ -22,7 +22,7 @@ export function StorageCheck() {
     const startTime = Date.now()
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'
       const response = await fetch(`${apiUrl}/storage/health`, {
         method: 'GET',
         headers: {
