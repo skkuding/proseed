@@ -49,28 +49,19 @@ export class ProjectService {
             versions: true,
           },
         },
-        versions: {
-          select: {
-            _count: {
-              select: { feedbacks: true },
-            },
-          },
-        },
       },
     })
 
     const hasNextPage = projects.length > take
     const sliced = hasNextPage ? projects.slice(0, take) : projects
+    const projectIds = sliced.map((p) => p.id)
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const data = sliced.map((project: any) => {
-      const { versions, ...rest } = project
-      const feedbackCount = versions.reduce(
-        (sum: number, v: any) => sum + v._count.feedbacks,
-        0,
-      )
-      return { ...rest, feedbackCount }
-    })
+    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+
+    const data = sliced.map((project) => ({
+      ...project,
+      feedbackCount: feedbackCounts.get(project.id) ?? 0,
+    }))
 
     const nextCursor = hasNextPage ? data[data.length - 1]?.id : null
 
@@ -79,7 +70,41 @@ export class ProjectService {
       nextCursor,
       hasNextPage,
     }
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+
+  private async getFeedbackCountsByProjectIds(
+    projectIds: number[],
+  ): Promise<Map<number, number>> {
+    if (projectIds.length === 0) return new Map()
+
+    const feedbackCounts = await this.prisma.feedback.groupBy({
+      by: ['versionId'],
+      where: {
+        version: {
+          projectId: { in: projectIds },
+        },
+      },
+      _count: { _all: true },
+    })
+
+    const versions = await this.prisma.projectVersion.findMany({
+      where: { projectId: { in: projectIds } },
+      select: { id: true, projectId: true },
+    })
+
+    const versionToProjectMap = new Map<number, number>(
+      versions.map((v) => [v.id, v.projectId]),
+    )
+
+    const result = new Map<number, number>()
+    for (const count of feedbackCounts) {
+      const projectId = versionToProjectMap.get(count.versionId)
+      if (projectId !== undefined) {
+        result.set(projectId, (result.get(projectId) ?? 0) + count._count._all)
+      }
+    }
+
+    return result
   }
 
   async getMyProjects(userId: number) {
@@ -98,26 +123,16 @@ export class ProjectService {
             versions: true,
           },
         },
-        versions: {
-          select: {
-            _count: {
-              select: { feedbacks: true },
-            },
-          },
-        },
       },
     })
 
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    return projects.map((project: any) => {
-      const { versions, ...rest } = project
-      const feedbackCount = versions.reduce(
-        (sum: number, v: any) => sum + v._count.feedbacks,
-        0,
-      )
-      return { ...rest, feedbackCount }
-    })
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    const projectIds = projects.map((p) => p.id)
+    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+
+    return projects.map((project) => ({
+      ...project,
+      feedbackCount: feedbackCounts.get(project.id) ?? 0,
+    }))
   }
 
   async getProjectById(userId: number, projectId: number) {
