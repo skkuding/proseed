@@ -59,7 +59,7 @@ enum JobType {
 model User {
   id               Int      @id @default(autoincrement())
   name             String
-  email            String
+  email            String   @unique
   createdAt        DateTime @default(now()) @map("created_at")
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType
@@ -99,15 +99,15 @@ enum ProjectStatus {
 }
 
 model Project {
-  id                 Int             @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   title              String
   type               ProjectType
   status             ProjectStatus
-  oneLineDescription String          @map("one_line_description")
+  oneLineDescription String            @map("one_line_description")
   description        String
-  category           ProjectCategory
-  contactPath        String          @map("contact_path")
-  projectLink        String          @map("project_link")
+  category           ProjectCategory[]
+  contactPath        String            @map("contact_path")
+  projectLink        String            @map("project_link")
 
   iconUrl String? @map("icon_url")
 
