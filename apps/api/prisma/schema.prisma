@@ -110,11 +110,9 @@ model Project {
   createdAt          DateTime          @default(now()) @map("created_at")
   updatedAt          DateTime          @updatedAt @map("updated_at")
 
-  versions          ProjectVersion[]
-  projectRoles      ProjectRole[]
-  feedbackQuestions FeedbackQuestion[]
-  images            ProjectImage[]
-  feedbacks         Feedback[]
+  versions     ProjectVersion[]
+  projectRoles ProjectRole[]
+  images       ProjectImage[]
 
   @@map("project")
 }
@@ -141,8 +139,10 @@ model ProjectVersion {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  growthRecords GrowthRecord[]
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  growthRecords     GrowthRecord[]
+  feedbackQuestions FeedbackQuestion[]
+  feedbacks         Feedback[]
 
   @@unique([projectId, version])
   @@map("project_version")
@@ -190,14 +190,14 @@ model ProjectRole {
 
 model FeedbackQuestion {
   id          Int            @id @default(autoincrement())
-  projectId   Int            @map("project_id")
+  versionId   Int            @map("version_id")
   category    RecordCategory
   title       String
   description String
   order       Int            @default(0)
   isRequired  Boolean        @default(false) @map("is_required")
 
-  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version   ProjectVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
   feedbacks Feedback[]
 
   @@map("feedback_question")
@@ -218,14 +218,14 @@ model GrowthRecordContent {
 model Feedback {
   id         Int      @id @default(autoincrement())
   questionId Int      @map("question_id")
-  projectId  Int      @map("project_id")
+  versionId  Int      @map("version_id")
   userId     Int      @map("user_id")
   content    String
   createdAt  DateTime @default(now()) @map("created_at")
 
   question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version   ProjectVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
 
   @@map("feedback")
 }

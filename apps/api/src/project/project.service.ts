@@ -194,4 +194,52 @@ export class ProjectService {
       },
     })
   }
+
+  // 프로젝트 성장기록 조회 페이지에서 버전 드롭다운
+  async getProjectVersions(projectId: number) {
+    const versions = await this.prisma.projectVersion.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        version: true,
+        createdAt: true,
+      },
+    })
+
+    return versions
+  }
+
+  async getGrowthRecordsByVersion(versionId: number) {
+    const version = await this.prisma.projectVersion.findUnique({
+      where: { id: versionId },
+      include: {
+        growthRecords: {
+          orderBy: { category: 'asc' },
+          include: {
+            contents: {
+              select: {
+                title: true,
+                content: true,
+              },
+              orderBy: { isDefault: 'desc' },
+            },
+            images: {
+              select: {
+                order: true,
+                url: true,
+              },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+
+    if (!version) {
+      throw new EntityNotExistException('ProjectVersion')
+    }
+
+    return version
+  }
 }

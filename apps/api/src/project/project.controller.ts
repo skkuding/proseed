@@ -56,4 +56,16 @@ export class ProjectController {
       dto.email,
     )
   }
+
+  @Get(':id/versions')
+  async getProjectVersions(@Param('id', ParseIntPipe) projectId: number) {
+    return this.projectService.getProjectVersions(projectId)
+  }
+
+  @Get(':id/versions/:versionId')
+  async getGrowthRecordsByVersion(
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ) {
+    return this.projectService.getGrowthRecordsByVersion(versionId)
+  }
 }
