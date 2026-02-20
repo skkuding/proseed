@@ -46,15 +46,23 @@ export class ProjectService {
         thumbnailUrl: true,
         _count: {
           select: {
-            growthRecords: true,
-            feedbacks: true,
+            versions: true,
           },
         },
       },
     })
 
     const hasNextPage = projects.length > take
-    const data = hasNextPage ? projects.slice(0, take) : projects
+    const sliced = hasNextPage ? projects.slice(0, take) : projects
+    const projectIds = sliced.map((p) => p.id)
+
+    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+
+    const data = sliced.map((project) => ({
+      ...project,
+      feedbackCount: feedbackCounts.get(project.id) ?? 0,
+    }))
+
     const nextCursor = hasNextPage ? data[data.length - 1]?.id : null
 
     return {
@@ -64,8 +72,43 @@ export class ProjectService {
     }
   }
 
+  private async getFeedbackCountsByProjectIds(
+    projectIds: number[],
+  ): Promise<Map<number, number>> {
+    if (projectIds.length === 0) return new Map()
+
+    const feedbackCounts = await this.prisma.feedback.groupBy({
+      by: ['versionId'],
+      where: {
+        version: {
+          projectId: { in: projectIds },
+        },
+      },
+      _count: { _all: true },
+    })
+
+    const versions = await this.prisma.projectVersion.findMany({
+      where: { projectId: { in: projectIds } },
+      select: { id: true, projectId: true },
+    })
+
+    const versionToProjectMap = new Map<number, number>(
+      versions.map((v) => [v.id, v.projectId]),
+    )
+
+    const result = new Map<number, number>()
+    for (const count of feedbackCounts) {
+      const projectId = versionToProjectMap.get(count.versionId)
+      if (projectId !== undefined) {
+        result.set(projectId, (result.get(projectId) ?? 0) + count._count._all)
+      }
+    }
+
+    return result
+  }
+
   async getMyProjects(userId: number) {
-    return this.prisma.project.findMany({
+    const projects = await this.prisma.project.findMany({
       where: {
         createdById: userId,
       },
@@ -77,12 +120,19 @@ export class ProjectService {
         thumbnailUrl: true,
         _count: {
           select: {
-            growthRecords: true,
-            feedbacks: true,
+            versions: true,
           },
         },
       },
     })
+
+    const projectIds = projects.map((p) => p.id)
+    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+
+    return projects.map((project) => ({
+      ...project,
+      feedbackCount: feedbackCounts.get(project.id) ?? 0,
+    }))
   }
 
   async getProjectById(userId: number, projectId: number) {
@@ -193,5 +243,53 @@ export class ProjectService {
         role: 'MEMBER',
       },
     })
+  }
+
+  // 프로젝트 성장기록 조회 페이지에서 버전 드롭다운
+  async getProjectVersions(projectId: number) {
+    const versions = await this.prisma.projectVersion.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        version: true,
+        createdAt: true,
+      },
+    })
+
+    return versions
+  }
+
+  async getGrowthRecordsByVersion(versionId: number) {
+    const version = await this.prisma.projectVersion.findUnique({
+      where: { id: versionId },
+      include: {
+        growthRecords: {
+          orderBy: { category: 'asc' },
+          include: {
+            contents: {
+              select: {
+                title: true,
+                content: true,
+              },
+              orderBy: { isDefault: 'desc' },
+            },
+            images: {
+              select: {
+                order: true,
+                url: true,
+              },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+
+    if (!version) {
+      throw new EntityNotExistException('ProjectVersion')
+    }
+
+    return version
   }
 }
