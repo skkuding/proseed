@@ -15,6 +15,7 @@ enum GrowthRecordCategory {
   OTHER
 }
 
+//TODO: MVP에서는 프로젝트 생성자 제외하고 모두 같은 MEMBER, 추후 팀장 권한 확대
 enum ProjectRoleType {
   ADMIN
   MEMBER
@@ -59,7 +60,7 @@ enum JobType {
 model User {
   id               Int      @id @default(autoincrement())
   name             String
-  email            String   @unique
+  email            String?  @unique
   createdAt        DateTime @default(now()) @map("created_at")
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType?
@@ -111,13 +112,14 @@ model Project {
   category           ProjectCategory[]
   contactPath        String            @map("contact_path")
   projectLink        String            @map("project_link")
-
-  iconUrl String? @map("icon_url")
+  iconUrl            String            @map("icon_url")
+  thumbnailUrl       String            @map("thumbnail_url")
 
   growthRecords     GrowthRecord[]
   projectRoles      ProjectRole[]
   feedbackQuestions FeedbackQuestion[]
   images            ProjectImage[]
+  feedbacks         Feedback[]
 
   @@map("project")
 }
@@ -154,7 +156,7 @@ model ProjectRole {
   id        Int             @id @default(autoincrement())
   userId    Int             @map("user_id")
   projectId Int             @map("project_id")
-  role      ProjectRoleType
+  role      ProjectRoleType @default(MEMBER)
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -200,6 +202,7 @@ model Feedback {
 
   question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@map("feedback")
 }
