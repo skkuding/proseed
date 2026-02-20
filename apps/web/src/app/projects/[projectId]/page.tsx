@@ -1,4 +1,4 @@
-export function ProjectPage() {
+export default function ProjectPage() {
   return (
     <main className="min-h-screen p-8">
       <h1 className="text-head0_sb_52">ProjectPage</h1>
