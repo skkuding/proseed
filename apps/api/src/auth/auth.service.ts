@@ -23,21 +23,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-    private readonly jwtAuthService: JwtService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
-
-  private async issueJwtTokens(userId: number) {
-    const payload = { userId }
-
-    const accessToken = await this.jwtAuthService.signAsync(payload, {
-      expiresIn: ACCESS_TOKEN_EXPIRE_TIME,
-    })
-
-    const refreshToken = await this.jwtAuthService.signAsync(payload, {
-      expiresIn: REFRESH_TOKEN_EXPIRE_TIME,
-    })
-  }
 
   async updateJwtTokens(refreshToken: string) {
     const { userId, username, userRole } =
