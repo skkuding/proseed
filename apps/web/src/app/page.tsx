@@ -1,10 +1,11 @@
 import { HealthCheck } from '@/components/health-check'
 import { StorageCheck } from '@/components/storage-check'
 import { Header } from '@/app/main/_components/Header'
+import { Footer } from '@/app/main/_components/Footer'
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen">
+    <div className="relative w-full">
       <Header />
       <main className="min-h-screen p-8 pt-20">
         <div className="flex gap-4 flex-wrap">
@@ -14,6 +15,7 @@ export default function Home() {
           <StorageCheck />
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

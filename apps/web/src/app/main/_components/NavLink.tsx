@@ -22,7 +22,7 @@ export function NavLink<T extends string>({ href, text }: NavLinkProps<T>) {
       aria-current={active ? 'page' : undefined}
       className={cn(
         'flex-1 h-full inline-flex items-center justify-center rounded-full px-4 py-3 transition-colors whitespace-nowrap',
-        active ? 'bg-black text-white' : 'text-black hover:bg-black/5'
+        active ? 'bg-CoolNeutral-15 text-white' : 'text-black hover:bg-black/5'
       )}
     >
       {text}
