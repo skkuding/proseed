@@ -27,7 +27,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/main/feedback"
+                  href="/main/navigate"
                   className="text-body2_m_14 text-black/80 hover:text-black"
                 >
                   탐색하기
@@ -35,7 +35,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/main/projects"
+                  href="/main/myproject"
                   className="text-body2_m_14 text-black/80 hover:text-black"
                 >
                   내 프로젝트

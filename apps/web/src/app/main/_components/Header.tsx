@@ -23,8 +23,8 @@ export function Header() {
           <nav className="flex items-center">
             <div className="flex items-center h-[58px] w-[460px] shrink-0 rounded-full p-[6px] shadow-sm">
               <NavLink href="/" text="메인 페이지" />
-              <NavLink href="/main/explore" text="탐색하기" />
-              <NavLink href="/main/projects" text="내 프로젝트" />
+              <NavLink href="/main/navigate" text="탐색하기" />
+              <NavLink href="/main/myproject" text="내 프로젝트" />
               <NavLink href="/main/mypage" text="마이 페이지" />
             </div>
           </nav>
