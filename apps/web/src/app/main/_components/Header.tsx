@@ -21,17 +21,17 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center">
-            <div className="flex items-center h-[58px] w-[460px] shrink-0 rounded-full p-[6px] shadow-sm">
+            <div className="flex items-center h-[58px] w-[460px] shrink-0 rounded-full p-[6px] bg-white shadow-md">
               <NavLink href="/" text="메인 페이지" />
-              <NavLink href="/main/navigate" text="탐색하기" />
-              <NavLink href="/main/myproject" text="내 프로젝트" />
-              <NavLink href="/main/mypage" text="마이 페이지" />
+              <NavLink href="/navigate" text="탐색하기" />
+              <NavLink href="/myproject" text="내 프로젝트" />
+              <NavLink href="/mypage" text="마이 페이지" />
             </div>
           </nav>
 
           <Link
-            href="/main/mypage"
-            className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full shadow-sm"
+            href="/mypage"
+            className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white shadow-md"
           >
             <Image src="/person_line.svg" alt="계정" width={32} height={32} />
           </Link>

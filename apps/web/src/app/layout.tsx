@@ -20,11 +20,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={pretendard.variable}>
-      <Header />
       <body className={`${pretendard.className} bg-background-normal`}>
+        <Header />
         <div className="mx-auto max-w-310 px-10">{children}</div>
+        <Footer />
       </body>
-      <Footer />
     </html>
   )
 }

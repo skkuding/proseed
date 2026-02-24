@@ -28,14 +28,14 @@ export function Footer() {
             <nav className="flex flex-1 items-center justify-center">
               <ul className="flex items-center gap-14">
                 <li>
-                  <Link href="/" className="text-body1_m_16 text-neutral-95 hover:text-black">
+                  <Link href="/" className="text-body1_m_16 text-neutral-95 hover:text-neutral-99">
                     메인 페이지
                   </Link>
                 </li>
                 <li>
                   <Link
                     href="/main/navigate"
-                    className="text-body1_m_16 text-neutral-95 hover:text-black"
+                    className="text-body1_m_16 text-neutral-95 hover:text-neutral-99"
                   >
                     탐색하기
                   </Link>
@@ -43,7 +43,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/main/myproject"
-                    className="text-body1_m_16 text-neutral-95 hover:text-black"
+                    className="text-body1_m_16 text-neutral-95 hover:text-neutral-99"
                   >
                     내 프로젝트
                   </Link>
@@ -51,7 +51,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/main/mypage"
-                    className="text-body1_m_16 text-neutral-95 hover:text-black"
+                    className="text-body1_m_16 text-neutral-95 hover:text-neutral-99"
                   >
                     마이 페이지
                   </Link>
