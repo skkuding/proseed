@@ -6,7 +6,6 @@ import { Footer } from '@/app/main/_components/Footer'
 export default function Home() {
   return (
     <div className="relative w-full">
-      <Header />
       <main className="min-h-screen p-8 pt-20">
         <div className="flex gap-4 flex-wrap">
           <p className="text-head0_sb_52">head0_sb_52</p>
@@ -15,7 +14,6 @@ export default function Home() {
           <StorageCheck />
         </div>
       </main>
-      <Footer />
     </div>
   )
 }
