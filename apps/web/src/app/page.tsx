@@ -1,7 +1,7 @@
 import { HealthCheck } from '@/components/health-check'
 import { StorageCheck } from '@/components/storage-check'
-import { Header } from '@/app/main/_components/Header'
-import { Footer } from '@/app/main/_components/Footer'
+import { Header } from '@/app/_components/Header'
+import { Footer } from '@/app/_components/Footer'
 
 export default function Home() {
   return (
