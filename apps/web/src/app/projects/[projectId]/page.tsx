@@ -6,6 +6,8 @@ import bookmarkline from '../../../../public/bookmark_line_black.svg'
 import bullet from '../../../../public/bullet_cool40.svg'
 import Link from 'next/link'
 import { Separator } from '@/components/ui/separator'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { ProjectMember } from './_components/ProjectMember'
 
 export default function ProjectDetailPage() {
   return (
@@ -91,34 +93,8 @@ export default function ProjectDetailPage() {
               </div>
             </div>
           </div>
-
           {/* 오른쪽 - 함께한 팀원 */}
-          <aside className="rounded-xl bg-white p-8 h-[451px] w-[396px]">
-            <h2 className="mb-4 text-lg font-semibold">함께한 팀원</h2>
-
-            <div className="max-h-90 overflow-y-auto">
-              {mockProject.projectRoles.map((member) => (
-                <div
-                  key={member.id}
-                  className="flex flex-col items-center h-[89px] justify-between rounded-lg px-3 py-5"
-                >
-                  <div className="flex items-center w-full justify-between">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={member.user.profileImageUrl}
-                        alt=""
-                        width={50}
-                        height={50}
-                        className="rounded-full"
-                      />
-                      <span className="text-sub1_sb_18">{member.user.name}</span>
-                    </div>
-                    <span className="text-body4_r_14 text-gray-400">{member.role}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </aside>
+          <ProjectMember />
         </div>
       </section>
     </div>
