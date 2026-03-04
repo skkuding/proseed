@@ -1,0 +1,79 @@
+{
+  "mockProject": {
+    "id": 1,
+    "title": "mediwalk",
+    "type": "APP",
+    "status": "Ongoing",
+    "oneLineDescription": "일상 소비 패턴을 분석하여 탄소 발자국을 계산하고 친환경 대안을 추천하는 친환경 소비 트래커, PLOWER 입니다.",
+    "description": "AI 기술의 최신 트렌드를 공유하는 국내 최대 규모 컨퍼런스입니다. 다양한 세션과 네트워킹 기회가 준비되어 있습니다. 국내외 AI 전문가들이 참여하여 머신러닝, 딥러닝, 자연어 처리 등 다양한 분야의 최신 연구 성과와 실무 경험을 공유합니다. AI 기술의 최신 트렌드를 공유하는 국내 최대 규모 컨퍼런스입니다. 다양한 세션과 네트워킹 기회가 준비되어 있습니다. 국내외 AI 전문가들이 참여하여 머신러닝, 딥러닝, 자연어 처리 등 다양한 분야의 최신 연구 성과와 실무 경험을 공유합니다.",
+    "category": ["AI"],
+    "contactPath": "aaa@gmail.com",
+    "projectLink": "https://www.naver.com",
+    "iconUrl": "/mock/projectdetail/icon.png",
+    "thumbnailUrl": "/mock/projectdetail/thumbnail.png",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "images": [
+      { "order": 0, "url": "/mock/projectdetail/projectImage1.png" },
+      { "order": 1, "url": "/mock/projectdetail/thumbnail.png" },
+      { "order": 2, "url": "/mock/projectdetail/projectImage1.png" }
+    ],
+    "projectRoles": [
+      {
+        "id": 1,
+        "user": { "name": "홍길동", "profileImageUrl": "/mock/projectdetail/team-member1.png" },
+        "role": "PLANNER",
+        "isLeader": true
+      },
+      {
+        "id": 2,
+        "user": { "name": "김철수", "profileImageUrl": "/mock/projectdetail/team-member2.png" },
+        "role": "DESIGNER",
+        "isLeader": false
+      },
+      {
+        "id": 3,
+        "user": { "name": "이영희", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "DEVELOPER",
+        "isLeader": false
+      },
+      {
+        "id": 4,
+        "user": { "name": "박민수", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "DEVELOPER",
+        "isLeader": false
+      },
+      {
+        "id": 5,
+        "user": { "name": "최수진", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "DESIGNER",
+        "isLeader": false
+      },
+      {
+        "id": 6,
+        "user": { "name": "김영수", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "PLANNER",
+        "isLeader": false
+      },
+      {
+        "id": 7,
+        "user": { "name": "이민지", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "DEVELOPER",
+        "isLeader": false
+      },
+      {
+        "id": 8,
+        "user": { "name": "박지훈", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "DESIGNER",
+        "isLeader": false
+      },
+      {
+        "id": 9,
+        "user": { "name": "김수현", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "role": "PLANNER",
+        "isLeader": false
+      }
+    ],
+    "isMyProject": true
+  }
+}

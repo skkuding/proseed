@@ -56,8 +56,9 @@ const config: Config = {
       },
       colors: {
         primary: {
-          90: '#F5F5F5',
-          95: '#E5E5E5',
+          DEFAULT: '#FF754F',
+          strong: '#F65225',
+          light: '#FFF1ED',
         },
         white: '#FFFFFF',
         black: '#0D0D0D',
@@ -90,6 +91,9 @@ const config: Config = {
           15: '#242626',
           10: '#191A1A',
           5: '#141414',
+        },
+        background: {
+          normal: '#F4F4F6',
         },
       },
     },
