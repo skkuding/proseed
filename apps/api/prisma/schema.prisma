@@ -15,12 +15,6 @@ enum RecordCategory {
   GENERAL
 }
 
-//TODO: MVP에서는 프로젝트 생성자 제외하고 모두 같은 MEMBER, 추후 팀장 권한 확대
-enum ProjectRoleType {
-  ADMIN
-  MEMBER
-}
-
 enum Provider {
   KAKAO
   NAVER
@@ -176,10 +170,11 @@ model GrowthRecordImage {
 }
 
 model ProjectRole {
-  id        Int             @id @default(autoincrement())
-  userId    Int             @map("user_id")
-  projectId Int             @map("project_id")
-  role      ProjectRoleType @default(MEMBER)
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  projectId Int     @map("project_id")
+  role      JobType
+  isLeader  Boolean @default(false)
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

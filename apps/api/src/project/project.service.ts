@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import type { Prisma } from '@prisma/client'
-import { ProjectRoleType } from '@prisma/client'
+import type { JobType, Prisma } from '@prisma/client'
 import {
   EntityNotExistException,
   ForbiddenAccessException,
@@ -196,7 +195,8 @@ export class ProjectService {
         projectRoles: {
           create: {
             userId,
-            role: 'ADMIN',
+            isLeader: true,
+            role: dto.leaderJobType,
           },
         },
         images: {
@@ -213,12 +213,13 @@ export class ProjectService {
     userId: number,
     projectId: number,
     targetEmail: string,
+    role: JobType,
   ) {
     const projectRole = await this.prisma.projectRole.findFirst({
       where: {
         userId,
         projectId,
-        role: ProjectRoleType.ADMIN,
+        isLeader: true,
       },
     })
 
@@ -240,7 +241,8 @@ export class ProjectService {
       data: {
         userId: targetUser.id,
         projectId,
-        role: 'MEMBER',
+        isLeader: false,
+        role,
       },
     })
   }
