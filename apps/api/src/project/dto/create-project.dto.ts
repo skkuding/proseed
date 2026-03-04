@@ -1,3 +1,4 @@
+import { JobType } from '@prisma/client'
 import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator'
 
 export enum ProjectType {
@@ -54,6 +55,9 @@ export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
   contactPath: string
+
+  @IsEnum(JobType)
+  leaderJobType: JobType
 
   @IsString()
   @IsNotEmpty()

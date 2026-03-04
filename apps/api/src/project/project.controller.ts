@@ -54,6 +54,7 @@ export class ProjectController {
       req.user.id,
       projectId,
       dto.email,
+      dto.role,
     )
   }
 
