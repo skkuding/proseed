@@ -18,7 +18,7 @@ export default function ProjectTabs() {
           onClick={() => router.push(`/projects/${projectId}`)}
           className="w-40 pt-3 pb-4"
         >
-          프로젝트 성장 기록
+          프로젝트 성장기록
         </TabsTrigger>
 
         <TabsTrigger

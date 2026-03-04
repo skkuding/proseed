@@ -33,8 +33,43 @@
       ],
       "images": [
         { "order": 0, "url": "/mock/projectdetail/growth-img1.png" },
-        { "order": 1, "url": "/mock/growthrecord/growth-img2.png" },
-        { "order": 2, "url": "/mock/growthrecord/growth-img3.png" }
+        { "order": 1, "url": "/mock/projectdetail/growth-img2.png" },
+        { "order": 2, "url": "/mock/projectdetail/growth-img3.png" },
+        { "order": 3, "url": "/mock/projectdetail/growth-img1.png" },
+        { "order": 4, "url": "/mock/projectdetail/growth-img2.png" },
+        { "order": 5, "url": "/mock/projectdetail/growth-img3.png" },
+        { "order": 6, "url": "/mock/projectdetail/growth-img1.png" },
+        { "order": 7, "url": "/mock/projectdetail/growth-img2.png" },
+        { "order": 8, "url": "/mock/projectdetail/growth-img3.png" }
+      ],
+      "taggedFeedbacks": [
+        {
+          "id": 1,
+          "author": {
+            "name": "김철수",
+            "profileImageUrl": "/mock/projectdetail/team-member2.png",
+            "role": "DESIGNER"
+          },
+          "content": "아이디어와 문제 해결 구조는 좋은데, 제품 품질에 더욱 신경써야만 하는 서비스. 아이디어와 문제 해결 구조는 좋은데 제품 품질에 더욱 신경써야만..."
+        },
+        {
+          "id": 2,
+          "author": {
+            "name": "최수진",
+            "profileImageUrl": "/mock/projectdetail/team-member3.png",
+            "role": "DESIGNER"
+          },
+          "content": "아이디어와 문제 해결 구조는 좋은데, 제품 품질에 더욱 신경써야만 하는 서비스. 아이디어와 문제 해결 구조는 좋은데 제품 품질에 더욱 신경써야만..."
+        },
+        {
+          "id": 3,
+          "author": {
+            "name": "박지훈",
+            "profileImageUrl": "/mock/projectdetail/team-member3.png",
+            "role": "DESIGNER"
+          },
+          "content": "아이디어와 문제 해결 구조는 좋은데, 제품 품질에 더욱 신경써야만 하는 서비스. 아이디어와 문제 해결 구조는 좋은데 제품 품질에 더욱 신경써야만..."
+        }
       ]
     },
     {
@@ -60,6 +95,26 @@
       "images": [
         { "order": 0, "url": "/mock/projectdetail/growth-img1.png" },
         { "order": 1, "url": "/mock/projectdetail/growth-img2.png" }
+      ],
+      "taggedFeedbacks": [
+        {
+          "id": 4,
+          "author": {
+            "name": "홍길동",
+            "profileImageUrl": "/mock/projectdetail/team-member1.png",
+            "role": "PLANNER"
+          },
+          "content": "전체적인 플로우가 명확해졌어요. 다만 완료 화면의 메시지가 좀 더 구체적이면 좋겠습니다."
+        },
+        {
+          "id": 5,
+          "author": {
+            "name": "이민지",
+            "profileImageUrl": "/mock/projectdetail/team-member3.png",
+            "role": "DEVELOPER"
+          },
+          "content": "스텝 인디케이터 구현 시 접근성 고려도 필요할 것 같아요. aria-label 추가를 검토해 주세요."
+        }
       ]
     },
     {
@@ -82,7 +137,18 @@
           "content": "웹훅 전환 이후 데이터 불일치 오류가 98% 감소했습니다. 서버 응답 지연 대응 처리를 추가한 결과, 오류 화면 노출 건수가 월 평균 120건에서 3건으로 줄었습니다. 다음 버전에서는 수거 처리 상태를 실시간 푸시 알림으로 제공하는 기능을 추가할 예정입니다."
         }
       ],
-      "images": [{ "order": 0, "url": "/mock/projectdetail/growth-img1.png" }]
+      "images": [{ "order": 0, "url": "/mock/projectdetail/growth-img1.png" }],
+      "taggedFeedbacks": [
+        {
+          "id": 6,
+          "author": {
+            "name": "김수현",
+            "profileImageUrl": "/mock/projectdetail/team-member3.png",
+            "role": "PLANNER"
+          },
+          "content": "웹훅 전환 방향은 좋은데, 실패 케이스에 대한 알림 처리도 함께 논의했으면 합니다."
+        }
+      ]
     },
     {
       "id": 4,
@@ -104,7 +170,8 @@
           "content": "핸드오프 프로세스 통일 후 디자인-개발 간 재작업 요청이 40% 감소했습니다. 공통 용어집 사용이 정착되며 주간 회의 시간도 평균 20분 단축되었습니다."
         }
       ],
-      "images": []
+      "images": [],
+      "taggedFeedbacks": []
     }
   ]
 }

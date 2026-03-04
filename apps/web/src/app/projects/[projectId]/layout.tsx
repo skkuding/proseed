@@ -20,7 +20,7 @@ export default function ProjectDetailLayout({ children }: { children: React.Reac
           <ProjectMember />
         </div>
       </section>
-      <div className="flex flex-col bg-white w-full px-8 py-7 rounded-xl mt-6">
+      <div className="flex flex-col bg-white w-full px-8 py-7 rounded-xl mt-6 mb-30">
         <ProjectTabs />
         {children}
       </div>
