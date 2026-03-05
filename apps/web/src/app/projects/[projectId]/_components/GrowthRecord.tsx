@@ -13,6 +13,7 @@ import {
 import growthData from '@/app/_mockdata/project-detail/project-growthrecord.json'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import { formatDate } from '@/lib/utils'
+import { ImageLightbox } from './ImageLightbox'
 
 type GrowthCategory = 'PLAN' | 'DESIGN' | 'DEVELOP' | 'COMMON'
 
@@ -140,26 +141,38 @@ function SummarySection() {
 }
 
 function RecordSection({ record }: { record: GrowthRecordItem }) {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const sortedImages = [...record.images].sort((a, b) => a.order - b.order)
+  const imageUrls = sortedImages.map((img) => img.url)
+
   return (
     <div className="flex flex-col gap-10">
       {/* Image carousel */}
       {record.images.length > 0 && (
         <ScrollArea className="w-full rounded-xl">
           <div className="flex gap-4 pb-3">
-            {[...record.images]
-              .sort((a, b) => a.order - b.order)
-              .map((img) => (
-                <div
-                  key={img.order}
-                  className="relative flex-shrink-0 w-[380px] h-[220px] rounded-xl overflow-hidden bg-neutral-100"
-                >
-                  <Image src={img.url} alt="" fill className="object-cover" />
-                </div>
-              ))}
+            {sortedImages.map((img, idx) => (
+              <div
+                key={img.order}
+                className="relative shrink-0 w-95 h-55 rounded-xl overflow-hidden bg-neutral-100 cursor-pointer"
+                onClick={() => setLightboxIndex(idx)}
+              >
+                <Image src={img.url} alt="" fill className="object-cover" />
+              </div>
+            ))}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       )}
+
+      <ImageLightbox
+        images={imageUrls}
+        currentIndex={lightboxIndex ?? 0}
+        isOpen={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+        onPrev={() => setLightboxIndex((i) => (i! - 1 + imageUrls.length) % imageUrls.length)}
+        onNext={() => setLightboxIndex((i) => (i! + 1) % imageUrls.length)}
+      />
 
       {/* Content sections */}
       {record.contents.map((section, idx) => (
