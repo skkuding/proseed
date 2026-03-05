@@ -5,7 +5,7 @@ export default function EditorPage() {
     <main className="min-h-screen p-8">
       <h1 className="text-2xl font-bold mb-6">MDX Editor</h1>
       <div className="flex gap-4 flex-wrap">
-        <Editor />
+        <Editor width={924} height={252} />
       </div>
     </main>
   )
