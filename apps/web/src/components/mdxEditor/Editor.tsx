@@ -14,8 +14,8 @@ interface EditorProps {
   markdown?: string
   onChange?: (markdown: string) => void
   placeholder?: string
-  width?: string | number
-  height?: string | number
+  width: string | number
+  height: string | number
 }
 
 export default function Editor({
@@ -26,7 +26,10 @@ export default function Editor({
   height,
 }: EditorProps) {
   return (
-    <div className="border border-neutral-95 rounded-xl bg-white" style={{ width, height }}>
+    <div
+      className="flex flex-col border border-neutral-95 rounded-xl bg-white overflow-hidden"
+      style={{ width, height }}
+    >
       <ForwardRefEditor
         markdown={markdown}
         onChange={onChange}
@@ -47,7 +50,8 @@ export default function Editor({
             ),
           }),
         ]}
-        className="min-h-50"
+        className={height ? 'mdxeditor-fixed' : 'min-h-50'}
+        contentEditableClassName="px-4 py-3"
       />
     </div>
   )

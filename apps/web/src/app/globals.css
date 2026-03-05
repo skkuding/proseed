@@ -134,3 +134,29 @@
   list-style: decimal;
   padding-left: 1.5rem;
 }
+
+/* height prop이 있을 때: 툴바 아래 content 영역만 스크롤 */
+.mdxeditor-fixed {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mdxeditor-fixed > div:nth-child(2) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mdxeditor-fixed > div:nth-child(2)::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mdxeditor-fixed > div:nth-child(2)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mdxeditor-fixed > div:nth-child(2)::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 9999px;
+}
