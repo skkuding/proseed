@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 
 export function ProjectMember() {
   return (
-    <div className="p-8 rounded-xl bg-white h-[451px] w-[396px]">
+    <div className="p-8 rounded-xl bg-white min-h-[451px] w-[396px]">
       <h2 className="mb-4 text-lg font-semibold">함께한 팀원</h2>
       <ScrollArea className="h-[348px]">
         <div>

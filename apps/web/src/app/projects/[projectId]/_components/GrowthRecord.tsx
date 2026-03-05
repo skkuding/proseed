@@ -31,12 +31,6 @@ const ROLE_LABEL: Record<string, string> = {
   DEVELOPER: '개발자',
 }
 
-const ROLE_COLOR: Record<string, string> = {
-  PLANNER: 'text-amber-600',
-  DESIGNER: 'text-blue-500',
-  DEVELOPER: 'text-emerald-600',
-}
-
 function formatDate(dateStr: string) {
   const date = new Date(dateStr)
   return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`
@@ -68,12 +62,12 @@ export function GrowthRecord() {
   ) as GrowthRecordItem | undefined
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-5">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-head3_sb_36">프로젝트 성장기록</h1>
-          <p className="text-body3_r_16 text-CoolNeutral-40 mt-1">
+          <p className="text-body3_r_16 text-CoolNeutral-40 mt-2">
             업데이트 날짜 {formatDate(growthData.releasedAt)}
           </p>
         </div>
@@ -94,12 +88,12 @@ export function GrowthRecord() {
       </div>
 
       {/* Role filter tabs */}
-      <div className="flex gap-1 border border-neutral-200 rounded-full p-1 w-fit">
+      <div className="flex gap-1 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] border-neutral-200 rounded-full p-1 w-fit">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-full text-body1_m_16 transition-colors ${
+            className={`px-5 py-2 hover:cursor-pointer rounded-full text-body1_m_16 transition-colors ${
               activeTab === tab
                 ? 'bg-CoolNeutral-20 text-white'
                 : 'text-CoolNeutral-40 hover:text-CoolNeutral-20'
@@ -124,15 +118,15 @@ export function GrowthRecord() {
 
 function SummarySection() {
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 mt-5">
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-bold">이번 업데이트 목표</h2>
+        <h2 className="text-title3_sb_20">이번 업데이트 목표</h2>
         <p className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed">
           {growthData.updateGoal}
         </p>
       </section>
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-bold">이번 업데이트 결과물</h2>
+        <h2 className="text-title3_sb_20">이번 업데이트 결과물</h2>
         <ul className="flex flex-col gap-2">
           {growthData.updateResults.map((result, idx) => (
             <li
@@ -174,28 +168,26 @@ function RecordSection({ record }: { record: GrowthRecordItem }) {
       {/* Content sections */}
       {record.contents.map((section, idx) => (
         <section key={idx} className="flex flex-col gap-3">
-          <h2 className="text-xl font-bold">{section.title}</h2>
+          <h2 className="text-title3_sb_20">{section.title}</h2>
           <p className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed">{section.content}</p>
         </section>
       ))}
 
       {/* Tagged feedbacks */}
       {record.taggedFeedbacks.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold">태그된 피드백</h2>
-          <div className="grid grid-cols-3 gap-4">
+        <section className="flex flex-col gap-3">
+          <h2 className="text-title3_sb_20">태그된 피드백</h2>
+          <div className="grid grid-cols-3 gap-3">
             {record.taggedFeedbacks.map((feedback) => (
               <div
                 key={feedback.id}
-                className="border border-neutral-200 rounded-xl p-5 flex flex-col gap-2"
+                className="border border-neutral-200 rounded-xl p-5 flex flex-col"
               >
-                <span
-                  className={`text-body4_r_14 font-medium ${ROLE_COLOR[feedback.author.role] ?? 'text-CoolNeutral-40'}`}
-                >
+                <span className={`text-caption1_m_13 text-primary-strong`}>
                   {ROLE_LABEL[feedback.author.role] ?? feedback.author.role}
                 </span>
-                <p className="text-sub2_m_18 font-semibold">{feedback.author.name}</p>
-                <p className="text-body4_r_14 text-CoolNeutral-40 leading-relaxed line-clamp-3">
+                <p className="text-sub1_sb_18">{feedback.author.name}</p>
+                <p className="text-body2_m_14 text-CoolNeutral-40 mt-3 line-clamp-2">
                   {feedback.content}
                 </p>
               </div>

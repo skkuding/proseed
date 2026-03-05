@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 
 export function ProjectDescription() {
   return (
-    <div className="rounded-xl bg-white p-8 w-[944px] h-[451px] flex justify-between items-start gap-5">
+    <div className="rounded-xl bg-white p-8 w-[944px] min-h-[451px] flex justify-between items-start gap-5">
       <Image
         src={mockProject.iconUrl}
         alt=""
