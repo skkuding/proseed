@@ -16,7 +16,7 @@ export default function ProjectTabs() {
         <TabsTrigger
           value="record"
           onClick={() => router.push(`/projects/${projectId}`)}
-          className="w-40 pt-3 pb-4"
+          className="w-40 pt-3 pb-4 hover:cursor-pointer"
         >
           프로젝트 성장기록
         </TabsTrigger>
@@ -24,7 +24,7 @@ export default function ProjectTabs() {
         <TabsTrigger
           value="feedback"
           onClick={() => router.push(`/projects/${projectId}/feedback`)}
-          className="w-40 pt-3 pb-4"
+          className="w-40 pt-3 pb-4 hover:cursor-pointer"
         >
           프로젝트 피드백
         </TabsTrigger>

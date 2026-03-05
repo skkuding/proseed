@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/carousel'
 import arrowLeft from '../../../../../public/arrow2_left.svg'
 import arrowRight from '../../../../../public/arrow2_right.svg'
-import { Ghost } from 'lucide-react'
 
 interface Props {
   images: string[]
@@ -30,14 +29,14 @@ export function ProjectImageCarousel({ images }: Props) {
       </CarouselContent>
       <CarouselPrevious
         variant="ghost"
-        className="absolute left-4 size-10 flex items-center justify-center hover:bg-zinc-400"
+        className="absolute left-4 size-10 flex items-center justify-center hover:bg-zinc-400 hover:cursor-pointer"
       >
         <Image src={arrowLeft} alt="이전" width={24} height={24} className="shadow-2xl" />
       </CarouselPrevious>
 
       <CarouselNext
         variant="ghost"
-        className="absolute right-4 size-10 flex items-center justify-center hover:bg-zinc-400"
+        className="absolute right-4 size-10 flex items-center justify-center hover:bg-zinc-400 hover:cursor-pointer"
       >
         <Image src={arrowRight} alt="다음" width={24} height={24} className="shadow-2xl" />
       </CarouselNext>

@@ -1,5 +1,5 @@
-import { mockProject } from '@/app/_mockdata/project-detail/project-basicdata.json'
+import { Feedbacks } from '../_components/Feedbacks'
 
 export default function ProjectDetailFeedback() {
-  return <p>hello feedback component</p>
+  return <Feedbacks />
 }

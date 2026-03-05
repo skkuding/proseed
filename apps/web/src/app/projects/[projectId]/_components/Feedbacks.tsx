@@ -12,11 +12,11 @@ import {
 } from '@/components/ui/select'
 import growthData from '@/app/_mockdata/project-detail/project-growthrecord.json'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
-import { formatDate } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 type GrowthCategory = 'PLAN' | 'DESIGN' | 'DEVELOP' | 'COMMON'
 
-const TABS = ['전체 요약', '기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
 const CATEGORY_TO_TAB: Record<GrowthCategory, TabLabel> = {
@@ -49,8 +49,8 @@ type GrowthRecordItem = {
   taggedFeedbacks: TaggedFeedback[]
 }
 
-export function GrowthRecord() {
-  const [activeTab, setActiveTab] = useState<TabLabel>('전체 요약')
+export function Feedbacks() {
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
   const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
 
   const activeRecord = growthData.growthRecords.find(
@@ -62,25 +62,35 @@ export function GrowthRecord() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-head3_sb_36">프로젝트 성장기록</h1>
+          <h1 className="text-head3_sb_36">프로젝트 피드백</h1>
           <p className="text-body3_r_16 text-CoolNeutral-40 mt-2">
-            업데이트 날짜 {formatDate(growthData.releasedAt)}
+            피드백을 작성하고 프로젝트 리뷰 티켓을 받아보세요!
           </p>
         </div>
-        <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-          <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-lg border-neutral-200">
-            <SelectValue>
-              업데이트 버전 {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {versionList.map((v) => (
-              <SelectItem key={v.id} value={v.id.toString()}>
-                버전 {v.version}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center">
+          <div className="min-h-12">
+            <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+              <SelectTrigger className="px-4 py-[11px] h-full! text-body1_m_16 rounded-lg border-neutral-200">
+                <SelectValue>
+                  <p className="text-body1_m_16">
+                    업데이트 버전{' '}
+                    {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
+                  </p>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="h-12">
+                {versionList.map((v) => (
+                  <SelectItem key={v.id} value={v.id.toString()}>
+                    버전 {v.version}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button className="ml-[6px] h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20">
+            <p className="text-sub3_sb_16 text-white">피드백 작성하기</p>
+          </Button>
+        </div>
       </div>
 
       {/* Role filter tabs */}
@@ -101,40 +111,11 @@ export function GrowthRecord() {
       </div>
 
       {/* Content */}
-      {activeTab === '전체 요약' ? (
-        <SummarySection />
-      ) : activeRecord ? (
+      {/* {activeRecord ? (
         <RecordSection record={activeRecord} />
       ) : (
         <p className="text-body3_r_16 text-CoolNeutral-40">해당 카테고리의 기록이 없습니다.</p>
-      )}
-    </div>
-  )
-}
-
-function SummarySection() {
-  return (
-    <div className="flex flex-col gap-10 mt-5">
-      <section className="flex flex-col gap-3">
-        <h2 className="text-title3_sb_20">이번 업데이트 목표</h2>
-        <p className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed">
-          {growthData.updateGoal}
-        </p>
-      </section>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-title3_sb_20">이번 업데이트 결과물</h2>
-        <ul className="flex flex-col gap-2">
-          {growthData.updateResults.map((result, idx) => (
-            <li
-              key={idx}
-              className="flex items-start gap-2 text-body3_r_16 text-CoolNeutral-30 leading-relaxed"
-            >
-              <span>•</span>
-              <span>{result}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      )} */}
     </div>
   )
 }
