@@ -1,51 +1,31 @@
 'use client'
 
+import '@mdxeditor/editor/style.css'
 import type { ForwardedRef } from 'react'
 import {
   MDXEditor,
   type MDXEditorMethods,
   type MDXEditorProps,
-  codeBlockPlugin,
-  type CodeBlockEditorDescriptor,
-  useCodeBlockEditorContext,
-  headingsPlugin,
   listsPlugin,
-  quotePlugin,
   linkPlugin,
+  linkDialogPlugin,
   markdownShortcutPlugin,
 } from '@mdxeditor/editor'
 
-const PlainTextCodeEditorDescriptor: CodeBlockEditorDescriptor = {
-  match: () => true,
-  priority: 0,
-  Editor: ({ code }) => {
-    const cb = useCodeBlockEditorContext()
-    return (
-      <textarea
-        className="w-full rounded border p-2 font-mono"
-        defaultValue={code}
-        onChange={(e) => cb.setCode(e.target.value)}
-      />
-    )
-  },
-}
-
 export default function InitializedMDXEditor({
   editorRef,
+  plugins: extraPlugins = [],
   ...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
   return (
     <MDXEditor
       ref={editorRef}
       plugins={[
-        codeBlockPlugin({
-          codeBlockEditorDescriptors: [PlainTextCodeEditorDescriptor],
-        }),
-        headingsPlugin(),
         listsPlugin(),
         linkPlugin(),
-        quotePlugin(),
+        linkDialogPlugin(),
         markdownShortcutPlugin(),
+        ...extraPlugins,
       ]}
       {...props}
     />

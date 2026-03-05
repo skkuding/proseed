@@ -13,7 +13,7 @@ const pretendard = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Proseed',
+  title: 'PROSEED',
   description: 'Proseed Now!!!',
 }
 

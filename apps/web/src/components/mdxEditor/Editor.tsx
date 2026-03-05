@@ -1,66 +1,48 @@
 'use client'
 
-import { useRef } from 'react'
-import type { MDXEditorMethods } from '@mdxeditor/editor'
 import {
-  UndoRedo,
   BoldItalicUnderlineToggles,
+  CreateLink,
   ListsToggle,
-  CodeToggle,
-  InsertCodeBlock,
-  InsertImage,
-  InsertThematicBreak,
+  Separator,
+  StrikeThroughSupSubToggles,
   toolbarPlugin,
 } from '@mdxeditor/editor'
 import { ForwardRefEditor } from './ForwardRefEditor'
 
 interface EditorProps {
-  initialMarkdown?: string
-  onSave?: (markdown: string) => void
+  markdown?: string
+  onChange?: (markdown: string) => void
+  placeholder?: string
 }
 
-export default function Editor({ initialMarkdown = '', onSave }: EditorProps) {
-  const editorRef = useRef<MDXEditorMethods>(null)
-
-  const handleSave = () => {
-    const markdown = editorRef.current?.getMarkdown()
-    if (!markdown) return
-    onSave?.(markdown)
-  }
-
+export default function Editor({
+  markdown = '',
+  onChange,
+  placeholder = '텍스트를 입력해주세요',
+}: EditorProps) {
   return (
-    <div className="rounded-xl border bg-white">
+    <div className="min-w-231 rounded-xl border border-gray-200 bg-white">
       <ForwardRefEditor
-        ref={editorRef}
-        markdown={initialMarkdown}
+        markdown={markdown}
+        onChange={onChange}
+        placeholder={placeholder}
         plugins={[
           toolbarPlugin({
-            toolbarClassName: 'flex items-center gap-1 border-b px-2 py-1',
+            toolbarClassName: 'flex flex-row items-center gap-1 border-b px-2 py-1',
             toolbarContents: () => (
               <>
-                <UndoRedo />
-
                 <BoldItalicUnderlineToggles />
-                <CodeToggle />
-
-                <ListsToggle />
-
-                <InsertCodeBlock />
-                <InsertThematicBreak />
-                <InsertImage />
-
-                <button
-                  onClick={handleSave}
-                  className="ml-auto rounded bg-black px-3 py-1 text-sm text-white"
-                >
-                  저장
-                </button>
+                <StrikeThroughSupSubToggles options={['Strikethrough']} />
+                <Separator />
+                <ListsToggle options={['bullet', 'number']} />
+                <Separator />
+                <CreateLink />
               </>
             ),
           }),
         ]}
-        className="min-h-75 px-4 py-3"
-        placeholder="내용을 입력하세요"
+        className="min-h-50 px-4 py-3"
       />
     </div>
   )
