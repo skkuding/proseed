@@ -1,0 +1,583 @@
+{
+  "projectId": 1,
+  "versionId": 3,
+  "totalCount": 40,
+  "page": 1,
+  "pageSize": 5,
+  "feedbacks": {
+    "plan": [
+      {
+        "feedbackId": 1,
+        "createdBy": 101,
+        "username": "김기획",
+        "nickname": "영국의활발한캥거루",
+        "profileImageUrl": "/mock/projectdetail/team-member1.png",
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "아이디어와 문제 해결 구조는 좋은데, 제품 품질에 더욱 신경써야만 하는 서비스",
+        "isAdopted": true,
+        "isOpened": true,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "솔루션 가이드 템플릿인 \"The Solution Blueprint\"\n이 템플릿은 단번거리 문제를 파악한 직후, 핵심 내용을 깔끔하게 정리할 수 있도록 설계되었습니다.\n[솔루션 카드 표준 구조]\n1. 원인 진단 (Root Cause):\n   - 내용: 한 줄 요약, \"왜 이 문제가 발생했는가?\"\n   - 예시: \"Safari 브라우저의 최신 쿠키 정책(SameSite)으로 인한 토큰 유실\"\n2. 해결 방법 (How we fixed it):\n   - 내용: 구체적인 액션 아이템, 코드 변경, 설정 변경, 혹은 업무 프로세스 수정.\n   - 예시: config/session.js 파일에서 SameSite:'Lax' 옵션 추가.\n3. 재발 방지 및 팁 (Key Takeaway):\n   - 내용: 다른 팀원들이 이 문제를 겪지 않으려면 무엇을 기억해야 하는가?\n   - 예시: \"소셜 로그인 연동 시, 반드시 모바일 웹 브라우저 호환성을 체크하세요.\"\n4. 관련 링크 (References):\n   - 내용: 참고한 공식 문서, 해결에 사용된 내부 가이드 링크.",
+            "images": [
+              "/mock/projectdetail/projectImage1.png",
+              "/mock/projectdetail/thumbnail.png",
+              "/mock/projectdetail/projectImage1.png",
+              "/mock/projectdetail/thumbnail.png",
+              "/mock/projectdetail/projectImage1.png",
+              "/mock/projectdetail/thumbnail.png"
+            ]
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "타겟 사용자 정의는 비교적 명확하게 되어 있으나, 페르소나의 구체성이 다소 부족합니다. 사용자의 일상적인 행동 패턴과 pain point가 더 구체적으로 서술되면 좋겠습니다. 특히 20-30대 직장인을 주 타겟으로 설정했다면, 그들의 헬스케어에 대한 현재 행동 방식과 불편함을 데이터 기반으로 보완해 주세요.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "프리미엄 구독 모델은 헬스케어 앱에서 검증된 방식이지만, 초기 사용자 확보를 위한 무료 플랜의 기능 범위 설정이 핵심입니다. 경쟁사 대비 차별화 포인트를 수익 모델과 연결짓는 전략이 필요해 보입니다. B2B 기업 복지 솔루션으로의 확장도 고려해볼 만합니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "경쟁사 분석 자료에 국내 서비스 위주로 정리되어 있어, 글로벌 헬스케어 앱(Noom, MyFitnessPal 등)과의 비교가 부족합니다. 단순 기능 비교표 외에도 UX, 가격 정책, 커뮤니티 전략 등 다각도 분석이 추가되면 차별화 포인트가 더 명확해질 것 같습니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 5,
+        "createdBy": 105,
+        "username": "정전략",
+        "nickname": "조용한전략가사자",
+        "profileImageUrl": "/mock/projectdetail/team-member2.png",
+        "createdAt": "2026-01-02T00:00:00.000Z",
+        "updatedAt": "2026-01-02T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "시장 조사는 탄탄하나 실행 로드맵이 더 구체화되어야 할 것 같습니다",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "문제 정의가 명확하고 현실적인 니즈를 잘 반영하고 있습니다. 다만 '왜 지금인가'에 대한 시장 타이밍 근거가 좀 더 보강되면 투자자나 팀원 설득에 도움이 될 것 같습니다. 헬스케어 디지털 전환 트렌드와 연결 지어 설명하면 배경이 더욱 탄탄해질 것입니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "페르소나 설정이 꽤 구체적으로 잘 되어 있어 좋았습니다. 직장인 A와 건강 관심 B의 두 유형을 구분한 점이 인상적입니다. 각 페르소나별로 핵심 기능 우선순위를 다르게 설정해보는 것도 고려해볼 만합니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "광고 기반 무료 모델과 프리미엄 구독의 하이브리드 접근은 초기 성장에 유리합니다. 하지만 헬스케어 데이터 민감성을 고려할 때 광고 모델에 대한 사용자 거부감을 사전에 조사해보길 권합니다. 기업 웰니스 프로그램과의 B2B 파트너십이 수익성 측면에서 더 매력적일 수 있습니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "주요 경쟁사 분석은 잘 되어 있으나, 각 서비스의 실제 사용자 리뷰 분석을 통한 pain point 발굴이 추가되면 더욱 설득력 있는 차별화 포인트를 도출할 수 있을 것입니다. 특히 App Store/Play Store 리뷰 분석은 무료로 실행 가능한 좋은 방법입니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 6,
+        "createdBy": 106,
+        "username": "한서비스",
+        "nickname": "꼼꼼한분석가너구리",
+        "profileImageUrl": "/mock/projectdetail/team-member3.png",
+        "createdAt": "2026-01-03T00:00:00.000Z",
+        "updatedAt": "2026-01-03T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "핵심 문제 정의는 명확하지만 실행 가능성 검증이 필요합니다",
+        "isAdopted": false,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "문제 인식의 출발점이 사용자 인터뷰에서 비롯된 점이 매우 좋습니다. 인터뷰 대상자 수와 방법론도 함께 공유해주시면 더욱 신뢰감이 높아질 것 같습니다. 현재 서술된 문제가 '불편함'에서 나아가 '해결하지 않으면 손실이 되는 문제'임을 강조하면 임팩트가 더 커집니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "타겟을 '건강에 관심 있는 직장인'으로 정의했는데, 이 범위가 다소 넓습니다. 초기 집중 타겟을 더 좁히는 것(예: '운동을 시작하려는 30대 초반 직장인')이 마케팅 효율과 제품 집중도를 높이는 데 도움이 됩니다. 타겟을 좁혀도 나중에 확장할 수 있습니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "수익 모델이 명확히 설계되어 있어 좋습니다. 단, 구독 전환율 가정치의 근거가 부족한 것 같습니다. 유사 서비스의 벤치마크 데이터나 직접 설문을 통한 지불 의향 조사를 추가하면 재무 계획의 신뢰도가 높아질 것입니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "경쟁사 기능 비교는 잘 정리되어 있습니다. 여기에 각 경쟁사의 핵심 수익 모델과 MAU 규모도 파악해두면 시장 진입 전략 수립에 큰 도움이 됩니다. 블루오션 영역을 시각적으로 표현한 포지셔닝 맵도 추가해보시길 권장합니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 10,
+        "createdBy": 110,
+        "username": "오혁신",
+        "nickname": "도전적인붉은여우",
+        "profileImageUrl": "/mock/projectdetail/team-member1.png",
+        "createdAt": "2026-01-04T00:00:00.000Z",
+        "updatedAt": "2026-01-04T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "사용자 중심 사고가 돋보이지만 실행 우선순위 정리가 더 필요합니다",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "사용자 인터뷰 기반으로 도출된 문제 정의라는 점이 강점입니다. 다만 '불편함'을 넘어서 '해결하지 않으면 이탈하는 문제'임을 보여주는 데이터가 추가되면 더욱 설득력이 높아질 것 같습니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "페르소나 프로필이 구체적으로 잘 작성되어 있습니다. 각 페르소나별 핵심 사용 시나리오를 스토리보드 형태로 추가하면 팀 공유와 공감대 형성에 더 효과적입니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "구독 기반 수익 모델의 방향성은 적절합니다. 초기 트랙션 확보를 위한 '가격 실험' 전략, 예를 들어 얼리버드 할인이나 베타 무료 기간 설정을 통해 전환율 데이터를 먼저 수집하는 것을 권장합니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "직접 경쟁사 분석은 잘 되어 있으나, 간접 경쟁(사용자가 현재 문제를 해결하는 방법, 예: 엑셀 사용, 수기 기록)도 경쟁 대상으로 포함해 분석하면 시장 기회가 더 명확하게 보입니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 11,
+        "createdBy": 111,
+        "username": "신유저",
+        "nickname": "호기심많은수달",
+        "profileImageUrl": "/mock/projectdetail/team-member2.png",
+        "createdAt": "2026-01-05T00:00:00.000Z",
+        "updatedAt": "2026-01-05T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "문제 인식은 탁월하나 솔루션의 독창성이 조금 더 필요해 보입니다",
+        "isAdopted": false,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "문제 배경 서술이 간결하고 읽기 좋습니다. 통계 수치를 한두 가지 삽입해 '이 문제가 얼마나 많은 사람에게 해당하는가'를 보여주면 규모감이 생겨 더욱 인상적일 것 같습니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "페르소나 설정은 적절합니다. 다만 '건강 관심 있는 직장인'이라는 정의가 여전히 넓습니다. 초기 타겟을 '운동 루틴을 막 시작하려는 사람'으로 좁혀 PMF를 먼저 확인하는 전략이 효율적일 수 있습니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "수익 모델 설계가 깔끔합니다. 헬스케어 데이터를 기반으로 한 맞춤형 콘텐츠 판매(전자책, 프로그램 등) 같은 부가 수익원도 검토해볼 만합니다. 단, 핵심 가치 전달에 집중한 뒤 확장하는 것이 바람직합니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "경쟁사 비교표가 잘 정리되어 있습니다. 각 경쟁사의 '핵심 불만 리뷰'를 수집해 공통 패턴을 파악하면, 우리 서비스가 채워야 할 공백이 더 구체적으로 보일 것입니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 12,
+        "createdBy": 112,
+        "username": "권마케팅",
+        "nickname": "날카로운매의눈",
+        "profileImageUrl": "/mock/projectdetail/team-member3.png",
+        "createdAt": "2026-01-06T00:00:00.000Z",
+        "updatedAt": "2026-01-06T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "GTM 전략과 초기 채널 계획이 더 구체화되면 훨씬 강력한 기획서가 될 것 같아요",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "문제 정의와 배경이 논리적으로 잘 연결되어 있습니다. '현재 대안의 한계'를 명시적으로 서술한 부분이 특히 인상적이었습니다. 여기에 해당 시장의 성장률 데이터를 추가하면 '왜 지금 이 문제를 풀어야 하는가'에 대한 설득력이 강해집니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "타겟이 명확하게 정의되어 있습니다. 마케팅 채널 선택과 연결해 '이 페르소나가 주로 어디서 정보를 얻는지'를 파악해두면 GTM 전략 수립에 바로 활용할 수 있을 것입니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "수익 모델 방향성에 동의합니다. 추가로 고객 획득 비용(CAC)과 생애 가치(LTV) 추정치를 단순하게라도 계산해두면, 마케팅 예산 배분과 채널 우선순위를 결정하는 데 큰 도움이 됩니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "경쟁사 분석이 탄탄합니다. 차별화 포인트를 '우리만 할 수 있는 것'과 '우리가 더 잘할 수 있는 것'으로 나눠 정리하면 포지셔닝 메시지를 더 날카롭게 만들 수 있습니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 13,
+        "createdBy": 113,
+        "username": "임데이터",
+        "nickname": "분석적인회색늑대",
+        "profileImageUrl": "/mock/projectdetail/team-member1.png",
+        "createdAt": "2026-01-07T00:00:00.000Z",
+        "updatedAt": "2026-01-07T00:00:00.000Z",
+        "category": "plan",
+        "onelineReview": "데이터 기반 의사결정 구조가 잘 갖춰진 기획, 지속적인 검증이 핵심입니다",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 1,
+            "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+            "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요.",
+            "feedbackBody": "정량적 근거와 정성적 인사이트가 균형 있게 혼합된 문제 정의입니다. 초기 인터뷰 샘플 수가 적더라도 핵심 패턴 3~5개를 추출해 명시하면 신뢰도가 크게 올라갑니다.",
+            "images": []
+          },
+          {
+            "questionId": 2,
+            "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+            "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?",
+            "feedbackBody": "페르소나가 잘 설계되어 있습니다. 각 페르소나의 '현재 행동(As-Is)'과 '우리 서비스 사용 후 행동(To-Be)' 비교를 추가하면 제품의 변화 가치를 더 명확하게 전달할 수 있습니다.",
+            "images": []
+          },
+          {
+            "questionId": 3,
+            "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+            "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?",
+            "feedbackBody": "수익 모델 논리가 명확합니다. 단계별 수익화 로드맵(1단계: 무료 사용자 기반 확보, 2단계: 전환율 실험, 3단계: 유료화)을 시각적으로 정리해두면 투자자와의 대화에서 유용하게 쓸 수 있습니다.",
+            "images": []
+          },
+          {
+            "questionId": 4,
+            "questionTitle": "경쟁사 분석은 충분한가요?",
+            "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?",
+            "feedbackBody": "경쟁사 분석의 깊이가 좋습니다. 주요 경쟁사의 최근 업데이트 방향성도 지속적으로 모니터링하면서 우리의 차별화 포인트가 침식되지 않는지 정기적으로 검토하는 프로세스를 만들면 좋겠습니다.",
+            "images": []
+          }
+        ]
+      }
+    ],
+    "design": [
+      {
+        "feedbackId": 2,
+        "createdBy": 102,
+        "username": "이디자인",
+        "nickname": "감각적인하늘다람쥐",
+        "profileImageUrl": "/mock/projectdetail/team-member2.png",
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z",
+        "category": "design",
+        "onelineReview": "깔끔한 UI지만 디자인 시스템 정립이 더 필요해 보입니다",
+        "isAdopted": true,
+        "isOpened": true,
+        "questions": [
+          {
+            "questionId": 5,
+            "questionTitle": "UI/UX의 전반적인 사용성은 어떠한가요?",
+            "questionContent": "서비스의 UI/UX 흐름과 사용성에 대해 평가해주세요.",
+            "feedbackBody": "전반적인 UI 구성은 깔끔하고 직관적입니다. 다만 온보딩 플로우에서 사용자가 초기 목표를 설정하는 단계가 다소 길게 느껴질 수 있습니다. 핵심 기능으로의 진입 경로를 단축하고, 첫 방문 사용자를 위한 빈 상태(empty state) 디자인을 보완해 주세요.",
+            "images": []
+          },
+          {
+            "questionId": 6,
+            "questionTitle": "디자인 일관성은 유지되고 있나요?",
+            "questionContent": "컬러, 타이포그래피, 컴포넌트 등 디자인 시스템의 일관성을 평가해주세요.",
+            "feedbackBody": "색상 팔레트와 주요 컴포넌트는 일관되게 유지되어 있습니다. 그러나 일부 화면에서 버튼의 크기와 간격이 다르게 적용된 부분이 발견됩니다. 디자인 토큰 기반의 시스템을 도입하면 확장 시에도 일관성을 유지하기 쉬울 것 같습니다. 다크모드 대응도 초기부터 고려하면 좋겠습니다.",
+            "images": []
+          },
+          {
+            "questionId": 7,
+            "questionTitle": "접근성(Accessibility)은 고려되어 있나요?",
+            "questionContent": "색상 대비, 폰트 크기, 스크린 리더 지원 등 접근성 관련 사항을 평가해주세요.",
+            "feedbackBody": "주요 텍스트의 색상 대비는 WCAG 기준을 충족하는 것으로 보입니다. 다만 아이콘만으로 의미를 전달하는 버튼에 aria-label이 누락된 경우가 있어 보입니다. 폰트 최소 크기 14px 유지와 터치 영역 44px 이상 확보도 체크해 주세요.",
+            "images": []
+          },
+          {
+            "questionId": 8,
+            "questionTitle": "모바일 반응형 디자인은 적절한가요?",
+            "questionContent": "다양한 기기와 화면 크기에 대한 반응형 대응을 평가해주세요.",
+            "feedbackBody": "모바일 퍼스트 접근 방식이 잘 반영되어 있습니다. 태블릿 화면에서 레이아웃이 어색하게 늘어나는 부분이 일부 발견됩니다. 특히 대시보드 카드 그리드가 중간 뷰포트에서 최적화가 필요해 보입니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 7,
+        "createdBy": 107,
+        "username": "박시각",
+        "nickname": "섬세한눈의독수리",
+        "profileImageUrl": "/mock/projectdetail/team-member1.png",
+        "createdAt": "2026-01-04T00:00:00.000Z",
+        "updatedAt": "2026-01-04T00:00:00.000Z",
+        "category": "design",
+        "onelineReview": "사용자 경험 흐름이 자연스럽고 브랜드 아이덴티티가 잘 살아있어요",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 5,
+            "questionTitle": "UI/UX의 전반적인 사용성은 어떠한가요?",
+            "questionContent": "서비스의 UI/UX 흐름과 사용성에 대해 평가해주세요.",
+            "feedbackBody": "사용자 플로우가 논리적으로 잘 설계되어 있고, 주요 CTA 버튼의 위치가 직관적입니다. 마이크로 인터랙션을 더 활용하면 사용자 경험의 완성도가 높아질 것 같습니다. 로딩 스켈레톤 UI 적용도 고려해보세요.",
+            "images": []
+          },
+          {
+            "questionId": 6,
+            "questionTitle": "디자인 일관성은 유지되고 있나요?",
+            "questionContent": "컬러, 타이포그래피, 컴포넌트 등 디자인 시스템의 일관성을 평가해주세요.",
+            "feedbackBody": "전체적으로 일관된 비주얼 언어를 사용하고 있습니다. Figma 컴포넌트 라이브러리 구축이 잘 되어 있다면, 개발팀과의 디자인-개발 핸드오프 과정에서도 일관성을 유지할 수 있을 것입니다. Storybook 연동을 고려해보세요.",
+            "images": []
+          },
+          {
+            "questionId": 7,
+            "questionTitle": "접근성(Accessibility)은 고려되어 있나요?",
+            "questionContent": "색상 대비, 폰트 크기, 스크린 리더 지원 등 접근성 관련 사항을 평가해주세요.",
+            "feedbackBody": "기본적인 접근성 요소는 갖추어져 있습니다. 헬스케어 서비스 특성상 시니어 사용자도 타겟이 될 수 있으므로, 더 큰 폰트 옵션과 고대비 모드를 지원하는 것을 추천합니다. 키보드 내비게이션 지원 여부도 확인이 필요합니다.",
+            "images": []
+          },
+          {
+            "questionId": 8,
+            "questionTitle": "모바일 반응형 디자인은 적절한가요?",
+            "questionContent": "다양한 기기와 화면 크기에 대한 반응형 대응을 평가해주세요.",
+            "feedbackBody": "iOS와 Android 각각의 디자인 가이드라인(HIG, Material Design)을 적절히 반영하면서도 브랜드 아이덴티티를 유지하는 균형이 좋습니다. 노치/다이나믹 아일랜드 영역 처리가 잘 되어 있는지 실기기 테스트가 필요해 보입니다.",
+            "images": []
+          }
+        ]
+      }
+    ],
+    "dev": [
+      {
+        "feedbackId": 3,
+        "createdBy": 103,
+        "username": "박개발",
+        "nickname": "빠른손가락개발자",
+        "profileImageUrl": "/mock/projectdetail/team-member3.png",
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z",
+        "category": "dev",
+        "onelineReview": "기술 스택 선택은 훌륭하나 테스트 커버리지 보완이 시급합니다",
+        "isAdopted": true,
+        "isOpened": true,
+        "questions": [
+          {
+            "questionId": 9,
+            "questionTitle": "기술 스택 선택은 적절한가요?",
+            "questionContent": "현재 사용 중인 기술 스택이 프로젝트의 요구사항에 적합한지 평가해주세요.",
+            "feedbackBody": "Next.js + NestJS 조합은 풀스택 TypeScript 환경으로 팀 생산성 측면에서 좋은 선택입니다. 다만 현재 단계에서 Kubernetes 도입은 오버엔지니어링일 수 있습니다. 초기에는 단순한 배포 파이프라인을 유지하고, 트래픽이 증가한 뒤 확장하는 방향을 고려해보세요. Prisma ORM 선택은 개발 속도와 타입 안전성 면에서 적절합니다.",
+            "images": []
+          },
+          {
+            "questionId": 10,
+            "questionTitle": "코드 품질과 유지보수성은 어떤가요?",
+            "questionContent": "코드 구조, 테스트 커버리지, 문서화 수준에 대해 평가해주세요.",
+            "feedbackBody": "컴포넌트 분리와 관심사 분리가 잘 되어 있어 유지보수성이 높아 보입니다. API 레이어의 에러 핸들링 전략을 더 체계화하면 좋겠습니다. 현재 테스트 커버리지가 낮은 것으로 보이는데, 핵심 비즈니스 로직 위주로 단위 테스트를 먼저 작성하는 것을 권장합니다. OpenTelemetry 도입은 장기적으로 매우 좋은 결정입니다.",
+            "images": []
+          },
+          {
+            "questionId": 11,
+            "questionTitle": "보안 측면에서 고려해야 할 사항이 있나요?",
+            "questionContent": "인증/인가, 데이터 보호 등 보안 관련 사항을 점검해주세요.",
+            "feedbackBody": "S3 Presigned URL 방식은 파일 접근 제어 측면에서 좋은 접근입니다. JWT 토큰 갱신 로직과 리프레시 토큰 관리 전략을 명확히 문서화해 주세요. 또한 사용자 건강 데이터는 민감 정보이므로, 데이터 암호화와 접근 로그 관리 정책을 초기부터 수립하는 것이 중요합니다.",
+            "images": []
+          },
+          {
+            "questionId": 12,
+            "questionTitle": "성능 최적화는 충분히 고려되었나요?",
+            "questionContent": "로딩 속도, 데이터 처리, 캐싱 전략 등 성능 관련 사항을 평가해주세요.",
+            "feedbackBody": "Next.js의 SSR/SSG 전략이 잘 활용되고 있는 것 같습니다. 이미지 최적화에 next/image 컴포넌트를 일관되게 사용하고 있는지 확인해주세요. API 응답 캐싱 전략과 데이터베이스 인덱싱 설계도 초기부터 고려하면 확장 시 큰 도움이 됩니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 8,
+        "createdBy": 108,
+        "username": "최아키",
+        "nickname": "구조적사고의비버",
+        "profileImageUrl": "/mock/projectdetail/team-member2.png",
+        "createdAt": "2026-01-05T00:00:00.000Z",
+        "updatedAt": "2026-01-05T00:00:00.000Z",
+        "category": "dev",
+        "onelineReview": "아키텍처 설계가 견고하고 확장성을 잘 고려한 프로젝트입니다",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 9,
+            "questionTitle": "기술 스택 선택은 적절한가요?",
+            "questionContent": "현재 사용 중인 기술 스택이 프로젝트의 요구사항에 적합한지 평가해주세요.",
+            "feedbackBody": "모노레포 구조에 pnpm workspaces 조합은 팀 협업과 코드 공유 측면에서 훌륭한 선택입니다. Tailwind CSS 4와 React 19 조합의 최신 스택 도입은 장기적으로 유리하지만, 레퍼런스가 적은 만큼 마이그레이션 이슈에 대비가 필요합니다. 전반적으로 현대적이고 합리적인 스택입니다.",
+            "images": []
+          },
+          {
+            "questionId": 10,
+            "questionTitle": "코드 품질과 유지보수성은 어떤가요?",
+            "questionContent": "코드 구조, 테스트 커버리지, 문서화 수준에 대해 평가해주세요.",
+            "feedbackBody": "Conventional Commits와 commitlint 도입으로 커밋 히스토리가 깔끔하게 관리되고 있는 점이 좋습니다. NestJS 모듈 구조도 도메인별로 잘 분리되어 있습니다. API 명세 자동화(Swagger)가 되어 있다면 프론트엔드-백엔드 협업 효율이 크게 향상될 것입니다.",
+            "images": []
+          },
+          {
+            "questionId": 11,
+            "questionTitle": "보안 측면에서 고려해야 할 사항이 있나요?",
+            "questionContent": "인증/인가, 데이터 보호 등 보안 관련 사항을 점검해주세요.",
+            "feedbackBody": "환경변수 검증 로직이 startup 시 fast fail로 동작하도록 설계된 점이 매우 좋습니다. .env.example 관리도 체계적으로 하고 있는 것 같습니다. External Secrets Operator를 통한 k8s secret 관리는 프로덕션 보안을 잘 고려한 결정입니다.",
+            "images": []
+          },
+          {
+            "questionId": 12,
+            "questionTitle": "성능 최적화는 충분히 고려되었나요?",
+            "questionContent": "로딩 속도, 데이터 처리, 캐싱 전략 등 성능 관련 사항을 평가해주세요.",
+            "feedbackBody": "OpenTelemetry 기반 모니터링 도입은 성능 병목 탐지에 매우 유용합니다. 데이터베이스 쿼리 최적화를 위해 Prisma의 쿼리 로그와 slow query 분석을 습관화하길 권장합니다. 초기부터 CDN 전략도 고려해두면 글로벌 확장 시 유리합니다.",
+            "images": []
+          }
+        ]
+      }
+    ],
+    "general": [
+      {
+        "feedbackId": 4,
+        "createdBy": 104,
+        "username": "최종합",
+        "nickname": "날카로운눈의올빼미",
+        "profileImageUrl": "/mock/projectdetail/team-member3.png",
+        "createdAt": "2026-01-01T00:00:00.000Z",
+        "updatedAt": "2026-01-01T00:00:00.000Z",
+        "category": "general",
+        "onelineReview": "아이디어와 문제 해결 구조는 좋은데, 제품 품질에 더욱 신경써야만 하는 서비스",
+        "isAdopted": true,
+        "isOpened": true,
+        "questions": [
+          {
+            "questionId": 13,
+            "questionTitle": "전반적인 프로젝트 완성도는 어떠한가요?",
+            "questionContent": "기획, 디자인, 개발 전반에 걸쳐 프로젝트의 완성도를 평가해주세요.",
+            "feedbackBody": "세 가지 영역이 비교적 균형 있게 진행되고 있습니다. 특히 문서화와 버전 관리가 체계적으로 이루어지고 있는 점이 인상적입니다. 다만 현재 MVP 기능 범위가 다소 넓어 보여, 핵심 가치 제안에 집중하여 범위를 좁히는 것이 출시 타이밍을 앞당기는 데 도움이 될 것 같습니다.",
+            "images": []
+          },
+          {
+            "questionId": 14,
+            "questionTitle": "팀 구성과 역할 분담은 적절한가요?",
+            "questionContent": "팀의 구성과 각 역할의 분담이 프로젝트 성공에 충분한지 평가해주세요.",
+            "feedbackBody": "기획, 디자인, 개발 각 파트의 역할이 명확하게 구분되어 있습니다. 다만 QA 담당 역할이 없어 보이는데, 사이드 프로젝트이더라도 릴리즈 전 체계적인 QA 프로세스가 있으면 품질 향상에 도움이 됩니다. 팀원 간 커뮤니케이션 채널과 의사결정 프로세스도 문서화하면 좋겠습니다.",
+            "images": []
+          },
+          {
+            "questionId": 15,
+            "questionTitle": "프로젝트 일정 및 마일스톤 관리는 어떤가요?",
+            "questionContent": "개발 일정, 마일스톤, 리스크 관리 계획에 대해 평가해주세요.",
+            "feedbackBody": "버전 관리와 릴리즈 노트 작성이 잘 되어 있어 진행 상황 파악이 용이합니다. 다만 구체적인 마일스톤 날짜와 각 단계별 목표가 공개된 곳에 정리되어 있으면 팀 전체의 목표 정렬에 도움이 됩니다. 리스크 매트릭스 작성도 고려해보세요.",
+            "images": []
+          },
+          {
+            "questionId": 16,
+            "questionTitle": "사용자 피드백 수집 및 반영 계획은 있나요?",
+            "questionContent": "출시 후 사용자 피드백을 어떻게 수집하고 제품에 반영할 계획인지 평가해주세요.",
+            "feedbackBody": "Proseed 플랫폼 자체를 활용한 버전별 피드백 수집은 매우 창의적인 접근입니다. 추가로 인앱 설문, NPS 측정, 사용자 인터뷰 계획도 수립하면 정량/정성 데이터를 균형 있게 수집할 수 있습니다. 피드백-반영 사이클을 짧게 유지하는 것이 초기 제품 성장의 핵심입니다.",
+            "images": []
+          }
+        ]
+      },
+      {
+        "feedbackId": 9,
+        "createdBy": 109,
+        "username": "윤멘토",
+        "nickname": "경험많은현명한부엉이",
+        "profileImageUrl": "/mock/projectdetail/team-member1.png",
+        "createdAt": "2026-01-06T00:00:00.000Z",
+        "updatedAt": "2026-01-06T00:00:00.000Z",
+        "category": "general",
+        "onelineReview": "잠재력이 높은 프로젝트, 실행력과 지속성이 성패를 가를 것입니다",
+        "isAdopted": true,
+        "isOpened": false,
+        "questions": [
+          {
+            "questionId": 13,
+            "questionTitle": "전반적인 프로젝트 완성도는 어떠한가요?",
+            "questionContent": "기획, 디자인, 개발 전반에 걸쳐 프로젝트의 완성도를 평가해주세요.",
+            "feedbackBody": "사이드 프로젝트임에도 불구하고 완성도가 상당히 높습니다. 특히 기술 스택의 현대성과 인프라 설계가 인상적입니다. 다만 실제 사용자에게 전달되는 핵심 가치가 무엇인지를 항상 중심에 두고, 기술적 완성도보다 문제 해결 완성도를 우선시하길 권합니다.",
+            "images": []
+          },
+          {
+            "questionId": 14,
+            "questionTitle": "팀 구성과 역할 분담은 적절한가요?",
+            "questionContent": "팀의 구성과 각 역할의 분담이 프로젝트 성공에 충분한지 평가해주세요.",
+            "feedbackBody": "팀원 각자의 강점이 잘 활용되고 있는 것 같습니다. 사이드 프로젝트의 특성상 동기 부여 유지가 중요한데, 작은 성취를 자주 공유하고 축하하는 팀 문화를 만들면 장기 지속에 도움이 됩니다. 의사결정 속도를 높이기 위한 명확한 리더십 구조도 필요합니다.",
+            "images": []
+          },
+          {
+            "questionId": 15,
+            "questionTitle": "프로젝트 일정 및 마일스톤 관리는 어떤가요?",
+            "questionContent": "개발 일정, 마일스톤, 리스크 관리 계획에 대해 평가해주세요.",
+            "feedbackBody": "명확한 버전 관리와 릴리즈 전략이 잘 수립되어 있습니다. 사이드 프로젝트의 현실적인 제약(본업 병행)을 고려한 완충 일정 확보가 중요합니다. '언제까지 안 되면 피벗한다'는 기준점을 미리 설정해두는 것도 현명한 전략입니다.",
+            "images": []
+          },
+          {
+            "questionId": 16,
+            "questionTitle": "사용자 피드백 수집 및 반영 계획은 있나요?",
+            "questionContent": "출시 후 사용자 피드백을 어떻게 수집하고 제품에 반영할 계획인지 평가해주세요.",
+            "feedbackBody": "초기 소수의 '찐 팬' 사용자를 확보하고 그들과 긴밀하게 소통하는 전략을 추천합니다. 퍼블릭 출시 전 베타 테스터 그룹을 운영하면 제품-시장 적합성(PMF)을 빠르게 검증할 수 있습니다. 피드백 채널을 단순화하여 사용자가 쉽게 의견을 남길 수 있도록 해주세요.",
+            "images": []
+          }
+        ]
+      }
+    ]
+  }
+}
