@@ -169,7 +169,7 @@ export function Feedbacks() {
         <div className="flex items-center">
           <div className="min-h-12">
             <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-              <SelectTrigger className="px-4 text-body1_m_16 rounded-lg border-neutral-200">
+              <SelectTrigger className="px-4 rounded-lg border-neutral-200 text-body1_m_16! hover:cursor-pointer">
                 <SelectValue>
                   업데이트 버전{' '}
                   {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
@@ -177,14 +177,18 @@ export function Feedbacks() {
               </SelectTrigger>
               <SelectContent>
                 {versionList.map((v) => (
-                  <SelectItem key={v.id} value={v.id.toString()}>
+                  <SelectItem
+                    key={v.id}
+                    value={v.id.toString()}
+                    className="text-body1_m_16! hover:cursor-pointer"
+                  >
                     버전 {v.version}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <Button className="ml-[6px] h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20">
+          <Button className="ml-[6px] h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer">
             <p className="text-sub3_sb_16 text-white">피드백 작성하기</p>
           </Button>
         </div>
@@ -231,38 +235,38 @@ export function Feedbacks() {
             </PopoverTrigger>
             <PopoverContent
               align="end"
-              className="w-72 rounded-2xl border-neutral-200 p-5 flex flex-col gap-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.12)]"
+              className="w-107 h-64 rounded-2xl border-neutral-200 p-5 flex flex-col gap-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.12)]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sub2_sb_16">필터 설정하기</span>
+                <span className="text-title1_sb_24">필터 설정하기</span>
                 <button
                   onClick={() => setPendingFilter('all')}
                   className="flex items-center gap-1 text-caption1_m_13 text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
                 >
-                  <RotateCcwIcon className="size-3" />
-                  필터 초기화
+                  <RotateCcwIcon className="size-4" />
+                  <p className="text-body2_m_14">필터 초기화</p>
                 </button>
               </div>
 
               <div className="flex flex-col gap-2">
-                <p className="text-caption1_m_13 text-CoolNeutral-40">피드백 노출</p>
+                <p className="text-body1_m_16 text-CoolNeutral-40">피드백 노출</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPendingFilter('all')}
-                    className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
+                    className={`px-4 py-2 rounded-lg h-11 text-body3_r_16 transition-colors hover:cursor-pointer ${
                       pendingFilter === 'all'
-                        ? 'bg-CoolNeutral-20 text-white'
-                        : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
+                        ? 'bg-CoolNeutral-30 text-white'
+                        : 'bg-neutral-99 text-neutral-30 hover:bg-neutral-200'
                     }`}
                   >
                     전체 피드백
                   </button>
                   <button
                     onClick={() => setPendingFilter('closed')}
-                    className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
+                    className={`px-4 py-2 rounded-lg h-11 text-body3_r_16 transition-colors hover:cursor-pointer ${
                       pendingFilter === 'closed'
-                        ? 'bg-CoolNeutral-20 text-white'
-                        : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
+                        ? 'bg-CoolNeutral-30 text-white'
+                        : 'bg-neutral-99 text-neutral-30 hover:bg-neutral-200'
                     }`}
                   >
                     해제한 피드백만 보기
@@ -270,12 +274,12 @@ export function Feedbacks() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-1 justify-end">
                 <button
                   onClick={() => setIsFilterOpen(false)}
-                  className="flex-1 py-2.5 rounded-lg border border-neutral-200 text-body3_r_16 text-CoolNeutral-40 hover:bg-neutral-50 hover:cursor-pointer transition-colors"
+                  className="py-2.5 rounded-lg h-12 w-23.5 border-[1.4px] border-CoolNeutral-50 text-body3_r_16 text-CoolNeutral-40 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
                 >
-                  취소
+                  <p className="text-sub3_sb_16 text-CoolNeutral-20">취소</p>
                 </button>
                 <button
                   onClick={() => {
@@ -284,20 +288,24 @@ export function Feedbacks() {
                     setOpenFeedbackId('')
                     setIsFilterOpen(false)
                   }}
-                  className="flex-1 py-2.5 rounded-lg bg-CoolNeutral-20 text-body3_r_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+                  className="py-2.5 rounded-lg h-12 w-23.5 bg-CoolNeutral-20 text-body3_r_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
                 >
-                  적용하기
+                  <p className="text-sub3_sb_16 ">적용하기</p>
                 </button>
               </div>
             </PopoverContent>
           </Popover>
           <Select value={sortOrder} onValueChange={setSortOrder}>
-            <SelectTrigger className="w-fit h-12 px-4 rounded-lg border-neutral-200 text-body1_m_16 gap-2">
+            <SelectTrigger className="w-[105px] h-12 pr-4 pl-6 rounded-lg border-neutral-200 text-body1_m_16! gap-2 hover:cursor-pointer">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="latest">최신순</SelectItem>
-              <SelectItem value="oldest">오래된순</SelectItem>
+              <SelectItem value="latest" className="text-body1_m_16! hover:cursor-pointer">
+                최신순
+              </SelectItem>
+              <SelectItem value="oldest" className="text-body1_m_16! hover:cursor-pointer">
+                오래된순
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
