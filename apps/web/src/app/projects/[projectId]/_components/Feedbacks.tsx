@@ -193,7 +193,9 @@ export function Feedbacks() {
           </div>
           {/* 피드백 버튼 누르면 /create 페이지로 이동 */}
           <Button
-            onClick={() => router.push(`${pathname}/create`)}
+            onClick={() => router.push(`${pathname}/create?version=${selectedVersion}`)}
+            // 최신버전이 아니라면 disabled 처리
+            disabled={selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
           >
             <p className="text-sub3_sb_16 text-white">피드백 작성하기</p>
