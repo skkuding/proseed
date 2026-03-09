@@ -112,6 +112,7 @@ export function Feedbacks() {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [pendingFilter, setPendingFilter] = useState<FilterMode>('all')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [sortOrder, setSortOrder] = useState('latest')
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
 
   const category = TAB_TO_CATEGORY[activeTab]
@@ -207,88 +208,99 @@ export function Feedbacks() {
           ))}
         </div>
 
-        {/* Filter */}
-        <Popover
-          open={isFilterOpen}
-          onOpenChange={(open) => {
-            if (open) setPendingFilter(filterMode)
-            setIsFilterOpen(open)
-          }}
-        >
-          <PopoverTrigger asChild>
-            <button
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border text-body3_r_16 transition-colors hover:cursor-pointer ${
-                filterMode !== 'all'
-                  ? 'border-CoolNeutral-20 text-CoolNeutral-20 bg-neutral-50'
-                  : 'border-neutral-200 text-CoolNeutral-40 hover:border-CoolNeutral-40'
-              }`}
-            >
-              <SlidersHorizontalIcon className="size-4" />
-              필터
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            className="w-72 rounded-2xl border-neutral-200 p-5 flex flex-col gap-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.12)]"
+        {/* Sort & Filter */}
+        <div className="flex items-center gap-2">
+          <Popover
+            open={isFilterOpen}
+            onOpenChange={(open) => {
+              if (open) setPendingFilter(filterMode)
+              setIsFilterOpen(open)
+            }}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sub2_sb_16">필터 설정하기</span>
+            <PopoverTrigger asChild>
               <button
-                onClick={() => setPendingFilter('all')}
-                className="flex items-center gap-1 text-caption1_m_13 text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
+                className={`flex w-23 h-12 items-center justify-between pl-4 py-2 pr-6 rounded-lg border text-body3_r_16 transition-colors hover:cursor-pointer ${
+                  filterMode !== 'all'
+                    ? 'border-CoolNeutral-20 bg-neutral-50'
+                    : 'border-neutral-200 hover:border-CoolNeutral-40'
+                }`}
               >
-                <RotateCcwIcon className="size-3" />
-                필터 초기화
+                <SlidersHorizontalIcon className="size-4 text-neutral-30" />
+                <p className="text-body1_m_16">필터</p>
               </button>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <p className="text-caption1_m_13 text-CoolNeutral-40">피드백 노출</p>
-              <div className="flex gap-2">
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className="w-72 rounded-2xl border-neutral-200 p-5 flex flex-col gap-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.12)]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sub2_sb_16">필터 설정하기</span>
                 <button
                   onClick={() => setPendingFilter('all')}
-                  className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
-                    pendingFilter === 'all'
-                      ? 'bg-CoolNeutral-20 text-white'
-                      : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
-                  }`}
+                  className="flex items-center gap-1 text-caption1_m_13 text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
                 >
-                  전체 피드백
-                </button>
-                <button
-                  onClick={() => setPendingFilter('closed')}
-                  className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
-                    pendingFilter === 'closed'
-                      ? 'bg-CoolNeutral-20 text-white'
-                      : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
-                  }`}
-                >
-                  해제한 피드백만 보기
+                  <RotateCcwIcon className="size-3" />
+                  필터 초기화
                 </button>
               </div>
-            </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsFilterOpen(false)}
-                className="flex-1 py-2.5 rounded-lg border border-neutral-200 text-body3_r_16 text-CoolNeutral-40 hover:bg-neutral-50 hover:cursor-pointer transition-colors"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => {
-                  setFilterMode(pendingFilter)
-                  setCurrentPage(1)
-                  setOpenFeedbackId('')
-                  setIsFilterOpen(false)
-                }}
-                className="flex-1 py-2.5 rounded-lg bg-CoolNeutral-20 text-body3_r_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
-              >
-                적용하기
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+              <div className="flex flex-col gap-2">
+                <p className="text-caption1_m_13 text-CoolNeutral-40">피드백 노출</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPendingFilter('all')}
+                    className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
+                      pendingFilter === 'all'
+                        ? 'bg-CoolNeutral-20 text-white'
+                        : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
+                    }`}
+                  >
+                    전체 피드백
+                  </button>
+                  <button
+                    onClick={() => setPendingFilter('closed')}
+                    className={`px-4 py-2 rounded-lg text-body3_r_16 transition-colors hover:cursor-pointer ${
+                      pendingFilter === 'closed'
+                        ? 'bg-CoolNeutral-20 text-white'
+                        : 'bg-neutral-100 text-CoolNeutral-40 hover:bg-neutral-200'
+                    }`}
+                  >
+                    해제한 피드백만 보기
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="flex-1 py-2.5 rounded-lg border border-neutral-200 text-body3_r_16 text-CoolNeutral-40 hover:bg-neutral-50 hover:cursor-pointer transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterMode(pendingFilter)
+                    setCurrentPage(1)
+                    setOpenFeedbackId('')
+                    setIsFilterOpen(false)
+                  }}
+                  className="flex-1 py-2.5 rounded-lg bg-CoolNeutral-20 text-body3_r_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+                >
+                  적용하기
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger className="w-fit h-12 px-4 rounded-lg border-neutral-200 text-body1_m_16 gap-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="latest">최신순</SelectItem>
+              <SelectItem value="oldest">오래된순</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Feedback list */}
