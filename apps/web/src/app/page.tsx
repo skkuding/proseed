@@ -1,30 +1,17 @@
-import { HealthCheck } from '@/components/health-check'
-import { StorageCheck } from '@/components/storage-check'
-import { Header } from '@/app/_components/Header'
-import { Footer } from '@/app/_components/Footer'
+import HeroSection from './mainpage/_components/HeroSection'
+import RecentProjectsSection from './mainpage/_components/RecentProjectsSection'
+import FeedbackSection from './mainpage/_components/FeedbackSection'
+import GrowthRecordSection from './mainpage/_components/GrowthRecordSection'
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="relative w-full">
-      <main className="min-h-screen p-8 pt-20">
-        <div className="flex gap-4 flex-wrap">
-          <p className="text-head0_sb_52">head0_sb_52</p>
-          <p className="text-caption4_r_12">caption4_r_12</p>
-          <HealthCheck />
-          <StorageCheck />
-        </div>
-      </main>
-    </div>
+    <main className="w-full bg-[#F5F5F5]">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-8">
+        <HeroSection />
+        <RecentProjectsSection />
+        <FeedbackSection />
+        <GrowthRecordSection />
+      </div>
+    </main>
   )
 }
-
-// import { Header } from './main/_components/Header'
-
-// export default function Page() {
-//   return (
-//     <div className = "min-h-screen">
-//       <Header />
-//       <main></main>
-//     </div>
-//   )
-// }
