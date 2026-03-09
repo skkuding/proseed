@@ -34,6 +34,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
+import { ImageLightbox } from './ImageLightbox'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -50,13 +51,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   design: '디자이너',
   dev: '개발자',
   general: '기타',
-}
-
-const CATEGORY_COLOR: Record<string, string> = {
-  plan: 'text-blue-500',
-  design: 'text-orange-400',
-  dev: 'text-green-500',
-  general: 'text-neutral-400',
 }
 
 type FeedbackQuestion = {
@@ -117,6 +111,7 @@ export function Feedbacks() {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [pendingFilter, setPendingFilter] = useState<FilterMode>('all')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
 
   const category = TAB_TO_CATEGORY[activeTab]
   const allFeedbacks = (feedbackData.feedbacks[category] as FeedbackItem[]).filter((f) =>
@@ -333,7 +328,7 @@ export function Feedbacks() {
                         />
                       </div>
                       <div className="flex flex-col gap-0.5 text-left">
-                        <span className={`text-caption1_m_13 ${CATEGORY_COLOR[feedback.category]}`}>
+                        <span className={`text-caption1_m_13 text-primary-strong`}>
                           {CATEGORY_LABEL[feedback.category]}
                         </span>
                         <span className="text-sub1_sb_18">{feedback.nickname}</span>
@@ -405,12 +400,16 @@ export function Feedbacks() {
                             {selectedQuestion.images.length > 0 && (
                               <div className="grid grid-cols-3 gap-3 mt-1">
                                 {selectedQuestion.images.map((img, idx) => (
-                                  <div
+                                  <button
                                     key={idx}
-                                    className="relative aspect-video rounded-xl overflow-hidden bg-neutral-100"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setLightbox({ images: selectedQuestion.images, index: idx })
+                                    }}
+                                    className="relative aspect-video rounded-xl overflow-hidden bg-neutral-100 hover:opacity-90 transition-opacity hover:cursor-pointer"
                                   >
                                     <Image src={img} alt="" fill className="object-cover" />
-                                  </div>
+                                  </button>
                                 ))}
                               </div>
                             )}
@@ -470,6 +469,27 @@ export function Feedbacks() {
             </PaginationContent>
           </Pagination>
         </>
+      )}
+
+      {lightbox && (
+        <ImageLightbox
+          images={lightbox.images}
+          currentIndex={lightbox.index}
+          isOpen={true}
+          onClose={() => setLightbox(null)}
+          onPrev={() =>
+            setLightbox(
+              (prev) =>
+                prev && {
+                  ...prev,
+                  index: (prev.index - 1 + prev.images.length) % prev.images.length,
+                }
+            )
+          }
+          onNext={() =>
+            setLightbox((prev) => prev && { ...prev, index: (prev.index + 1) % prev.images.length })
+          }
+        />
       )}
     </div>
   )
