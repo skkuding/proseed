@@ -36,6 +36,7 @@ import { Button } from '@/components/ui/button'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { ImageLightbox } from './ImageLightbox'
+import { usePathname, useRouter } from 'next/navigation'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -104,6 +105,8 @@ function getVisiblePages(current: number, total: number): (number | 'ellipsis')[
 type FilterMode = 'all' | 'closed'
 
 export function Feedbacks() {
+  const pathname = usePathname()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
   const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
   const [currentPage, setCurrentPage] = useState(1)
@@ -188,7 +191,11 @@ export function Feedbacks() {
               </SelectContent>
             </Select>
           </div>
-          <Button className="ml-[6px] h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer">
+          {/* 피드백 버튼 누르면 /create 페이지로 이동 */}
+          <Button
+            onClick={() => router.push(`${pathname}/create`)}
+            className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
+          >
             <p className="text-sub3_sb_16 text-white">피드백 작성하기</p>
           </Button>
         </div>
@@ -225,7 +232,7 @@ export function Feedbacks() {
               <button
                 className={`flex w-23 h-12 items-center justify-between pl-4 py-2 pr-6 rounded-lg border text-body3_r_16 transition-colors hover:cursor-pointer ${
                   filterMode !== 'all'
-                    ? 'border-CoolNeutral-20 bg-neutral-50'
+                    ? 'border-CoolNeutral-20 bg-neutral-99'
                     : 'border-neutral-200 hover:border-CoolNeutral-40'
                 }`}
               >
