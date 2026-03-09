@@ -7,6 +7,7 @@ import {
   ChevronRightIcon,
   SlidersHorizontalIcon,
   RotateCcwIcon,
+  Dot,
 } from 'lucide-react'
 import {
   Select,
@@ -296,13 +297,13 @@ export function Feedbacks() {
           해당 카테고리의 피드백이 없습니다.
         </p>
       ) : (
-        <>
+        <div className="ml-[-20px]">
           <Accordion
             type="single"
             collapsible
             value={openFeedbackId}
             onValueChange={handleAccordionChange}
-            className="flex flex-col gap-4"
+            className="flex flex-col pl-3"
           >
             {feedbacks.map((feedback) => {
               const isOpen = openFeedbackId === String(feedback.feedbackId)
@@ -314,12 +315,12 @@ export function Feedbacks() {
                 <AccordionItem
                   key={feedback.feedbackId}
                   value={String(feedback.feedbackId)}
-                  className="border border-neutral-200 rounded-2xl overflow-hidden"
+                  className="overflow-hidden py-10 "
                 >
                   {/* Trigger: Profile header */}
-                  <AccordionTrigger className="px-6 py-5 hover:no-underline hover:bg-neutral-50/50 [&>svg]:hidden items-center">
+                  <AccordionTrigger className="[&>svg]:hidden items-center cursor-pointer pl-2">
                     <div className="flex items-center gap-4 w-full">
-                      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-neutral-100">
+                      <div className="relative w-17.5 h-17.5 rounded-full overflow-hidden shrink-0 bg-neutral-100">
                         <Image
                           src={feedback.profileImageUrl}
                           alt={feedback.nickname}
@@ -327,17 +328,19 @@ export function Feedbacks() {
                           className="object-cover"
                         />
                       </div>
-                      <div className="flex flex-col gap-0.5 text-left">
-                        <span className={`text-caption1_m_13 text-primary-strong`}>
+                      <div className="flex flex-col text-left">
+                        <span className={`text-body2_m_14 text-primary-strong`}>
                           {CATEGORY_LABEL[feedback.category]}
                         </span>
-                        <span className="text-sub1_sb_18">{feedback.nickname}</span>
-                        <span className="text-caption1_m_13 text-CoolNeutral-40">
+                        <span className="text-[28px] font-semibold tracking-[-0.04em]">
+                          {feedback.nickname}
+                        </span>
+                        <span className="text-body1_m_16 text-[#6E6E6E]">
                           {formatDate(feedback.createdAt)}
                         </span>
                       </div>
                       <ChevronDownIcon
-                        className={`ml-auto size-5 text-CoolNeutral-40 transition-transform duration-200 ${
+                        className={`ml-auto mr-5 size-10 text-CoolNeutral-20 transition-transform duration-200 ${
                           isOpen ? 'rotate-180' : ''
                         }`}
                       />
@@ -345,22 +348,19 @@ export function Feedbacks() {
                   </AccordionTrigger>
 
                   {/* Always visible: one-line review */}
-                  <div className="px-6 pb-5">
-                    <p className="bg-neutral-50 rounded-xl px-5 py-4 text-body3_r_16 text-CoolNeutral-30">
+                  <div className="bg-[#0000000A] border border-[#00000033] rounded-xl px-6 py-5 h-[66px] mt-7 ml-2">
+                    <p className="text-title4_m_20 leading-[130%] truncate">
                       {feedback.onelineReview}
                     </p>
                   </div>
 
                   {/* Expandable: Q&A content */}
-                  <AccordionContent className="pb-0">
-                    <div className="border-t border-neutral-100 mb-5" />
+                  <AccordionContent className="pb-0 pl-2 mt-10">
                     <div className="flex min-h-50 pb-6">
                       {/* Left sidebar */}
-                      <div className="w-44 shrink-0 px-4 border-r border-neutral-100">
-                        <p className="text-caption1_m_13 text-CoolNeutral-40 mb-3 px-2">
-                          피드백 답변 바로가기
-                        </p>
-                        <div className="flex flex-col gap-1">
+                      <div className="w-[283px] h-[254px] shrink-0 p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] rounded-lg flex flex-col">
+                        <p className="text-title3_sb_20 mb-3">피드백 답변 바로가기</p>
+                        <div className="flex flex-col">
                           {feedback.questions.map((q) => {
                             const isSelected = selectedQuestionId === q.questionId
                             return (
@@ -373,16 +373,15 @@ export function Feedbacks() {
                                     [feedback.feedbackId]: q.questionId,
                                   }))
                                 }}
-                                className={`flex items-center gap-1 text-left w-full px-2 py-2 rounded-lg text-caption1_m_13 transition-colors hover:bg-neutral-100 ${
-                                  isSelected
-                                    ? 'text-CoolNeutral-20 font-semibold'
-                                    : 'text-CoolNeutral-40'
+                                className={`flex justify-between items-center text-left w-full px-1 py-2 rounded-lg text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99 hover:cursor-pointer ${
+                                  isSelected ? 'bg-neutral-99' : ''
                                 }`}
                               >
-                                <span className="flex-1 line-clamp-2 leading-relaxed">
-                                  {q.questionTitle}
-                                </span>
-                                <ChevronRightIcon className="size-3 shrink-0 text-CoolNeutral-40" />
+                                <div className="flex items-center gap-[2px]">
+                                  <Dot className="size-4 shrink-0" />
+                                  <span className="max-w-[185px] truncate">{q.questionTitle}</span>
+                                </div>
+                                <ChevronRightIcon className="size-6 shrink-0 text-[#7B7B7B]" />
                               </button>
                             )
                           })}
@@ -390,11 +389,11 @@ export function Feedbacks() {
                       </div>
 
                       {/* Right content */}
-                      <div className="flex-1 px-6">
+                      <div className="flex-1 px-10">
                         {selectedQuestion && (
-                          <div className="flex flex-col gap-4">
-                            <h3 className="text-title3_sb_20">{selectedQuestion.questionTitle}</h3>
-                            <p className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed whitespace-pre-line">
+                          <div className="flex flex-col gap-10">
+                            <h3 className="text-title1_sb_24">{selectedQuestion.questionTitle}</h3>
+                            <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
                               {selectedQuestion.feedbackBody}
                             </p>
                             {selectedQuestion.images.length > 0 && (
@@ -422,9 +421,8 @@ export function Feedbacks() {
               )
             })}
           </Accordion>
-
           {/* Pagination */}
-          <Pagination className="mt-2">
+          <Pagination className="mt-10">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
@@ -468,7 +466,7 @@ export function Feedbacks() {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </>
+        </div>
       )}
 
       {lightbox && (

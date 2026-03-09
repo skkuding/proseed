@@ -26,7 +26,7 @@ export function ProjectImageCarousel({ images }: Props) {
   return (
     <>
       <Carousel opts={{ align: 'start' }} className="w-full">
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="px-1">
           {images.map((src, idx) => (
             <CarouselItem key={idx} className="pl-3 basis-auto">
               <div
