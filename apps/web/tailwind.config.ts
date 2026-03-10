@@ -24,6 +24,7 @@ const config: Config = {
         title2_m_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
         title3_sb_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
         title4_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
+        title6_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
 
         // ── Sub ──────────────────────────────────────────────
         sub1_sb_18: ['18px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],

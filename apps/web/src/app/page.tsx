@@ -5,12 +5,15 @@ import GrowthRecordSection from './mainpage/_components/GrowthRecordSection'
 
 export default function HomePage() {
   return (
-    <main className="w-full bg-[#F5F5F5]">
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-12 px-6 py-8">
+    <main className="w-full bg-[##F4F4F6]">
+      <div className="mx-auto flex w-full max-w-[1200px] px-1 flex-col">
         <HeroSection />
-        <RecentProjectsSection />
-        <FeedbackSection />
-        <GrowthRecordSection />
+
+        <div className="mb-30 mt-11 flex flex-col gap-30">
+          <RecentProjectsSection />
+          <FeedbackSection />
+          <GrowthRecordSection />
+        </div>
       </div>
     </main>
   )
