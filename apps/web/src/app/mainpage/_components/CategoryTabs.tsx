@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import { useRef } from 'react'
 
-const categories = [
-  { label: '전체' },
+export const categories = [
+  { label: '전체', icon: undefined },
   { label: '헬스케어', icon: '/healthcare_color.svg' },
   { label: '금융', icon: '/money_color.svg' },
   { label: '공공 · 정부', icon: '/government_color.svg' },
@@ -18,9 +18,16 @@ const categories = [
   { label: '생산성', icon: '/production_color.svg' },
   { label: '커뮤니티', icon: '/community_color.svg' },
   { label: '인공지능', icon: '/ai_color.svg' },
-]
+] as const
 
-export default function CategoryTabs() {
+export type CategoryLabel = (typeof categories)[number]['label']
+
+interface CategoryTabsProps {
+  selectedCategory: CategoryLabel
+  onSelectCategory: (category: CategoryLabel) => void
+}
+
+export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleScrollRight = () => {
@@ -36,15 +43,18 @@ export default function CategoryTabs() {
         ref={scrollRef}
         className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {categories.map((category, index) => {
-          const isActive = index === 0
+        {categories.map((category) => {
           const isAll = category.label === '전체'
 
           return (
             <button
               key={category.label}
-              className={`inline-flex h-12 shrink-0 items-center rounded-full ${
-                isActive ? 'bg-CoolNeutral-30 text-white' : 'bg-white text-CoolNeutral-20'
+              type="button"
+              onClick={() => onSelectCategory(category.label)}
+              className={`inline-flex h-12 shrink-0 cursor-pointer items-center rounded-full ${
+                isAll
+                  ? 'bg-CoolNeutral-30 text-white'
+                  : 'bg-white text-CoolNeutral-20 hover:bg-CoolNeutral-90'
               }`}
             >
               <div
@@ -62,7 +72,7 @@ export default function CategoryTabs() {
                   />
                 ) : null}
 
-                <span className="whitespace-nowrap text-title_m_20">{category.label}</span>
+                <span className="whitespace-nowrap text-title6_m_20">{category.label}</span>
               </div>
             </button>
           )
@@ -72,7 +82,7 @@ export default function CategoryTabs() {
       <button
         type="button"
         onClick={handleScrollRight}
-        className="inline-flex h-6 w-6 shrink-0 items-center justify-center"
+        className="inline-flex h-6 w-6 shrink-0 items-center justify-center cursor-pointer"
         aria-label="다음 카테고리 보기"
       >
         <Image src="/arrow2_right.svg" alt="다음" width={24} height={24} />

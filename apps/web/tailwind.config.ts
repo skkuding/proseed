@@ -23,6 +23,7 @@ const config: Config = {
         title1_sb_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
         title2_m_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
         title3_sb_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
+        title3_sb_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
         title4_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
         title6_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
 
