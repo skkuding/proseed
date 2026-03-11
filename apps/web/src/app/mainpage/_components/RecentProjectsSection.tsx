@@ -16,6 +16,8 @@ type Project = {
   oneLineDescription: string
   category: Exclude<CategoryLabel, '전체'>[]
   thumbnailUrl: string
+  feedbackCount: number
+  growthRecordCount: number
 }
 
 export default function RecentProjectsSection() {
