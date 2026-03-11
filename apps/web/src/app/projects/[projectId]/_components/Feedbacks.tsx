@@ -37,6 +37,7 @@ import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { ImageLightbox } from './ImageLightbox'
 import { usePathname, useRouter } from 'next/navigation'
+import { RoleFilterTabs } from '@/components/RoleTabs'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -205,21 +206,11 @@ export function Feedbacks() {
 
       {/* Role filter tabs + filter button */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] border-neutral-200 rounded-full p-1 w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => handleTabChange(tab)}
-              className={`px-5 py-2 hover:cursor-pointer rounded-full text-body1_m_16 transition-colors ${
-                activeTab === tab
-                  ? 'bg-CoolNeutral-20 text-white'
-                  : 'text-CoolNeutral-40 hover:text-CoolNeutral-20'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <RoleFilterTabs
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tab) => handleTabChange(tab as TabLabel)}
+        />
 
         {/* Sort & Filter */}
         <div className="flex items-center gap-2">

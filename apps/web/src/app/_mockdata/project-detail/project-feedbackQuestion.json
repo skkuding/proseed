@@ -1,0 +1,95 @@
+{
+  "id": 1,
+  "versionId": 3,
+  "version": "1.2.0",
+  "questions": {
+    "plan": [
+      {
+        "questionId": 1,
+        "questionTitle": "문제의 정의와 배경은 어떠한가요?",
+        "questionContent": "프로젝트가 해결하고자 하는 문제의 정의와 그 배경에 대해 설명해주세요."
+      },
+      {
+        "questionId": 2,
+        "questionTitle": "목표 사용자와 페르소나는 명확한가요?",
+        "questionContent": "타겟 사용자를 어떻게 정의했으며, 페르소나 설정이 제품 방향성에 잘 반영되어 있나요?"
+      },
+      {
+        "questionId": 3,
+        "questionTitle": "비즈니스 모델과 수익 구조는 어떠한가요?",
+        "questionContent": "프로젝트의 비즈니스 모델과 수익화 방안에 대해 어떻게 생각하시나요?"
+      },
+      {
+        "questionId": 4,
+        "questionTitle": "경쟁사 분석은 충분한가요?",
+        "questionContent": "시장 내 경쟁 서비스들과 비교했을 때 이 프로젝트의 차별점은 무엇인가요?"
+      }
+    ],
+    "design": [
+      {
+        "questionId": 5,
+        "questionTitle": "UI/UX의 전반적인 사용성은 어떠한가요?",
+        "questionContent": "서비스의 UI/UX 흐름과 사용성에 대해 평가해주세요."
+      },
+      {
+        "questionId": 6,
+        "questionTitle": "디자인 일관성은 유지되고 있나요?",
+        "questionContent": "컬러, 타이포그래피, 컴포넌트 등 디자인 시스템의 일관성을 평가해주세요."
+      },
+      {
+        "questionId": 7,
+        "questionTitle": "접근성(Accessibility)은 고려되어 있나요?",
+        "questionContent": "색상 대비, 폰트 크기, 스크린 리더 지원 등 접근성 관련 사항을 평가해주세요."
+      },
+      {
+        "questionId": 8,
+        "questionTitle": "모바일 반응형 디자인은 적절한가요?",
+        "questionContent": "다양한 기기와 화면 크기에 대한 반응형 대응을 평가해주세요."
+      }
+    ],
+    "dev": [
+      {
+        "questionId": 9,
+        "questionTitle": "기술 스택 선택은 적절한가요?",
+        "questionContent": "현재 사용 중인 기술 스택이 프로젝트의 요구사항에 적합한지 평가해주세요."
+      },
+      {
+        "questionId": 10,
+        "questionTitle": "코드 품질과 유지보수성은 어떤가요?",
+        "questionContent": "코드 구조, 테스트 커버리지, 문서화 수준에 대해 평가해주세요."
+      },
+      {
+        "questionId": 11,
+        "questionTitle": "보안 측면에서 고려해야 할 사항이 있나요?",
+        "questionContent": "인증/인가, 데이터 보호 등 보안 관련 사항을 점검해주세요."
+      },
+      {
+        "questionId": 12,
+        "questionTitle": "성능 최적화는 충분히 고려되었나요?",
+        "questionContent": "로딩 속도, 데이터 처리, 캐싱 전략 등 성능 관련 사항을 평가해주세요."
+      }
+    ],
+    "general": [
+      {
+        "questionId": 13,
+        "questionTitle": "전반적인 프로젝트 완성도는 어떠한가요?",
+        "questionContent": "기획, 디자인, 개발 전반에 걸쳐 프로젝트의 완성도를 평가해주세요."
+      },
+      {
+        "questionId": 14,
+        "questionTitle": "팀 구성과 역할 분담은 적절한가요?",
+        "questionContent": "팀의 구성과 각 역할의 분담이 프로젝트 성공에 충분한지 평가해주세요."
+      },
+      {
+        "questionId": 15,
+        "questionTitle": "프로젝트 일정 및 마일스톤 관리는 어떤가요?",
+        "questionContent": "개발 일정, 마일스톤, 리스크 관리 계획에 대해 평가해주세요."
+      },
+      {
+        "questionId": 16,
+        "questionTitle": "사용자 피드백 수집 및 반영 계획은 있나요?",
+        "questionContent": "출시 후 사용자 피드백을 어떻게 수집하고 제품에 반영할 계획인지 평가해주세요."
+      }
+    ]
+  }
+}

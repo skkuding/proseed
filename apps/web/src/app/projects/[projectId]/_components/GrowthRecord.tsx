@@ -14,13 +14,12 @@ import growthData from '@/app/_mockdata/project-detail/project-growthrecord.json
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import { formatDate } from '@/lib/utils'
 import { ImageLightbox } from './ImageLightbox'
-
-type GrowthCategory = 'PLAN' | 'DESIGN' | 'DEVELOP' | 'COMMON'
+import { RoleFilterTabs } from '@/components/RoleTabs'
 
 const TABS = ['전체 요약', '기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
-const CATEGORY_TO_TAB: Record<GrowthCategory, TabLabel> = {
+const CATEGORY_TO_TAB: Record<string, TabLabel> = {
   PLAN: '기획자',
   DESIGN: '디자이너',
   DEVELOP: '개발자',
@@ -33,12 +32,6 @@ const ROLE_LABEL: Record<string, string> = {
   DEVELOPER: '개발자',
 }
 
-type TaggedFeedback = {
-  id: number
-  author: { name: string; profileImageUrl: string; role: string }
-  content: string
-}
-
 type GrowthRecordItem = {
   id: number
   versionId: number
@@ -47,7 +40,11 @@ type GrowthRecordItem = {
   updatedAt: string
   contents: { title: string; content: string }[]
   images: { order: number; url: string }[]
-  taggedFeedbacks: TaggedFeedback[]
+  taggedFeedbacks: {
+    id: number
+    author: { name: string; profileImageUrl: string; role: string }
+    content: string
+  }[]
 }
 
 export function GrowthRecord() {
@@ -55,7 +52,7 @@ export function GrowthRecord() {
   const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
 
   const activeRecord = growthData.growthRecords.find(
-    (r) => CATEGORY_TO_TAB[r.category as GrowthCategory] === activeTab
+    (r) => CATEGORY_TO_TAB[r.category] === activeTab
   ) as GrowthRecordItem | undefined
 
   return (
@@ -85,21 +82,11 @@ export function GrowthRecord() {
       </div>
 
       {/* Role filter tabs */}
-      <div className="flex gap-1 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] border-neutral-200 rounded-full p-1 w-fit">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 hover:cursor-pointer rounded-full text-body1_m_16 transition-colors ${
-              activeTab === tab
-                ? 'bg-CoolNeutral-20 text-white'
-                : 'text-CoolNeutral-40 hover:text-CoolNeutral-20'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      <RoleFilterTabs
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab as TabLabel)}
+      />
 
       {/* Content */}
       {activeTab === '전체 요약' ? (
