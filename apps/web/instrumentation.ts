@@ -97,9 +97,11 @@ class Instrumentation {
   }
 }
 
-process.on('SIGTERM', () => {
-  void Instrumentation.shutdown()
-})
+if (process.env.NEXT_RUNTIME === 'nodejs') {
+  process.on('SIGTERM', () => {
+    void Instrumentation.shutdown()
+  })
+}
 
 export function register() {
   const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT
