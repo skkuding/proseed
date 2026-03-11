@@ -20,11 +20,11 @@ const config: Config = {
         head4_m_36: ['36px', { lineHeight: '130%', letterSpacing: '-0.04em', fontWeight: '500' }],
 
         // ── title ─────────────────────────────────────────────
-        title1_sb_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
-        title2_m_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
-        title3_sb_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
+        title1_sb_28: ['28px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
+        title2_m_28: ['28px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
         title3_sb_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
-        title4_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
+        title4_m_24: ['24px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
+        title5_sb_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '600' }],
         title6_m_20: ['20px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
 
         // ── Sub ──────────────────────────────────────────────
