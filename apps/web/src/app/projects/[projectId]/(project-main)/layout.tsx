@@ -6,7 +6,7 @@ import ProjectTabs from '../_components/ProjectTabs'
 
 export default function ProjectDetailLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full mt-5">
+    <div className="w-full mt-5 px-1">
       {/* 이미지 영역 */}
       <ProjectImageCarousel
         images={[mockProject.thumbnailUrl, ...mockProject.images.map((i) => i.url)]}
