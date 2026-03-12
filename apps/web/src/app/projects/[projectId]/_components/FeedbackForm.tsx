@@ -8,6 +8,7 @@ import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
+import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import Editor from '@/components/mdxEditor/Editor'
 
 const latestVersionId = versionList[0].id.toString()
@@ -63,6 +64,7 @@ export function CreateFeedbackContent() {
   const [questionImages, setQuestionImages] = useState<Record<number, ImageItem[]>>({})
   const [imageModal, setImageModal] = useState<ImageModal>(null)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
@@ -288,11 +290,20 @@ export function CreateFeedbackContent() {
               ))}
             </div>
           </div>
-          <button className="w-full h-12 mt-4 bg-CoolNeutral-20 text-white rounded-lg text-sub3_sb_16 hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors">
+          <button
+            onClick={() => setShowSuccessModal(true)}
+            className="w-full h-12 mt-4 bg-CoolNeutral-20 text-white rounded-lg text-sub3_sb_16 hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+          >
             피드백 등록하기
           </button>
         </div>
       </div>
+
+      <FeedbackSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        projectId={params.projectId ?? ''}
+      />
 
       <LeaveConfirmModal
         isOpen={showLeaveModal}
