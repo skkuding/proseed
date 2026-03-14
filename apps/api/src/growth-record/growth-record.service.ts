@@ -1,22 +1,31 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { RecordCategory } from '@prisma/client'
 import {
   EntityNotExistException,
   ForbiddenAccessException,
+  UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import type { CreateVersionDto } from './dto/create-version.dto'
+
+const FEEDBACK_QUESTIONS_PER_CATEGORY = { min: 1, max: 4 }
 
 @Injectable()
 export class GrowthRecordService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(GrowthRecordService.name)
 
-  /** 성장기록 + 피드백 질문 발행 및 팀원 티켓 보상 (트랜잭션) */
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
+
+  /** 성장기록 + 피드백 질문 발행 및 팀원 티켓 보상 */
   async createVersion(
     userId: number,
     projectId: number,
     dto: CreateVersionDto,
   ) {
-    // 발행 권한: 프로젝트 팀원(ProjectRole)만 가능
     const role = await this.prisma.projectRole.findUnique({
       where: { userId_projectId: { userId, projectId } },
     })
@@ -26,8 +35,9 @@ export class GrowthRecordService {
       )
     }
 
+    this.validateFeedbackQuestionsPerCategory(dto.feedbackQuestions)
+
     return this.prisma.$transaction(async (tx) => {
-      // 1. 버전 + 하위 데이터 일괄 생성
       const version = await tx.projectVersion.create({
         data: {
           projectId,
@@ -68,24 +78,29 @@ export class GrowthRecordService {
         },
       })
 
-      // 2. 팀원 전원 티켓 +1
-      const memberIds = await tx.projectRole.findMany({
+      // 팀원 전원 티켓 +1
+      const members = await tx.projectRole.findMany({
         where: { projectId },
         select: { userId: true },
       })
 
-      if (memberIds.length > 0) {
+      if (members.length > 0) {
         await tx.user.updateMany({
-          where: { id: { in: memberIds.map((m) => m.userId) } },
+          where: { id: { in: members.map((m) => m.userId) } },
           data: { ownedTicketCount: { increment: 1 } },
         })
       }
+
+      this.logger.log(
+        `Version ${version.id} published for project ${projectId}, ` +
+          `${members.length} tickets granted`,
+      )
 
       return version
     })
   }
 
-  /** 특정 버전 상세 성장기록 조회 */
+  /** 특정 버전 상세 성장기록 조회 (이미지는 presigned URL로 변환) */
   async getVersionDetail(versionId: number) {
     const version = await this.prisma.projectVersion.findUnique({
       where: { id: versionId },
@@ -121,6 +136,49 @@ export class GrowthRecordService {
       throw new EntityNotExistException('ProjectVersion')
     }
 
-    return version
+    // S3 key → presigned URL 변환
+    const resolved = await this.resolveImageUrls(version.growthRecords)
+    return { ...version, growthRecords: resolved }
+  }
+
+  private validateFeedbackQuestionsPerCategory(
+    questions: { category: RecordCategory }[],
+  ) {
+    const counts = new Map<RecordCategory, number>()
+    for (const q of questions) {
+      counts.set(q.category, (counts.get(q.category) ?? 0) + 1)
+    }
+
+    for (const [category, count] of counts) {
+      const { min, max } = FEEDBACK_QUESTIONS_PER_CATEGORY
+      if (count < min || count > max) {
+        throw new UnprocessableDataException(
+          `Category '${category}' has ${count} feedback questions (allowed: ${min}~${max})`,
+        )
+      }
+    }
+  }
+
+  private async resolveImageUrls<
+    T extends { images: { url: string; order: number }[] },
+  >(records: T[]): Promise<T[]> {
+    const allImages = records.flatMap((r) => r.images)
+    if (allImages.length === 0) return records
+
+    const urlMap = new Map<string, string>()
+    await Promise.all(
+      allImages.map(async (img) => {
+        const signed = await this.storage.getSignedDownloadUrl(img.url)
+        urlMap.set(img.url, signed)
+      }),
+    )
+
+    return records.map((record) => ({
+      ...record,
+      images: record.images.map((img) => ({
+        ...img,
+        url: urlMap.get(img.url) ?? img.url,
+      })),
+    }))
   }
 }
