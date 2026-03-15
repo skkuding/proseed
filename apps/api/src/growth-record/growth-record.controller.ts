@@ -4,10 +4,12 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Req,
 } from '@nestjs/common'
 import type { AuthenticatedRequest } from 'libs/auth/src/authenticated-request.interface'
+import { AdoptFeedbackDto } from './dto/adopt-feedback.dto'
 import { CreateVersionDto } from './dto/create-version.dto'
 import { GrowthRecordService } from './growth-record.service'
 
@@ -27,5 +29,22 @@ export class GrowthRecordController {
   @Get(':versionId')
   async getVersionDetail(@Param('versionId', ParseIntPipe) versionId: number) {
     return this.growthRecordService.getVersionDetail(versionId)
+  }
+
+  @Patch(':versionId/feedbacks/:feedbackId/adopt')
+  async adoptFeedback(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+    @Param('feedbackId', ParseIntPipe) feedbackId: number,
+    @Body() dto: AdoptFeedbackDto,
+  ) {
+    return this.growthRecordService.adoptFeedback(
+      req.user.id,
+      projectId,
+      versionId,
+      feedbackId,
+      dto.category,
+    )
   }
 }
