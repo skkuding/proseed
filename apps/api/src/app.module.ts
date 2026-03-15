@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
 import { ProjectModule } from './project/project.module'
+import { GrowthRecordModule } from './growth-record/growth-record.module'
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProjectModule } from './project/project.module'
     AuthModule,
     UserModule,
     ProjectModule,
+    GrowthRecordModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
