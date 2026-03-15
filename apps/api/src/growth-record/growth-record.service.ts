@@ -63,11 +63,11 @@ export class GrowthRecordService {
             })),
           },
           feedbackQuestions: {
-            create: dto.feedbackQuestions.map((q) => ({
+            create: dto.feedbackQuestions.map((q, i) => ({
               category: q.category,
-              title: q.title,
-              description: q.description,
-              order: q.order,
+              title: q.content,
+              description: '',
+              order: i,
               isRequired: q.isRequired ?? false,
             })),
           },
@@ -96,7 +96,16 @@ export class GrowthRecordService {
           `${members.length} tickets granted`,
       )
 
-      return version
+      return {
+        ...version,
+        feedbackQuestions: version.feedbackQuestions.map((q) => ({
+          id: q.id,
+          category: q.category,
+          content: q.title,
+          isRequired: q.isRequired,
+          order: q.order,
+        })),
+      }
     })
   }
 
@@ -138,7 +147,18 @@ export class GrowthRecordService {
 
     // S3 key → presigned URL 변환
     const resolved = await this.resolveImageUrls(version.growthRecords)
-    return { ...version, growthRecords: resolved }
+
+    return {
+      ...version,
+      growthRecords: resolved,
+      feedbackQuestions: version.feedbackQuestions.map((q) => ({
+        id: q.id,
+        category: q.category,
+        content: q.title,
+        isRequired: q.isRequired,
+        order: q.order,
+      })),
+    }
   }
 
   private validateFeedbackQuestionsPerCategory(

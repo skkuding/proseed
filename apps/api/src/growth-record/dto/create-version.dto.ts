@@ -78,15 +78,7 @@ export class CreateFeedbackQuestionDto {
 
   @IsString()
   @IsNotEmpty()
-  title: string
-
-  @IsString()
-  @IsNotEmpty()
-  description: string
-
-  @IsInt()
-  @Min(0)
-  order: number
+  content: string
 
   @IsBoolean()
   @IsOptional()
