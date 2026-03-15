@@ -37,23 +37,23 @@ export class GrowthRecordService {
       )
     }
 
-    // 버전명 중복 검사
-    const existingVersion = await this.prisma.projectVersion.findUnique({
-      where: {
-        projectId_version: {
-          projectId,
-          version: dto.version,
-        },
-      },
-      select: { id: true },
-    })
-    if (existingVersion) {
-      throw new DuplicateFoundException('ProjectVersion')
-    }
-
     this.validateFeedbackQuestionsPerCategory(dto.feedbackQuestions)
 
     return this.prisma.$transaction(async (tx) => {
+      // 버전명 중복 검사는 트랜잭션 내에서 수행하여 경합을 방지
+      const existingVersion = await tx.projectVersion.findUnique({
+        where: {
+          projectId_version: {
+            projectId,
+            version: dto.version,
+          },
+        },
+        select: { id: true },
+      })
+      if (existingVersion) {
+        throw new DuplicateFoundException('ProjectVersion')
+      }
+
       const version = await tx.projectVersion.create({
         data: {
           projectId,
@@ -236,26 +236,26 @@ export class GrowthRecordService {
       )
     }
 
-    // 2. 피드백 존재 확인 (versionId 일치 여부 포함)
-    const feedback = await this.prisma.feedback.findUnique({
-      where: {
-        id: feedbackId,
-        versionId,
-        version: { projectId }, // 프로젝트 ID 교차 검증
-      },
-      select: { id: true, isAdopted: true, userId: true },
-    })
-    if (!feedback) {
-      throw new EntityNotExistException('Feedback')
-    }
-
-    // 3. 중복 채택 방지
-    if (feedback.isAdopted) {
-      throw new ConflictFoundException('This feedback is already adopted.')
-    }
-
-    // 4. 트랜잭션: 채택 처리 및 티켓 보상 (+3, +2, +0 방어 로직)
+    // 2. 트랜잭션: 피드백 검증 및 채택 처리, 티켓 보상 (+3, +2, +0 방어 로직)
     const result = await this.prisma.$transaction(async (tx) => {
+      // 피드백 존재 확인 및 교차 검증 (트랜잭션 내부 조회로 경합 방지)
+      const feedback = await tx.feedback.findUnique({
+        where: {
+          id: feedbackId,
+          versionId,
+          version: { projectId }, // 프로젝트 ID 교차 검증
+        },
+        select: { id: true, isAdopted: true, userId: true },
+      })
+      if (!feedback) {
+        throw new EntityNotExistException('Feedback')
+      }
+
+      // 중복 채택 체크
+      if (feedback.isAdopted) {
+        throw new ConflictFoundException('This feedback is already adopted.')
+      }
+
       // 해당 피드백 작성자가 현재 버전에서 이미 채택받은 피드백 개수 카운트
       const adoptedCount = await tx.feedback.count({
         where: {
@@ -287,12 +287,12 @@ export class GrowthRecordService {
         })
       }
 
-      return { rewardAmount }
+      return { rewardAmount, feedbackUserId: feedback.userId }
     })
 
     this.logger.log(
       `Feedback ${feedbackId} adopted for version ${versionId} by user ${userId}. ` +
-        `Ticket rewarded to feedback author ${feedback.userId}: +${result.rewardAmount}`,
+        `Ticket rewarded to feedback author ${result.feedbackUserId}: +${result.rewardAmount}`,
     )
 
     return { success: true, rewardAmount: result.rewardAmount }
