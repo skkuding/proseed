@@ -1,9 +1,10 @@
 import { Provider } from '@prisma/client'
-import { IsEmail, IsNotEmpty } from 'class-validator'
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator'
 
 export class SocialSignUpDto {
   @IsEmail()
   @IsNotEmpty()
+  @IsOptional()
   readonly email: string
 
   @IsNotEmpty()
