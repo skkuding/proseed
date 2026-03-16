@@ -84,32 +84,38 @@ export class AuthService {
 
   async socialLogin(socialSignUpDto: SocialSignUpDto) {
     const { provider, providerId, email } = socialSignUpDto
+    //기존 로그인한 유저인지 확인
     const oauth = await this.prisma.userOAuth.findUnique({
       where: {
         id_provider: { id: providerId, provider },
       },
+      include: { user: true },
     })
+    //1. 기존 user라면 jwt 토큰 발행
     if (oauth) {
-      const user = this.prisma.user.findUnique({
-        where: { id: oauth.userId },
-      })
-      if (!user) {
-        throw new UnauthorizedException('User not found')
-      }
-      return user
+      if (!oauth.user) throw new UnauthorizedException('User not found')
+      return this.createJwtTokens(oauth.user.id)
     }
 
+    //2. 신규 user라면 회원가입(새로운 user, userOAuth 생성) 후 jwt 토큰 발행
     const randomNickname = await this.generateRandonNickname()
 
-    return await this.prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
+    const newUser = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { email, name: randomNickname },
+      })
+      await tx.userOAuth.create({
         data: {
-          email: socialSignUpDto.email,
-          name: randomNickname,
+          id: providerId,
+          provider,
+          userId: user.id,
         },
       })
+      return user
     })
+    return this.createJwtTokens(newUser.id)
   }
+
 
   private async generateRandonNickname(): Promise<string> {
     const types = ['animals', 'heros', 'characters', 'monsters'] as const
@@ -128,24 +134,5 @@ export class AuthService {
       isInvalid = false
     }
     return username
-  }
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth'
-  }
-
-  findAll() {
-    return `This action returns all auth`
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`
   }
 }
