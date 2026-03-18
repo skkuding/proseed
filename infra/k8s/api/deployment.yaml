@@ -14,7 +14,7 @@ spec:
         app: api
     spec:
       containers:
-        - name: api
+        - name: api 
           image: ghcr.io/skkuding/proseed/api:latest
           ports:
             - containerPort: 4000
@@ -31,21 +31,21 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            limits:
+            limits: 
               cpu: 1
               memory: 1Gi
-            requests:
+            requests: 
               cpu: 0.2
               memory: 200Mi
           envFrom:
             - configMapRef:
-                name: api-env
-            - secretRef:
-                name: database-credentials
-          env:
+                name: api-env 
+            - secretRef: 
+                name: database-credentials 
+          env: 
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
-                secretKeyRef:
+                secretKeyRef: 
                   name: proseed-aws-credentials
                   key: aws_access_key_id
             - name: AWS_SECRET_ACCESS_KEY
