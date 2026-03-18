@@ -17,8 +17,8 @@ spec:
         - name: postgres
           image: postgres:16.10-alpine
           ports:
-            - containerPort: 5432 
-          env: 
+            - containerPort: 5432
+          env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
