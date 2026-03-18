@@ -1,112 +1,114 @@
-# RDS PostgreSQL Database for Proseed API
+# ###삭제예정 -> aws rds에서 온프레미스로 내린다. 
 
-# Use default VPC
-data "aws_vpc" "default" {
-  default = true
-}
+# # RDS PostgreSQL Database for Proseed API
 
-# Get default subnets
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
+# # Use default VPC
+# data "aws_vpc" "default" {
+#   default = true
+# }
 
-# DB Subnet Group
-resource "aws_db_subnet_group" "main" {
-  name       = "proseed-db-subnet-group"
-  subnet_ids = data.aws_subnets.default.ids
+# # Get default subnets
+# data "aws_subnets" "default" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.default.id]
+#   }
+# }
 
-  tags = {
-    Name = "proseed-db-subnet-group"
-  }
-}
+# # DB Subnet Group
+# resource "aws_db_subnet_group" "main" {
+#   name       = "proseed-db-subnet-group"
+#   subnet_ids = data.aws_subnets.default.ids
 
-# Security Group for RDS
-resource "aws_security_group" "rds" {
-  name        = "proseed-rds-sg"
-  description = "Security group for Proseed RDS PostgreSQL"
-  vpc_id      = data.aws_vpc.default.id
+#   tags = {
+#     Name = "proseed-db-subnet-group"
+#   }
+# }
 
-  # Allow PostgreSQL from lab cluster IP only
-  ingress {
-    description = "PostgreSQL from lab cluster"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [for ip in local.lab_cluster_ip : "${ip}/32"]
-  }
+# # Security Group for RDS
+# resource "aws_security_group" "rds" {
+#   name        = "proseed-rds-sg"
+#   description = "Security group for Proseed RDS PostgreSQL"
+#   vpc_id      = data.aws_vpc.default.id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   # Allow PostgreSQL from lab cluster IP only
+#   ingress {
+#     description = "PostgreSQL from lab cluster"
+#     from_port   = 5432
+#     to_port     = 5432
+#     protocol    = "tcp"
+#     cidr_blocks = [for ip in local.lab_cluster_ip : "${ip}/32"]
+#   }
 
-  tags = {
-    Name = "proseed-rds-sg"
-  }
-}
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-# RDS PostgreSQL Instance
-resource "aws_db_instance" "main" {
-  identifier = "proseed-database"
+#   tags = {
+#     Name = "proseed-rds-sg"
+#   }
+# }
 
-  # Engine
-  engine         = "postgres"
-  engine_version = "16"
+# # RDS PostgreSQL Instance
+# resource "aws_db_instance" "main" {
+#   identifier = "proseed-database"
 
-  # Instance
-  instance_class = "db.t3.micro"
+#   # Engine
+#   engine         = "postgres"
+#   engine_version = "16"
 
-  # Storage (gp2 for free tier)
-  allocated_storage = 20
-  storage_type      = "gp2"
+#   # Instance
+#   instance_class = "db.t3.micro"
 
-  # Database
-  db_name  = "skkuding"
-  username = "postgres"
+#   # Storage (gp2 for free tier)
+#   allocated_storage = 20
+#   storage_type      = "gp2"
 
-  # Auto-generate password and store in Secrets Manager
-  manage_master_user_password = true
+#   # Database
+#   db_name  = "skkuding"
+#   username = "postgres"
 
-  # Network
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
-  publicly_accessible    = true
+#   # Auto-generate password and store in Secrets Manager
+#   manage_master_user_password = true
 
-  # Backup
-  backup_retention_period = 7
-  backup_window           = "03:00-04:00"
-  maintenance_window      = "Mon:04:00-Mon:05:00"
+#   # Network
+#   db_subnet_group_name   = aws_db_subnet_group.main.name
+#   vpc_security_group_ids = [aws_security_group.rds.id]
+#   publicly_accessible    = true
 
-  # Settings
-  skip_final_snapshot = true
-  deletion_protection = false # Set to true after testing
+#   # Backup
+#   backup_retention_period = 7
+#   backup_window           = "03:00-04:00"
+#   maintenance_window      = "Mon:04:00-Mon:05:00"
 
-  tags = {
-    Name = "proseed-database"
-  }
-}
+#   # Settings
+#   skip_final_snapshot = true
+#   deletion_protection = false # Set to true after testing
 
-# Note: RDS automatically creates a secret in Secrets Manager with manage_master_user_password = true
-# The secret ARN is available via aws_db_instance.main.master_user_secret[0].secret_arn
-# Secret contains: username, password
+#   tags = {
+#     Name = "proseed-database"
+#   }
+# }
 
-# Outputs
-output "rds_endpoint" {
-  description = "RDS instance endpoint"
-  value       = aws_db_instance.main.address
-}
+# # Note: RDS automatically creates a secret in Secrets Manager with manage_master_user_password = true
+# # The secret ARN is available via aws_db_instance.main.master_user_secret[0].secret_arn
+# # Secret contains: username, password
 
-output "rds_port" {
-  description = "RDS instance port"
-  value       = aws_db_instance.main.port
-}
+# # Outputs
+# output "rds_endpoint" {
+#   description = "RDS instance endpoint"
+#   value       = aws_db_instance.main.address
+# }
 
-output "rds_master_user_secret_arn" {
-  description = "ARN of the RDS master user secret in Secrets Manager"
-  value       = aws_db_instance.main.master_user_secret[0].secret_arn
-}
+# output "rds_port" {
+#   description = "RDS instance port"
+#   value       = aws_db_instance.main.port
+# }
+
+# output "rds_master_user_secret_arn" {
+#   description = "ARN of the RDS master user secret in Secrets Manager"
+#   value       = aws_db_instance.main.master_user_secret[0].secret_arn
+# }

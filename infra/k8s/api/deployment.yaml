@@ -14,7 +14,7 @@ spec:
         app: api
     spec:
       containers:
-        - name: api
+        - name: api # api서버 image 
           image: ghcr.io/skkuding/proseed/api:latest
           ports:
             - containerPort: 4000
@@ -31,21 +31,22 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            limits:
+            limits: # 넘으면 OOM kill 
               cpu: 1
               memory: 1Gi
-            requests:
+            requests: # 필요한 최소 자원 
               cpu: 0.2
               memory: 200Mi
           envFrom:
             - configMapRef:
-                name: api-env
-            - secretRef:
-                name: database-credentials
-          env:
+                name: api-env #s3, region 변수 가져오고 
+            - secretRef: # 보안이 필요한 정보 
+                name: database-credentials # externalSecret이 만든 secret(db연결정보) 
+                # reflector 
+          env: # 시크릿 내의 DB_HOST를 온프레미스 DB IP로 바꿀 것 
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
-                secretKeyRef:
+                secretKeyRef: # S3 접근을 위한 인증키  (name에 저장)
                   name: proseed-aws-credentials
                   key: aws_access_key_id
             - name: AWS_SECRET_ACCESS_KEY

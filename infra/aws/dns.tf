@@ -41,3 +41,11 @@ resource "aws_route53_record" "otel" {
   records = local.lab_cluster_ip
   ttl     = 300
 }
+
+resource "aws_route53_record" "db" {
+  name    = "db.proseednow.com"
+  zone_id = aws_route53_zone.main.zone_id
+  type    = "A"
+  records = local.lab_cluster_ip
+  ttl     = 300
+}
