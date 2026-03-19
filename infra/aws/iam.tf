@@ -39,7 +39,6 @@ resource "aws_iam_user_policy" "proseed" {
           "secretsmanager:DescribeSecret"
         ]
         Resource = [
-          #"arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:rds!*",
           "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:proseed/*"
         ]
       },
