@@ -25,66 +25,6 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
-  //refresh 요청이 오면 토큰을 다시 생성
-  async updateJwtTokens(refreshToken: string) {
-    const { userId, username, userRole } =
-      await this.verifyJwtToken(refreshToken) //username, userRole도 payload에 포함해야 되나?
-    if (!(await this.isValidRefreshToken(refreshToken, userId))) {
-      throw new InvalidJwtTokenException('Unidentified refresh token')
-    }
-    return await this.createJwtTokens(userId)
-  }
-
-  //프론트에서 받은 refreshToken을 디코딩해서 userId 꺼냄
-  async verifyJwtToken(token: string, options: JwtVerifyOptions = {}) {
-    const jwtVerifyOptions = {
-      secret: this.config.get('JWT_SECRET'),
-      ...options,
-    }
-    try {
-      return await this.jwtService.verifyAsync(token, jwtVerifyOptions)
-    } catch (error) {
-      throw new InvalidJwtTokenException(error.message)
-    }
-  }
-
-  //refresh 요청시 key 값(userId &refreshToken)을 넣었을때 1이 나오면 유효한 refreshToken!
-  async isValidRefreshToken(refreshToken: string, userId: number) {
-    const cachedRefreshToken = await this.cacheManager.get(
-      refreshTokenCacheKey(userId, refreshToken),
-    )
-    if (cachedRefreshToken !== 1) {
-      return false
-    }
-    return true
-  }
-
-  async createJwtTokens(userId: number) {
-    const payload: JwtPayload = { userId }
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: ACCESS_TOKEN_EXPIRE_TIME,
-    })
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: REFRESH_TOKEN_EXPIRE_TIME,
-    })
-
-    // userId &refreshToken을 key로 cache에 저장
-    await this.cacheManager.set(
-      refreshTokenCacheKey(userId, refreshToken),
-      1,
-      REFRESH_TOKEN_EXPIRE_TIME * 1000, // milliseconds
-    )
-
-    return { accessToken, refreshToken } //토큰에 payload로 userId 담겨있음
-  }
-
-  //캐시에서 refreshToken을 삭제 (로그아웃)
-  async deleteRefreshToken(userId: number, refreshToken: string) {
-    return await this.cacheManager.del(
-      refreshTokenCacheKey(userId, refreshToken),
-    )
-  }
-
   async socialLogin(
     socialSignUpDto: SocialSignUpDto,
   ): Promise<SocialSignUpResponseDto> {
