@@ -45,7 +45,9 @@ enum JobType {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
+  id               String   @id
+  userIndex        Int      @unique @default(autoincrement())
+  
   name             String
   email            String?  @unique
   createdAt        DateTime @default(now()) @map("created_at")
