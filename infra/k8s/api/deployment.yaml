@@ -5,7 +5,7 @@ metadata:
   namespace: proseed
 spec:
   replicas: 1 #replicas 2개 이상부터는 initContainer의 마이그레이션 중복 위험 있음
-  selector:     #TODO: 마이그레이션 방식 initContainer -> workflow 대체 
+  selector: #TODO: 마이그레이션 방식 initContainer -> workflow 대체
     matchLabels:
       app: api
   template:
