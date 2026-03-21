@@ -16,8 +16,17 @@ spec:
       initContainers:
         - name: prisma-migrate
           image: ghcr.io/skkuding/proseed/api:latest
+          # TODO: Dockerfile node_modules/.bin/prisma 포함되면 아래로 교체
+          # command: ['node_modules/.bin/prisma', 'migrate', 'deploy', '--schema', 'apps/api/prisma/schema.prisma']
           command:
-            ['npx', 'prisma', 'migrate', 'deploy', '--schema', 'apps/api/prisma/schema.prisma']
+            [
+              'npx',
+              'prisma@6.19.2',
+              'migrate',
+              'deploy',
+              '--schema',
+              'apps/api/prisma/schema.prisma',
+            ]
           envFrom:
             - secretRef:
                 name: database-credentials
