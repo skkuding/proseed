@@ -16,7 +16,8 @@ spec:
       initContainers:
         - name: prisma-migrate
           image: ghcr.io/skkuding/proseed/api:latest
-          command: ['npx', 'prisma', 'migrate', 'deploy']
+          command:
+            ['npx', 'prisma', 'migrate', 'deploy', '--schema', 'apps/api/prisma/schema.prisma']
           envFrom:
             - secretRef:
                 name: database-credentials
