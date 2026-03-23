@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import { RecordCategory } from '@prisma/client'
 import {
   ConflictFoundException,
@@ -21,6 +22,10 @@ export class GrowthRecordService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
   ) {}
+
+  getFeedbackTemplates() {
+    return FEEDBACK_TEMPLATES
+  }
 
   /** 성장기록 + 피드백 질문 발행 및 팀원 티켓 보상 */
   async createVersion(

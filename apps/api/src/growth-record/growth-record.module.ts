@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common'
-import { GrowthRecordController } from './growth-record.controller'
+import {
+  GrowthRecordController,
+  GrowthRecordTemplateController,
+} from './growth-record.controller'
 import { GrowthRecordService } from './growth-record.service'
 
 @Module({
-  controllers: [GrowthRecordController],
+  controllers: [GrowthRecordController, GrowthRecordTemplateController],
   providers: [GrowthRecordService],
 })
 export class GrowthRecordModule {}

@@ -13,6 +13,16 @@ import { AdoptFeedbackDto } from './dto/adopt-feedback.dto'
 import { CreateVersionDto } from './dto/create-version.dto'
 import { GrowthRecordService } from './growth-record.service'
 
+@Controller('growth-records')
+export class GrowthRecordTemplateController {
+  constructor(private readonly growthRecordService: GrowthRecordService) {}
+
+  @Get('feedback-templates')
+  getFeedbackTemplates() {
+    return this.growthRecordService.getFeedbackTemplates()
+  }
+}
+
 @Controller('project/:id/versions')
 export class GrowthRecordController {
   constructor(private readonly growthRecordService: GrowthRecordService) {}
