@@ -15,7 +15,8 @@ spec:
       containers:
         - name: proseed-migrate
           image: ghcr.io/skkuding/proseed/api:latest
-          command: [
+          command:
+            [
               'npx',
               'prisma@6.19.2',
               'migrate',
