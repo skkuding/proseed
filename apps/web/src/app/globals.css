@@ -148,6 +148,16 @@
   overflow-y: auto;
 }
 
+::-webkit-scrollbar {
+  background-color: transparent;
+  width: 8px; /* 스크롤바 너비 */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* 막대 색상 */
+  border-radius: 10px; /* 막대 둥글게 */
+}
+
 .mdxeditor-fixed > div:nth-child(2)::-webkit-scrollbar {
   width: 6px;
 }

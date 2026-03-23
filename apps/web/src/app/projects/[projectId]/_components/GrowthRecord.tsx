@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter, useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -49,6 +50,8 @@ type GrowthRecordItem = {
 }
 
 export function GrowthRecord() {
+  const router = useRouter()
+  const params = useParams()
   const [activeTab, setActiveTab] = useState<TabLabel>('전체 요약')
   const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
 
@@ -83,6 +86,7 @@ export function GrowthRecord() {
             </SelectContent>
           </Select>
           <Button
+            onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
             disabled={selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
           >

@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Image from 'next/image'
-import { ChevronLeftIcon, ChevronRightIcon, Dot, ImageIcon, Trash2 } from 'lucide-react'
+import { Dot, ImageIcon } from 'lucide-react'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import Editor from '@/components/mdxEditor/Editor'
+import { ImageDeleteModal } from '@/components/ImageDeleteModal'
+import { ChevronRightIcon } from 'lucide-react'
 
 const latestVersionId = versionList[0].id.toString()
 const ONE_LINE_MAX = 200
@@ -317,54 +319,25 @@ export function CreateFeedbackContent() {
         onConfirm={handleLeaveConfirm}
       />
 
-      {/* Image modal */}
-      {imageModal && modalImage && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70"
-          onClick={() => setImageModal(null)}
-        >
-          {/* Image + nav */}
-          <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() =>
-                setImageModal((prev) =>
-                  prev
-                    ? { ...prev, index: (prev.index - 1 + modalImages.length) % modalImages.length }
-                    : null
-                )
-              }
-              className="size-10 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 hover:cursor-pointer transition-colors"
-            >
-              <ChevronLeftIcon className="size-6" />
-            </button>
-            <div className="relative w-175 h-100 rounded-2xl overflow-hidden">
-              <Image src={modalImage.previewUrl} alt="" fill className="object-contain" />
-            </div>
-            <button
-              onClick={() =>
-                setImageModal((prev) =>
-                  prev ? { ...prev, index: (prev.index + 1) % modalImages.length } : null
-                )
-              }
-              className="size-10 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 hover:cursor-pointer transition-colors"
-            >
-              <ChevronRightIcon className="size-6" />
-            </button>
-          </div>
-
-          {/* Delete button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              removeImage(imageModal.questionId, imageModal.index)
-            }}
-            className="mt-4 flex w-225 justify-center h-13 items-center gap-2 px-6 py-3.5 bg-white rounded-lg text-CoolNeutral-20 text-sub3_sb_16 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-          >
-            <Trash2 className="size-4" />
-            이미지 삭제하기
-          </button>
-        </div>
-      )}
+      <ImageDeleteModal
+        isOpen={!!imageModal && !!modalImage}
+        images={modalImages}
+        currentIndex={imageModal?.index ?? 0}
+        onClose={() => setImageModal(null)}
+        onPrev={() =>
+          setImageModal((prev) =>
+            prev
+              ? { ...prev, index: (prev.index - 1 + modalImages.length) % modalImages.length }
+              : null
+          )
+        }
+        onNext={() =>
+          setImageModal((prev) =>
+            prev ? { ...prev, index: (prev.index + 1) % modalImages.length } : null
+          )
+        }
+        onDelete={() => imageModal && removeImage(imageModal.questionId, imageModal.index)}
+      />
     </div>
   )
 }
