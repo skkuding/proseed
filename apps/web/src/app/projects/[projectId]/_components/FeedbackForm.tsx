@@ -55,10 +55,16 @@ export function CreateFeedbackContent() {
   const searchParams = useSearchParams()
   const params = useParams()
   const version = searchParams.get('version')
+  const rolesParam = searchParams.get('roles')
+  const allowedCategories = rolesParam ? rolesParam.split(',') : null
+
+  const allowedTabs = allowedCategories
+    ? (TABS.filter((t) => allowedCategories.includes(TAB_TO_CATEGORY[t])) as TabLabel[])
+    : ([...TABS] as TabLabel[])
 
   const isLatestVersion = version === latestVersionId
 
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획자')
   const [oneLineReview, setOneLineReview] = useState('')
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [questionImages, setQuestionImages] = useState<Record<number, ImageItem[]>>({})
@@ -166,7 +172,7 @@ export function CreateFeedbackContent() {
           </p>
         </div>
         <RoleFilterTabs
-          tabs={TABS}
+          tabs={allowedTabs}
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />

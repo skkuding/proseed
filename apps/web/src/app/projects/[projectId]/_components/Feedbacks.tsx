@@ -38,6 +38,7 @@ import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { ImageLightbox } from './ImageLightbox'
 import { usePathname, useRouter } from 'next/navigation'
 import { RoleFilterTabs } from '@/components/RoleTabs'
+import { FeedbackRoleSelectModal } from '@/components/FeedbackRoleSelectModal'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -118,6 +119,13 @@ export function Feedbacks() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortOrder, setSortOrder] = useState('latest')
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
+  const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
+
+  const handleRoleSelectConfirm = (selectedRoles: string[]) => {
+    setShowRoleSelectModal(false)
+    const roles = selectedRoles.map((r) => TAB_TO_CATEGORY[r as TabLabel]).join(',')
+    router.push(`${pathname}/create?version=${selectedVersion}&roles=${roles}`)
+  }
 
   const category = TAB_TO_CATEGORY[activeTab]
   const allFeedbacks = (feedbackData.feedbacks[category] as FeedbackItem[]).filter((f) =>
@@ -194,8 +202,7 @@ export function Feedbacks() {
           </div>
           {/* 피드백 버튼 누르면 /create 페이지로 이동 */}
           <Button
-            onClick={() => router.push(`${pathname}/create?version=${selectedVersion}`)}
-            // 최신버전이 아니라면 disabled 처리
+            onClick={() => setShowRoleSelectModal(true)}
             disabled={selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
           >
@@ -509,6 +516,12 @@ export function Feedbacks() {
           }
         />
       )}
+
+      <FeedbackRoleSelectModal
+        isOpen={showRoleSelectModal}
+        onClose={() => setShowRoleSelectModal(false)}
+        onConfirm={handleRoleSelectConfirm}
+      />
     </div>
   )
 }

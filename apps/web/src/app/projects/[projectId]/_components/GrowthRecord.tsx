@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import growthData from '@/app/_mockdata/project-detail/project-growthrecord.json'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import { formatDate } from '@/lib/utils'
@@ -65,20 +66,29 @@ export function GrowthRecord() {
             업데이트 날짜 {formatDate(growthData.releasedAt)}
           </p>
         </div>
-        <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-          <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-lg border-neutral-200">
-            <SelectValue>
-              업데이트 버전 {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {versionList.map((v) => (
-              <SelectItem key={v.id} value={v.id.toString()}>
-                버전 {v.version}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center">
+          <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+            <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-lg border-neutral-200">
+              <SelectValue>
+                업데이트 버전{' '}
+                {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {versionList.map((v) => (
+                <SelectItem key={v.id} value={v.id.toString()}>
+                  버전 {v.version}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            disabled={selectedVersion !== versionList[0].id.toString()}
+            className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
+          >
+            <p className="text-sub3_sb_16 text-white">성장기록 작성하기</p>
+          </Button>
+        </div>
       </div>
 
       {/* Role filter tabs */}
