@@ -69,7 +69,7 @@ model Session {
   userAgent   String?  @map("user_agent")
   userId      Int      @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @map("created_at")
+  createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("session")
@@ -86,7 +86,7 @@ model Account {
   accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
   refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
   scope                 String?
-  createdAt             DateTime @map("created_at")
+  createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@map("account")
@@ -97,7 +97,7 @@ model Verification {
   identifier String 
   value      String
   expiresAt  DateTime  @map("expires_at")
-  createdAt  DateTime? @map("created_at")
+  createdAt  DateTime? @default(now()) @map("created_at")
   updatedAt  DateTime? @map("updated_at")
 
   @@map("verification")
