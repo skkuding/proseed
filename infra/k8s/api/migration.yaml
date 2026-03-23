@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: proseed-migrate
+  namespace: proseed
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: '1'
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure # TODO: ci 단계에 마이그레이션 사전 검증 로직 추가 필요 (백엔드 개발자가 배포지연 원인을 파악하기 어려움)
+      containers:
+        - name: proseed-migrate
+          image: ghcr.io/skkuding/proseed/api:latest
+          command: [
+              'npx',
+              'prisma@6.19.2',
+              'migrate',
+              'deploy',
+              '--schema',
+              'apps/api/prisma/schema.prisma',
+            ]
+          envFrom:
+            - secretRef:
+                name: database-credentials

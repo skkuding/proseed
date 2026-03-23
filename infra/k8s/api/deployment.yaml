@@ -4,8 +4,8 @@ metadata:
   name: api
   namespace: proseed
 spec:
-  replicas: 1 #replicas 2개 이상부터는 initContainer의 마이그레이션 중복 위험 있음
-  selector: #TODO: 마이그레이션 방식 initContainer -> workflow 대체
+  replicas: 1
+  selector:
     matchLabels:
       app: api
   template:
@@ -13,23 +13,6 @@ spec:
       labels:
         app: api
     spec:
-      initContainers:
-        - name: prisma-migrate
-          image: ghcr.io/skkuding/proseed/api:latest
-          # TODO: Dockerfile node_modules/.bin/prisma 포함되면 아래로 교체
-          # command: ['node_modules/.bin/prisma', 'migrate', 'deploy', '--schema', 'apps/api/prisma/schema.prisma']
-          command:
-            [
-              'npx',
-              'prisma@6.19.2',
-              'migrate',
-              'deploy',
-              '--schema',
-              'apps/api/prisma/schema.prisma',
-            ]
-          envFrom:
-            - secretRef:
-                name: database-credentials
       containers:
         - name: api
           image: ghcr.io/skkuding/proseed/api:latest

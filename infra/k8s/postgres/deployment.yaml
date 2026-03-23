@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: postgres
   namespace: proseed-postgres
+  annotations:
+    argocd.argoproj.io/sync-wave: '0'
 spec:
   replicas: 1
   strategy:
@@ -30,6 +32,13 @@ spec:
               command: ['sh', '-c', 'pg_isready -U $POSTGRES_USER']
             initialDelaySeconds: 15
             periodSeconds: 20
+          resources:
+            requests:
+              cpu: 0.5
+              memory: 512Mi
+            limits:
+              cpu: 2
+              memory: 2Gi
           env:
             - name: POSTGRES_USER
               valueFrom:
