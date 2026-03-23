@@ -15,12 +15,6 @@ enum RecordCategory {
   GENERAL
 }
 
-enum Provider {
-  KAKAO
-  NAVER
-  GOOGLE
-}
-
 enum ProjectCategory {
   HEALTHCARE
   FINANCE
@@ -45,24 +39,22 @@ enum JobType {
 }
 
 model User {
-  id               String   @id
-  userIndex        Int      @unique @default(autoincrement())
-  
+  id               Int      @id @default(autoincrement())
   name             String
   email            String?  @unique
   createdAt        DateTime @default(now()) @map("created_at")
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
-  jobType          JobType?
+  jobType          JobType? @map("job_type")
   bio              String?
   birth            String?
-  profileImageUrl  String?
+  profileImageUrl  String? @map("profile_image_url")
 
   projectRoles ProjectRole[]
   feedbacks    Feedback[]
   projects     Project[]
 
-  emailVerified    Boolean
-  updatedAt        DateTime @updatedAt
+  emailVerified    Boolean @default(false) @map("email_verified")
+  updatedAt        DateTime @updatedAt @map("updated_at")
   sessions         Session[]
   accounts         Account[]
 
@@ -71,38 +63,44 @@ model User {
 
 model Session {
   id          Int      @id @default(autoincrement())
-  expiresAt   DateTime
+  expiresAt   DateTime @map("expires_at")
   token       String   @unique
-  ipAddress   String?
-  userAgent   String?
-  userId      Int
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  userId      Int      @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime
-  updatedAt   DateTime
+  createdAt   DateTime @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("session")
 }
 
 model Account {
   id                    Int      @id @default(autoincrement())
-  accountId             String
-  providerId            String
-  userId                Int
+  accountId             String   @map("account_id")
+  providerId            String   @map("provider_id")
+  userId                Int      @map("user_id")
   user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
+  accessToken           String?  @map("access_token")
+  refreshToken          String?  @map("refresh_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
   scope                 String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  createdAt             DateTime @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("account")
 }
 
 model Verification {
   id         Int      @id @default(autoincrement())
-  identifier String
+  identifier String 
   value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
+
+  @@map("verification")
 }
 
 enum ProjectType {
