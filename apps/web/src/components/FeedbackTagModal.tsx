@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
+import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -29,17 +30,16 @@ type Feedback = (typeof feedbackData.feedbacks.plan)[number]
 interface Props {
   isOpen: boolean
   onClose: () => void
-  onConfirm: (selectedIds: Record<string, number[]>) => void
-  initialSelected?: Record<string, number[]>
 }
 
-export function FeedbackTagModal({ isOpen, onClose, onConfirm, initialSelected = {} }: Props) {
+export function FeedbackTagModal({ isOpen, onClose }: Props) {
+  const { taggedFeedbacks, setTaggedFeedbacks } = useFeedbackTagStore()
   const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
   const [selectedByTab, setSelectedByTab] = useState<Record<TabLabel, number[]>>({
-    기획자: initialSelected.plan ?? [],
-    디자이너: initialSelected.design ?? [],
-    개발자: initialSelected.dev ?? [],
-    기타: initialSelected.general ?? [],
+    기획자: taggedFeedbacks.plan ?? [],
+    디자이너: taggedFeedbacks.design ?? [],
+    개발자: taggedFeedbacks.dev ?? [],
+    기타: taggedFeedbacks.general ?? [],
   })
   const [detailFeedback, setDetailFeedback] = useState<Feedback | null>(null)
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null)
@@ -67,12 +67,13 @@ export function FeedbackTagModal({ isOpen, onClose, onConfirm, initialSelected =
   }
 
   const handleConfirm = () => {
-    onConfirm({
+    setTaggedFeedbacks({
       plan: selectedByTab['기획자'],
       design: selectedByTab['디자이너'],
       dev: selectedByTab['개발자'],
       general: selectedByTab['기타'],
     })
+    onClose()
   }
 
   const totalSelected = Object.values(selectedByTab).flat().length

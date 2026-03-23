@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import Image from 'next/image'
 import { ChevronRightIcon, ImageIcon } from 'lucide-react'
 import { RoleFilterTabs } from '@/components/RoleTabs'
@@ -9,6 +10,14 @@ import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTagModal } from '@/components/FeedbackTagModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
+import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
+
+const CATEGORY_LABEL: Record<string, string> = {
+  plan: '기획자',
+  design: '디자이너',
+  dev: '개발자',
+  general: '기타',
+}
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -56,12 +65,7 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
-  const [taggedFeedbacks, setTaggedFeedbacks] = useState<Record<string, number[]>>({
-    plan: [],
-    design: [],
-    dev: [],
-    general: [],
-  })
+  const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
   const imageInputRef = useRef<HTMLInputElement>(null)
 
@@ -273,20 +277,59 @@ export function GrowthRecordForm() {
           ))}
 
           {/* 피드백 태그하기 */}
-          <div className="flex items-center justify-between bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-title1_sb_28">피드백 태그하기</h2>
-              <p className="text-body3_r_16 text-CoolNeutral-40">
-                업데이트에 도움이 되었던 피드백을 태그하여 고마움을 전달해보세요 (직군당 최대 3개
-                선택 가능)
-              </p>
+          <div className="flex flex-col gap-4 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-title1_sb_28">피드백 태그하기</h2>
+                <p className="text-body3_r_16 text-CoolNeutral-40">
+                  업데이트에 도움이 되었던 피드백을 태그하여 고마움을 전달해보세요 (직군당 최대 3개
+                  선택 가능)
+                </p>
+              </div>
+              <button
+                onClick={() => setShowFeedbackTagModal(true)}
+                className="shrink-0 flex items-center gap-1.5 px-5 py-3.25 h-12 rounded-lg bg-neutral-20 hover:bg-neutral-30 hover:cursor-pointer transition-colors"
+              >
+                <p className="text-sub3_sb_16 text-white">피드백 태그하기</p>
+              </button>
             </div>
-            <button
-              onClick={() => setShowFeedbackTagModal(true)}
-              className="flex items-center gap-1.5 px-5 py-3.25 h-12 rounded-lg bg-neutral-20 hover:bg-neutral-30 hover:cursor-pointer transition-colors"
-            >
-              <p className="text-sub3_sb_16 text-white">피드백 태그하기</p>
-            </button>
+            {(() => {
+              const taggedIds = taggedFeedbacks[category] ?? []
+              const taggedItems = feedbackData.feedbacks[category].filter((f) =>
+                taggedIds.includes(f.feedbackId)
+              )
+              if (taggedItems.length === 0) return null
+              return (
+                <div className="grid grid-cols-3 gap-4">
+                  {taggedItems.map((feedback) => (
+                    <div
+                      key={feedback.feedbackId}
+                      className="flex flex-col gap-2 rounded-xl border border-neutral-200 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-body2_m_14 text-primary-strong">
+                            {CATEGORY_LABEL[feedback.category]}
+                          </span>
+                          <span className="text-title5_sb_20 leading-tight">
+                            {feedback.nickname}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeTaggedFeedback(category, feedback.feedbackId)}
+                          className="shrink-0 w-15 h-10 text-caption1_m_13 text-CoolNeutral-20 border border-CoolNeutral-20 rounded-lg px-2 py-1 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                      <p className="text-body2_m_14 text-CoolNeutral-30 line-clamp-2">
+                        {feedback.onelineReview}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
           </div>
         </div>
 
@@ -321,13 +364,9 @@ export function GrowthRecordForm() {
       />
 
       <FeedbackTagModal
+        key={String(showFeedbackTagModal)}
         isOpen={showFeedbackTagModal}
         onClose={() => setShowFeedbackTagModal(false)}
-        onConfirm={(selected) => {
-          setTaggedFeedbacks(selected)
-          setShowFeedbackTagModal(false)
-        }}
-        initialSelected={taggedFeedbacks}
       />
 
       <ImageDeleteModal
