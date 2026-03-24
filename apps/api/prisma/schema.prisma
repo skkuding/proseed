@@ -239,12 +239,14 @@ model GrowthRecordContent {
 }
 
 model Feedback {
-  id         Int      @id @default(autoincrement())
-  questionId Int      @map("question_id")
-  versionId  Int      @map("version_id")
-  userId     Int      @map("user_id")
-  content    String
-  createdAt  DateTime @default(now()) @map("created_at")
+  id              Int             @id @default(autoincrement())
+  questionId      Int             @map("question_id")
+  versionId       Int             @map("version_id")
+  userId          Int             @map("user_id")
+  content         String
+  isAdopted       Boolean         @default(false) @map("is_adopted")
+  adoptedCategory RecordCategory? @map("adopted_category")
+  createdAt       DateTime        @default(now()) @map("created_at")
 
   question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
   createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
