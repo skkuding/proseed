@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import { RecordCategory } from '@prisma/client'
 import {
+  ConflictFoundException,
+  DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
   UnprocessableDataException,
@@ -20,6 +23,10 @@ export class GrowthRecordService {
     private readonly storage: StorageService,
   ) {}
 
+  getFeedbackTemplates() {
+    return FEEDBACK_TEMPLATES
+  }
+
   /** 성장기록 + 피드백 질문 발행 및 팀원 티켓 보상 */
   async createVersion(
     userId: number,
@@ -38,6 +45,20 @@ export class GrowthRecordService {
     this.validateFeedbackQuestionsPerCategory(dto.feedbackQuestions)
 
     return this.prisma.$transaction(async (tx) => {
+      // 버전명 중복 검사는 트랜잭션 내에서 수행하여 경합을 방지
+      const existingVersion = await tx.projectVersion.findUnique({
+        where: {
+          projectId_version: {
+            projectId,
+            version: dto.version,
+          },
+        },
+        select: { id: true },
+      })
+      if (existingVersion) {
+        throw new DuplicateFoundException('ProjectVersion')
+      }
+
       const version = await tx.projectVersion.create({
         data: {
           projectId,
@@ -200,5 +221,85 @@ export class GrowthRecordService {
         url: urlMap.get(img.url) ?? img.url,
       })),
     }))
+  }
+
+  /** 피드백 채택 (팀원 권한) 및 조건부 티켓 보상 */
+  async adoptFeedback(
+    userId: number,
+    projectId: number,
+    versionId: number,
+    feedbackId: number,
+    category: RecordCategory,
+  ) {
+    // 1. 프로젝트 팀원 권한 확인
+    const role = await this.prisma.projectRole.findUnique({
+      where: { userId_projectId: { userId, projectId } },
+    })
+    if (!role) {
+      throw new ForbiddenAccessException(
+        'Only project members can adopt feedbacks.',
+      )
+    }
+
+    // 2. 트랜잭션: 피드백 검증 및 채택 처리, 티켓 보상 (+3, +2, +0 방어 로직)
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 피드백 존재 확인 및 교차 검증 (트랜잭션 내부 조회로 경합 방지)
+      const feedback = await tx.feedback.findUnique({
+        where: {
+          id: feedbackId,
+          versionId,
+          version: { projectId }, // 프로젝트 ID 교차 검증
+        },
+        select: { id: true, isAdopted: true, userId: true },
+      })
+      if (!feedback) {
+        throw new EntityNotExistException('Feedback')
+      }
+
+      // 중복 채택 체크
+      if (feedback.isAdopted) {
+        throw new ConflictFoundException('This feedback is already adopted.')
+      }
+
+      // 해당 피드백 작성자가 현재 버전에서 이미 채택받은 피드백 개수 카운트
+      const adoptedCount = await tx.feedback.count({
+        where: {
+          versionId,
+          userId: feedback.userId,
+          isAdopted: true,
+        },
+      })
+
+      // 로직: 0개면 +3, 1개면 +2(설계상 최대 5개 제한), 2개 이상이면 0
+      let rewardAmount = 0
+      if (adoptedCount === 0) rewardAmount = 3
+      else if (adoptedCount === 1) rewardAmount = 2
+
+      // 피드백 채택 상태 업데이트
+      await tx.feedback.update({
+        where: { id: feedbackId },
+        data: {
+          isAdopted: true,
+          adoptedCategory: category,
+        },
+      })
+
+      // 보상 티켓이 있으면 작성자에게 지급
+      if (rewardAmount > 0) {
+        await tx.user.update({
+          where: { id: feedback.userId },
+          data: { ownedTicketCount: { increment: rewardAmount } },
+        })
+      }
+
+      return { rewardAmount, feedbackUserId: feedback.userId }
+    })
+
+    this.logger.log(
+      `Feedback ${feedbackId} adopted for version ${versionId} by user ${userId}. ` +
+        `Ticket rewarded to feedback author ${result.feedbackUserId}: +${result.rewardAmount}`,
+    )
+
+    return { success: true, rewardAmount: result.rewardAmount }
   }
 }
