@@ -1,18 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import { RecordCategory } from '@prisma/client'
+import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import {
   ConflictFoundException,
   DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
-  UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import type { CreateVersionDto } from './dto/create-version.dto'
 
-const FEEDBACK_QUESTIONS_PER_CATEGORY = { min: 1, max: 4 }
+const FEEDBACK_CATEGORIES: RecordCategory[] = [
+  RecordCategory.PLAN,
+  RecordCategory.DESIGN,
+  RecordCategory.DEVELOPMENT,
+  RecordCategory.GENERAL,
+]
 
 @Injectable()
 export class GrowthRecordService {
@@ -42,7 +46,15 @@ export class GrowthRecordService {
       )
     }
 
-    this.validateFeedbackQuestionsPerCategory(dto.feedbackQuestions)
+    const feedbackQuestionRows = FEEDBACK_CATEGORIES.flatMap((category) =>
+      (dto.feedbackQuestions[category]?.context ?? []).map((title, order) => ({
+        category,
+        title,
+        description: '',
+        order,
+        isRequired: false,
+      })),
+    )
 
     return this.prisma.$transaction(async (tx) => {
       // 버전명 중복 검사는 트랜잭션 내에서 수행하여 경합을 방지
@@ -84,13 +96,7 @@ export class GrowthRecordService {
             })),
           },
           feedbackQuestions: {
-            create: dto.feedbackQuestions.map((q, i) => ({
-              category: q.category,
-              title: q.content,
-              description: '',
-              order: i,
-              isRequired: q.isRequired ?? false,
-            })),
+            create: feedbackQuestionRows,
           },
         },
         include: {
@@ -119,13 +125,9 @@ export class GrowthRecordService {
 
       return {
         ...version,
-        feedbackQuestions: version.feedbackQuestions.map((q) => ({
-          id: q.id,
-          category: q.category,
-          content: q.title,
-          isRequired: q.isRequired,
-          order: q.order,
-        })),
+        feedbackQuestions: this.groupFeedbackQuestions(
+          version.feedbackQuestions,
+        ),
       }
     })
   }
@@ -172,32 +174,22 @@ export class GrowthRecordService {
     return {
       ...version,
       growthRecords: resolved,
-      feedbackQuestions: version.feedbackQuestions.map((q) => ({
-        id: q.id,
-        category: q.category,
-        content: q.title,
-        isRequired: q.isRequired,
-        order: q.order,
-      })),
+      feedbackQuestions: this.groupFeedbackQuestions(version.feedbackQuestions),
     }
   }
 
-  private validateFeedbackQuestionsPerCategory(
-    questions: { category: RecordCategory }[],
-  ) {
-    const counts = new Map<RecordCategory, number>()
+  private groupFeedbackQuestions(
+    questions: { category: RecordCategory; title: string }[],
+  ): Record<RecordCategory, { context: string[] }> {
+    const map = Object.fromEntries(
+      FEEDBACK_CATEGORIES.map((cat) => [cat, { context: [] as string[] }]),
+    ) as Record<RecordCategory, { context: string[] }>
+
     for (const q of questions) {
-      counts.set(q.category, (counts.get(q.category) ?? 0) + 1)
+      map[q.category].context.push(q.title)
     }
 
-    for (const [category, count] of counts) {
-      const { min, max } = FEEDBACK_QUESTIONS_PER_CATEGORY
-      if (count < min || count > max) {
-        throw new UnprocessableDataException(
-          `Category '${category}' has ${count} feedback questions (allowed: ${min}~${max})`,
-        )
-      }
-    }
+    return map
   }
 
   private async resolveImageUrls<

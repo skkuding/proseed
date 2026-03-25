@@ -9,8 +9,7 @@ import {
   Req,
 } from '@nestjs/common'
 import type { AuthenticatedRequest } from 'libs/auth/src/authenticated-request.interface'
-import { AdoptFeedbackDto } from './dto/adopt-feedback.dto'
-import { CreateVersionDto } from './dto/create-version.dto'
+import { AdoptFeedbackDto, CreateVersionDto } from './dto/create-version.dto'
 import { GrowthRecordService } from './growth-record.service'
 
 @Controller('growth-records')
