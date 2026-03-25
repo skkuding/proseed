@@ -9,6 +9,7 @@ import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTagModal } from '@/components/FeedbackTagModal'
+import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 
@@ -65,6 +66,7 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
+  const [showSubmitModal, setShowSubmitModal] = useState(false)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -82,6 +84,13 @@ export function GrowthRecordForm() {
   const category = TAB_TO_CATEGORY[activeTab]
   const questions = growthRecordQuestions.questions[category]
   const images = imagesByTab[activeTab]
+
+  const allRequiredQuestionIds = Object.values(growthRecordQuestions.questions)
+    .flat()
+    .filter((q) => q.isRequired)
+    .map((q) => q.questionId)
+
+  const isNextEnabled = allRequiredQuestionIds.every((id) => (answers[id] ?? '').trim().length > 0)
 
   const setImages = (updater: (prev: ImageItem[]) => ImageItem[]) => {
     setImagesByTab((prev) => ({ ...prev, [activeTab]: updater(prev[activeTab]) }))
@@ -349,8 +358,9 @@ export function GrowthRecordForm() {
             </p>
           </button>
           <button
-            disabled
-            className="w-full h-12 mt-4 bg-neutral-200 text-CoolNeutral-50 rounded-lg text-sub3_sb_16 cursor-not-allowed"
+            //disabled={!isNextEnabled}
+            onClick={() => setShowSubmitModal(true)}
+            className={`w-full h-12 mt-4 rounded-lg text-sub3_sb_16 transition-colors ${isNextEnabled ? 'bg-neutral-20 text-white hover:bg-neutral-30 cursor-pointer' : 'bg-neutral-200 text-CoolNeutral-50 cursor-not-allowed'}`}
           >
             다음 단계로
           </button>
@@ -367,6 +377,20 @@ export function GrowthRecordForm() {
         key={String(showFeedbackTagModal)}
         isOpen={showFeedbackTagModal}
         onClose={() => setShowFeedbackTagModal(false)}
+      />
+
+      <GrowthRecordSubmitModal
+        isOpen={showSubmitModal}
+        onCancel={() => setShowSubmitModal(false)}
+        onSubmit={() => setShowSubmitModal(false)}
+        formData={{
+          version,
+          imagesByTab: Object.fromEntries(
+            Object.entries(imagesByTab).map(([tab, imgs]) => [tab, imgs.map((img) => img.id)])
+          ),
+          answers,
+          taggedFeedbacks,
+        }}
       />
 
       <ImageDeleteModal
