@@ -4,6 +4,7 @@ import './globals.css'
 import localFont from 'next/font/local'
 import { Header } from '@/app/_components/Header'
 import { Footer } from '@/app/_components/Footer'
+import { Toaster } from '@/components/ui/sonner'
 
 const pretendard = localFont({
   src: '../font/PretendardVariable.woff2',
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <div className="mx-auto max-w-340">{children}</div>
         <Footer />
+        <Toaster position="top-center" />
       </body>
     </html>
   )

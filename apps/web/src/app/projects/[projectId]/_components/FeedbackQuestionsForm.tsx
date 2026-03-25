@@ -1,9 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { ChevronRightIcon } from 'lucide-react'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
+import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
+import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
+import { toast } from 'sonner'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -55,6 +59,10 @@ export function FeedbackQuestionsForm() {
     기타: [createQuestion(), createFreeComment()],
   })
   const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const params = useParams()
+  const projectId = params.projectId as string
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
@@ -172,7 +180,10 @@ export function FeedbackQuestionsForm() {
         {/* Sidebar */}
         <div className="sticky top-6 flex flex-col gap-3 w-90 shrink-0">
           {/* 피드백 질문 템플릿 */}
-          <button className="flex flex-col gap-2 bg-white rounded-xl p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left">
+          <button
+            onClick={() => setShowTemplateModal(true)}
+            className="flex flex-col gap-2 bg-white rounded-xl p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
+          >
             <div className="flex items-center justify-between">
               <p className="text-title1_sb_28">피드백 질문 템플릿</p>
               <ChevronRightIcon className="size-5 text-CoolNeutral-40" />
@@ -192,11 +203,35 @@ export function FeedbackQuestionsForm() {
           </button>
 
           {/* 프로젝트 업데이트 */}
-          <button className="w-full h-12 rounded-lg bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors">
+          <button
+            onClick={() => {
+              const allTabs = Object.keys(questionsByTab) as TabLabel[]
+              const hasEmpty = allTabs.some((tab) =>
+                questionsByTab[tab].some((q) => !q.isFreeComment && q.text.trim().length === 0)
+              )
+              if (hasEmpty) {
+                toast.error('모든 질문란을 채워주세요')
+                return
+              }
+              setShowSuccessModal(true)
+            }}
+            className="w-full h-12 rounded-lg bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+          >
             프로젝트 업데이트
           </button>
         </div>
       </div>
+
+      <GrowthRecordSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        projectId={projectId}
+      />
+
+      <FeedbackTemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+      />
 
       <LeaveConfirmModal
         isOpen={showLeaveModal}
