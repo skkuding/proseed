@@ -9,7 +9,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Validate,
   ValidateNested,
+  ValidatorConstraint,
+  type ValidatorConstraintInterface,
 } from 'class-validator'
 
 export class AdoptFeedbackDto {
@@ -20,8 +23,28 @@ export class AdoptFeedbackDto {
 export class CategoryQuestionsDto {
   @IsArray()
   @IsString({ each: true })
+  @IsNotEmpty({ each: true })
   @ArrayMaxSize(4)
   context: string[]
+}
+
+@ValidatorConstraint({ name: 'atLeastOneQuestion', async: false })
+export class AtLeastOneQuestionConstraint implements ValidatorConstraintInterface {
+  validate(feedbackQuestions: FeedbackQuestionsDto) {
+    if (!feedbackQuestions) return false
+
+    const totalQuestions =
+      (feedbackQuestions.PLAN?.context?.length ?? 0) +
+      (feedbackQuestions.DESIGN?.context?.length ?? 0) +
+      (feedbackQuestions.DEVELOPMENT?.context?.length ?? 0) +
+      (feedbackQuestions.GENERAL?.context?.length ?? 0)
+
+    return totalQuestions >= 1
+  }
+
+  defaultMessage() {
+    return 'There must be at least one feedback question across all categories'
+  }
 }
 
 export class FeedbackQuestionsDto {
@@ -93,5 +116,6 @@ export class CreateVersionDto {
 
   @ValidateNested()
   @Type(() => FeedbackQuestionsDto)
+  @Validate(AtLeastOneQuestionConstraint)
   feedbackQuestions: FeedbackQuestionsDto
 }
