@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import {
   ChevronDownIcon,
@@ -119,6 +119,7 @@ export function Feedbacks() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortOrder, setSortOrder] = useState('latest')
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
+  const [highlightId, setHighlightId] = useState<number | null>(null)
   const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
 
   const handleRoleSelectConfirm = (selectedRoles: string[]) => {
@@ -134,6 +135,32 @@ export function Feedbacks() {
   const pageSize = 5
   const totalPages = Math.ceil(allFeedbacks.length / pageSize)
   const feedbacks = allFeedbacks.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+  useEffect(() => {
+    const hash = window.location.hash
+    if (!hash.startsWith('#feedback-')) return
+
+    const targetId = parseInt(hash.replace('#feedback-', ''))
+    if (isNaN(targetId)) return
+
+    for (const [cat, items] of Object.entries(feedbackData.feedbacks)) {
+      const idx = (items as FeedbackItem[]).findIndex((f) => f.feedbackId === targetId)
+      if (idx === -1) continue
+
+      const tabLabel = Object.entries(TAB_TO_CATEGORY).find(([, c]) => c === cat)?.[0] as TabLabel
+      if (tabLabel) setActiveTab(tabLabel)
+      setCurrentPage(Math.ceil((idx + 1) / pageSize))
+
+      setTimeout(() => {
+        const el = document.getElementById(`feedback-${targetId}`)
+        if (!el) return
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setHighlightId(targetId)
+        setTimeout(() => setHighlightId(null), 2000)
+      }, 100)
+      break
+    }
+  }, [])
 
   const handleTabChange = (tab: TabLabel) => {
     setActiveTab(tab)
@@ -341,8 +368,9 @@ export function Feedbacks() {
               return (
                 <AccordionItem
                   key={feedback.feedbackId}
+                  id={`feedback-${feedback.feedbackId}`}
                   value={String(feedback.feedbackId)}
-                  className="overflow-hidden py-10 "
+                  className={`scroll-mt-24 overflow-hidden py-10 transition-colors duration-1000 ${highlightId === feedback.feedbackId ? 'rounded-xl bg-CoolNeutral-95' : ''}`}
                 >
                   {/* Trigger: Profile header */}
                   <AccordionTrigger className="[&>svg]:hidden items-center cursor-pointer pl-2">
