@@ -9,3 +9,4 @@ resources:
   - ingress.yaml
   - namespace.yaml
   - service.yaml
+  - migration.yaml
