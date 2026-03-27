@@ -32,6 +32,25 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   S3_ENDPOINT?: string
+
+  //소셜 로그인 환경 변수
+  @IsString()
+  GOOGLE_CLIENT_ID: string
+
+  @IsString()
+  GOOGLE_CLIENT_SECRET: string
+
+  @IsString()
+  KAKAO_CLIENT_ID: string
+
+  @IsString()
+  KAKAO_CLIENT_SECRET: string
+
+  @IsString()
+  NAVER_CLIENT_ID: string
+
+  @IsString()
+  NAVER_CLIENT_SECRET: string
 }
 
 export function validate(config: Record<string, unknown>) {
