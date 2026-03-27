@@ -19,9 +19,12 @@ export class BetterAuthGuard implements CanActivate {
 
     if (!session) throw new UnauthorizedException()
 
-    req.user = {
-      id: Number(session.user.id),
-    } //user.id 형변환 (string -> number)
+    const userIdInNumber = parseInt(String(session.user.id), 10) //user.id numbe로 형변환
+    if (isNaN(userIdInNumber)) {
+      //반환값이 NAN인지 확인
+      throw new UnauthorizedException('Invalid userId')
+    }
+    req.user = { id: userIdInNumber }
     return true
   }
 }
