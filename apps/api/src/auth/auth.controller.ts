@@ -1,42 +1,25 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common'
+import { Controller, Body, Patch, UseGuards, Req, Get } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { CreateAuthDto } from './dto/create-auth.dto'
-import { UpdateAuthDto } from './dto/update-auth.dto'
+import { OnboardingDto } from './dto/onboarding.dto'
+import type { RequestWithUser } from 'src/common/types/request-with-user.type'
+import { BetterAuthGuard } from './guards/better-auth.guard'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto)
+  @Get('check') //기존 or 신규 유저인지 확인
+  @UseGuards(BetterAuthGuard)
+  async checkIsNewUser(@Req() req: RequestWithUser) {
+    return this.authService.checkIsNewUser(req.user.id)
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll()
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id)
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto)
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id)
+  @Patch('onboarding') //온보딩 정보 업데이트 후 user 반환
+  @UseGuards(BetterAuthGuard)
+  async onboarding(
+    @Req() req: RequestWithUser,
+    @Body() onboardingDto: OnboardingDto,
+  ) {
+    return this.authService.onboarding(req.user.id, onboardingDto)
   }
 }
