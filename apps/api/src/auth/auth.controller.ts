@@ -11,7 +11,7 @@ export class AuthController {
   @Get('check') //기존 or 신규 유저인지 확인
   @UseGuards(BetterAuthGuard)
   async checkIsNewUser(@Req() req: RequestWithUser) {
-    return this.authService.checkIsNewUser(req.user.id)
+    return await this.authService.checkIsNewUser(req.user.id)
   }
 
   @Patch('onboarding') //온보딩 정보 업데이트 후 user 반환
@@ -20,6 +20,6 @@ export class AuthController {
     @Req() req: RequestWithUser,
     @Body() onboardingDto: OnboardingDto,
   ) {
-    return this.authService.onboarding(req.user.id, onboardingDto)
+    return await this.authService.onboarding(req.user.id, onboardingDto)
   }
 }
