@@ -1,4 +1,4 @@
-import { auth } from '../better-auth'
+import { BetterAuthService } from '../better-auth.service'
 import {
   CanActivate,
   ExecutionContext,
@@ -9,10 +9,11 @@ import { fromNodeHeaders } from 'better-auth/node'
 
 @Injectable()
 export class BetterAuthGuard implements CanActivate {
+  constructor(private readonly betterAuthService: BetterAuthService) {}
   //요청 헤더에서 세션 쿠키 존재하는지 확인
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest()
-    const session = await auth.api.getSession({
+    const session = await this.betterAuthService.auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     })
 
