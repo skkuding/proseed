@@ -38,7 +38,7 @@ export function ProfileForm() {
 
       <div className="flex flex-col gap-4">
         {/* 이름 */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-10">
           <label className="w-20 shrink-0 text-sub2_m_18 text-neutral-40">이름</label>
           <div className="relative flex-1">
             <input
@@ -47,14 +47,14 @@ export function ProfileForm() {
               onChange={(e) => setName(e.target.value.slice(0, 30))}
               className="w-120 rounded-lg border border-neutral-90 px-4 py-3 pr-16 text-body3_r_16 text-neutral-10 outline-none focus:border-neutral-50"
             />
-            <span className="absolute right-75 top-1/2 -translate-y-1/2 text-caption4_r_12 text-neutral-70">
+            <span className="absolute right-71 top-1/2 -translate-y-1/2 text-caption4_r_12 text-neutral-70">
               {name.length}/30
             </span>
           </div>
         </div>
 
         {/* 직무 */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-10">
           <label className="w-20 shrink-0 text-sub2_m_18 text-neutral-40">직무</label>
           <div className="w-120">
             <Select value={job} onValueChange={setJob}>
@@ -73,7 +73,7 @@ export function ProfileForm() {
         </div>
 
         {/* 보유 스킬 */}
-        <div className="flex items-start justify-start gap-6">
+        <div className="flex items-start justify-start gap-10">
           <label className="w-20 shrink-0 pt-3 text-sub2_m_18 text-neutral-40">보유 스킬</label>
           <div className="flex flex-col gap-2">
             {skills.map((skill, index) => (
@@ -94,14 +94,14 @@ export function ProfileForm() {
           <Button
             variant="outline"
             onClick={addSkill}
-            className="h-12 shrink-0 rounded-lg border-neutral-90 px-5"
+            className="h-12 -ml-7.5 shrink-0 rounded-lg border-neutral-90 px-5"
           >
             추가하기
           </Button>
         </div>
 
         {/* 관련 링크 */}
-        <div className="flex items-start gap-6">
+        <div className="flex items-start gap-10">
           <label className="w-20 shrink-0 pt-3 text-sub2_m_18 text-neutral-40">관련 링크</label>
           <div className="flex flex-col gap-2">
             {links.map((link, index) => (
@@ -120,7 +120,7 @@ export function ProfileForm() {
           <Button
             variant="outline"
             onClick={addLink}
-            className="h-12 shrink-0 rounded-lg border-neutral-90 px-5"
+            className="h-12 shrink-0 -ml-7.5 rounded-lg border-neutral-90 px-5"
           >
             추가하기
           </Button>
