@@ -20,7 +20,7 @@ export default function GrowthRecordSection() {
   const [activeTab, setActiveTab] = useState<Tab>('기획')
 
   const filtered = useMemo(() => {
-    return recentGrowthRecords.filter((r) => r.category === TAB_TO_CATEGORY[activeTab])
+    return recentGrowthRecords.filter((rg) => rg.category === TAB_TO_CATEGORY[activeTab])
   }, [activeTab])
 
   return (
