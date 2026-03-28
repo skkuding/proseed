@@ -1,0 +1,79 @@
+[
+  {
+    "versionId": 1,
+    "projectId": 1,
+    "projectName": "Skill UP",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "첫 MVP 배포 완료",
+    "updateGoal": "이번 업데이트 목표는 채점 기능 개발을 통해 기존 사용자들이 수동으로 했어야만 했던 채점을 서비스 내부에서 자체적으로 시행 가능하겠다는 목적 달성을 통한 불편함 해소에 있습니다. 그 외에도 Contest 오류 기능 해결과 Course 대시보드 기능 구축을 통해 보다 더 편리한 사용을 도모하였습니다.",
+    "projectCategories": ["생산성", "교육"],
+    "category": "DEVELOPMENT",
+    "createdAt": "2026.01.01"
+  },
+  {
+    "versionId": 2,
+    "projectId": 2,
+    "projectName": "DINGDONG",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "UX 리뉴얼 및 온보딩 개선",
+    "updateGoal": "이번 업데이트 목표는 신규 사용자 온보딩 흐름을 개선하고 전반적인 UX를 리뉴얼하는 데 초점을 맞췄습니다. 첫 화면에서 핵심 액션을 더 눈에 띄게 배치하고 빈 상태 화면을 보완하여 이탈률을 낮추고자 하였습니다.",
+    "projectCategories": ["커뮤니티"],
+    "category": "DESIGN",
+    "createdAt": "2026.01.15"
+  },
+  {
+    "versionId": 3,
+    "projectId": 3,
+    "projectName": "LINK:U",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "타겟 사용자 정의 및 기획 개선",
+    "updateGoal": "이번 업데이트 목표는 서비스가 해결하려는 문제를 더 명확하게 정의하고 타겟 사용자를 구체화하는 것입니다. UX 의사결정의 일관성을 높이기 위해 사용자 페르소나와 핵심 시나리오를 재정비하였습니다.",
+    "projectCategories": ["라이프스타일", "커뮤니티"],
+    "category": "PLAN",
+    "createdAt": "2026.02.01"
+  },
+  {
+    "versionId": 4,
+    "projectId": 1,
+    "projectName": "Skill UP",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "성능 최적화 및 API 리팩토링",
+    "updateGoal": "이번 업데이트 목표는 초기 로딩 속도 개선과 이미지 리소스 최적화를 중심으로 합니다. API 응답 캐싱 도입으로 반복 요청을 줄이고 DB 쿼리 효율을 높여 전반적인 서비스 응답 속도를 개선하였습니다.",
+    "projectCategories": ["생산성", "교육"],
+    "category": "DEVELOPMENT",
+    "createdAt": "2026.02.10"
+  },
+  {
+    "versionId": 5,
+    "projectId": 2,
+    "projectName": "DINGDONG",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "브랜딩 가이드라인 수립",
+    "updateGoal": "이번 업데이트 목표는 서비스 브랜딩 아이덴티티를 명확히 하고 컬러 팔레트, 타이포그래피, 컴포넌트 스타일 가이드를 정립하는 것입니다. 디자인 일관성 확보를 통해 사용자 신뢰도를 높이고자 하였습니다.",
+    "projectCategories": ["커뮤니티"],
+    "category": "DESIGN",
+    "createdAt": "2026.02.20"
+  },
+  {
+    "versionId": 6,
+    "projectId": 3,
+    "projectName": "LINK:U",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "서비스 방향성 재정립",
+    "updateGoal": "이번 업데이트 목표는 초기 기획 단계에서 놓쳤던 핵심 가치 제안을 재정립하고 로드맵을 구체화하는 것입니다. 팀 내 얼라인먼트를 맞추고 다음 스프린트 우선순위를 명확히 하였습니다.",
+    "projectCategories": ["라이프스타일"],
+    "category": "PLAN",
+    "createdAt": "2026.03.05"
+  },
+  {
+    "versionId": 7,
+    "projectId": 2,
+    "projectName": "DINGDONG",
+    "projectIconUrl": "/mock/projectdetail/icon.png",
+    "versionTitle": "분기 회고 및 접근성 개선",
+    "updateGoal": "이번 업데이트 목표는 스크린리더 호환성과 키보드 네비게이션 개선입니다. 분기별 회고를 통해 팀 워크플로우와 커뮤니케이션 방식을 재점검하고 다음 분기 개선 방향을 도출하였습니다.",
+    "projectCategories": ["커뮤니티"],
+    "category": "GENERAL",
+    "createdAt": "2026.03.15"
+  }
+]

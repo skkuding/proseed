@@ -1,30 +1,53 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { RoleFilterTabs } from '@/components/RoleTabs'
 import GrowthRecordCard from './GrowthRecordCard'
 import SectionTitle from './SectionTitle'
+import recentGrowthRecords from '@/app/_mockdata/mainpage/recent-growth-records.json'
 
-const tabs = ['기획', '디자인', '프론트엔드', '백엔드', '기타']
+const TABS = ['기획', '디자인', '개발', '기타'] as const
+type Tab = (typeof TABS)[number]
+
+const TAB_TO_CATEGORY: Record<Tab, string> = {
+  기획: 'PLAN',
+  디자인: 'DESIGN',
+  개발: 'DEVELOPMENT',
+  기타: 'GENERAL',
+}
 
 export default function GrowthRecordSection() {
-  return (
-    <section className="flex flex-col gap-6">
-      <SectionTitle title="최근 업데이트 된 성장기록" />
+  const [activeTab, setActiveTab] = useState<Tab>('기획')
 
-      <div className="flex flex-wrap gap-2">
-        {tabs.map((tab, index) => (
-          <button
-            key={tab}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${
-              index === 0 ? 'bg-black text-white' : 'bg-white text-gray-600 ring-1 ring-gray-200'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+  const filtered = useMemo(() => {
+    return recentGrowthRecords.filter((r) => r.category === TAB_TO_CATEGORY[activeTab])
+  }, [activeTab])
+
+  return (
+    <section className="flex flex-col gap-7">
+      <div className="flex justify-between">
+        <SectionTitle title="최근 업데이트 된 성장기록" />
+
+        <RoleFilterTabs
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as Tab)}
+        />
       </div>
 
       <div className="flex flex-col gap-4">
-        <GrowthRecordCard />
-        <GrowthRecordCard />
-        <GrowthRecordCard />
+        {filtered.map((record) => (
+          <GrowthRecordCard
+            key={record.versionId}
+            projectId={record.projectId}
+            projectName={record.projectName}
+            projectIconUrl={record.projectIconUrl}
+            versionTitle={record.versionTitle}
+            updateGoal={record.updateGoal}
+            projectCategories={record.projectCategories}
+            createdAt={record.createdAt}
+          />
+        ))}
       </div>
     </section>
   )

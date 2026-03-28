@@ -32,7 +32,7 @@ export default function FeedbackCard({
   projectIconUrl,
 }: FeedbackCardProps) {
   return (
-    <article className="h-[362px] w-[536px] group flex flex-col gap-6 rounded-[16px] bg-white p-7 transition-colors hover:bg-CoolNeutral-15">
+    <article className="h-[362px] w-[536px] group flex flex-col gap-6 rounded-[16px] bg-white p-7 transition-colors hover:bg-CoolNeutral-15 shadow-[0 4px 20px 0 rgba(27, 29, 38, 0.08)]">
       {/* 유저 정보 */}
       <div className="flex items-center gap-4">
         <div className="relative overflow-hidden rounded-full">
