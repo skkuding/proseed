@@ -251,7 +251,7 @@ export class GrowthRecordService {
             select: {
               userId: true,
               versionId: true,
-              project: { select: { id: true } },
+              projectId: true,
             },
           },
         },
@@ -259,7 +259,7 @@ export class GrowthRecordService {
       if (
         !feedback ||
         feedback.submission.versionId !== versionId ||
-        feedback.submission.project.id !== projectId
+        feedback.submission.projectId !== projectId
       ) {
         throw new EntityNotExistException('Feedback')
       }
