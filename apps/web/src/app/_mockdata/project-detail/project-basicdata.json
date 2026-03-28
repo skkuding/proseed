@@ -21,55 +21,100 @@
     "projectRoles": [
       {
         "id": 1,
-        "user": { "name": "홍길동", "profileImageUrl": "/mock/projectdetail/team-member1.png" },
+        "user": {
+          "name": "홍길동",
+          "email": "hong@proseed.kr",
+          "ownRole": "기획자",
+          "profileImageUrl": "/mock/projectdetail/team-member1.png"
+        },
         "role": "PLANNER",
         "isLeader": true
       },
       {
         "id": 2,
-        "user": { "name": "김철수", "profileImageUrl": "/mock/projectdetail/team-member2.png" },
+        "user": {
+          "name": "김철수",
+          "email": "chulsoo@proseed.kr",
+          "ownRole": "디자이너",
+          "profileImageUrl": "/mock/projectdetail/team-member2.png"
+        },
         "role": "DESIGNER",
         "isLeader": false
       },
       {
         "id": 3,
-        "user": { "name": "이영희", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "이영희",
+          "email": "younghee@proseed.kr",
+          "ownRole": "개발자",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "DEVELOPER",
         "isLeader": false
       },
       {
         "id": 4,
-        "user": { "name": "박민수", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "박민수",
+          "email": "minsu@proseed.kr",
+          "ownRole": "기타",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "DEVELOPER",
         "isLeader": false
       },
       {
         "id": 5,
-        "user": { "name": "최수진", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "최수진",
+          "email": "soojin@proseed.kr",
+          "ownRole": "디자이너",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "DESIGNER",
         "isLeader": false
       },
       {
         "id": 6,
-        "user": { "name": "김영수", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "김영수",
+          "email": "youngsu@proseed.kr",
+          "ownRole": "개발자",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "PLANNER",
         "isLeader": false
       },
       {
         "id": 7,
-        "user": { "name": "이민지", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "이민지",
+          "email": "minji@proseed.kr",
+          "ownRole": "기획자",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "DEVELOPER",
         "isLeader": false
       },
       {
         "id": 8,
-        "user": { "name": "박지훈", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "박지훈",
+          "email": "jihoon@proseed.kr",
+          "ownRole": "기타",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "DESIGNER",
         "isLeader": false
       },
       {
         "id": 9,
-        "user": { "name": "김수현", "profileImageUrl": "/mock/projectdetail/team-member3.png" },
+        "user": {
+          "name": "김수현",
+          "email": "soohyun@proseed.kr",
+          "ownRole": "개발자",
+          "profileImageUrl": "/mock/projectdetail/team-member3.png"
+        },
         "role": "PLANNER",
         "isLeader": false
       }

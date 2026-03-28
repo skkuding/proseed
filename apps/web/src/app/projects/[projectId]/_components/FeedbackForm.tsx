@@ -28,7 +28,7 @@ const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions
 
 type ImageItem = {
   id: string
-  previewUrl: string
+  preview: string
   key?: string
   uploading: boolean
 }
@@ -116,7 +116,7 @@ export function CreateFeedbackContent() {
 
     const newImages: ImageItem[] = selected.map((file) => ({
       id: crypto.randomUUID(),
-      previewUrl: URL.createObjectURL(file),
+      preview: URL.createObjectURL(file),
       uploading: true,
     }))
 
@@ -256,7 +256,7 @@ export function CreateFeedbackContent() {
                       onClick={() => setImageModal({ questionId: q.questionId, index })}
                       className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
                     >
-                      <Image src={img.previewUrl} alt="" fill className="object-cover" />
+                      <Image src={img.preview} alt="" fill className="object-cover" />
                       {img.uploading && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                           <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

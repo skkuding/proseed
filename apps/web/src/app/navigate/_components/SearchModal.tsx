@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
 import navigateProjects from '@/app/_mockdata/project-list/navigate-projects.json'
 
@@ -49,16 +50,13 @@ interface SearchModalProps {
 }
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
-  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [clearCount, setClearCount] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (isOpen) {
-      setRecentProjects(getRecentProjects())
-      setQuery('')
-      setTimeout(() => inputRef.current?.focus(), 50)
-    }
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 50)
   }, [isOpen])
 
   useEffect(() => {
@@ -71,6 +69,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   if (!isOpen) return null
 
+  const recentProjects = clearCount >= 0 ? getRecentProjects() : []
   const trimmedQuery = query.trim()
   const matchedProjects = trimmedQuery
     ? navigateProjects.filter((p) => p.title.toLowerCase().includes(trimmedQuery.toLowerCase()))
@@ -79,12 +78,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const handleProjectClick = (project: Project) => {
     saveRecentProject(project.id)
     onClose()
-    window.location.href = `/projects/${project.id}`
+    router.push(`/projects/${project.id}`)
   }
 
   const handleClearAll = () => {
     localStorage.removeItem(STORAGE_KEY)
-    setRecentProjects([])
+    setClearCount((c) => c + 1)
   }
 
   return (

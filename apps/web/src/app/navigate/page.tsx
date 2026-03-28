@@ -68,7 +68,7 @@ export default function Navigate() {
 
   return (
     <main className="min-h-screen">
-      <div className="mx-auto max-w-[1200px] px-6 py-14 flex flex-col gap-10">
+      <div className="mx-auto max-w-[1200px] pt-10 flex flex-col gap-10">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-2">
@@ -155,7 +155,11 @@ export default function Navigate() {
         )}
       </div>
 
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <SearchModal
+        key={String(isSearchOpen)}
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </main>
   )
 }

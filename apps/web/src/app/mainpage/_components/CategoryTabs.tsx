@@ -2,25 +2,9 @@
 
 import Image from 'next/image'
 import { useRef } from 'react'
+import { categories, type CategoryLabel } from '@/app/_utils/projectConstants'
 
-export const categories = [
-  { label: '전체', icon: undefined },
-  { label: '헬스케어', icon: '/healthcare_color.svg' },
-  { label: '금융', icon: '/money_color.svg' },
-  { label: '공공 · 정부', icon: '/government_color.svg' },
-  { label: '커머스', icon: '/commerce_color.svg' },
-  { label: '교육', icon: '/education_color.svg' },
-  { label: '엔터테인먼트', icon: '/entertainment_color.svg' },
-  { label: '모빌리티', icon: '/mobility_color.svg' },
-  { label: '에너지 · 환경', icon: '/energy_color.svg' },
-  { label: '부동산 · 건설', icon: '/construction_color.svg' },
-  { label: '라이프스타일', icon: '/lifestyle_color.svg' },
-  { label: '생산성', icon: '/production_color.svg' },
-  { label: '커뮤니티', icon: '/community_color.svg' },
-  { label: '인공지능', icon: '/ai_color.svg' },
-] as const
-
-export type CategoryLabel = (typeof categories)[number]['label']
+export { categories, type CategoryLabel }
 
 interface CategoryTabsProps {
   selectedCategory: CategoryLabel
@@ -31,10 +15,7 @@ export default function CategoryTabs({ selectedCategory, onSelectCategory }: Cat
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleScrollRight = () => {
-    scrollRef.current?.scrollBy({
-      left: 240,
-      behavior: 'smooth',
-    })
+    scrollRef.current?.scrollBy({ left: 240, behavior: 'smooth' })
   }
 
   return (
@@ -71,7 +52,6 @@ export default function CategoryTabs({ selectedCategory, onSelectCategory }: Cat
                     className="h-5 w-5 shrink-0"
                   />
                 ) : null}
-
                 <span className="whitespace-nowrap text-title6_m_20">{category.label}</span>
               </div>
             </button>
