@@ -27,7 +27,7 @@ interface CategoryTabsProps {
   onSelectCategory: (category: CategoryLabel) => void
 }
 
-export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
+export default function CategoryTabs({ selectedCategory, onSelectCategory }: CategoryTabsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleScrollRight = () => {
@@ -44,7 +44,7 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
         className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categories.map((category) => {
-          const isAll = category.label === '전체'
+          const isActive = category.label === selectedCategory
 
           return (
             <button
@@ -52,14 +52,14 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
               type="button"
               onClick={() => onSelectCategory(category.label)}
               className={`inline-flex h-12 shrink-0 cursor-pointer items-center rounded-full ${
-                isAll
+                isActive
                   ? 'bg-CoolNeutral-30 text-white'
                   : 'bg-white text-CoolNeutral-20 hover:bg-CoolNeutral-90'
               }`}
             >
               <div
                 className={`flex items-center gap-[6px] ${
-                  isAll ? 'px-6 py-[10px]' : 'py-[10px] pl-3 pr-4'
+                  category.label === '전체' ? 'px-6 py-[10px]' : 'py-[10px] pl-3 pr-4'
                 }`}
               >
                 {category.icon ? (

@@ -5,7 +5,7 @@ import GrowthRecordSection from './mainpage/_components/GrowthRecordSection'
 
 export default function HomePage() {
   return (
-    <main className="w-full bg-[##F4F4F6]">
+    <main className="w-full bg-background-normal">
       <div className="mx-auto flex w-full max-w-[1200px] px-1 flex-col">
         <HeroSection />
 
