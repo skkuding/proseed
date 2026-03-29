@@ -4,10 +4,18 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
   validateSync,
 } from 'class-validator'
 
+const isProduction = (env: EnvironmentVariables) =>
+  env.NODE_ENV === 'production'
+
 class EnvironmentVariables {
+  @IsString()
+  @IsOptional()
+  NODE_ENV?: string
+
   @IsString()
   DATABASE_URL!: string
 
@@ -49,30 +57,36 @@ class EnvironmentVariables {
   @IsNotEmpty()
   BETTER_AUTH_URL!: string
 
-  //소셜 로그인 환경 변수
+  // OAuth (required in production for social login, optional locally)
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  GOOGLE_CLIENT_ID!: string
+  GOOGLE_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  GOOGLE_CLIENT_SECRET!: string
+  GOOGLE_CLIENT_SECRET?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  KAKAO_CLIENT_ID!: string
+  KAKAO_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  KAKAO_CLIENT_SECRET!: string
+  KAKAO_CLIENT_SECRET?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  NAVER_CLIENT_ID!: string
+  NAVER_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  NAVER_CLIENT_SECRET!: string
+  NAVER_CLIENT_SECRET?: string
 }
 
 export function validate(config: Record<string, unknown>) {
