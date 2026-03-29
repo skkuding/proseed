@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import {
   ChevronDownIcon,
@@ -148,8 +149,10 @@ export function Feedbacks() {
       if (idx === -1) continue
 
       const tabLabel = Object.entries(TAB_TO_CATEGORY).find(([, c]) => c === cat)?.[0] as TabLabel
-      if (tabLabel) setActiveTab(tabLabel)
-      setCurrentPage(Math.ceil((idx + 1) / pageSize))
+      flushSync(() => {
+        if (tabLabel) setActiveTab(tabLabel)
+        setCurrentPage(Math.ceil((idx + 1) / pageSize))
+      })
 
       setTimeout(() => {
         const el = document.getElementById(`feedback-${targetId}`)
