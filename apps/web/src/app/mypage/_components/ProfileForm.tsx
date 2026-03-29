@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Link2 } from 'lucide-react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -10,18 +10,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { TextInput } from '@/components/TextInput'
 
-const JOB_OPTIONS = ['디자이너', '개발자', '기획자', 'PM/PO', '마케터', '기타']
+const JOB_OPTIONS = ['디자이너', '개발자', '기획', '기타']
 
-export function ProfileForm() {
-  const [name, setName] = useState('영국의행복한친칠라')
-  const [job, setJob] = useState('디자이너')
-  const [skills, setSkills] = useState<string[]>([''])
-  const [links, setLinks] = useState<string[]>([''])
-  const [bio, setBio] = useState('')
+interface ProfileFormProps {
+  initialName: string
+  initialJob: string
+  initialSkills?: string[]
+  initialLinks?: string[]
+  initialBio?: string
+}
+
+export function ProfileForm({
+  initialName,
+  initialJob,
+  initialSkills = [''],
+  initialLinks = [''],
+  initialBio = '',
+}: ProfileFormProps) {
+  const [name, setName] = useState(initialName)
+  const [job, setJob] = useState(initialJob)
+  const [skills, setSkills] = useState<string[]>(initialSkills.length > 0 ? initialSkills : [''])
+  const [links, setLinks] = useState<string[]>(initialLinks.length > 0 ? initialLinks : [''])
+  const [bio, setBio] = useState(initialBio)
 
   const updateSkill = (index: number, value: string) => {
-    setSkills((prev) => prev.map((s, i) => (i === index ? value.slice(0, 30) : s)))
+    setSkills((prev) => prev.map((s, i) => (i === index ? value : s)))
   }
 
   const addSkill = () => setSkills((prev) => [...prev, ''])
@@ -33,111 +48,101 @@ export function ProfileForm() {
   const addLink = () => setLinks((prev) => [...prev, ''])
 
   return (
-    <div className="flex-1 rounded-2xl bg-white p-8">
-      <h2 className="mb-8 text-title3_sb_24 text-neutral-10">내 프로필</h2>
+    <div className="flex-1 min-w-0 rounded-2xl bg-white p-10 flex flex-col gap-7 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)]">
+      <span className="text-head3_sb_36">내 프로필</span>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 justify-center">
         {/* 이름 */}
-        <div className="flex items-center gap-10">
-          <label className="w-20 shrink-0 text-sub2_m_18 text-neutral-40">이름</label>
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 30))}
-              className="w-120 rounded-lg border border-neutral-90 px-4 py-3 pr-16 text-body3_r_16 text-neutral-10 outline-none focus:border-neutral-50"
-            />
-            <span className="absolute right-71 top-1/2 -translate-y-1/2 text-caption4_r_12 text-neutral-70">
-              {name.length}/30
-            </span>
-          </div>
+        <div className="flex gap-10 items-center">
+          <label className="w-20 shrink-0 text-sub2_m_18">이름</label>
+          <TextInput
+            value={name}
+            onChange={setName}
+            placeholder="이름을 입력해주세요"
+            maxLength={30}
+            className="w-full md:w-[480px] md:flex-none"
+          />
         </div>
 
         {/* 직무 */}
-        <div className="flex items-center gap-10">
-          <label className="w-20 shrink-0 text-sub2_m_18 text-neutral-40">직무</label>
-          <div className="w-120">
-            <Select value={job} onValueChange={setJob}>
-              <SelectTrigger className="h-12 w-120 flex-1 rounded-lg border-neutral-90">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {JOB_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex gap-10 items-center">
+          <label className="w-20 shrink-0 text-sub2_m_18">직무</label>
+          <Select value={job} onValueChange={setJob}>
+            <SelectTrigger className="h-auto w-full rounded-[8px] border-neutral-95 px-4 py-3 md:w-[480px] md:flex-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {JOB_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* 보유 스킬 */}
-        <div className="flex items-start justify-start gap-10">
-          <label className="w-20 shrink-0 pt-3 text-sub2_m_18 text-neutral-40">보유 스킬</label>
-          <div className="flex flex-col gap-2">
+        <div className="flex gap-3">
+          <label className=" flex w-20 shrink-0 text-sub2_m_18 items-center h-12 items-center">
+            보유 스킬
+          </label>
+          <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
             {skills.map((skill, index) => (
-              <div key={index} className="relative">
-                <input
-                  type="text"
-                  value={skill}
-                  onChange={(e) => updateSkill(index, e.target.value)}
-                  placeholder="보유 스킬을 입력해주세요"
-                  className="w-120 rounded-lg border border-neutral-90 px-4 py-3 pr-16 text-body3_r_16 text-neutral-10 outline-none focus:border-neutral-50 placeholder:text-neutral-70"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-caption4_r_12 text-neutral-70">
-                  {skill.length}/30
-                </span>
-              </div>
+              <TextInput
+                key={index}
+                value={skill}
+                onChange={(v) => updateSkill(index, v)}
+                placeholder="보유 스킬을 입력해주세요"
+                maxLength={30}
+              />
             ))}
           </div>
           <Button
             variant="outline"
             onClick={addSkill}
-            className="h-12 -ml-7.5 shrink-0 rounded-lg border-neutral-90 px-5"
+            className="h-12 shrink-0 self-start rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
           >
             추가하기
           </Button>
         </div>
 
         {/* 관련 링크 */}
-        <div className="flex items-start gap-10">
-          <label className="w-20 shrink-0 pt-3 text-sub2_m_18 text-neutral-40">관련 링크</label>
-          <div className="flex flex-col gap-2">
+        <div className="flex gap-3">
+          <label className="flex w-20 shrink-0 text-sub2_m_18 md:h-12 md:items-center">
+            관련 링크
+          </label>
+          <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
             {links.map((link, index) => (
-              <div key={index} className="relative">
-                <Link2 className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-neutral-70" />
-                <input
-                  type="text"
-                  value={link}
-                  onChange={(e) => updateLink(index, e.target.value)}
-                  placeholder="관련 링크를 입력해주세요"
-                  className="w-120 rounded-lg border border-neutral-90 py-3 pl-10 pr-4 text-body3_r_16 text-neutral-10 outline-none focus:border-neutral-50 placeholder:text-neutral-70"
-                />
-              </div>
+              <TextInput
+                key={index}
+                value={link}
+                onChange={(v) => updateLink(index, v)}
+                placeholder="관련 링크를 입력해주세요"
+                prefix={<Image src="/link.svg" alt="link" height={24} width={24} />}
+              />
             ))}
           </div>
           <Button
             variant="outline"
             onClick={addLink}
-            className="h-12 shrink-0 -ml-7.5 rounded-lg border-neutral-90 px-5"
+            className="h-12 shrink-0 self-start rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
           >
             추가하기
           </Button>
         </div>
 
         {/* 자기소개 */}
-        <div className="flex flex-col gap-2">
-          <label className="w-20 shrink-0 pt-3 text-sub2_m_18 text-neutral-40">자기소개</label>
+        <div className="flex flex-col gap-2 py-3">
+          <label className="w-20 shrink-0 text-sub2_m_18">자기소개</label>
           <div className="relative flex-1">
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value.slice(0, 600))}
               placeholder="텍스트를 입력해주세요"
               rows={5}
-              className="w-full resize-none rounded-lg border border-neutral-90 px-4 py-3 text-body3_r_16 text-neutral-10 outline-none focus:border-neutral-50 placeholder:text-neutral-70"
+              className="w-full resize-none rounded-[8px] border border-neutral-95 p-4 text-body1_m_16 text-CoolNeutral-20 placeholder:text-neutral-80 outline-none focus:border-neutral-50"
             />
-            <span className="absolute bottom-3 right-4 text-caption4_r_12 text-neutral-70">
+            <span className="absolute bottom-4 right-4 text-body1_m_16 text-CoolNeutral-20">
               {bio.length}/600
             </span>
           </div>
@@ -145,14 +150,14 @@ export function ProfileForm() {
       </div>
 
       {/* 액션 버튼 */}
-      <div className="mt-8 flex justify-end gap-3">
+      <div className="flex justify-end gap-2">
         <Button
           variant="outline"
-          className="h-12 rounded-xl border-neutral-90 px-6 text-neutral-40"
+          className="h-12 rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
         >
           초기화하기
         </Button>
-        <Button className="h-12 rounded-xl bg-neutral-10 px-6 text-white hover:bg-neutral-20">
+        <Button className="h-12 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer">
           프로필 업데이트
         </Button>
       </div>
