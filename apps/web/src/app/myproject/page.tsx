@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
-import { type CategoryLabel, CATEGORY_LABELS } from '@/app/_utils/projectConstants'
+import { type CategoryLabel } from '@/app/_utils/projectConstants'
 import MyProjectCard from './_components/MyProjectCard'
 import ProjectCard from '@/app/mainpage/_components/ProjectCard'
 import {
@@ -45,59 +45,14 @@ function getVisiblePages(current: number, total: number): (number | 'ellipsis')[
   return result
 }
 
+// TODO: 백엔드 연결 시 아래 mock 제거 후 fetch 로직 복원
+// fetch('http://localhost:4000/project/my', { credentials: 'include' })
+const MOCK_PROJECTS: Project[] = (navigateProjects as Project[]).slice(0, 10)
+
 export default function MyProject() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
+  const [projects] = useState<Project[]>(MOCK_PROJECTS)
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')
   const [currentPage, setCurrentPage] = useState(1)
-
-  useEffect(() => {
-    fetch('http://localhost:4000/project/my', { credentials: 'include' })
-      .then(async (res) => {
-        if (!res.ok) return []
-        const data = await res.json()
-        return Promise.all(
-          data.map(
-            async (p: {
-              id: number
-              title: string
-              oneLineDescription: string
-              category: string[]
-              thumbnailUrl: string
-              _count: { versions: number }
-              feedbackCount: number
-            }) => {
-              let thumbnailUrl = p.thumbnailUrl ?? ''
-              if (thumbnailUrl && !thumbnailUrl.startsWith('/')) {
-                try {
-                  const r = await fetch(
-                    `http://localhost:4000/storage/download-url/${thumbnailUrl}`,
-                    { credentials: 'include' }
-                  )
-                  thumbnailUrl = (await r.json()).url
-                } catch {
-                  thumbnailUrl = ''
-                }
-              }
-              return {
-                id: p.id,
-                title: p.title,
-                oneLineDescription: p.oneLineDescription,
-                category: p.category.map((c: string) => CATEGORY_LABELS[c] ?? c),
-                thumbnailUrl,
-                feedbackCount: p.feedbackCount,
-                growthRecordCount: p._count.versions,
-              }
-            }
-          )
-        )
-      })
-      .then((data) => {
-        setProjects(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
 
   const filteredProjects = useMemo(
     () =>
@@ -124,10 +79,10 @@ export default function MyProject() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const isEmpty = !loading && projects.length === 0
+  const isEmpty = projects.length === 0
 
   return (
-    <main className="min-h-screen pt-20 ">
+    <main className="min-h-screen pt-10 ">
       <div className="mx-auto max-w-[1200px] flex flex-col gap-10">
         {/* div1: 헤더 + 카테고리 탭 */}
         <div className="flex flex-col gap-7">
@@ -153,11 +108,6 @@ export default function MyProject() {
 
         {/* div2: 카드 섹션 or 빈 상태 */}
         <div>
-          {loading && (
-            <div className="flex items-center justify-center py-30 text-CoolNeutral-50 text-body3_r_16">
-              불러오는 중...
-            </div>
-          )}
           {isEmpty && (
             <div className="flex flex-col items-center justify-center py-30 gap-2">
               <p className="text-title3_sb_24 text-black">아직 등록된 내 프로젝트가 없어요</p>
@@ -174,7 +124,7 @@ export default function MyProject() {
               </Link>
             </div>
           )}
-          {!loading && projects.length > 0 && (
+          {projects.length > 0 && (
             <div className="flex flex-col gap-10">
               {pagedProjects.length === 0 ? (
                 <div className="flex items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
@@ -245,8 +195,8 @@ export default function MyProject() {
           )}
         </div>
 
-        {/* div3: 추천 프로젝트 (내 프로젝트 6개 이하일 때만) */}
-        {projects.length <= 6 && (
+        {/* div3: 추천 프로젝트 (현재 페이지 프로젝트 6개 이하일 때만) */}
+        {pagedProjects.length <= 6 && (
           <div className="flex flex-col gap-3">
             <h2 className="text-title3_sb_24">추천 프로젝트</h2>
             <div className="grid grid-cols-3 gap-x-2 gap-y-5">

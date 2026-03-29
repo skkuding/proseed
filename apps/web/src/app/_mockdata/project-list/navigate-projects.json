@@ -262,38 +262,5 @@
     "thumbnailUrl": "/mock/projectdetail/thumbnail7.png",
     "feedbackCount": 10,
     "growthRecordCount": 3
-  },
-  {
-    "id": 25,
-    "title": "solarpanel.io",
-    "type": "WEB",
-    "status": "Completed",
-    "oneLineDescription": "태양광 발전 효율을 모니터링하고 에너지 사용을 최적화하는 플랫폼입니다.",
-    "category": ["에너지 · 환경"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail2.png",
-    "feedbackCount": 5,
-    "growthRecordCount": 2
-  },
-  {
-    "id": 26,
-    "title": "legalease",
-    "type": "WEB",
-    "status": "Ongoing",
-    "oneLineDescription": "AI가 법률 문서를 분석하고 쉽게 요약해주는 리걸테크 서비스입니다.",
-    "category": ["인공지능", "생산성"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail8.png",
-    "feedbackCount": 18,
-    "growthRecordCount": 6
-  },
-  {
-    "id": 27,
-    "title": "buildmate",
-    "type": "WEB",
-    "status": "Ongoing",
-    "oneLineDescription": "건설 현장 관리와 자재 발주를 디지털화하는 건설 관리 플랫폼입니다.",
-    "category": ["부동산 · 건설"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail4.png",
-    "feedbackCount": 9,
-    "growthRecordCount": 3
   }
 ]

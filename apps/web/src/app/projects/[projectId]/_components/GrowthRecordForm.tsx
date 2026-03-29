@@ -136,7 +136,7 @@ export function GrowthRecordForm() {
   }
 
   return (
-    <div className="flex flex-col gap-8 mt-20 mb-30">
+    <div className="flex flex-col gap-8 mt-10">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">

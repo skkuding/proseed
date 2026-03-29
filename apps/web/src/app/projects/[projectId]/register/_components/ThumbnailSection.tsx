@@ -49,7 +49,7 @@ export function ThumbnailSection({ preview, onSelect }: ThumbnailSectionProps) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="relative w-[225px] h-[127px] rounded-[8px] border border-dashed border-neutral-90 bg-neutral-99 flex flex-col items-center justify-center overflow-hidden hover:border-CoolNeutral-50 transition-colors hover:cursor-pointer"
+        className={`relative w-[225px] h-[127px] rounded-[8px] border bg-neutral-99 flex flex-col items-center justify-center overflow-hidden hover:border-CoolNeutral-50 transition-colors hover:cursor-pointer ${preview ? 'border-neutral-90' : 'border-dashed border-neutral-90'}`}
       >
         {preview ? (
           <Image src={preview} alt="썸네일" fill className="object-cover" />

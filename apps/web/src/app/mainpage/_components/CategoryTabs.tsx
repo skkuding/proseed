@@ -65,7 +65,7 @@ export default function CategoryTabs({ selectedCategory, onSelectCategory }: Cat
         className="inline-flex h-6 w-6 shrink-0 items-center justify-center cursor-pointer"
         aria-label="다음 카테고리 보기"
       >
-        <Image src="/arrow2_right.svg" alt="다음" width={24} height={24} />
+        <Image src="/arrow2_right_grey.svg" alt="다음" width={24} height={24} />
       </button>
     </div>
   )

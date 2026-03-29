@@ -49,7 +49,7 @@ export function IconSection({ preview, onSelect }: IconSectionProps) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="relative w-25 h-25 rounded-[12px] border border-dashed border-neutral-90 bg-neutral-99 flex flex-col items-center justify-center overflow-hidden hover:border-CoolNeutral-50 transition-colors hover:cursor-pointer"
+        className={`relative w-25 h-25 rounded-[12px] border bg-neutral-99 flex flex-col items-center justify-center overflow-hidden hover:border-CoolNeutral-50 transition-colors hover:cursor-pointer ${preview ? 'border-neutral-90' : 'border-dashed border-neutral-90'}`}
       >
         {preview ? (
           <Image src={preview} alt="아이콘" fill className="object-cover" />

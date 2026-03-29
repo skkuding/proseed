@@ -45,6 +45,7 @@ interface ProjectSummaryProps {
   selectedCategories: string[]
   projectType: string | null
   hasMember: boolean
+  submitLabel?: string
 }
 
 export function ProjectSummary({
@@ -59,6 +60,7 @@ export function ProjectSummary({
   selectedCategories,
   projectType,
   hasMember,
+  submitLabel = '프로젝트 등록하기',
 }: ProjectSummaryProps) {
   const categoryValue = selectedCategories.length > 0 ? selectedCategories.join(' | ') : ''
   const typeValue = projectType ?? ''
@@ -113,7 +115,7 @@ export function ProjectSummary({
                 : 'bg-neutral-200 text-CoolNeutral-60 cursor-not-allowed'
             }`}
           >
-            {submitting ? '등록 중...' : '프로젝트 등록하기'}
+            {submitting ? '등록 중...' : submitLabel}
           </button>
         )}
       </div>
