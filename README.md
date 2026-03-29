@@ -21,8 +21,8 @@ proseed/
 │   ├── web/              # Next.js 웹앱 (PWA)
 │   └── api/              # NestJS API 서버
 ├── infra/
-│   ├── aws/              # Terraform (RDS, S3, IAM)
-│   └── k8s/              # Kubernetes manifests
+│   ├── aws/              # Terraform (S3, IAM, Route53)
+│   └── k8s/              # Kubernetes manifests (API, Postgres 등)
 └── .github/workflows/    # CI/CD
 ```
 
@@ -31,7 +31,7 @@ proseed/
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Next.js   │────▶│   NestJS    │────▶│ PostgreSQL  │
-│    (Web)    │     │    (API)    │     │    (RDS)    │
+│    (Web)    │     │    (API)    │     │    (K8s)    │
 └─────────────┘     └──────┬──────┘     └─────────────┘
                           │
                           ▼
@@ -72,7 +72,6 @@ API 서버 필수 환경변수 (`apps/api/.env.example` 참고):
 
 `infra/aws/` 디렉토리에서 관리:
 
-- **RDS**: PostgreSQL 데이터베이스
 - **S3**: 파일 업로드 버킷 (`proseed-uploads`)
 - **IAM**: API 서버용 사용자 및 정책
 - **Route53**: DNS 관리
@@ -82,7 +81,8 @@ API 서버 필수 환경변수 (`apps/api/.env.example` 참고):
 `infra/k8s/` 디렉토리에서 관리:
 
 - **Kustomize** 기반 매니페스트
-- **External Secrets Operator**: AWS Secrets Manager 연동
+- **PostgreSQL**: on-premise Postgres pod (`infra/k8s/postgres/`)
+- **SealedSecrets**: DB 크레덴셜 등 시크릿 암호화 관리
 - **Reflector**: 네임스페이스 간 시크릿 복사
 - **ArgoCD**: GitOps 배포
 
