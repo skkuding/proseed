@@ -22,12 +22,20 @@ export class AuthService {
     })
   }
 
-  async checkIsNewUser(userId: number): Promise<{ isNewUser: boolean }> {
+  async checkIsNewUser(
+    userId: number,
+  ): Promise<{ isNewUser: boolean; nickname: string }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { jobType: true },
+      select: {
+        jobType: true,
+        name: true,
+      },
     })
     if (!user) throw new NotFoundException()
-    return { isNewUser: user.jobType === null }
+    return {
+      isNewUser: user.jobType === null,
+      nickname: user.name,
+    }
   }
 }

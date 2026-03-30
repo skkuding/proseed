@@ -1,8 +1,8 @@
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { getRandomNickname } from '@woowa-babble/random-nickname'
 import { Injectable } from '@nestjs/common'
+import { generateRandomNickname } from './utils/generateRandomNickname'
 
 @Injectable()
 export class BetterAuthService {
@@ -20,7 +20,7 @@ export class BetterAuthService {
           create: {
             before: async (user) => {
               //신규 유저라면 DB에 User 생성하면서 랜덤 닉네임 자동 부여 (name이 NOT NULL이라 일단 넣기)
-              const randomNickname = this.generateRandomNickname()
+              const randomNickname = generateRandomNickname()
               return {
                 data: {
                   ...user,
@@ -46,24 +46,5 @@ export class BetterAuthService {
         },
       },
     }) as unknown as ReturnType<typeof betterAuth>
-  }
-
-  private generateRandomNickname(): string {
-    const types = ['animals', 'heros', 'characters', 'monsters'] as const
-
-    let username = ''
-    let isInvalid = true
-
-    while (isInvalid) {
-      const randomType = types[Math.floor(Math.random() * types.length)]
-      username = getRandomNickname(randomType)
-
-      if (username.length > 12) {
-        continue
-      }
-
-      isInvalid = false
-    }
-    return username
   }
 }
