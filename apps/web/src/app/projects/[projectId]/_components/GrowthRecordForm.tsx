@@ -12,6 +12,7 @@ import { FeedbackTagModal } from '@/components/FeedbackTagModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
+import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
 
 const CATEGORY_LABEL: Record<string, string> = {
   plan: '기획자',
@@ -20,8 +21,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   general: '기타',
 }
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
-type TabLabel = (typeof TABS)[number]
+type TabLabel = JobTab
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.questions> = {
   기획자: 'plan',
@@ -32,7 +32,7 @@ const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.quest
 
 type ImageItem = {
   id: string
-  previewUrl: string
+  preview: string
   uploading: boolean
 }
 
@@ -104,7 +104,7 @@ export function GrowthRecordForm() {
 
     const newImages: ImageItem[] = selected.map((file) => ({
       id: crypto.randomUUID(),
-      previewUrl: URL.createObjectURL(file),
+      preview: URL.createObjectURL(file),
       uploading: true,
     }))
 
@@ -136,7 +136,7 @@ export function GrowthRecordForm() {
   }
 
   return (
-    <div className="flex flex-col gap-8 mt-20 mb-30">
+    <div className="flex flex-col gap-8 mt-10">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
@@ -146,7 +146,7 @@ export function GrowthRecordForm() {
           </p>
         </div>
         <RoleFilterTabs
-          tabs={TABS}
+          tabs={JOB_TABS}
           activeTab={activeTab}
           onTabChange={(tab) => {
             setActiveTab(tab as TabLabel)
@@ -242,7 +242,7 @@ export function GrowthRecordForm() {
                     onClick={() => setImageModalIndex(index)}
                     className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
                   >
-                    <Image src={img.previewUrl} alt="" fill className="object-cover" />
+                    <Image src={img.preview} alt="" fill className="object-cover" />
                     {img.uploading && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

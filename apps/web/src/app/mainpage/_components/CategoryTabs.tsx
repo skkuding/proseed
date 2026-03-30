@@ -2,39 +2,20 @@
 
 import Image from 'next/image'
 import { useRef } from 'react'
+import { categories, type CategoryLabel } from '@/app/_utils/projectConstants'
 
-export const categories = [
-  { label: '전체', icon: undefined },
-  { label: '헬스케어', icon: '/healthcare_color.svg' },
-  { label: '금융', icon: '/money_color.svg' },
-  { label: '공공 · 정부', icon: '/government_color.svg' },
-  { label: '커머스', icon: '/commerce_color.svg' },
-  { label: '교육', icon: '/education_color.svg' },
-  { label: '엔터테인먼트', icon: '/entertainment_color.svg' },
-  { label: '모빌리티', icon: '/mobility_color.svg' },
-  { label: '에너지 · 환경', icon: '/energy_color.svg' },
-  { label: '부동산 · 건설', icon: '/construction_color.svg' },
-  { label: '라이프스타일', icon: '/lifestyle_color.svg' },
-  { label: '생산성', icon: '/production_color.svg' },
-  { label: '커뮤니티', icon: '/community_color.svg' },
-  { label: '인공지능', icon: '/ai_color.svg' },
-] as const
-
-export type CategoryLabel = (typeof categories)[number]['label']
+export { categories, type CategoryLabel }
 
 interface CategoryTabsProps {
   selectedCategory: CategoryLabel
   onSelectCategory: (category: CategoryLabel) => void
 }
 
-export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
+export default function CategoryTabs({ selectedCategory, onSelectCategory }: CategoryTabsProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const handleScrollRight = () => {
-    scrollRef.current?.scrollBy({
-      left: 240,
-      behavior: 'smooth',
-    })
+    scrollRef.current?.scrollBy({ left: 240, behavior: 'smooth' })
   }
 
   return (
@@ -44,7 +25,7 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
         className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {categories.map((category) => {
-          const isAll = category.label === '전체'
+          const isActive = category.label === selectedCategory
 
           return (
             <button
@@ -52,14 +33,14 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
               type="button"
               onClick={() => onSelectCategory(category.label)}
               className={`inline-flex h-12 shrink-0 cursor-pointer items-center rounded-full ${
-                isAll
+                isActive
                   ? 'bg-CoolNeutral-30 text-white'
                   : 'bg-white text-CoolNeutral-20 hover:bg-CoolNeutral-90'
               }`}
             >
               <div
                 className={`flex items-center gap-[6px] ${
-                  isAll ? 'px-6 py-[10px]' : 'py-[10px] pl-3 pr-4'
+                  category.label === '전체' ? 'px-6 py-[10px]' : 'py-[10px] pl-3 pr-4'
                 }`}
               >
                 {category.icon ? (
@@ -71,7 +52,6 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
                     className="h-5 w-5 shrink-0"
                   />
                 ) : null}
-
                 <span className="whitespace-nowrap text-title6_m_20">{category.label}</span>
               </div>
             </button>
@@ -85,7 +65,7 @@ export default function CategoryTabs({ onSelectCategory }: CategoryTabsProps) {
         className="inline-flex h-6 w-6 shrink-0 items-center justify-center cursor-pointer"
         aria-label="다음 카테고리 보기"
       >
-        <Image src="/arrow2_right.svg" alt="다음" width={24} height={24} />
+        <Image src="/arrow2_right_grey.svg" alt="다음" width={24} height={24} />
       </button>
     </div>
   )

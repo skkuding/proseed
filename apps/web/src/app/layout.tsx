@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={pretendard.variable}>
       <body className={`${pretendard.className} bg-background-normal`}>
         <Header />
-        <div className="mx-auto max-w-340">{children}</div>
+        <div className="mx-auto max-w-340 px-10 pb-30">{children}</div>
         <Footer />
         <Toaster position="top-center" />
       </body>

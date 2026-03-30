@@ -6,7 +6,9 @@
     "status": "Ongoing",
     "oneLineDescription": "일상 소비 패턴을 분석하여 탄소 발자국을 계산하고 친환경 대안을 추천하는 친환경 소비 트래커입니다.",
     "category": ["헬스케어", "인공지능"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail.png",
+    "feedbackCount": 15,
+    "growthRecordCount": 5
   },
   {
     "id": 2,
@@ -15,7 +17,9 @@
     "status": "Ongoing",
     "oneLineDescription": "친환경 소비 데이터를 분석하고 리포트를 제공하는 금융 서비스입니다.",
     "category": ["금융"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail2.png",
+    "feedbackCount": 8,
+    "growthRecordCount": 3
   },
   {
     "id": 3,
@@ -24,7 +28,9 @@
     "status": "Completed",
     "oneLineDescription": "민원 데이터를 한눈에 확인할 수 있는 공공 서비스 플랫폼입니다.",
     "category": ["공공 · 정부"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail3.png",
+    "feedbackCount": 22,
+    "growthRecordCount": 7
   },
   {
     "id": 4,
@@ -33,7 +39,9 @@
     "status": "Ongoing",
     "oneLineDescription": "개인 맞춤형 학습 피드백을 제공하는 교육 플랫폼입니다.",
     "category": ["교육"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail4.png",
+    "feedbackCount": 11,
+    "growthRecordCount": 4
   },
   {
     "id": 5,
@@ -42,7 +50,9 @@
     "status": "Ongoing",
     "oneLineDescription": "사용자 취향을 반영한 상품 추천 커머스 서비스입니다.",
     "category": ["커머스"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail5.png",
+    "feedbackCount": 19,
+    "growthRecordCount": 6
   },
   {
     "id": 6,
@@ -51,6 +61,8 @@
     "status": "Ongoing",
     "oneLineDescription": "문서 요약과 아이디어 정리를 도와주는 생산성 AI 툴입니다.",
     "category": ["생산성", "인공지능"],
-    "thumbnailUrl": "/mock/projectdetail/thumbnail.png"
+    "thumbnailUrl": "/mock/projectdetail/thumbnail6.png",
+    "feedbackCount": 14,
+    "growthRecordCount": 5
   }
 ]
