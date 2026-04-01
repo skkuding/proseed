@@ -264,6 +264,7 @@ model Feedback {
   isAdopted       Boolean         @default(false) @map("is_adopted")
   adoptedCategory RecordCategory? @map("adopted_category")
   createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
   submission FeedbackSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   question   FeedbackQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
