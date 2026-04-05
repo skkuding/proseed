@@ -3,9 +3,9 @@ import { IsNotEmpty, IsString } from 'class-validator'
 
 export class OnboardingDto {
   @IsNotEmpty()
-  jobType: JobType
+  jobType!: JobType
 
   @IsNotEmpty()
   @IsString()
-  nickname: string
+  nickname!: string
 }

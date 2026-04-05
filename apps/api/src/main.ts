@@ -14,7 +14,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const betterAuthService = app.get(BetterAuthService)
 
-  app.use('/api/auth', toNodeHandler(betterAuthService.auth)) //소셜 로그인 콜백, 세션 조회 등 better-auth 자동 라우트 동작을 위한 미들웨어 등록
+  //소셜 로그인 callback, 세션 조회 등 better-auth를 미들웨어 등록해서 /api/auth로 들어오는 모든 요청을 처리해버림.
+  app.use('/api/auth', toNodeHandler(betterAuthService.auth))
   app.setGlobalPrefix('api')
   app.enableCors()
   await app.listen(process.env.PORT ?? 4000)

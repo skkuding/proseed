@@ -2,13 +2,17 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { Injectable } from '@nestjs/common'
-import { generateRandomNickname } from './utils/generateRandomNickname'
+import { generateRandomNickname } from '../user/utils/generateRandomNickname'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class BetterAuthService {
   public readonly auth: ReturnType<typeof betterAuth>
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {
     this.auth = betterAuth({
       database: () => prismaAdapter(this.prisma, { provider: 'postgresql' }), //Prisma 어댑터 사용: prisma에서 알아서
       advanced: {
@@ -33,16 +37,16 @@ export class BetterAuthService {
       },
       socialProviders: {
         google: {
-          clientId: process.env.GOOGLE_CLIENT_ID!,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          clientId: this.config.getOrThrow('GOOGLE_CLIENT_ID'),
+          clientSecret: this.config.getOrThrow('GOOGLE_CLIENT_SECRET'),
         },
         kakao: {
-          clientId: process.env.KAKAO_CLIENT_ID!,
-          clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+          clientId: this.config.getOrThrow('KAKAO_CLIENT_ID'),
+          clientSecret: this.config.getOrThrow('KAKAO_CLIENT_SECRET'),
         },
         naver: {
-          clientId: process.env.NAVER_CLIENT_ID!,
-          clientSecret: process.env.NAVER_CLIENT_SECRET!,
+          clientId: this.config.getOrThrow('NAVER_CLIENT_ID'),
+          clientSecret: this.config.getOrThrow('NAVER_CLIENT_SECRET'),
         },
       },
     }) as unknown as ReturnType<typeof betterAuth>
