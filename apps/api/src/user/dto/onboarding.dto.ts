@@ -1,8 +1,8 @@
 import { JobType } from '@prisma/client'
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator'
 
 export class OnboardingDto {
-  @IsNotEmpty()
+  @IsEnum(JobType)
   jobType!: JobType
 
   @IsNotEmpty()

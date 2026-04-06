@@ -30,7 +30,7 @@ export class UserController {
   @Get('nickname')
   @UseGuards(BetterAuthGuard)
   async generateRandomNickname() {
-    return generateRandomNickname()
+    return { nickname: generateRandomNickname() }
   }
 
   @Patch('onboarding') //온보딩 정보 업데이트 후 user 반환
