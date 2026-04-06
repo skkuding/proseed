@@ -39,6 +39,15 @@ class EnvironmentVariables {
   @IsOptional()
   S3_ENDPOINT?: string
 
+  //Better-Auth 환경 변수
+  @IsString()
+  @IsNotEmpty()
+  BETTER_AUTH_SECRET!: string
+
+  //Base URL -> 실제 배포할때 소셜 로그인 callback할때 반드시 필요!!!!
+  @IsString()
+  BETTER_AUTH_URL?: string
+
   //소셜 로그인 환경 변수
   @IsString()
   @IsNotEmpty()

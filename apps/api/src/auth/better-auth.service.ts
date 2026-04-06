@@ -14,6 +14,8 @@ export class BetterAuthService {
     private readonly config: ConfigService,
   ) {
     this.auth = betterAuth({
+      secret: this.config.getOrThrow('BETTER_AUTH_SECRET'),
+      baseURL: this.config.getOrThrow('BETTER_AUTH_URL'),
       database: () => prismaAdapter(this.prisma, { provider: 'postgresql' }), //Prisma 어댑터 사용: prisma에서 알아서
       advanced: {
         database: { generateId: false }, //better-auth 대신 DB가 직접 id 생성 담당 (autoincrement 유지)
