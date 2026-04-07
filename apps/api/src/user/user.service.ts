@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 
-import { User } from '@prisma/client'
+import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
 
 @Injectable()
@@ -16,13 +16,20 @@ export class UserService {
     onboardingDto: OnboardingDto,
   ): Promise<User> {
     const { jobType, nickname } = onboardingDto
-    return await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        jobType,
-        name: nickname,
-      },
-    })
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          jobType,
+          name: nickname,
+        },
+      })
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code == 'P2025') throw new NotFoundException()
+      }
+      throw error
+    }
   }
 
   async checkIsNewUser(
