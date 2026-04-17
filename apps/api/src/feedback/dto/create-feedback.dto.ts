@@ -25,7 +25,7 @@ export class FeedbackItemDto {
 export class CreateFeedbackDto {
   @IsString()
   @IsNotEmpty()
-  onelineReview!: string
+  oneLineReview!: string
 
   @IsArray()
   @ValidateNested({ each: true })

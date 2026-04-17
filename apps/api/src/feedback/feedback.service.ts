@@ -18,7 +18,7 @@ export class FeedbackService {
         userId,
         projectId,
         versionId,
-        onelineReview: dto.onelineReview,
+        oneLineReview: dto.oneLineReview,
         feedbacks: {
           create: dto.feedbacks.map((f) => ({
             questionId: f.questionId,
