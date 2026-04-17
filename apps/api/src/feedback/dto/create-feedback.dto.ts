@@ -23,14 +23,6 @@ export class FeedbackItemDto {
 }
 
 export class CreateFeedbackDto {
-  @IsNumber()
-  @IsNotEmpty()
-  projectId!: number
-
-  @IsNumber()
-  @IsNotEmpty()
-  versionId!: number
-
   @IsString()
   @IsNotEmpty()
   onelineReview!: string

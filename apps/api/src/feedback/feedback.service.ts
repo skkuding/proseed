@@ -1,26 +1,52 @@
 import { Injectable } from '@nestjs/common'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { UpdateFeedbackDto } from './dto/update-feedback.dto'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class FeedbackService {
-  create(createFeedbackDto: CreateFeedbackDto) {
-    return 'This action adds a new feedback'
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all feedback`
-  }
+  async create(
+    userId: number,
+    projectId: number,
+    versionId: number,
+    dto: CreateFeedbackDto,
+  ) {
+    const submission = await this.prisma.feedbackSubmission.create({
+      data: {
+        userId,
+        projectId,
+        versionId,
+        onelineReview: dto.onelineReview,
+        feedbacks: {
+          create: dto.feedbacks.map((f) => ({
+            questionId: f.questionId,
+            content: f.content,
+            // imageURL 어떻게 할까요?
+            ...(f.imageURL ? { images: { create: { url: f.imageURL } } } : {}),
+          })),
+        },
+      },
+      include: {
+        feedbacks: true,
+      },
+    })
 
-  findOne(id: number) {
-    return `This action returns a #${id} feedback`
-  }
-
-  update(id: number, updateFeedbackDto: UpdateFeedbackDto) {
-    return `This action updates a #${id} feedback`
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} feedback`
+    return {
+      success: true,
+      data: {
+        submittedCount: submission.feedbacks.length,
+        feedbacks: submission.feedbacks.map((f) => ({
+          id: f.id,
+          questionId: f.questionId,
+          versionId: submission.versionId,
+          userId: submission.userId,
+          content: f.content,
+          isAdopted: false,
+          createdAt: f.createdAt,
+        })),
+      },
+    }
   }
 }
