@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { PrismaService } from '../prisma/prisma.service'
+import { EntityNotExistException } from 'src/common/exceptions/business.exception'
 
 @Injectable()
 export class FeedbackService {
@@ -13,6 +14,35 @@ export class FeedbackService {
     versionId: number,
     dto: CreateFeedbackDto,
   ) {
+    const targetVersion = await this.prisma.projectVersion.findFirst({
+      where: {
+        id: versionId,
+        projectId: projectId,
+      },
+      select: {
+        feedbackQuestions: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    if (!targetVersion) {
+      throw new EntityNotExistException('projectVersion')
+    }
+
+    const validQuestionIds = new Set(
+      targetVersion.feedbackQuestions.map((q) => q.id),
+    )
+    const isAllQuestionsValid = dto.feedbacks.every((f) =>
+      validQuestionIds.has(f.questionId),
+    )
+
+    if (!isAllQuestionsValid) {
+      throw new EntityNotExistException('feedbackQuestion')
+    }
+
     const submission = await this.prisma.feedbackSubmission.create({
       data: {
         userId,
