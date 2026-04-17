@@ -253,6 +253,8 @@ model FeedbackSubmission {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   feedbacks Feedback[]
 
+  @@index([projectId])
+  @@index([versionId, userId])
   @@map("feedback_submission")
 }
 
