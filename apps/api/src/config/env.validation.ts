@@ -1,9 +1,15 @@
 import { plainToInstance } from 'class-transformer'
-import { IsNumber, IsOptional, IsString, validateSync } from 'class-validator'
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  validateSync,
+} from 'class-validator'
 
 class EnvironmentVariables {
   @IsString()
-  DATABASE_URL: string
+  DATABASE_URL!: string
 
   @IsNumber()
   @IsOptional()
@@ -15,13 +21,13 @@ class EnvironmentVariables {
 
   // S3 / MinIO (required)
   @IsString()
-  AWS_ACCESS_KEY_ID: string
+  AWS_ACCESS_KEY_ID!: string
 
   @IsString()
-  AWS_SECRET_ACCESS_KEY: string
+  AWS_SECRET_ACCESS_KEY!: string
 
   @IsString()
-  S3_BUCKET_NAME: string
+  S3_BUCKET_NAME!: string
 
   // Optional: region defaults to ap-northeast-2
   @IsString()
@@ -32,6 +38,41 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   S3_ENDPOINT?: string
+
+  //Better-Auth 환경 변수
+  @IsString()
+  @IsNotEmpty()
+  BETTER_AUTH_SECRET!: string
+
+  //Base URL -> 실제 배포할때 소셜 로그인 callback할때 반드시 필요!!!!
+  @IsString()
+  @IsNotEmpty()
+  BETTER_AUTH_URL!: string
+
+  //소셜 로그인 환경 변수
+  @IsString()
+  @IsNotEmpty()
+  GOOGLE_CLIENT_ID!: string
+
+  @IsString()
+  @IsNotEmpty()
+  GOOGLE_CLIENT_SECRET!: string
+
+  @IsString()
+  @IsNotEmpty()
+  KAKAO_CLIENT_ID!: string
+
+  @IsString()
+  @IsNotEmpty()
+  KAKAO_CLIENT_SECRET!: string
+
+  @IsString()
+  @IsNotEmpty()
+  NAVER_CLIENT_ID!: string
+
+  @IsString()
+  @IsNotEmpty()
+  NAVER_CLIENT_SECRET!: string
 }
 
 export function validate(config: Record<string, unknown>) {

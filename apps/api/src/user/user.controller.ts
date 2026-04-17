@@ -6,37 +6,39 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common'
+
 import { UserService } from './user.service'
-import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+
+import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
+import type { RequestWithUser } from 'src/common/types/request-with-user.type'
+import { generateRandomNickname } from 'src/user/utils/generateRandomNickname'
+import { OnboardingDto } from './dto/onboarding.dto'
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto)
+  @Get('check') //기존 or 신규 유저인지 확인 + 초기 생성 닉네임 반환
+  @UseGuards(BetterAuthGuard)
+  async checkIsNewUser(@Req() req: RequestWithUser) {
+    return await this.userService.checkIsNewUser(req.user.id)
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll()
+  @Get('nickname')
+  @UseGuards(BetterAuthGuard)
+  async generateRandomNickname() {
+    return { nickname: generateRandomNickname() }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id)
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto)
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id)
+  @Patch('onboarding') //온보딩 정보 업데이트 후 user 반환
+  @UseGuards(BetterAuthGuard)
+  async onboarding(
+    @Req() req: RequestWithUser,
+    @Body() onboardingDto: OnboardingDto,
+  ) {
+    return await this.userService.onboarding(req.user.id, onboardingDto)
   }
 }
