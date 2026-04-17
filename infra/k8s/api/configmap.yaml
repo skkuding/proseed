@@ -8,3 +8,4 @@ data:
   AWS_REGION: 'ap-northeast-2'
   S3_BUCKET_NAME: 'proseed-uploads'
   OTEL_EXPORTER_OTLP_ENDPOINT: 'http://simplest-collector.observability.svc.cluster.local:4317'
+  BETTER_AUTH_URL: 'https://proseednow.com'
