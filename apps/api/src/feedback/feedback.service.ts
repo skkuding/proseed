@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service'
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
+  async createFeedback(
     userId: number,
     projectId: number,
     versionId: number,
