@@ -49,9 +49,9 @@ model User {
   birth            String?
   profileImageUrl  String?  @map("profile_image_url")
 
-  projectRoles ProjectRole[]
-  feedbacks    Feedback[]
-  projects     Project[]
+  projectRoles        ProjectRole[]
+  feedbackSubmissions FeedbackSubmission[]
+  projects            Project[]
 
   emailVerified Boolean   @default(false) @map("email_verified")
   updatedAt     DateTime  @updatedAt @map("updated_at")
@@ -132,9 +132,10 @@ model Project {
   createdAt          DateTime          @default(now()) @map("created_at")
   updatedAt          DateTime          @updatedAt @map("updated_at")
 
-  versions     ProjectVersion[]
-  projectRoles ProjectRole[]
-  images       ProjectImage[]
+  versions            ProjectVersion[]
+  projectRoles        ProjectRole[]
+  feedbackSubmissions FeedbackSubmission[]
+  images              ProjectImage[]
 
   @@map("project")
 }
@@ -161,10 +162,10 @@ model ProjectVersion {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  growthRecords     GrowthRecord[]
-  feedbackQuestions FeedbackQuestion[]
-  feedbacks         Feedback[]
+  project             Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  growthRecords       GrowthRecord[]
+  feedbackQuestions   FeedbackQuestion[]
+  feedbackSubmissions FeedbackSubmission[]
 
   @@unique([projectId, version])
   @@map("project_version")
@@ -238,19 +239,50 @@ model GrowthRecordContent {
   @@map("growth_record_content")
 }
 
+model FeedbackSubmission {
+  id            Int      @id @default(autoincrement())
+  projectId     Int      @map("project_id")
+  versionId     Int      @map("version_id")
+  userId        Int      @map("user_id")
+  oneLineReview String   @map("oneline_review")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version   ProjectVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feedbacks Feedback[]
+
+  @@index([projectId])
+  @@index([versionId, userId])
+  @@map("feedback_submission")
+}
+
 model Feedback {
   id              Int             @id @default(autoincrement())
+  submissionId    Int             @map("submission_id")
   questionId      Int             @map("question_id")
-  versionId       Int             @map("version_id")
-  userId          Int             @map("user_id")
   content         String
   isAdopted       Boolean         @default(false) @map("is_adopted")
   adoptedCategory RecordCategory? @map("adopted_category")
   createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  question  FeedbackQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  createdBy User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  version   ProjectVersion   @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  submission FeedbackSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question   FeedbackQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  images     FeedbackImage[]
 
   @@map("feedback")
+}
+
+model FeedbackImage {
+  id         Int      @id @default(autoincrement())
+  feedbackId Int      @map("feedback_id")
+  url        String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@map("feedback_image")
 }
