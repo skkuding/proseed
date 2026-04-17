@@ -244,7 +244,7 @@ model FeedbackSubmission {
   projectId     Int      @map("project_id")
   versionId     Int      @map("version_id")
   userId        Int      @map("user_id")
-  onelineReview String   @map("oneline_review")
+  oneLineReview String   @map("oneline_review")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

@@ -272,7 +272,12 @@ export class GrowthRecordService {
       // 해당 피드백 작성자가 현재 버전에서 이미 채택받은 피드백 개수 카운트
       const adoptedCount = await tx.feedback.count({
         where: {
-          submission: { versionId, userId: feedback.submission.userId },
+          submission: {
+            is: {
+              versionId,
+              userId: feedback.submission.userId,
+            },
+          },
           isAdopted: true,
         },
       })
