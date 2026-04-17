@@ -16,7 +16,7 @@ export class BetterAuthService {
     this.auth = betterAuth({
       secret: this.config.getOrThrow('BETTER_AUTH_SECRET'),
       baseURL: this.config.getOrThrow('BETTER_AUTH_URL'),
-      database: () => prismaAdapter(this.prisma, { provider: 'postgresql' }), //Prisma 어댑터 사용: prisma에서 알아서
+      database: () => prismaAdapter(this.prisma, { provider: 'postgresql' }), //better-auth가 Prisma를 통해 DB에 접근
       advanced: {
         database: { generateId: false }, //DB에 저장될때만 Int로 저장되고 반환은 string
       },
