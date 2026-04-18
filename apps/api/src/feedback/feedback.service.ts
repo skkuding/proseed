@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { PrismaService } from '../prisma/prisma.service'
-import { EntityNotExistException } from 'src/common/exceptions/business.exception'
+import {
+  EntityNotExistException,
+  UnprocessableDataException,
+} from 'src/common/exceptions/business.exception'
 
 @Injectable()
 export class FeedbackService {
@@ -23,6 +26,7 @@ export class FeedbackService {
         feedbackQuestions: {
           select: {
             id: true,
+            isRequired: true,
           },
         },
       },
@@ -35,12 +39,33 @@ export class FeedbackService {
     const validQuestionIds = new Set(
       targetVersion.feedbackQuestions.map((q) => q.id),
     )
-    const isAllQuestionsValid = dto.feedbacks.every((f) =>
-      validQuestionIds.has(f.questionId),
-    )
+    const requiredQuestionIds = targetVersion.feedbackQuestions
+      .filter((q) => q.isRequired)
+      .map((q) => q.id)
 
-    if (!isAllQuestionsValid) {
+    const submittedQuestionIds = dto.feedbacks.map((f) => f.questionId)
+    const submittedQuestionSet = new Set(submittedQuestionIds)
+
+    // 1. 모든 제출된 질문 ID가 해당 버전의 유효한 질문인지 확인
+    if (!submittedQuestionIds.every((id) => validQuestionIds.has(id))) {
       throw new EntityNotExistException('feedbackQuestion')
+    }
+
+    // 2. 동일한 질문에 대한 중복 답변이 있는지 확인
+    if (submittedQuestionSet.size !== submittedQuestionIds.length) {
+      throw new UnprocessableDataException(
+        'Duplicate feedback for the same question',
+      )
+    }
+
+    // 3. 필수 질문이 모두 포함되었는지 확인
+    const missingRequired = requiredQuestionIds.filter(
+      (id) => !submittedQuestionSet.has(id),
+    )
+    if (missingRequired.length > 0) {
+      throw new UnprocessableDataException(
+        'Missing required questions: ' + missingRequired.join(', '),
+      )
     }
 
     const submission = await this.prisma.feedbackSubmission.create({
