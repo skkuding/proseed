@@ -8,7 +8,7 @@ import { EntityNotExistException } from 'src/common/exceptions/business.exceptio
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createFeedback(
+  async create(
     userId: number,
     projectId: number,
     versionId: number,
@@ -53,13 +53,22 @@ export class FeedbackService {
           create: dto.feedbacks.map((f) => ({
             questionId: f.questionId,
             content: f.content,
-            // imageURL 어떻게 할까요?
-            ...(f.imageURL ? { images: { create: { url: f.imageURL } } } : {}),
+            images: f.imageURL
+              ? {
+                  create: {
+                    url: f.imageURL,
+                  },
+                }
+              : undefined,
           })),
         },
       },
       include: {
-        feedbacks: true,
+        feedbacks: {
+          include: {
+            images: true,
+          },
+        },
       },
     })
 
@@ -73,6 +82,7 @@ export class FeedbackService {
           versionId: submission.versionId,
           userId: submission.userId,
           content: f.content,
+          imageUrl: f.images[0]?.url || null,
           isAdopted: false,
           createdAt: f.createdAt,
         })),
