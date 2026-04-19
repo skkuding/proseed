@@ -24,15 +24,15 @@ export class BetterAuthService {
         //user:create:before: User를 DB에 생성하기 전 실행되는 hook
         user: {
           create: {
-            before: async (user) => {
+            before: (user) => {
               //신규 유저라면 DB에 User 생성하면서 랜덤 닉네임 자동 부여 (name이 NOT NULL이라 일단 넣기)
               const randomNickname = generateRandomNickname()
-              return {
+              return Promise.resolve({
                 data: {
                   ...user,
                   name: randomNickname,
                 },
-              }
+              })
             },
           },
         },
