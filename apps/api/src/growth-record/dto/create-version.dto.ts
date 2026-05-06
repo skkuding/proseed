@@ -33,11 +33,13 @@ export class AtLeastOneQuestionConstraint implements ValidatorConstraintInterfac
   validate(feedbackQuestions: FeedbackQuestionsDto) {
     if (!feedbackQuestions) return false
 
-    const totalQuestions =
-      (feedbackQuestions.PLAN?.context?.length ?? 0) +
-      (feedbackQuestions.DESIGN?.context?.length ?? 0) +
-      (feedbackQuestions.DEVELOPMENT?.context?.length ?? 0) +
-      (feedbackQuestions.GENERAL?.context?.length ?? 0)
+    const totalQuestions = (
+      Object.values(feedbackQuestions) as CategoryQuestionsDto[]
+    ).reduce(
+      (sum: number, category: CategoryQuestionsDto) =>
+        sum + (category?.context?.length ?? 0),
+      0,
+    )
 
     return totalQuestions >= 1
   }

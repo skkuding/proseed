@@ -76,17 +76,22 @@ export class ProjectService {
   ): Promise<Map<number, number>> {
     if (projectIds.length === 0) return new Map()
 
-    const feedbackCounts = await this.prisma.feedbackSubmission.groupBy({
-      by: ['projectId'],
-      where: {
-        projectId: { in: projectIds },
+    const submissionsWithCounts = await this.prisma.feedbackSubmission.findMany(
+      {
+        where: { projectId: { in: projectIds } },
+        select: {
+          projectId: true,
+          _count: { select: { feedbacks: true } },
+        },
       },
-      _count: { _all: true },
-    })
+    )
 
     const result = new Map<number, number>()
-    for (const count of feedbackCounts) {
-      result.set(count.projectId, count._count._all)
+    for (const sub of submissionsWithCounts) {
+      result.set(
+        sub.projectId,
+        (result.get(sub.projectId) ?? 0) + sub._count.feedbacks,
+      )
     }
 
     return result
