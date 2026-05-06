@@ -1,5 +1,10 @@
 import { getRandomNickname } from '@woowa-babble/random-nickname'
 
+// @woowa-babble/random-nickname doesn't ship types; assert the signature we use.
+const getRandomNicknameTyped = getRandomNickname as (
+  type: 'animals' | 'heros' | 'characters' | 'monsters',
+) => string
+
 export function generateRandomNickname(): string {
   const types = ['animals', 'heros', 'characters', 'monsters'] as const
 
@@ -8,7 +13,7 @@ export function generateRandomNickname(): string {
 
   while (isInvalid) {
     const randomType = types[Math.floor(Math.random() * types.length)]
-    username = getRandomNickname(randomType)
+    username = getRandomNicknameTyped(randomType)
 
     if (username.length > 12) {
       continue

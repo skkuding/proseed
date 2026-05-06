@@ -4,10 +4,18 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
   validateSync,
 } from 'class-validator'
 
+const isProduction = (env: EnvironmentVariables) =>
+  env.NODE_ENV === 'production'
+
 class EnvironmentVariables {
+  @IsString()
+  @IsOptional()
+  NODE_ENV?: string
+
   @IsString()
   DATABASE_URL!: string
 
@@ -39,40 +47,46 @@ class EnvironmentVariables {
   @IsOptional()
   S3_ENDPOINT?: string
 
-  //Better-Auth 환경 변수
+  // Better-Auth 환경 변수
   @IsString()
   @IsNotEmpty()
   BETTER_AUTH_SECRET!: string
 
-  //Base URL -> 실제 배포할때 소셜 로그인 callback할때 반드시 필요!!!!
+  // Optional: library falls back to localhost in dev; production gets the public URL from configmap
   @IsString()
-  @IsNotEmpty()
-  BETTER_AUTH_URL!: string
+  @IsOptional()
+  BETTER_AUTH_URL?: string
 
-  //소셜 로그인 환경 변수
+  // OAuth (required in production for social login, optional locally)
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  GOOGLE_CLIENT_ID!: string
+  GOOGLE_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  GOOGLE_CLIENT_SECRET!: string
+  GOOGLE_CLIENT_SECRET?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  KAKAO_CLIENT_ID!: string
+  KAKAO_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  KAKAO_CLIENT_SECRET!: string
+  KAKAO_CLIENT_SECRET?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  NAVER_CLIENT_ID!: string
+  NAVER_CLIENT_ID?: string
 
+  @ValidateIf(isProduction)
   @IsString()
   @IsNotEmpty()
-  NAVER_CLIENT_SECRET!: string
+  NAVER_CLIENT_SECRET?: string
 }
 
 export function validate(config: Record<string, unknown>) {
