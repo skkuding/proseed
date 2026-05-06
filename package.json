@@ -20,6 +20,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "prisma": "6.19.2",
     "typescript-eslint": "^8.50.1"
   },
   "lint-staged": {
@@ -27,6 +28,7 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md,css,yaml,yml}": "prettier --write"
+    "*.{json,md,css,yaml,yml}": "prettier --write",
+    "*.prisma": "prisma format --schema"
   }
 }

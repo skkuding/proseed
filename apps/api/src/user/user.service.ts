@@ -1,35 +1,51 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager'
-import { Injectable, Inject, Logger } from '@nestjs/common'
-import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { ConfigService } from '@nestjs/config'
+
+import { Prisma, User } from '@prisma/client'
+import { OnboardingDto } from './dto/onboarding.dto'
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name)
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
-  ) {}
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user'
+  constructor(private readonly prisma: PrismaService) {}
+
+  //신규 회원일 경우 온보딩 정보 입력
+  async onboarding(
+    userId: number,
+    onboardingDto: OnboardingDto,
+  ): Promise<User> {
+    const { jobType, nickname } = onboardingDto
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          jobType,
+          name: nickname,
+        },
+      })
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code == 'P2025') throw new NotFoundException()
+      }
+      throw error
+    }
   }
 
-  findAll() {
-    return `This action returns all user`
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`
+  async checkIsNewUser(
+    userId: number,
+  ): Promise<{ isNewUser: boolean; nickname: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        jobType: true,
+        name: true,
+      },
+    })
+    if (!user) throw new NotFoundException()
+    return {
+      isNewUser: user.jobType === null,
+      nickname: user.name,
+    }
   }
 }
