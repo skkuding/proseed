@@ -6,6 +6,7 @@ import {
   EntityNotExistException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
+import { success } from 'better-auth'
 
 @Injectable()
 export class FeedbackService {
@@ -112,6 +113,41 @@ export class FeedbackService {
           createdAt: f.createdAt,
         })),
       },
+    }
+  }
+
+  async findAllQuestions(projectId: number, versionId: number) {
+    //1. 해당 버전이 프로젝트에 존재하는지 확인하며 질문 가져오기
+    const targetVersion = await this.prisma.projectVersion.findFirst({
+      where: {
+        id: versionId,
+        projectId: projectId,
+      },
+      include: {
+        feedbackQuestions: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    })
+
+    //2. 해당 버전이 없으면 예외 던지기
+    if (!targetVersion) {
+      throw new EntityNotExistException('projectVersion')
+    }
+
+    //3. 데이터를 포멧에 맞춰 반환
+    return {
+      success: true,
+      data: targetVersion.feedbackQuestions.map((q) => ({
+        id: q.id,
+        category: q.category,
+        title: q.title,
+        description: q.description,
+        order: q.order,
+        required: q.isRequired,
+      })),
     }
   }
 }

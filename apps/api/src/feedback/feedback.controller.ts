@@ -16,13 +16,13 @@ import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
-@Controller('project/:projectId/versions/:versionId/feedbacks')
+@Controller('project/:projectId/versions/:versionId/')
+@UseGuards(BetterAuthGuard)
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  // POST project/:id/versions/:versionId/feedbacks
-  @Post()
-  @UseGuards(BetterAuthGuard)
+  // POST project/:projectId/versions/:versionId/feedbacks
+  @Post('feedbacks')
   async create(
     @Req() req: RequestWithUser,
     @Param('projectId', ParseIntPipe) projectId: number,
@@ -36,5 +36,14 @@ export class FeedbackController {
       versionId,
       createFeedbackDto,
     )
+  }
+
+  // GET project/:projectId/versions/:versionId/feedbackQuestions
+  @Get('feedbackQuestions')
+  async findAllQuestions(
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ) {
+    return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
 }
