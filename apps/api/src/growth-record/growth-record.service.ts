@@ -101,7 +101,7 @@ export class GrowthRecordService {
         },
         include: {
           growthRecords: { include: { contents: true, images: true } },
-          feedbackQuestions: true,
+          feedbackQuestions: { orderBy: { order: 'asc' } },
         },
       })
 
