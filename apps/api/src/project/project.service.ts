@@ -74,20 +74,14 @@ export class ProjectService {
   private async getFeedbackCountsByProjectIds(
     projectIds: number[],
   ): Promise<Map<number, number>> {
-    if (projectIds.length === 0) {
-      return new Map()
-    }
+    if (projectIds.length === 0) return new Map()
 
     const submissionsWithCounts = await this.prisma.feedbackSubmission.findMany(
       {
-        where: {
-          projectId: { in: projectIds },
-        },
+        where: { projectId: { in: projectIds } },
         select: {
           projectId: true,
-          _count: {
-            select: { feedbacks: true },
-          },
+          _count: { select: { feedbacks: true } },
         },
       },
     )

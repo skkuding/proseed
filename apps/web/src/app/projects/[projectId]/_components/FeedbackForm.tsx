@@ -3,15 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Image from 'next/image'
-import { Dot, ImageIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, Dot, ImageIcon, Trash2 } from 'lucide-react'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import Editor from '@/components/mdxEditor/Editor'
-import { ImageDeleteModal } from '@/components/ImageDeleteModal'
-import { ChevronRightIcon } from 'lucide-react'
 
 const latestVersionId = versionList[0].id.toString()
 const ONE_LINE_MAX = 200
@@ -28,7 +26,7 @@ const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions
 
 type ImageItem = {
   id: string
-  preview: string
+  previewUrl: string
   key?: string
   uploading: boolean
 }
@@ -57,16 +55,10 @@ export function CreateFeedbackContent() {
   const searchParams = useSearchParams()
   const params = useParams()
   const version = searchParams.get('version')
-  const rolesParam = searchParams.get('roles')
-  const allowedCategories = rolesParam ? rolesParam.split(',') : null
-
-  const allowedTabs = allowedCategories
-    ? (TABS.filter((t) => allowedCategories.includes(TAB_TO_CATEGORY[t])) as TabLabel[])
-    : ([...TABS] as TabLabel[])
 
   const isLatestVersion = version === latestVersionId
 
-  const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
   const [oneLineReview, setOneLineReview] = useState('')
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [questionImages, setQuestionImages] = useState<Record<number, ImageItem[]>>({})
@@ -116,7 +108,7 @@ export function CreateFeedbackContent() {
 
     const newImages: ImageItem[] = selected.map((file) => ({
       id: crypto.randomUUID(),
-      preview: URL.createObjectURL(file),
+      previewUrl: URL.createObjectURL(file),
       uploading: true,
     }))
 
@@ -174,7 +166,7 @@ export function CreateFeedbackContent() {
           </p>
         </div>
         <RoleFilterTabs
-          tabs={allowedTabs}
+          tabs={TABS}
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />
@@ -256,7 +248,7 @@ export function CreateFeedbackContent() {
                       onClick={() => setImageModal({ questionId: q.questionId, index })}
                       className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
                     >
-                      <Image src={img.preview} alt="" fill className="object-cover" />
+                      <Image src={img.previewUrl} alt="" fill className="object-cover" />
                       {img.uploading && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                           <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -319,25 +311,54 @@ export function CreateFeedbackContent() {
         onConfirm={handleLeaveConfirm}
       />
 
-      <ImageDeleteModal
-        isOpen={!!imageModal && !!modalImage}
-        images={modalImages}
-        currentIndex={imageModal?.index ?? 0}
-        onClose={() => setImageModal(null)}
-        onPrev={() =>
-          setImageModal((prev) =>
-            prev
-              ? { ...prev, index: (prev.index - 1 + modalImages.length) % modalImages.length }
-              : null
-          )
-        }
-        onNext={() =>
-          setImageModal((prev) =>
-            prev ? { ...prev, index: (prev.index + 1) % modalImages.length } : null
-          )
-        }
-        onDelete={() => imageModal && removeImage(imageModal.questionId, imageModal.index)}
-      />
+      {/* Image modal */}
+      {imageModal && modalImage && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70"
+          onClick={() => setImageModal(null)}
+        >
+          {/* Image + nav */}
+          <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() =>
+                setImageModal((prev) =>
+                  prev
+                    ? { ...prev, index: (prev.index - 1 + modalImages.length) % modalImages.length }
+                    : null
+                )
+              }
+              className="size-10 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 hover:cursor-pointer transition-colors"
+            >
+              <ChevronLeftIcon className="size-6" />
+            </button>
+            <div className="relative w-175 h-100 rounded-2xl overflow-hidden">
+              <Image src={modalImage.previewUrl} alt="" fill className="object-contain" />
+            </div>
+            <button
+              onClick={() =>
+                setImageModal((prev) =>
+                  prev ? { ...prev, index: (prev.index + 1) % modalImages.length } : null
+                )
+              }
+              className="size-10 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 hover:cursor-pointer transition-colors"
+            >
+              <ChevronRightIcon className="size-6" />
+            </button>
+          </div>
+
+          {/* Delete button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              removeImage(imageModal.questionId, imageModal.index)
+            }}
+            className="mt-4 flex w-225 justify-center h-13 items-center gap-2 px-6 py-3.5 bg-white rounded-lg text-CoolNeutral-20 text-sub3_sb_16 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+          >
+            <Trash2 className="size-4" />
+            이미지 삭제하기
+          </button>
+        </div>
+      )}
     </div>
   )
 }

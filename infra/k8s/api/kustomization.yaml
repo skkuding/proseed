@@ -6,8 +6,8 @@ resources:
   - aws-credentials.yaml
   - configmap.yaml
   - deployment.yaml
+  - external-secret.yaml
   - ingress.yaml
   - namespace.yaml
   - oauth-credentials.yaml
   - service.yaml
-  - migration.yaml

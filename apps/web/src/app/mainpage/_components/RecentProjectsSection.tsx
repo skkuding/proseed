@@ -40,7 +40,7 @@ export default function RecentProjectsSection() {
         <Link href="/navigate">
           <button type="button" className="flex items-center text-title6_m_20 cursor-pointer">
             전체 보기
-            <Image src="/arrow2_right_grey.svg" alt="다음" width={24} height={24} />
+            <Image src="/arrow2_right.svg" alt="다음" width={24} height={24} />
           </button>
         </Link>
       </div>

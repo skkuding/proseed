@@ -4,6 +4,8 @@ kind: Kustomization
 namespace: proseed-preview
 
 resources:
+  - namespace.yaml
+  - certificate.yaml
   - configmap.yaml
   - deployment.yaml
   - service.yaml

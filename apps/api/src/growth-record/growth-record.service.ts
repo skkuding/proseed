@@ -1,18 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import { RecordCategory } from '@prisma/client'
+import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import {
   ConflictFoundException,
   DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
-  UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import type { CreateVersionDto } from './dto/create-version.dto'
 
-const FEEDBACK_QUESTIONS_PER_CATEGORY = { min: 1, max: 4 }
+const FEEDBACK_CATEGORIES: RecordCategory[] = [
+  RecordCategory.PLAN,
+  RecordCategory.DESIGN,
+  RecordCategory.DEVELOPMENT,
+  RecordCategory.GENERAL,
+]
 
 @Injectable()
 export class GrowthRecordService {
@@ -42,7 +46,15 @@ export class GrowthRecordService {
       )
     }
 
-    this.validateFeedbackQuestionsPerCategory(dto.feedbackQuestions)
+    const feedbackQuestionRows = FEEDBACK_CATEGORIES.flatMap((category) =>
+      (dto.feedbackQuestions[category]?.context ?? []).map((title, order) => ({
+        category,
+        title,
+        description: '',
+        order,
+        isRequired: false,
+      })),
+    )
 
     return this.prisma.$transaction(async (tx) => {
       // 버전명 중복 검사는 트랜잭션 내에서 수행하여 경합을 방지
@@ -84,18 +96,12 @@ export class GrowthRecordService {
             })),
           },
           feedbackQuestions: {
-            create: dto.feedbackQuestions.map((q, i) => ({
-              category: q.category,
-              title: q.content,
-              description: '',
-              order: i,
-              isRequired: q.isRequired ?? false,
-            })),
+            create: feedbackQuestionRows,
           },
         },
         include: {
           growthRecords: { include: { contents: true, images: true } },
-          feedbackQuestions: true,
+          feedbackQuestions: { orderBy: { order: 'asc' } },
         },
       })
 
@@ -119,13 +125,9 @@ export class GrowthRecordService {
 
       return {
         ...version,
-        feedbackQuestions: version.feedbackQuestions.map((q) => ({
-          id: q.id,
-          category: q.category,
-          content: q.title,
-          isRequired: q.isRequired,
-          order: q.order,
-        })),
+        feedbackQuestions: this.groupFeedbackQuestions(
+          version.feedbackQuestions,
+        ),
       }
     })
   }
@@ -172,32 +174,22 @@ export class GrowthRecordService {
     return {
       ...version,
       growthRecords: resolved,
-      feedbackQuestions: version.feedbackQuestions.map((q) => ({
-        id: q.id,
-        category: q.category,
-        content: q.title,
-        isRequired: q.isRequired,
-        order: q.order,
-      })),
+      feedbackQuestions: this.groupFeedbackQuestions(version.feedbackQuestions),
     }
   }
 
-  private validateFeedbackQuestionsPerCategory(
-    questions: { category: RecordCategory }[],
-  ) {
-    const counts = new Map<RecordCategory, number>()
+  private groupFeedbackQuestions(
+    questions: { category: RecordCategory; title: string }[],
+  ): Record<RecordCategory, { context: string[] }> {
+    const map = Object.fromEntries(
+      FEEDBACK_CATEGORIES.map((cat) => [cat, { context: [] as string[] }]),
+    ) as Record<RecordCategory, { context: string[] }>
+
     for (const q of questions) {
-      counts.set(q.category, (counts.get(q.category) ?? 0) + 1)
+      map[q.category].context.push(q.title)
     }
 
-    for (const [category, count] of counts) {
-      const { min, max } = FEEDBACK_QUESTIONS_PER_CATEGORY
-      if (count < min || count > max) {
-        throw new UnprocessableDataException(
-          `Category '${category}' has ${count} feedback questions (allowed: ${min}~${max})`,
-        )
-      }
-    }
+    return map
   }
 
   private async resolveImageUrls<
@@ -244,23 +236,21 @@ export class GrowthRecordService {
     // 2. 트랜잭션: 피드백 검증 및 채택 처리, 티켓 보상 (+3, +2, +0 방어 로직)
     const result = await this.prisma.$transaction(async (tx) => {
       // 피드백 존재 확인 및 교차 검증 (트랜잭션 내부 조회로 경합 방지)
-      const feedback = await tx.feedback.findUnique({
-        where: { id: feedbackId },
-        include: {
+      const feedback = await tx.feedback.findFirst({
+        where: {
+          id: feedbackId,
           submission: {
-            select: {
-              userId: true,
-              versionId: true,
-              projectId: true,
-            },
+            versionId,
+            projectId, // 프로젝트 ID 교차 검증
           },
         },
+        select: {
+          id: true,
+          isAdopted: true,
+          submission: { select: { userId: true } },
+        },
       })
-      if (
-        !feedback ||
-        feedback.submission.versionId !== versionId ||
-        feedback.submission.projectId !== projectId
-      ) {
+      if (!feedback) {
         throw new EntityNotExistException('Feedback')
       }
 
@@ -273,10 +263,8 @@ export class GrowthRecordService {
       const adoptedCount = await tx.feedback.count({
         where: {
           submission: {
-            is: {
-              versionId,
-              userId: feedback.submission.userId,
-            },
+            versionId,
+            userId: feedback.submission.userId,
           },
           isAdopted: true,
         },
