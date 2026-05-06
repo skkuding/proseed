@@ -236,13 +236,19 @@ export class GrowthRecordService {
     // 2. 트랜잭션: 피드백 검증 및 채택 처리, 티켓 보상 (+3, +2, +0 방어 로직)
     const result = await this.prisma.$transaction(async (tx) => {
       // 피드백 존재 확인 및 교차 검증 (트랜잭션 내부 조회로 경합 방지)
-      const feedback = await tx.feedback.findUnique({
+      const feedback = await tx.feedback.findFirst({
         where: {
           id: feedbackId,
-          versionId,
-          version: { projectId }, // 프로젝트 ID 교차 검증
+          submission: {
+            versionId,
+            projectId, // 프로젝트 ID 교차 검증
+          },
         },
-        select: { id: true, isAdopted: true, userId: true },
+        select: {
+          id: true,
+          isAdopted: true,
+          submission: { select: { userId: true } },
+        },
       })
       if (!feedback) {
         throw new EntityNotExistException('Feedback')
@@ -256,8 +262,10 @@ export class GrowthRecordService {
       // 해당 피드백 작성자가 현재 버전에서 이미 채택받은 피드백 개수 카운트
       const adoptedCount = await tx.feedback.count({
         where: {
-          versionId,
-          userId: feedback.userId,
+          submission: {
+            versionId,
+            userId: feedback.submission.userId,
+          },
           isAdopted: true,
         },
       })
@@ -279,12 +287,12 @@ export class GrowthRecordService {
       // 보상 티켓이 있으면 작성자에게 지급
       if (rewardAmount > 0) {
         await tx.user.update({
-          where: { id: feedback.userId },
+          where: { id: feedback.submission.userId },
           data: { ownedTicketCount: { increment: rewardAmount } },
         })
       }
 
-      return { rewardAmount, feedbackUserId: feedback.userId }
+      return { rewardAmount, feedbackUserId: feedback.submission.userId }
     })
 
     this.logger.log(
