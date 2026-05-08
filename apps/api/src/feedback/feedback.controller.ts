@@ -16,7 +16,7 @@ import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
-@Controller('project/:projectId/versions/:versionId/')
+@Controller('project/:projectId/versions/:versionId')
 @UseGuards(BetterAuthGuard)
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
