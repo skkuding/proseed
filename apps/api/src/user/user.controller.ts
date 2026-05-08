@@ -29,7 +29,7 @@ export class UserController {
 
   @Get('nickname')
   @UseGuards(BetterAuthGuard)
-  async generateRandomNickname() {
+  generateRandomNickname() {
     return { nickname: generateRandomNickname() }
   }
 

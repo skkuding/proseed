@@ -39,36 +39,37 @@ enum JobType {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  name             String
-  email            String?  @unique
-  createdAt        DateTime @default(now()) @map("created_at")
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String   @unique
+  emailVerified   Boolean  @default(false) @map("email_verified")
+  profileImageUrl String?  @map("profile_image_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType? @map("job_type")
   bio              String?
   birth            String?
-  profileImageUrl  String?  @map("profile_image_url")
 
   projectRoles        ProjectRole[]
   feedbackSubmissions FeedbackSubmission[]
   projects            Project[]
 
-  emailVerified Boolean   @default(false) @map("email_verified")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  sessions      Session[]
-  accounts      Account[]
+  sessions Session[]
+  accounts Account[]
 
   @@map("user")
 }
 
 model Session {
   id        Int      @id @default(autoincrement())
-  expiresAt DateTime @map("expires_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
   token     String   @unique
+  expiresAt DateTime @map("expires_at")
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
-  userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -77,15 +78,17 @@ model Session {
 
 model Account {
   id                    Int       @id @default(autoincrement())
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                Int       @map("user_id")
   accountId             String    @map("account_id")
   providerId            String    @map("provider_id")
-  userId                Int       @map("user_id")
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?   @map("access_token")
   refreshToken          String?   @map("refresh_token")
   accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
   refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
   scope                 String?
+  idToken               String?   @map("id_token")
+  password              String?
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
@@ -93,12 +96,12 @@ model Account {
 }
 
 model Verification {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   identifier String
   value      String
-  expiresAt  DateTime  @map("expires_at")
-  createdAt  DateTime? @default(now()) @map("created_at")
-  updatedAt  DateTime? @map("updated_at")
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("verification")
 }

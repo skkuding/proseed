@@ -42,6 +42,8 @@ spec:
                 name: api-env
             - secretRef:
                 name: database-credentials
+            - secretRef:
+                name: oauth-credentials
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
