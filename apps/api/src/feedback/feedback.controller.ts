@@ -23,14 +23,14 @@ export class FeedbackController {
   // POST project/:id/versions/:versionId/feedbacks
   @Post()
   @UseGuards(BetterAuthGuard)
-  async create(
+  async createFeedback(
     @Req() req: RequestWithUser,
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
     @Body() createFeedbackDto: CreateFeedbackDto,
   ) {
     const userId = req.user.id
-    return await this.feedbackService.create(
+    return await this.feedbackService.createFeedback(
       userId,
       projectId,
       versionId,
