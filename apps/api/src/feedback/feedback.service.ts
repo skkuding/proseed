@@ -108,7 +108,7 @@ export class FeedbackService {
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
-          isAdopted: false,
+          isAdopted: f.isAdopted,
           createdAt: f.createdAt,
         })),
       },
