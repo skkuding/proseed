@@ -12,7 +12,7 @@ import { success } from 'better-auth'
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
+  async createFeedback(
     userId: number,
     projectId: number,
     versionId: number,
@@ -79,10 +79,10 @@ export class FeedbackService {
           create: dto.feedbacks.map((f) => ({
             questionId: f.questionId,
             content: f.content,
-            images: f.imageURL
+            images: f.imageUrl
               ? {
                   create: {
-                    url: f.imageURL,
+                    url: f.imageUrl,
                   },
                 }
               : undefined,
@@ -109,7 +109,7 @@ export class FeedbackService {
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
-          isAdopted: false,
+          isAdopted: f.isAdopted,
           createdAt: f.createdAt,
         })),
       },
