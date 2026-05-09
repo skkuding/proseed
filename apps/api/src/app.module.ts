@@ -10,6 +10,7 @@ import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
 import { ProjectModule } from './project/project.module'
 import { GrowthRecordModule } from './growth-record/growth-record.module'
+import { FeedbackModule } from './feedback/feedback.module'
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { GrowthRecordModule } from './growth-record/growth-record.module'
     UserModule,
     ProjectModule,
     GrowthRecordModule,
+    FeedbackModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],
