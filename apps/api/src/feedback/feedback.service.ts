@@ -78,10 +78,10 @@ export class FeedbackService {
           create: dto.feedbacks.map((f) => ({
             questionId: f.questionId,
             content: f.content,
-            images: f.imageURL
+            images: f.imageUrl
               ? {
                   create: {
-                    url: f.imageURL,
+                    url: f.imageUrl,
                   },
                 }
               : undefined,

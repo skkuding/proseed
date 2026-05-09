@@ -19,7 +19,7 @@ export class FeedbackItemDto {
 
   @IsOptional()
   @IsString()
-  imageURL?: string
+  imageUrl?: string
 }
 
 export class CreateFeedbackDto {
