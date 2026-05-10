@@ -82,7 +82,7 @@
         "category": "plan",
         "onelineReview": "시장 조사는 탄탄하나 실행 로드맵이 더 구체화되어야 할 것 같습니다",
         "isAdopted": true,
-        "isOpened": true,
+        "isOpened": false,
         "questions": [
           {
             "questionId": 1,
@@ -125,7 +125,7 @@
         "category": "plan",
         "onelineReview": "핵심 문제 정의는 명확하지만 실행 가능성 검증이 필요합니다",
         "isAdopted": false,
-        "isOpened": true,
+        "isOpened": false,
         "questions": [
           {
             "questionId": 1,
@@ -167,7 +167,7 @@
         "updatedAt": "2026-01-04T00:00:00.000Z",
         "category": "plan",
         "onelineReview": "사용자 중심 사고가 돋보이지만 실행 우선순위 정리가 더 필요합니다",
-        "isAdopted": false,
+        "isAdopted": true,
         "isOpened": false,
         "questions": [
           {
@@ -253,7 +253,7 @@
         "updatedAt": "2026-01-06T00:00:00.000Z",
         "category": "plan",
         "onelineReview": "GTM 전략과 초기 채널 계획이 더 구체화되면 훨씬 강력한 기획서가 될 것 같아요",
-        "isAdopted": false,
+        "isAdopted": true,
         "isOpened": false,
         "questions": [
           {
@@ -296,7 +296,7 @@
         "updatedAt": "2026-01-07T00:00:00.000Z",
         "category": "plan",
         "onelineReview": "데이터 기반 의사결정 구조가 잘 갖춰진 기획, 지속적인 검증이 핵심입니다",
-        "isAdopted": false,
+        "isAdopted": true,
         "isOpened": false,
         "questions": [
           {
@@ -384,8 +384,8 @@
         "updatedAt": "2026-01-04T00:00:00.000Z",
         "category": "design",
         "onelineReview": "사용자 경험 흐름이 자연스럽고 브랜드 아이덴티티가 잘 살아있어요",
-        "isAdopted": false,
-        "isOpened": true,
+        "isAdopted": true,
+        "isOpened": false,
         "questions": [
           {
             "questionId": 5,
@@ -472,7 +472,7 @@
         "updatedAt": "2026-01-05T00:00:00.000Z",
         "category": "dev",
         "onelineReview": "아키텍처 설계가 견고하고 확장성을 잘 고려한 프로젝트입니다",
-        "isAdopted": false,
+        "isAdopted": true,
         "isOpened": false,
         "questions": [
           {
@@ -561,7 +561,7 @@
         "category": "general",
         "onelineReview": "잠재력이 높은 프로젝트, 실행력과 지속성이 성패를 가를 것입니다",
         "isAdopted": true,
-        "isOpened": true,
+        "isOpened": false,
         "questions": [
           {
             "questionId": 13,

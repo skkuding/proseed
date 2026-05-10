@@ -66,7 +66,7 @@ const config: Config = {
         black: '#0D0D0D',
         neutral: {
           99: '#F5F5F5',
-          95: '#E6E6E6',
+          95: '#E5E5E5',
           90: '#C4C4C4',
           80: '#B0B0B0',
           70: '#9B9B9B',

@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { flushSync } from 'react-dom'
+import { useState } from 'react'
 import Image from 'next/image'
 import {
   ChevronDownIcon,
@@ -39,7 +38,6 @@ import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { ImageLightbox } from './ImageLightbox'
 import { usePathname, useRouter } from 'next/navigation'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import { FeedbackRoleSelectModal } from '@/components/FeedbackRoleSelectModal'
 
 const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -120,14 +118,6 @@ export function Feedbacks() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [sortOrder, setSortOrder] = useState('latest')
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
-  const [highlightId, setHighlightId] = useState<number | null>(null)
-  const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
-
-  const handleRoleSelectConfirm = (selectedRoles: string[]) => {
-    setShowRoleSelectModal(false)
-    const roles = selectedRoles.map((r) => TAB_TO_CATEGORY[r as TabLabel]).join(',')
-    router.push(`${pathname}/create?version=${selectedVersion}&roles=${roles}`)
-  }
 
   const category = TAB_TO_CATEGORY[activeTab]
   const allFeedbacks = (feedbackData.feedbacks[category] as FeedbackItem[]).filter((f) =>
@@ -136,34 +126,6 @@ export function Feedbacks() {
   const pageSize = 5
   const totalPages = Math.ceil(allFeedbacks.length / pageSize)
   const feedbacks = allFeedbacks.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-
-  useEffect(() => {
-    const hash = window.location.hash
-    if (!hash.startsWith('#feedback-')) return
-
-    const targetId = parseInt(hash.replace('#feedback-', ''))
-    if (isNaN(targetId)) return
-
-    for (const [cat, items] of Object.entries(feedbackData.feedbacks)) {
-      const idx = (items as FeedbackItem[]).findIndex((f) => f.feedbackId === targetId)
-      if (idx === -1) continue
-
-      const tabLabel = Object.entries(TAB_TO_CATEGORY).find(([, c]) => c === cat)?.[0] as TabLabel
-      flushSync(() => {
-        if (tabLabel) setActiveTab(tabLabel)
-        setCurrentPage(Math.ceil((idx + 1) / pageSize))
-      })
-
-      setTimeout(() => {
-        const el = document.getElementById(`feedback-${targetId}`)
-        if (!el) return
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        setHighlightId(targetId)
-        setTimeout(() => setHighlightId(null), 2000)
-      }, 100)
-      break
-    }
-  }, [])
 
   const handleTabChange = (tab: TabLabel) => {
     setActiveTab(tab)
@@ -232,7 +194,8 @@ export function Feedbacks() {
           </div>
           {/* 피드백 버튼 누르면 /create 페이지로 이동 */}
           <Button
-            onClick={() => setShowRoleSelectModal(true)}
+            onClick={() => router.push(`${pathname}/create?version=${selectedVersion}`)}
+            // 최신버전이 아니라면 disabled 처리
             disabled={selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
           >
@@ -371,9 +334,8 @@ export function Feedbacks() {
               return (
                 <AccordionItem
                   key={feedback.feedbackId}
-                  id={`feedback-${feedback.feedbackId}`}
                   value={String(feedback.feedbackId)}
-                  className={`scroll-mt-24 overflow-hidden py-10 transition-colors duration-1000 ${highlightId === feedback.feedbackId ? 'rounded-xl bg-CoolNeutral-95' : ''}`}
+                  className="overflow-hidden py-10 "
                 >
                   {/* Trigger: Profile header */}
                   <AccordionTrigger className="[&>svg]:hidden items-center cursor-pointer pl-2">
@@ -547,12 +509,6 @@ export function Feedbacks() {
           }
         />
       )}
-
-      <FeedbackRoleSelectModal
-        isOpen={showRoleSelectModal}
-        onClose={() => setShowRoleSelectModal(false)}
-        onConfirm={handleRoleSelectConfirm}
-      />
     </div>
   )
 }
