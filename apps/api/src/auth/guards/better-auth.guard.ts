@@ -14,19 +14,19 @@ export class BetterAuthGuard implements CanActivate {
   //요청 헤더에서 세션 쿠키 존재하는지 확인
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUser>()
+    //DB에서 session 테이블 조회
     const session = await this.betterAuthService.auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     })
 
     if (!session) throw new UnauthorizedException()
 
-    //세션 유효하면 req.user에 유저 id
-    const userIdInNumber = Number(session.user.id) //DB의 user.id를 number로 형변환
-    if (isNaN(userIdInNumber)) {
-      //반환값이 NAN인지 확인
-      throw new UnauthorizedException('Invalid userId')
+    //세션 유효한지 체크 후, req에 userId 넣기
+    const userIdNumber = Number(session.user.id) //DB insert/fetch 외에는 id이 string type -> number로 형변환
+    if (!session.user.id) {
+      throw new UnauthorizedException()
     }
-    req.user = { id: userIdInNumber } //req 객체에 user 프로퍼티 추가해주기
+    req.user = { id: userIdNumber } //req 객체에 user 프로퍼티 추가해주기
     return true
   }
 }
