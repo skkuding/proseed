@@ -21,16 +21,17 @@ import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  // POST project/:projectId/versions/:versionId/feedbacks
-  @Post('feedbacks')
-  async create(
+  // POST project/:id/versions/:versionId/feedbacks
+  @Post()
+  @UseGuards(BetterAuthGuard)
+  async createFeedback(
     @Req() req: RequestWithUser,
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
     @Body() createFeedbackDto: CreateFeedbackDto,
   ) {
     const userId = req.user.id
-    return await this.feedbackService.create(
+    return await this.feedbackService.createFeedback(
       userId,
       projectId,
       versionId,

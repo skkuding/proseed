@@ -1,4 +1,4 @@
-# Unified IAM user for proseed project (Route53, Secrets Manager, S3, etc.)
+# Unified IAM user for proseed project (Route53, S3, etc.)
 resource "aws_iam_user" "proseed" {
   name = "proseed"
 }
@@ -30,17 +30,6 @@ resource "aws_iam_user_policy" "proseed" {
           "route53:ListHostedZonesByName"
         ]
         Resource = "*"
-      },
-      # Secrets Manager
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ]
-        Resource = [
-          "arn:aws:secretsmanager:ap-northeast-2:548484840497:secret:proseed/*"
-        ]
       },
       # S3
       {
