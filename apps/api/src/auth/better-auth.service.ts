@@ -54,8 +54,6 @@ const createAuth = (prisma: PrismaService, config: ConfigService) => {
       kakao: {
         clientId: config.getOrThrow('KAKAO_CLIENT_ID'),
         clientSecret: config.getOrThrow('KAKAO_CLIENT_SECRET'),
-        disableDefaultScope: true,
-        scope: ['profile_image'], //프로필 이미지만 가져오기
       },
       naver: {
         clientId: config.getOrThrow('NAVER_CLIENT_ID'),
