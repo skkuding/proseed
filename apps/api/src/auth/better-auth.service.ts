@@ -16,8 +16,8 @@ export class BetterAuthService {
 //auth 생성
 const createAuth = (prisma: PrismaService, config: ConfigService) => {
   return betterAuth({
-    secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
-    baseURL: config.getOrThrow<string>('BETTER_AUTH_URL'),
+    secret: config.getOrThrow('BETTER_AUTH_SECRET'),
+    baseURL: config.getOrThrow('BETTER_AUTH_URL'),
     database: prismaAdapter(prisma, { provider: 'postgresql' }), //better-auth가 Prisma를 통해 DB에 접근
     advanced: {
       database: {
