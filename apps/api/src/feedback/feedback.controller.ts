@@ -37,4 +37,13 @@ export class FeedbackController {
       createFeedbackDto,
     )
   }
+
+  // GET project/:projectId/versions/:versionId/feedbackQuestions
+  @Get('feedbackQuestions')
+  async findAllQuestions(
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ) {
+    return await this.feedbackService.findAllQuestions(projectId, versionId)
+  }
 }
