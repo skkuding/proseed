@@ -46,7 +46,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:main
           build-args: |
             NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=${{ env.NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT }}
             NEXT_PUBLIC_APP_ENV=production
