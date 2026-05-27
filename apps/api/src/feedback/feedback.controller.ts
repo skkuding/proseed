@@ -22,7 +22,7 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   // POST project/:id/versions/:versionId/feedbacks
-  @Post()
+  @Post('feedbacks')
   @UseGuards(BetterAuthGuard)
   async createFeedback(
     @Req() req: RequestWithUser,
