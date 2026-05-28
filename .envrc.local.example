@@ -1,5 +1,3 @@
 ### Notion MCP (proseed integration) ###
-# Create an internal integration in Notion
-# (https://www.notion.so/profile/integrations) and share the proseed
-# pages/databases with that integration. Token starts with `ntn_`.
+# https://www.notion.so/profile/integrations
 export NOTION_PROSEED_TOKEN="ntn_YOUR_TOKEN_HERE"
