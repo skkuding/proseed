@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/skkuding/proseed/api:latest
+          image: ghcr.io/skkuding/proseed/api:main
           ports:
             - containerPort: 4000
           livenessProbe:

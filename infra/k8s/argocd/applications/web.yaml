@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: proseed-web
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  ignoreApplicationDifferences:
+    - jsonPointers:
+        - /spec/source/kustomize/images
+  goTemplate: true
+  goTemplateOptions: ['missingkey=error']
+  generators:
+    - list:
+        elements:
+          - env: production
+            branch: main
+  template:
+    metadata:
+      name: 'proseed-web-{{.env}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      labels:
+        app.kubernetes.io/environment: '{{.env}}'
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: 'web=ghcr.io/skkuding/proseed/web:{{.branch}}'
+        argocd-image-updater.argoproj.io/web.update-strategy: digest
+        argocd-image-updater.argoproj.io/write-back-method: argocd
+    spec:
+      project: default
+      source:
+        path: 'infra/k8s/web'
+        repoURL: https://github.com/skkuding/proseed
+        targetRevision: '{{.branch}}'
+        directory:
+          recurse: false
+      destination:
+        namespace: proseed
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
