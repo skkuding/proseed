@@ -27,7 +27,7 @@ pnpm dev                        # Web dev server (port 3000)
 pnpm --filter api start:dev     # API dev server (port 4000, includes docker compose up)
 
 # Build
-pnpm build                      # Build web
+pnpm --filter web build         # Build web
 pnpm --filter api build         # Build API
 
 # Lint & Format

@@ -28,7 +28,7 @@ ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN corepack enable pnpm && pnpm run build
+RUN corepack enable pnpm && pnpm --filter web build
 
 # Production image, copy all the files and run next
 FROM base AS runner
