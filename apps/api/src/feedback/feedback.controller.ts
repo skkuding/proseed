@@ -3,16 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   ParseIntPipe,
   UseGuards,
   Req,
 } from '@nestjs/common'
 import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
-import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 

@@ -9,7 +9,6 @@ import projects from '@/app/_mockdata/project-list/recent-projects.json'
 interface GrowthRecordSuccessModalProps {
   isOpen: boolean
   onClose: () => void
-  ticketCount?: number
   projectId: string | string[]
 }
 
@@ -19,7 +18,6 @@ const MAX_PROJECTS = 5
 export function GrowthRecordSuccessModal({
   isOpen,
   onClose,
-  ticketCount = 2,
   projectId,
 }: GrowthRecordSuccessModalProps) {
   const router = useRouter()

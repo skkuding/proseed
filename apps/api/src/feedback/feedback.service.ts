@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
-import { UpdateFeedbackDto } from './dto/update-feedback.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
   EntityNotExistException,
@@ -20,7 +19,7 @@ export class FeedbackService {
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {
         id: versionId,
-        projectId: projectId,
+        projectId,
       },
       select: {
         feedbackQuestions: {
@@ -120,7 +119,7 @@ export class FeedbackService {
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {
         id: versionId,
-        projectId: projectId,
+        projectId,
       },
       include: {
         feedbackQuestions: {
