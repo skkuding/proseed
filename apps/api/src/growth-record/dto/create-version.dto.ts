@@ -1,21 +1,17 @@
 import { RecordCategory } from '@prisma/client'
 import { Type } from 'class-transformer'
 import {
-  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
-  Min,
   Validate,
   ValidateNested,
   ValidatorConstraint,
   type ValidatorConstraintInterface,
-  type ValidationArguments,
 } from 'class-validator'
 
 // 카테고리별 피드백 질문 개수 제한 (1~4개)
@@ -37,7 +33,7 @@ export class FeedbackQuestionsPerCategoryConstraint implements ValidatorConstrai
     )
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return `Each category must have between 1 and 4 feedback questions`
   }
 }

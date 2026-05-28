@@ -27,7 +27,7 @@ export function saveRecentProject(projectId: number) {
     const ids: number[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
     const updated = [projectId, ...ids.filter((id) => id !== projectId)].slice(0, MAX_RECENT)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  } catch (_) {
+  } catch {
     // ignore
   }
 }
