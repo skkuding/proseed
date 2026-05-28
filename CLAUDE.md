@@ -10,8 +10,8 @@ Monorepo with pnpm workspaces:
 
 - `apps/web` - Next.js 16 frontend (React 19, TypeScript, Tailwind CSS 4)
 - `apps/api` - NestJS 11 backend (Prisma, PostgreSQL, S3/MinIO)
-- `infra/aws` - Terraform for AWS (RDS, S3, IAM, Route53)
-- `infra/k8s` - Kubernetes manifests (Kustomize)
+- `infra/aws` - Terraform for AWS (S3, IAM, Route53)
+- `infra/k8s` - Kubernetes manifests (Kustomize, Postgres, API 등)
 
 ## Common Commands
 
@@ -58,8 +58,8 @@ pnpm --filter api test:e2e      # E2E tests
 
 ### Infrastructure
 
-- **Terraform**: `infra/aws/` - RDS, S3 bucket, IAM policies, Route53
-- **Kubernetes**: `infra/k8s/` - Deployments use Kustomize, secrets via External Secrets Operator and Reflector
+- **Terraform**: `infra/aws/` - S3 bucket, IAM policies, Route53
+- **Kubernetes**: `infra/k8s/` - Deployments use Kustomize, on-premise Postgres pod, secrets via SealedSecrets and Reflector
 - **CI/CD**: GitHub Actions builds Docker images, pushes to GHCR
 
 ## Environment Variables

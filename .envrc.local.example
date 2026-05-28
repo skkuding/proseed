@@ -1,0 +1,3 @@
+### Notion MCP (proseed integration) ###
+# https://www.notion.so/profile/integrations
+export NOTION_PROSEED_TOKEN="ntn_YOUR_TOKEN_HERE"
