@@ -16,14 +16,36 @@ env:
   NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed apps
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - '.github/workflows/build-and-push.yaml'
+            api:
+              - 'apps/api/**'
+              - '.github/workflows/build-and-push.yaml'
+
   build-and-push:
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     strategy:
       matrix:
-        app: [web, api]
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
