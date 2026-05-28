@@ -23,7 +23,6 @@ export class FeedbackController {
 
   // POST project/:id/versions/:versionId/feedbacks
   @Post('feedbacks')
-  @UseGuards(BetterAuthGuard)
   async createFeedback(
     @Req() req: RequestWithUser,
     @Param('projectId', ParseIntPipe) projectId: number,
