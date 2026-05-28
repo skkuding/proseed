@@ -7,7 +7,34 @@ on:
     branches: [main]
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      api: ${{ steps.filter.outputs.api }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Detect changed apps
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - '.github/workflows/ci.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+            api:
+              - 'apps/api/**'
+              - '.github/workflows/ci.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+
   ci:
+    needs: changes
     runs-on: ubuntu-latest
 
     steps:
@@ -32,5 +59,10 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Build
-        run: pnpm build
+      - name: Build web
+        if: needs.changes.outputs.web == 'true'
+        run: pnpm --filter web build
+
+      - name: Build api
+        if: needs.changes.outputs.api == 'true'
+        run: pnpm --filter api build
