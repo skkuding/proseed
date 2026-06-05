@@ -84,7 +84,6 @@ export default function MyProject() {
   return (
     <main className="min-h-screen pt-10 ">
       <div className="mx-auto max-w-[1200px] flex flex-col gap-10">
-        {/* div1: 헤더 + 카테고리 탭 */}
         <div className="flex flex-col gap-7">
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-2">
@@ -105,8 +104,6 @@ export default function MyProject() {
             onSelectCategory={handleCategorySelect}
           />
         </div>
-
-        {/* div2: 카드 섹션 or 빈 상태 */}
         <div>
           {isEmpty && (
             <div className="flex flex-col items-center justify-center py-30 gap-2">
@@ -127,7 +124,7 @@ export default function MyProject() {
           {projects.length > 0 && (
             <div className="flex flex-col gap-10">
               {pagedProjects.length === 0 ? (
-                <div className="flex items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
+                <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
                   해당 카테고리의 프로젝트가 없습니다.
                   <Link
                     href="/projects/new/register"
@@ -195,7 +192,6 @@ export default function MyProject() {
           )}
         </div>
 
-        {/* div3: 추천 프로젝트 (현재 페이지 프로젝트 6개 이하일 때만) */}
         {pagedProjects.length <= 6 && (
           <div className="flex flex-col gap-3">
             <h2 className="text-title3_sb_24">추천 프로젝트</h2>

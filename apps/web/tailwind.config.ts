@@ -55,6 +55,8 @@ const config: Config = {
           '12px',
           { lineHeight: '160%', letterSpacing: '-0.04em', fontWeight: '400' },
         ],
+        // ── label ──────────────────────────────────────────
+        label4_m_12: ['12px', { lineHeight: '140%', letterSpacing: '-0.04em', fontWeight: '500' }],
       },
       colors: {
         primary: {
