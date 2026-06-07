@@ -1,16 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { ProfileForm } from './_components/ProfileForm'
 import { AccountForm } from './_components/AccountForm'
 import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
-import mockUser from '@/app/_mockdata/user/user-profile.json'
+import { authClient } from '@/lib/auth-client'
 
 type MenuItem = 'profile' | 'account' | 'faq'
 
 export default function MyPage() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('profile')
+  const { data: session, isPending } = authClient.useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push('/')
+    }
+  }, [isPending, session, router])
+
+  if (isPending || !session) return null
+
+  const { user } = session
 
   return (
     <main className="min-h-screen pt-10">
@@ -28,13 +41,13 @@ export default function MyPage() {
           {/* 왼쪽 컬럼 */}
           <div className="flex w-100 min-w-[260px] shrink flex-col gap-3">
             <UserInfoCard
-              name={mockUser.name}
-              email={mockUser.email}
-              job={mockUser.job}
-              loginProvider={mockUser.loginProvider}
-              profileImageUrl={mockUser.profileImageUrl}
-              projectCount={mockUser.projectCount}
-              feedbackCount={mockUser.feedbackCount}
+              name={user.name ?? ''}
+              email={user.email}
+              job={''}
+              loginProvider={'소셜'}
+              profileImageUrl={user.image ?? ''}
+              projectCount={0}
+              feedbackCount={0}
             />
             <SideNav activeMenu={activeMenu} onMenuChange={setActiveMenu} />
           </div>
@@ -42,14 +55,14 @@ export default function MyPage() {
           {/* 오른쪽 컬럼 */}
           {activeMenu === 'profile' && (
             <ProfileForm
-              initialName={mockUser.name}
-              initialJob={mockUser.job}
-              initialSkills={mockUser.skills}
-              initialLinks={mockUser.links}
-              initialBio={mockUser.bio}
+              initialName={user.name ?? ''}
+              initialJob={''}
+              initialSkills={[]}
+              initialLinks={[]}
+              initialBio={''}
             />
           )}
-          {activeMenu === 'account' && <AccountForm />}
+          {activeMenu === 'account' && <AccountForm email={user.email} />}
         </div>
       </div>
     </main>

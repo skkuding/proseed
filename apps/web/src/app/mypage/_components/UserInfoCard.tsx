@@ -30,13 +30,22 @@ export function UserInfoCard({
   return (
     <div className="rounded-[12px] bg-white p-7 shadow-[0_1px_3px_rgba(27,29,38,0.06)] min-w-0 overflow-hidden">
       <div className="flex items-center gap-5">
-        <Image
-          src={profileImageUrl}
-          alt="Profile Image"
-          width={83}
-          height={85}
-          className="rounded-full bg-neutral-95 shrink-0"
-        />
+        {profileImageUrl ? (
+          <Image
+            src={profileImageUrl}
+            alt="Profile Image"
+            width={83}
+            height={85}
+            unoptimized
+            className="rounded-full bg-neutral-95 shrink-0 size-[83px] object-cover"
+          />
+        ) : (
+          <div className="size-[83px] rounded-full bg-CoolNeutral-90 flex items-center justify-center shrink-0">
+            <span className="text-title1_sb_28 text-CoolNeutral-20">
+              {name[0]?.toUpperCase() ?? '?'}
+            </span>
+          </div>
+        )}
         <div className="min-w-0">
           <p className="text-title1_sb_28 truncate">{name}</p>
           <p className="text-body1__m_16 text-neutral-40 truncate">
