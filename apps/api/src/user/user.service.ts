@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 
 import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
+import { generateRandomNickname } from './utils/generateRandomNickname'
 
 @Injectable()
 export class UserService {
@@ -43,9 +44,11 @@ export class UserService {
       },
     })
     if (!user) throw new NotFoundException()
+    const isNewUser = user.jobType === null
+
     return {
-      isNewUser: user.jobType === null,
-      nickname: user.name,
+      isNewUser,
+      nickname: isNewUser ? generateRandomNickname() : user.name,
     }
   }
 }
