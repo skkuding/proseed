@@ -13,7 +13,7 @@ const COUNTRIES = [
   '태국',
   '스페인',
   '이탈리아',
-]
+] as const
 
 const EMOTIONAL_ADJECTIVES = [
   '행복한',
@@ -45,16 +45,21 @@ const ANIMALS = [
   '캥거루',
   '친칠라',
   '카피바라',
-]
+] as const
 
 function pickRandom<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)]
 }
 
 export function generateRandomNickname(): string {
-  const country = pickRandom(COUNTRIES)
-  const adjective = pickRandom(EMOTIONAL_ADJECTIVES)
-  const animal = pickRandom(ANIMALS)
+  while (true) {
+    const country = pickRandom(COUNTRIES)
+    const adjective = pickRandom(EMOTIONAL_ADJECTIVES)
+    const animal = pickRandom(ANIMALS)
+    const nickname = `${country}의 ${adjective} ${animal}`
 
-  return `${country}의 ${adjective} ${animal}`
+    if (nickname.length <= 12) {
+      return nickname
+    }
+  }
 }
