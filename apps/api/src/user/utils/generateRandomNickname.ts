@@ -56,7 +56,7 @@ export function generateRandomNickname(): string {
     const country = pickRandom(COUNTRIES)
     const adjective = pickRandom(EMOTIONAL_ADJECTIVES)
     const animal = pickRandom(ANIMALS)
-    const nickname = `${country}의 ${adjective} ${animal}`
+    const nickname = `${country}의${adjective}${animal}`
 
     if (nickname.length <= 12) {
       return nickname
