@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import info from '../../public/info.svg'
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -32,7 +31,7 @@ export function ConfirmModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-3">
-          <Image src={info} alt="info" width={24} height={24} />
+          <Image src="/info_cool30.svg" alt="info" width={24} height={24} />
           <div className="flex flex-col gap-2">
             <p className="text-title5_sb_20 text-CoolNeutral-20">{title}</p>
             {description && <p className="text-body2_m_14 text-CoolNeutral-40">{description}</p>}

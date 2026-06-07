@@ -2,17 +2,24 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 import { NavLink } from './NavLink'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
+import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
 
 export function Header() {
   const { data: session } = authClient.useSession()
   const { openLoginModal } = useAuthStore()
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const handleSignOut = async () => {
+    setIsDropdownOpen(false)
     await authClient.signOut()
   }
+
+  const profileImage =
+    session?.user.image && PROFILE_SRCS.includes(session.user.image) ? session.user.image : null
 
   return (
     <header className="w-full">
@@ -39,23 +46,46 @@ export function Header() {
           </nav>
 
           {session ? (
-            <div className="relative group">
-              <Link
-                href="/mypage"
-                className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-CoolNeutral-20 shadow-md"
+            <div className="relative">
+              {isDropdownOpen && (
+                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+              )}
+              <button
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className="relative z-20 inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-CoolNeutral-20 shadow-md hover:cursor-pointer"
               >
-                <span className="text-sub1_sb_18 text-white">
-                  {session.user.name?.[0]?.toUpperCase() ?? 'U'}
-                </span>
-              </Link>
-              <div className="absolute right-0 top-full mt-2 hidden w-28 rounded-xl bg-white shadow-lg group-hover:block">
-                <button
-                  onClick={handleSignOut}
-                  className="w-full rounded-xl px-4 py-3 text-left text-body4_r_14 text-CoolNeutral-40 transition-colors hover:cursor-pointer hover:bg-neutral-99 hover:text-CoolNeutral-20"
-                >
-                  로그아웃
-                </button>
-              </div>
+                {profileImage ? (
+                  <Image
+                    src={profileImage}
+                    alt="프로필"
+                    width={56}
+                    height={56}
+                    className="h-full w-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <span className="text-sub1_sb_18 text-white">
+                    {session.user.name?.[0]?.toUpperCase() ?? 'U'}
+                  </span>
+                )}
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute right-0 top-full z-20 mt-2 w-28 rounded-xl bg-white shadow-lg">
+                  <Link
+                    href="/mypage"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block w-full rounded-t-xl px-4 py-3 text-left text-body4_r_14 text-CoolNeutral-40 transition-colors hover:bg-neutral-99 hover:text-CoolNeutral-20"
+                  >
+                    마이 페이지
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full rounded-b-xl px-4 py-3 text-left text-body4_r_14 text-CoolNeutral-40 transition-colors hover:cursor-pointer hover:bg-neutral-99 hover:text-CoolNeutral-20"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <button
