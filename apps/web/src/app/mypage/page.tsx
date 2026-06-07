@@ -8,10 +8,13 @@ import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
 import { authClient } from '@/lib/auth-client'
 
+const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$/, '')
+
 type MenuItem = 'profile' | 'account' | 'faq'
 
 export default function MyPage() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('profile')
+  const [provider, setProvider] = useState('')
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
 
@@ -20,6 +23,18 @@ export default function MyPage() {
       router.push('/')
     }
   }, [isPending, session, router])
+
+  useEffect(() => {
+    if (!session) return
+    fetch(`${BETTER_AUTH_BASE}/api/auth/list-accounts`, { credentials: 'include' })
+      .then((res) => res.json())
+      .then((data: unknown) => {
+        const accounts = Array.isArray(data) ? data : []
+        const first = (accounts[0] as { providerId?: string })?.providerId
+        if (first) setProvider(first)
+      })
+      .catch(() => {})
+  }, [session])
 
   if (isPending || !session) return null
 
@@ -44,7 +59,7 @@ export default function MyPage() {
               name={user.name ?? ''}
               email={user.email}
               job={''}
-              loginProvider={'소셜'}
+              loginProvider={provider}
               profileImageUrl={user.image ?? ''}
               projectCount={0}
               feedbackCount={0}
@@ -62,7 +77,7 @@ export default function MyPage() {
               initialBio={''}
             />
           )}
-          {activeMenu === 'account' && <AccountForm email={user.email} />}
+          {activeMenu === 'account' && <AccountForm email={user.email} provider={provider} />}
         </div>
       </div>
     </main>

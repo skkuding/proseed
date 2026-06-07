@@ -11,8 +11,21 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { TextInput } from '@/components/TextInput'
+import { authClient } from '@/lib/auth-client'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 const JOB_OPTIONS = ['디자이너', '개발자', '기획', '기타']
+
+const JOB_TO_ENUM: Record<string, string> = {
+  디자이너: 'Designer',
+  개발자: 'Developer',
+  기획: 'Planner',
+  기타: 'Other',
+}
+
+const MAX_SKILLS = 10
+const MAX_LINKS = 3
 
 interface ProfileFormProps {
   initialName: string
@@ -34,18 +47,65 @@ export function ProfileForm({
   const [skills, setSkills] = useState<string[]>(initialSkills.length > 0 ? initialSkills : [''])
   const [links, setLinks] = useState<string[]>(initialLinks.length > 0 ? initialLinks : [''])
   const [bio, setBio] = useState(initialBio)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const updateSkill = (index: number, value: string) => {
+  const updateSkill = (index: number, value: string) =>
     setSkills((prev) => prev.map((s, i) => (i === index ? value : s)))
+
+  const addSkill = () => {
+    if (skills.length >= MAX_SKILLS) return
+    setSkills((prev) => [...prev, ''])
   }
 
-  const addSkill = () => setSkills((prev) => [...prev, ''])
+  const removeSkill = (index: number) => setSkills((prev) => prev.filter((_, i) => i !== index))
 
-  const updateLink = (index: number, value: string) => {
+  const updateLink = (index: number, value: string) =>
     setLinks((prev) => prev.map((l, i) => (i === index ? value : l)))
+
+  const addLink = () => {
+    if (links.length >= MAX_LINKS) return
+    setLinks((prev) => [...prev, ''])
   }
 
-  const addLink = () => setLinks((prev) => [...prev, ''])
+  const removeLink = (index: number) => setLinks((prev) => prev.filter((_, i) => i !== index))
+
+  const handleReset = () => {
+    setName(initialName)
+    setJob(initialJob)
+    setSkills(initialSkills.length > 0 ? initialSkills : [''])
+    setLinks(initialLinks.length > 0 ? initialLinks : [''])
+    setBio(initialBio)
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await authClient.updateUser({ name })
+      if (job && JOB_TO_ENUM[job]) {
+        await fetch(`${API_URL}/user/onboarding`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ jobType: JOB_TO_ENUM[job], nickname: name }),
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const isSkillsMax = skills.length >= MAX_SKILLS
+  const isLinksMax = links.length >= MAX_LINKS
+
+  const addBtnBase = 'h-12 shrink-0 rounded-[8px] px-5 py-[13px] text-sub3_sb_16'
+  const addBtnEnabled = 'border-CoolNeutral-50 text-CoolNeutral-20 hover:cursor-pointer'
+  const addBtnDisabled =
+    'bg-neutral-95 text-neutral-70 border-neutral-90 cursor-not-allowed hover:bg-neutral-95'
+
+  const trashBtn =
+    'flex h-12 min-w-[60px] shrink-0 items-center justify-center rounded-[8px] border border-neutral-90 hover:cursor-pointer hover:bg-neutral-99'
 
   return (
     <div className="flex-1 min-w-0 rounded-2xl bg-white p-10 flex flex-col gap-7 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)]">
@@ -69,7 +129,7 @@ export function ProfileForm({
           <label className="w-20 shrink-0 text-sub2_m_18">직무</label>
           <Select value={job} onValueChange={setJob}>
             <SelectTrigger className="h-auto w-full rounded-[8px] border-neutral-95 px-4 py-3 md:w-[480px] md:flex-none">
-              <SelectValue />
+              <SelectValue placeholder="직무를 선택해주세요" />
             </SelectTrigger>
             <SelectContent>
               {JOB_OPTIONS.map((option) => (
@@ -83,9 +143,7 @@ export function ProfileForm({
 
         {/* 보유 스킬 */}
         <div className="flex gap-3">
-          <label className=" flex w-20 shrink-0 text-sub2_m_18 items-center h-12 items-center">
-            보유 스킬
-          </label>
+          <label className="flex w-20 shrink-0 text-sub2_m_18 items-center h-12">보유 스킬</label>
           <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
             {skills.map((skill, index) => (
               <TextInput
@@ -97,13 +155,21 @@ export function ProfileForm({
               />
             ))}
           </div>
-          <Button
-            variant="outline"
-            onClick={addSkill}
-            className="h-12 shrink-0 self-start rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
-          >
-            추가하기
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={addSkill}
+              disabled={isSkillsMax}
+              className={`${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
+            >
+              추가하기
+            </Button>
+            {skills.slice(1).map((_, i) => (
+              <button key={i} type="button" onClick={() => removeSkill(i + 1)} className={trashBtn}>
+                <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 관련 링크 */}
@@ -122,13 +188,21 @@ export function ProfileForm({
               />
             ))}
           </div>
-          <Button
-            variant="outline"
-            onClick={addLink}
-            className="h-12 shrink-0 self-start rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
-          >
-            추가하기
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={addLink}
+              disabled={isLinksMax}
+              className={`${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
+            >
+              추가하기
+            </Button>
+            {links.slice(1).map((_, i) => (
+              <button key={i} type="button" onClick={() => removeLink(i + 1)} className={trashBtn}>
+                <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 자기소개 */}
@@ -153,12 +227,17 @@ export function ProfileForm({
       <div className="flex justify-end gap-2">
         <Button
           variant="outline"
+          onClick={handleReset}
           className="h-12 rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
         >
           초기화하기
         </Button>
-        <Button className="h-12 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer">
-          프로필 업데이트
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="h-12 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer disabled:opacity-60"
+        >
+          {isSaving ? '저장 중...' : '프로필 업데이트'}
         </Button>
       </div>
     </div>

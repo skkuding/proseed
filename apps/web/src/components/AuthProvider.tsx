@@ -5,8 +5,13 @@ import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
 import { LoginModal } from '@/components/LoginModal'
 import { OnboardingModal } from '@/components/OnboardingModal'
+import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+function randomProfileSrc() {
+  return PROFILE_SRCS[Math.floor(Math.random() * PROFILE_SRCS.length)]
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = authClient.useSession()
@@ -33,7 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetch(`${API_URL}/user/check`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data: { isNewUser: boolean; nickname: string }) => {
-        if (data.isNewUser) openOnboardingModal(data.nickname)
+        if (data.isNewUser) {
+          openOnboardingModal(data.nickname)
+          authClient.updateUser({ image: randomProfileSrc() }).catch(console.error)
+        }
       })
       .catch(console.error)
   }, [isPending, session, openOnboardingModal])
