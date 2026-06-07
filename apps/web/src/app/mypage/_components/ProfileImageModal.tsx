@@ -52,22 +52,19 @@ export function ProfileImageModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-[680px] rounded-2xl bg-white px-10 py-10">
-        {/* div1: 제목 */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="flex w-[680px] flex-col gap-5 rounded-2xl bg-white px-10 py-10">
         <div className="flex items-center justify-between">
-          <h2 className="text-head3_sb_36 text-CoolNeutral-20">프로필 이미지 변경하기</h2>
+          <h2 className="text-head3_sb_36">프로필 이미지 변경하기</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-neutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer"
+            className="text-neutral-30 hover:text-CoolNeutral-20 hover:cursor-pointer"
           >
-            <X className="size-6" />
+            <X className="size-9" />
           </button>
         </div>
-
-        {/* div2: 이미지 그리드 */}
-        <div className="mt-5 rounded-2xl bg-neutral-99 px-7 py-6">
+        <div className="rounded-2xl bg-neutral-99 px-7 py-6">
           <div className="grid grid-cols-5 gap-5">
             {PROFILE_OPTIONS.map(({ src, label }) => (
               <button
@@ -77,24 +74,22 @@ export function ProfileImageModal({
                 className="flex flex-col items-center gap-2 hover:cursor-pointer"
               >
                 <div
-                  className={`rounded-full p-[13px] transition-all ${
-                    selected === src ? 'ring-[3px] ring-primary' : ''
+                  className={`rounded-full transition-all ${
+                    selected === src ? 'ring-[3px] ring-primary ring-offset-0' : ''
                   }`}
                 >
-                  <Image src={src} width={64} height={64} alt={label} />
+                  <Image src={src} width={92} height={92} alt={label} />
                 </div>
                 <span className="text-sub3_sb_16 text-CoolNeutral-20">{label}</span>
               </button>
             ))}
           </div>
         </div>
-
-        {/* div3: 버튼 */}
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="flex justify-end gap-2">
           <Button
             variant="outline"
             onClick={onClose}
-            className="h-auto rounded-[8px] border-neutral-90 px-5 py-[15px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
+            className="h-auto rounded-[8px] border-CoolNeutral-50 px-5 py-[15px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
           >
             취소하기
           </Button>

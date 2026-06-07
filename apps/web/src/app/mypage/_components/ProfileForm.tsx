@@ -105,7 +105,7 @@ export function ProfileForm({
     'bg-neutral-95 text-neutral-70 border-neutral-90 cursor-not-allowed hover:bg-neutral-95'
 
   const trashBtn =
-    'flex h-12 min-w-[60px] shrink-0 items-center justify-center rounded-[8px] border border-neutral-90 hover:cursor-pointer hover:bg-neutral-99'
+    'flex h-[46px] w-[60px] shrink-0 items-center justify-center rounded-[8px] border-[1.4px] border-CoolNeutral-50 hover:cursor-pointer hover:bg-neutral-99'
 
   return (
     <div className="flex-1 min-w-0 rounded-2xl bg-white p-10 flex flex-col gap-7 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)]">
@@ -144,31 +144,38 @@ export function ProfileForm({
         {/* 보유 스킬 */}
         <div className="flex gap-3">
           <label className="flex w-20 shrink-0 text-sub2_m_18 items-center h-12">보유 스킬</label>
-          <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
-            {skills.map((skill, index) => (
-              <TextInput
-                key={index}
-                value={skill}
-                onChange={(v) => updateSkill(index, v)}
-                placeholder="보유 스킬을 입력해주세요"
-                maxLength={30}
-              />
-            ))}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              onClick={addSkill}
-              disabled={isSkillsMax}
-              className={`${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
-            >
-              추가하기
-            </Button>
-            {skills.slice(1).map((_, i) => (
-              <button key={i} type="button" onClick={() => removeSkill(i + 1)} className={trashBtn}>
-                <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
-              </button>
-            ))}
+          <div className="flex gap-2">
+            <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
+              {skills.map((skill, index) => (
+                <TextInput
+                  key={index}
+                  value={skill}
+                  onChange={(v) => updateSkill(index, v)}
+                  placeholder="보유 스킬을 입력해주세요"
+                  maxLength={30}
+                />
+              ))}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                onClick={addSkill}
+                disabled={isSkillsMax}
+                className={`${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
+              >
+                추가하기
+              </Button>
+              {skills.slice(1).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => removeSkill(i + 1)}
+                  className={trashBtn}
+                >
+                  <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -177,31 +184,38 @@ export function ProfileForm({
           <label className="flex w-20 shrink-0 text-sub2_m_18 md:h-12 md:items-center">
             관련 링크
           </label>
-          <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
-            {links.map((link, index) => (
-              <TextInput
-                key={index}
-                value={link}
-                onChange={(v) => updateLink(index, v)}
-                placeholder="관련 링크를 입력해주세요"
-                prefix={<Image src="/link.svg" alt="link" height={24} width={24} />}
-              />
-            ))}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              onClick={addLink}
-              disabled={isLinksMax}
-              className={`${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
-            >
-              추가하기
-            </Button>
-            {links.slice(1).map((_, i) => (
-              <button key={i} type="button" onClick={() => removeLink(i + 1)} className={trashBtn}>
-                <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
-              </button>
-            ))}
+          <div className="flex gap-2">
+            <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
+              {links.map((link, index) => (
+                <TextInput
+                  key={index}
+                  value={link}
+                  onChange={(v) => updateLink(index, v)}
+                  placeholder="관련 링크를 입력해주세요"
+                  prefix={<Image src="/link.svg" alt="link" height={24} width={24} />}
+                />
+              ))}
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                onClick={addLink}
+                disabled={isLinksMax}
+                className={`${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
+              >
+                추가하기
+              </Button>
+              {links.slice(1).map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => removeLink(i + 1)}
+                  className={trashBtn}
+                >
+                  <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

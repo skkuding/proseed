@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import Image from 'next/image'
 
 interface TextInputProps {
   value: string
@@ -19,22 +20,43 @@ export function TextInput({
   prefix,
   className = '',
 }: TextInputProps) {
+  const isAtMax = maxLength !== undefined && value.length >= maxLength
+
   return (
-    <div
-      className={`relative flex items-center rounded-[8px] border border-neutral-95 px-4 py-3 focus-within:border-neutral-50 ${className}`}
-    >
-      {prefix && <span className="mr-2 shrink-0 text-neutral-70">{prefix}</span>}
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(maxLength ? e.target.value.slice(0, maxLength) : e.target.value)}
-        placeholder={placeholder}
-        className={`flex-1 bg-transparent text-body1_m_16 text-CoolNeutral-20 outline-none placeholder:text-neutral-80 ${maxLength ? 'pr-12' : ''}`}
-      />
-      {maxLength !== undefined && (
-        <span className="absolute right-4 shrink-0 text-body1_m_16 text-CoolNeutral-20">
-          {value.length}/{maxLength}
-        </span>
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <div
+        className={`relative flex items-center rounded-[8px] border px-4 py-3 ${
+          isAtMax ? 'border-primary' : 'border-neutral-95 focus-within:border-neutral-50'
+        }`}
+      >
+        {prefix && <span className="mr-2 shrink-0 text-neutral-70">{prefix}</span>}
+        <input
+          type={type}
+          value={value}
+          maxLength={maxLength}
+          onChange={(e) =>
+            onChange(maxLength ? e.target.value.slice(0, maxLength) : e.target.value)
+          }
+          placeholder={placeholder}
+          className={`flex-1 bg-transparent text-body1_m_16 text-CoolNeutral-20 outline-none placeholder:text-neutral-80 ${maxLength ? 'pr-12' : ''}`}
+        />
+        {maxLength !== undefined && (
+          <span
+            className={`absolute right-4 shrink-0 text-body1_m_16 ${
+              isAtMax ? 'text-primary' : 'text-CoolNeutral-20'
+            }`}
+          >
+            {value.length}/{maxLength}
+          </span>
+        )}
+      </div>
+      {isAtMax && (
+        <div className="flex items-center gap-1">
+          <Image src="/info_primary_strong.svg" width={13} height={13} alt="" />
+          <span className="text-caption1_m_13 text-primary-strong">
+            최대 {maxLength}자 이내로 작성해주세요
+          </span>
+        </div>
       )}
     </div>
   )
