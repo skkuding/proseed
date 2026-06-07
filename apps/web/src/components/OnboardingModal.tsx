@@ -1,14 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { RotateCcw } from 'lucide-react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -34,8 +28,20 @@ export function OnboardingModal({
 }: OnboardingModalProps) {
   const [jobType, setJobType] = useState<JobType | ''>('')
   const [nickname, setNickname] = useState(initialNickname)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isRegenerating, setIsRegenerating] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen && !initialNickname) {
+      handleRegenerate()
+    }
+  }, [isOpen, initialNickname])
+
+  useEffect(() => {
+    setNickname(initialNickname)
+  }, [initialNickname])
 
   if (!isOpen) return null
 
@@ -70,10 +76,14 @@ export function OnboardingModal({
     }
   }
 
+  const selectedLabel = JOB_TYPE_OPTIONS.find((o) => o.value === jobType)?.label
   const isDisabled = !jobType || isSubmitting
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-[20px]">
+      {isDropdownOpen && (
+        <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+      )}
       <div className="w-[600px] rounded-[16px] bg-white px-7 py-10">
         {/* div7 */}
         <div className="flex flex-col gap-10">
@@ -90,20 +100,43 @@ export function OnboardingModal({
               {/* div2 - 직무 */}
               <div className="flex flex-col gap-[6px]">
                 <label className="text-sub4_sb_14 text-black">직무 유형</label>
-                <Select value={jobType} onValueChange={(v) => setJobType(v as JobType)}>
-                  <SelectTrigger
-                    className={`h-[50px] w-full gap-2 rounded-[8px] border border-neutral-95 px-4 py-3 text-body1_m_16 ${jobType ? 'text-CoolNeutral-20' : 'text-neutral-80'}`}
+                <div ref={dropdownRef} className="relative z-20">
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen((prev) => !prev)}
+                    className="flex h-[50px] w-full items-center justify-between rounded-[8px] border border-neutral-95 px-4 py-3 text-body1_m_16 outline-none"
                   >
-                    <SelectValue placeholder="직무를 선택해주세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOB_TYPE_OPTIONS.map(({ value, label }) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <span className={selectedLabel ? 'text-black' : 'text-neutral-80'}>
+                      {selectedLabel ?? '직무를 선택해주세요'}
+                    </span>
+                    <Image
+                      src="/arrow2_down.svg"
+                      width={24}
+                      height={24}
+                      alt=""
+                      className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute left-0 top-full w-full overflow-hidden rounded-[8px] border border-neutral-95 bg-white shadow-md">
+                      {JOB_TYPE_OPTIONS.map(({ value, label }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => {
+                            setJobType(value)
+                            setIsDropdownOpen(false)
+                          }}
+                          className={`w-full px-5 py-3 text-left text-body1_m_16 text-black transition-colors hover:bg-neutral-99 ${
+                            jobType === value ? 'bg-neutral-99' : 'bg-white'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               {/* div3 - 닉네임 */}
               <div className="flex flex-col gap-[6px]">

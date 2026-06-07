@@ -75,7 +75,7 @@ export function ProfileImageModal({
               >
                 <div
                   className={`rounded-full transition-all ${
-                    selected === src ? 'ring-[3px] ring-primary ring-offset-0' : ''
+                    selected === src ? 'ring-[3px] ring-[#FF754F] ring-offset-0' : ''
                   }`}
                 >
                   <Image src={src} width={92} height={92} alt={label} />

@@ -52,7 +52,7 @@ export function Header() {
               )}
               <button
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
-                className="relative z-20 inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-CoolNeutral-20 shadow-md hover:cursor-pointer"
+                className="relative z-20 inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-CoolNeutral-20 shadow-md hover:cursor-pointer border-none outline-none focus:outline-none"
               >
                 {profileImage ? (
                   <Image
