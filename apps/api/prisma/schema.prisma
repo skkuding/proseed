@@ -121,7 +121,7 @@ enum ProjectStatus {
 model Project {
   id                 Int               @id @default(autoincrement())
   title              String
-  createdBy          User              @relation(fields: [createdById], references: [id])
+  createdBy          User              @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdById        Int
   type               ProjectType
   status             ProjectStatus
