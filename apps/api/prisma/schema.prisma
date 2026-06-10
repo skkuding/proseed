@@ -47,11 +47,11 @@ model User {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  ticketBalance Int      @default(0) @map("ticket_balance")
-  jobType       JobType? @map("job_type")
-  skills        String[] @default([])
-  links         String[] @default([])
-  bio           String? //자기소개
+  ownedTicketCount Int      @default(0) @map("ticket_balance")
+  jobType          JobType? @map("job_type")
+  skills           String[] @default([])
+  links            String[] @default([])
+  bio              String? //자기소개
 
   projectRoles        ProjectRole[]
   feedbackSubmissions FeedbackSubmission[]

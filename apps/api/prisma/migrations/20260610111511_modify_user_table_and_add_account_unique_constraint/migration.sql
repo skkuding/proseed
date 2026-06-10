@@ -12,10 +12,8 @@ UPDATE "user" SET "profile_image_url" = '' WHERE "profile_image_url" IS NULL;
 
 -- AlterTable
 ALTER TABLE "user" DROP COLUMN "birth",
-DROP COLUMN "owned_ticket_count",
 ADD COLUMN     "links" TEXT[] DEFAULT ARRAY[]::TEXT[],
 ADD COLUMN     "skills" TEXT[] DEFAULT ARRAY[]::TEXT[],
-ADD COLUMN     "ticket_balance" INTEGER NOT NULL DEFAULT 0,
 ALTER COLUMN "profile_image_url" SET NOT NULL;
 
 -- CreateIndex
