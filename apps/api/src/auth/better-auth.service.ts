@@ -9,16 +9,19 @@ import { ConfigService } from '@nestjs/config'
 export class BetterAuthService {
   public readonly auth: BetterAuthInstance
 
-  constructor(prisma: PrismaService, config: ConfigService) {
-    this.auth = createAuth(prisma, config)
+  constructor(prismaService: PrismaService, configService: ConfigService) {
+    this.auth = createAuth(prismaService, configService)
   }
 }
 //auth 생성
-const createAuth = (prisma: PrismaService, config: ConfigService) => {
+const createAuth = (
+  prismaService: PrismaService,
+  configService: ConfigService,
+) => {
   return betterAuth({
-    secret: config.getOrThrow('BETTER_AUTH_SECRET'),
-    baseURL: config.getOrThrow('BETTER_AUTH_URL'),
-    database: prismaAdapter(prisma, { provider: 'postgresql' }), //better-auth가 Prisma를 통해 DB에 접근
+    secret: configService.getOrThrow('BETTER_AUTH_SECRET'),
+    baseURL: configService.getOrThrow('BETTER_AUTH_URL'),
+    database: prismaAdapter(prismaService, { provider: 'postgresql' }), //better-auth가 Prisma를 통해 DB에 접근
     advanced: {
       database: {
         generateId: 'serial',
@@ -27,6 +30,9 @@ const createAuth = (prisma: PrismaService, config: ConfigService) => {
     user: {
       fields: {
         image: 'profileImageUrl', //better-auth 기본적으로 image 라는 필드명 사용 -> 우리 스키마랑 매핑해주기
+      },
+      deleteUser: {
+        enabled: true,
       },
     },
     databaseHooks: {
@@ -48,16 +54,16 @@ const createAuth = (prisma: PrismaService, config: ConfigService) => {
     },
     socialProviders: {
       google: {
-        clientId: config.getOrThrow('GOOGLE_CLIENT_ID'),
-        clientSecret: config.getOrThrow('GOOGLE_CLIENT_SECRET'),
+        clientId: configService.getOrThrow('GOOGLE_CLIENT_ID'),
+        clientSecret: configService.getOrThrow('GOOGLE_CLIENT_SECRET'),
       },
       kakao: {
-        clientId: config.getOrThrow('KAKAO_CLIENT_ID'),
-        clientSecret: config.getOrThrow('KAKAO_CLIENT_SECRET'),
+        clientId: configService.getOrThrow('KAKAO_CLIENT_ID'),
+        clientSecret: configService.getOrThrow('KAKAO_CLIENT_SECRET'),
       },
       naver: {
-        clientId: config.getOrThrow('NAVER_CLIENT_ID'),
-        clientSecret: config.getOrThrow('NAVER_CLIENT_SECRET'),
+        clientId: configService.getOrThrow('NAVER_CLIENT_ID'),
+        clientSecret: configService.getOrThrow('NAVER_CLIENT_SECRET'),
       },
     },
   })
