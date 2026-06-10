@@ -43,19 +43,21 @@ model User {
   name            String
   email           String   @unique
   emailVerified   Boolean  @default(false) @map("email_verified")
-  profileImageUrl String?  @map("profile_image_url")
+  profileImageUrl String   @map("profile_image_url")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType? @map("job_type")
-  bio              String?
-  birth            String?
+  skills           String[] @default([])
+  links            String[] @default([])
+  bio              String? //자기소개
 
   projectRoles        ProjectRole[]
   feedbackSubmissions FeedbackSubmission[]
   projects            Project[]
 
+  //세션 및 Auth 관련
   sessions Session[]
   accounts Account[]
 
@@ -92,6 +94,7 @@ model Account {
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
+  @@unique([accountId, providerId])
   @@map("account")
 }
 
