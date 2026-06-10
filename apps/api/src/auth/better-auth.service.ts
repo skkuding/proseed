@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { Injectable } from '@nestjs/common'
 import { generateRandomNickname } from '../user/utils/generateRandomNickname'
 import { ConfigService } from '@nestjs/config'
+import { selectRandomProfileImage } from 'src/user/utils/selectRandomProfileImage'
 
 @Injectable()
 export class BetterAuthService {
@@ -42,10 +43,12 @@ const createAuth = (
           before: (user) => {
             //신규 유저라면 DB에 User 정보 저장하기 전, 랜덤 닉네임 자동 부여 (name이 NOT NULL이라 일단 넣기)
             const randomNickname = generateRandomNickname()
+            const randomProfileImage = selectRandomProfileImage()
             return Promise.resolve({
               data: {
                 ...user,
                 name: randomNickname,
+                image: randomProfileImage,
               },
             })
           },
@@ -56,14 +59,17 @@ const createAuth = (
       google: {
         clientId: configService.getOrThrow('GOOGLE_CLIENT_ID'),
         clientSecret: configService.getOrThrow('GOOGLE_CLIENT_SECRET'),
+        scope: ['email'],
       },
       kakao: {
         clientId: configService.getOrThrow('KAKAO_CLIENT_ID'),
         clientSecret: configService.getOrThrow('KAKAO_CLIENT_SECRET'),
+        scope: ['email'],
       },
       naver: {
         clientId: configService.getOrThrow('NAVER_CLIENT_ID'),
         clientSecret: configService.getOrThrow('NAVER_CLIENT_SECRET'),
+        scope: ['email'],
       },
     },
   })

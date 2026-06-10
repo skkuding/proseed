@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service'
 
 import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
-import { generateRandomNickname } from './utils/generateRandomNickname'
 
 @Injectable()
 export class UserService {
@@ -48,7 +47,7 @@ export class UserService {
 
     return {
       isNewUser,
-      nickname: isNewUser ? generateRandomNickname() : user.name,
+      nickname: user.name,
     }
   }
 }
