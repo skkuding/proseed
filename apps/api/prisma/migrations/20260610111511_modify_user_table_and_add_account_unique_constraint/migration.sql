@@ -7,6 +7,9 @@
   - Made the column `profile_image_url` on table `user` required. This step will fail if there are existing NULL values in that column.
 
 */
+
+UPDATE "user" SET "profile_image_url" = '' WHERE "profile_image_url" IS NULL;
+
 -- AlterTable
 ALTER TABLE "user" DROP COLUMN "birth",
 DROP COLUMN "owned_ticket_count",
