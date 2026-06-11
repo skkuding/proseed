@@ -60,13 +60,13 @@ const createAuth = (
         clientId: configService.getOrThrow('GOOGLE_CLIENT_ID'),
         clientSecret: configService.getOrThrow('GOOGLE_CLIENT_SECRET'),
         disableDefaultScope: true,
-        scope: ['email'],
+        scope: ['openid', 'email'],
       },
       kakao: {
         clientId: configService.getOrThrow('KAKAO_CLIENT_ID'),
         clientSecret: configService.getOrThrow('KAKAO_CLIENT_SECRET'),
         disableDefaultScope: true,
-        scope: ['account_email'],
+        scope: ['email'],
       },
       naver: {
         clientId: configService.getOrThrow('NAVER_CLIENT_ID'),
