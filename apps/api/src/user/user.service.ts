@@ -66,10 +66,10 @@ export class UserService {
    * 유저의 프로필 정보들을 조회합니다.
    *
    * @param userId 유저 아이디
-   * @returns 마이페이지 화면에 표시되는 유저 정보들
+   * @returns 마이페이지 화면 표시 정보가 담긴 user 객체
    */
   async getProfile(userId: number) {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         name: true,
@@ -87,6 +87,10 @@ export class UserService {
         ownedTicketCount: true,
       },
     })
+
+    if (!user) throw new NotFoundException('User not found')
+
+    return user
   }
 
   /**
@@ -100,25 +104,34 @@ export class UserService {
     const { name, jobType, profileImageUrl, skills, links, bio } =
       mypageUpdateDto
 
-    return await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        name,
-        jobType,
-        profileImageUrl,
-        skills,
-        links,
-        bio,
-      },
-      select: {
-        name: true,
-        jobType: true,
-        profileImageUrl: true,
-        skills: true,
-        links: true,
-        bio: true,
-      },
-    })
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          jobType,
+          profileImageUrl,
+          skills,
+          links,
+          bio,
+        },
+        select: {
+          name: true,
+          jobType: true,
+          profileImageUrl: true,
+          skills: true,
+          links: true,
+          bio: true,
+        },
+      })
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new NotFoundException('User not found')
+        }
+      }
+      throw error
+    }
   }
 
   async getMyProjects() {}
