@@ -1,8 +1,8 @@
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
-import type { UserService } from './user.service'
+import { UserService } from './user.service'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common'
-import type { MypageUpdateDto } from './dto/mypageUpdate.dto'
+import { MypageUpdateDto } from './dto/mypageUpdate.dto'
 
 @Controller('me')
 export class MypageController {
