@@ -35,6 +35,19 @@ export class FeedbackService {
       throw new EntityNotExistException('projectVersion')
     }
 
+    // 최신 버전만 피드백 작성 가능하도록 검증
+    const latestVersion = await this.prisma.projectVersion.findFirst({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+    })
+
+    if (!latestVersion || latestVersion.id !== versionId) {
+      throw new UnprocessableDataException(
+        'Feedback can only be submitted for the latest version',
+      )
+    }
+
     const validQuestionIds = new Set(
       targetVersion.feedbackQuestions.map((q) => q.id),
     )
