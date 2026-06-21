@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, RotateCcw } from 'lucide-react'
 import { UserInfoCard } from '../_components/UserInfoCard'
 import { SideNav } from '../_components/SideNav'
 import { MyFeedbackCard } from './_components/MyFeedbackCard'
@@ -39,6 +39,7 @@ export default function MyFeedbacks() {
   const { data: session, isPending } = authClient.useSession()
   const [sort, setSort] = useState('latest')
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
+  const [pendingFilter, setPendingFilter] = useState<FilterMode>('all')
   const [showFilterDropdown, setShowFilterDropdown] = useState(false)
   const [showSortDropdown, setShowSortDropdown] = useState(false)
   const filterRef = useRef<HTMLDivElement>(null)
@@ -94,33 +95,70 @@ export default function MyFeedbacks() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-head3_sb_36 text-black">작성한 피드백</h2>
           <div className="flex items-center gap-2">
-            {/* 필터 드롭다운 */}
+            {/* 필터 패널 */}
             <div className="relative" ref={filterRef}>
               <button
-                onClick={() => setShowFilterDropdown((prev) => !prev)}
+                onClick={() => {
+                  if (!showFilterDropdown) setPendingFilter(filterMode)
+                  setShowFilterDropdown((prev) => !prev)
+                }}
                 className="inline-flex items-center gap-1 rounded-[8px] border border-neutral-90 px-4 py-[11px] text-body1_m_16 text-black hover:bg-neutral-99 transition-colors"
               >
                 <Image src="/filter.svg" width={24} height={24} alt="필터" />
                 필터
               </button>
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full z-20 mt-1 w-[200px] overflow-hidden rounded-[8px] border border-neutral-90 bg-white shadow-md">
-                  {FILTER_OPTIONS.map((option) => (
+                <div className="absolute right-0 top-full z-20 mt-2 w-[320px] rounded-[12px] border border-neutral-90 bg-white p-5 shadow-md">
+                  {/* div1 */}
+                  <div className="mb-5 flex items-center justify-between">
+                    <h3 className="text-title3_sb_24 text-black">필터 설정하기</h3>
                     <button
-                      key={option.value}
+                      onClick={() => setPendingFilter('all')}
+                      className="flex items-center gap-1 text-body2__m_14 text-neutral-40 hover:cursor-pointer hover:text-neutral-30 transition-colors"
+                    >
+                      <RotateCcw className="size-4" />
+                      필터 초기화
+                    </button>
+                  </div>
+
+                  {/* div2 */}
+                  <div className="mb-5 flex flex-col gap-3">
+                    <p className="text-body1__m_16 text-neutral-30">피드백 노출</p>
+                    <div className="flex gap-2">
+                      {FILTER_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setPendingFilter(option.value)}
+                          className={`h-11 rounded-[8px] px-4 py-[9px] text-body1_m_16 transition-colors hover:cursor-pointer ${
+                            pendingFilter === option.value
+                              ? 'bg-CoolNeutral-30 text-white'
+                              : 'bg-neutral-99 text-neutral-30'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* div3 */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowFilterDropdown(false)}
+                      className="h-12 flex-1 rounded-[8px] border border-CoolNeutral-50 bg-white px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer transition-colors hover:bg-neutral-99"
+                    >
+                      취소
+                    </button>
+                    <button
                       onClick={() => {
-                        setFilterMode(option.value)
+                        setFilterMode(pendingFilter)
                         setShowFilterDropdown(false)
                       }}
-                      className={`w-full px-4 py-3 text-left text-body1_m_16 transition-colors hover:bg-neutral-99 ${
-                        filterMode === option.value
-                          ? 'text-CoolNeutral-20 font-semibold'
-                          : 'text-black'
-                      }`}
+                      className="h-12 flex-1 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer transition-colors hover:bg-CoolNeutral-30"
                     >
-                      {option.label}
+                      적용하기
                     </button>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>

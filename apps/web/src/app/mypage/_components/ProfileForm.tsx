@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TextInput } from '@/components/TextInput'
 import { authClient } from '@/lib/auth-client'
@@ -45,7 +46,21 @@ export function ProfileForm({
   const [bio, setBio] = useState(initialBio)
   const [isSaving, setIsSaving] = useState(false)
   const [savedOk, setSavedOk] = useState(false)
+  const [isRegenerating, setIsRegenerating] = useState(false)
   const jobRef = useRef<HTMLDivElement>(null)
+
+  const handleRegenerate = async () => {
+    setIsRegenerating(true)
+    try {
+      const res = await fetch(`${API_URL}/user/nickname`, { credentials: 'include' })
+      const data = await res.json()
+      setName(data.nickname)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setIsRegenerating(false)
+    }
+  }
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -132,6 +147,17 @@ export function ProfileForm({
               onChange={setName}
               placeholder="이름을 입력해주세요"
               maxLength={30}
+              suffix={
+                <button
+                  type="button"
+                  onClick={handleRegenerate}
+                  disabled={isRegenerating}
+                  className="text-neutral-40 transition-colors hover:cursor-pointer hover:text-CoolNeutral-20 disabled:opacity-40"
+                  aria-label="이름 재생성"
+                >
+                  <RotateCcw className={`size-5 ${isRegenerating ? 'animate-spin' : ''}`} />
+                </button>
+              }
               className="flex-1 min-w-0"
             />
             <div className="w-[104px] shrink-0" />
