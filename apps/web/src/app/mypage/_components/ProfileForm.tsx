@@ -26,6 +26,7 @@ interface ProfileFormProps {
   initialSkills?: string[]
   initialLinks?: string[]
   initialBio?: string
+  onJobChange?: (job: string) => void
 }
 
 export function ProfileForm({
@@ -34,6 +35,7 @@ export function ProfileForm({
   initialSkills = [''],
   initialLinks = [''],
   initialBio = '',
+  onJobChange,
 }: ProfileFormProps) {
   const [name, setName] = useState(initialName)
   const [job, setJob] = useState(initialJob)
@@ -95,6 +97,7 @@ export function ProfileForm({
           body: JSON.stringify({ jobType: JOB_TO_ENUM[job], nickname: name }),
         })
       }
+      onJobChange?.(job)
       setSavedOk(true)
       setTimeout(() => setSavedOk(false), 2000)
     } catch (e) {
@@ -123,54 +126,60 @@ export function ProfileForm({
         {/* 이름 */}
         <div className="flex gap-10 items-center">
           <label className="w-20 shrink-0 text-sub2_m_18">이름</label>
-          <TextInput
-            value={name}
-            onChange={setName}
-            placeholder="이름을 입력해주세요"
-            maxLength={30}
-            className="flex-1 min-w-0"
-          />
+          <div className="flex flex-1 min-w-0 items-center gap-2">
+            <TextInput
+              value={name}
+              onChange={setName}
+              placeholder="이름을 입력해주세요"
+              maxLength={30}
+              className="flex-1 min-w-0"
+            />
+            <div className="w-[104px] shrink-0" />
+          </div>
         </div>
 
         {/* 직무 */}
         <div className="flex gap-10 items-center">
           <label className="w-20 shrink-0 text-sub2_m_18">직무</label>
-          <div className="relative flex-1 min-w-0" ref={jobRef}>
-            <button
-              type="button"
-              onClick={() => setJobOpen((prev) => !prev)}
-              className="flex w-full items-center justify-between rounded-[8px] border border-neutral-95 px-4 py-3"
-            >
-              <span
-                className={`text-body1_m_16 ${job ? 'text-CoolNeutral-20' : 'text-neutral-80'}`}
+          <div className="flex flex-1 min-w-0 items-center gap-2">
+            <div className="relative flex-1 min-w-0" ref={jobRef}>
+              <button
+                type="button"
+                onClick={() => setJobOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between rounded-[8px] border border-neutral-95 px-4 py-3"
               >
-                {job || '직무를 선택해주세요'}
-              </span>
-              <Image
-                src="/arrow2_down.svg"
-                width={24}
-                height={24}
-                alt=""
-                className={`shrink-0 transition-transform duration-200 ${jobOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
-            {jobOpen && (
-              <div className="absolute left-0 top-full z-20 mt-1 w-full overflow-hidden rounded-[8px] border border-neutral-95 bg-white shadow-md">
-                {JOB_OPTIONS.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => {
-                      setJob(option)
-                      setJobOpen(false)
-                    }}
-                    className="w-full px-4 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99"
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
+                <span
+                  className={`text-body1_m_16 ${job ? 'text-CoolNeutral-20' : 'text-neutral-80'}`}
+                >
+                  {job || '직무를 선택해주세요'}
+                </span>
+                <Image
+                  src="/arrow2_down.svg"
+                  width={24}
+                  height={24}
+                  alt=""
+                  className={`shrink-0 transition-transform duration-200 ${jobOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {jobOpen && (
+                <div className="absolute left-0 top-full z-20 mt-1 w-full overflow-hidden rounded-[8px] border border-neutral-95 bg-white shadow-md">
+                  {JOB_OPTIONS.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        setJob(option)
+                        setJobOpen(false)
+                      }}
+                      className="w-full px-4 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="w-[104px] shrink-0" />
           </div>
         </div>
 

@@ -16,6 +16,7 @@ type MenuItem = 'profile' | 'account' | 'faq'
 export default function MyPage() {
   const [activeMenu, setActiveMenu] = useState<MenuItem>('profile')
   const [provider, setProvider] = useState('')
+  const [currentJob, setCurrentJob] = useState('')
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
 
@@ -48,7 +49,7 @@ export default function MyPage() {
         <UserInfoCard
           name={user.name ?? ''}
           email={user.email}
-          job={''}
+          job={currentJob}
           loginProvider={provider}
           profileImageUrl={user.image ?? ''}
           projectCount={0}
@@ -61,10 +62,11 @@ export default function MyPage() {
       {activeMenu === 'profile' && (
         <ProfileForm
           initialName={user.name ?? ''}
-          initialJob={''}
+          initialJob={currentJob}
           initialSkills={[]}
           initialLinks={[]}
           initialBio={''}
+          onJobChange={setCurrentJob}
         />
       )}
       {activeMenu === 'account' && <AccountForm email={user.email} provider={provider} />}
