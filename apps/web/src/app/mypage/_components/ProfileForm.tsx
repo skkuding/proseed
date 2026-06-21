@@ -1,15 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { TextInput } from '@/components/TextInput'
 import { authClient } from '@/lib/auth-client'
 
@@ -44,10 +37,23 @@ export function ProfileForm({
 }: ProfileFormProps) {
   const [name, setName] = useState(initialName)
   const [job, setJob] = useState(initialJob)
+  const [jobOpen, setJobOpen] = useState(false)
   const [skills, setSkills] = useState<string[]>(initialSkills.length > 0 ? initialSkills : [''])
   const [links, setLinks] = useState<string[]>(initialLinks.length > 0 ? initialLinks : [''])
   const [bio, setBio] = useState(initialBio)
   const [isSaving, setIsSaving] = useState(false)
+  const [savedOk, setSavedOk] = useState(false)
+  const jobRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (jobRef.current && !jobRef.current.contains(e.target as Node)) {
+        setJobOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const updateSkill = (index: number, value: string) =>
     setSkills((prev) => prev.map((s, i) => (i === index ? value : s)))
@@ -89,6 +95,8 @@ export function ProfileForm({
           body: JSON.stringify({ jobType: JOB_TO_ENUM[job], nickname: name }),
         })
       }
+      setSavedOk(true)
+      setTimeout(() => setSavedOk(false), 2000)
     } catch (e) {
       console.error(e)
     } finally {
@@ -120,102 +128,117 @@ export function ProfileForm({
             onChange={setName}
             placeholder="이름을 입력해주세요"
             maxLength={30}
-            className="w-full md:w-[480px] md:flex-none"
+            className="flex-1 min-w-0"
           />
         </div>
 
         {/* 직무 */}
         <div className="flex gap-10 items-center">
           <label className="w-20 shrink-0 text-sub2_m_18">직무</label>
-          <Select value={job} onValueChange={setJob}>
-            <SelectTrigger className="h-auto w-full rounded-[8px] border-neutral-95 px-4 py-3 md:w-[480px] md:flex-none">
-              <SelectValue placeholder="직무를 선택해주세요" />
-            </SelectTrigger>
-            <SelectContent>
-              {JOB_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative flex-1 min-w-0" ref={jobRef}>
+            <button
+              type="button"
+              onClick={() => setJobOpen((prev) => !prev)}
+              className="flex w-full items-center justify-between rounded-[8px] border border-neutral-95 px-4 py-3"
+            >
+              <span
+                className={`text-body1_m_16 ${job ? 'text-CoolNeutral-20' : 'text-neutral-80'}`}
+              >
+                {job || '직무를 선택해주세요'}
+              </span>
+              <Image
+                src="/arrow2_down.svg"
+                width={24}
+                height={24}
+                alt=""
+                className={`shrink-0 transition-transform duration-200 ${jobOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {jobOpen && (
+              <div className="absolute left-0 top-full z-20 mt-1 w-full overflow-hidden rounded-[8px] border border-neutral-95 bg-white shadow-md">
+                {JOB_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      setJob(option)
+                      setJobOpen(false)
+                    }}
+                    className="w-full px-4 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99"
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* 보유 스킬 */}
-        <div className="flex gap-3">
+        <div className="flex gap-10">
           <label className="flex w-20 shrink-0 text-sub2_m_18 items-center h-12">보유 스킬</label>
-          <div className="flex gap-2">
-            <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
-              {skills.map((skill, index) => (
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
+            {skills.map((skill, index) => (
+              <div key={index} className="flex gap-2 items-start">
                 <TextInput
-                  key={index}
                   value={skill}
                   onChange={(v) => updateSkill(index, v)}
                   placeholder="보유 스킬을 입력해주세요"
                   maxLength={30}
+                  className="flex-1 min-w-0"
                 />
-              ))}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                onClick={addSkill}
-                disabled={isSkillsMax}
-                className={`${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
-              >
-                추가하기
-              </Button>
-              {skills.slice(1).map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => removeSkill(i + 1)}
-                  className={trashBtn}
-                >
-                  <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
-                </button>
-              ))}
-            </div>
+                <div className="w-[104px] shrink-0">
+                  {index === 0 ? (
+                    <Button
+                      variant="outline"
+                      onClick={addSkill}
+                      disabled={isSkillsMax}
+                      className={`w-full ${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
+                    >
+                      추가하기
+                    </Button>
+                  ) : (
+                    <button type="button" onClick={() => removeSkill(index)} className={trashBtn}>
+                      <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* 관련 링크 */}
-        <div className="flex gap-3">
-          <label className="flex w-20 shrink-0 text-sub2_m_18 md:h-12 md:items-center">
-            관련 링크
-          </label>
-          <div className="flex gap-2">
-            <div className="ml-7 w-full flex flex-col gap-2 md:w-[480px]">
-              {links.map((link, index) => (
+        <div className="flex gap-10">
+          <label className="flex w-20 shrink-0 text-sub2_m_18 items-center h-12">관련 링크</label>
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
+            {links.map((link, index) => (
+              <div key={index} className="flex gap-2 items-start">
                 <TextInput
-                  key={index}
                   value={link}
                   onChange={(v) => updateLink(index, v)}
                   placeholder="관련 링크를 입력해주세요"
                   prefix={<Image src="/link.svg" alt="link" height={24} width={24} />}
+                  className="flex-1 min-w-0"
                 />
-              ))}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                onClick={addLink}
-                disabled={isLinksMax}
-                className={`${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
-              >
-                추가하기
-              </Button>
-              {links.slice(1).map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => removeLink(i + 1)}
-                  className={trashBtn}
-                >
-                  <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
-                </button>
-              ))}
-            </div>
+                <div className="w-[104px] shrink-0">
+                  {index === 0 ? (
+                    <Button
+                      variant="outline"
+                      onClick={addLink}
+                      disabled={isLinksMax}
+                      className={`w-full ${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
+                    >
+                      추가하기
+                    </Button>
+                  ) : (
+                    <button type="button" onClick={() => removeLink(index)} className={trashBtn}>
+                      <Image src="/trash_fill.svg" width={20} height={20} alt="삭제" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -251,7 +274,7 @@ export function ProfileForm({
           disabled={isSaving}
           className="h-12 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer disabled:opacity-60"
         >
-          {isSaving ? '저장 중...' : '프로필 업데이트'}
+          {isSaving ? '저장 중...' : savedOk ? '저장 완료' : '프로필 업데이트'}
         </Button>
       </div>
     </div>
