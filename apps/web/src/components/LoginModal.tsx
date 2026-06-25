@@ -88,7 +88,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       className={rounded ? 'rounded-[4px]' : ''}
                     />
                   </span>
-
                   <span>{label}</span>
                 </button>
               ))}

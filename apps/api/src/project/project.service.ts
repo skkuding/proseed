@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import type { JobType, Prisma } from '@prisma/client'
+import { ProjectMemberRole, type JobType, type Prisma } from '@prisma/client'
 import {
   EntityNotExistException,
   ForbiddenAccessException,
@@ -192,7 +192,7 @@ export class ProjectService {
         projectRoles: {
           create: {
             userId,
-            isLeader: true,
+            projectMemberRole: ProjectMemberRole.Lead,
             role: dto.leaderJobType,
           },
         },
@@ -216,12 +216,12 @@ export class ProjectService {
       where: {
         userId,
         projectId,
-        isLeader: true,
+        projectMemberRole: ProjectMemberRole.Lead,
       },
     })
 
     if (!projectRole) {
-      throw new ForbiddenAccessException('Only Admin can invite collaborators.')
+      throw new ForbiddenAccessException('Only Lead can invite collaborators.')
     }
 
     const targetUser = await this.prisma.user.findFirst({
@@ -238,7 +238,7 @@ export class ProjectService {
       data: {
         userId: targetUser.id,
         projectId,
-        isLeader: false,
+        projectMemberRole: ProjectMemberRole.TeamMember,
         role,
       },
     })

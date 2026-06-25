@@ -38,6 +38,11 @@ enum JobType {
   Other
 }
 
+enum UserRole {
+  Sprout //새싹
+  Seeder //시더
+}
+
 model User {
   id              Int      @id @default(autoincrement())
   name            String
@@ -49,6 +54,7 @@ model User {
 
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType? @map("job_type")
+  userRole         UserRole @default(Sprout) @map("user_role")
   skills           String[] @default([])
   links            String[] @default([])
   bio              String? //자기소개
@@ -119,6 +125,12 @@ enum ProjectStatus {
   MVP
   Ongoing
   Hiring
+}
+
+enum ProjectMemberRole {
+  Lead
+  TeamLeader
+  TeamMember
 }
 
 model Project {
@@ -205,11 +217,11 @@ model GrowthRecordImage {
 }
 
 model ProjectRole {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @map("user_id")
-  projectId Int     @map("project_id")
-  role      JobType
-  isLeader  Boolean @default(false)
+  id                Int               @id @default(autoincrement())
+  userId            Int               @map("user_id")
+  projectId         Int               @map("project_id")
+  role              JobType
+  projectMemberRole ProjectMemberRole @default(TeamMember) @map("project_member_role")
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
