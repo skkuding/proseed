@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
@@ -9,12 +10,14 @@ import { authClient } from '@/lib/auth-client'
 const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$/, '')
 
 const REASONS = [
-  '서비스에 만족하지 못해서',
-  '원하는 기능이 없어서',
-  '개인정보 보호를 위해',
-  '더 이상 사용하지 않아서',
-  '기타',
+  '기대했던 서비스와 달라요',
+  '콘텐츠/정보가 부족해요',
+  '오류가 자주 발생해요',
+  '사용 방법/화면 구성이 어려워요',
+  '다른 서비스가 더 만족스러워요',
+  '가입 목적을 달성하여 당분간 사용할 일이 없어요',
 ]
+const OTHER_REASON = '기타 (다른 의견을 남기고 싶어요)'
 
 interface Props {
   isOpen: boolean
@@ -33,7 +36,13 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
 
   if (!isOpen) return null
 
+  const isOtherSelected = selected.includes(OTHER_REASON)
+  const canWithdraw = selected.length > 0 && (!isOtherSelected || customReason.trim().length > 0)
+
   const toggleReason = (reason: string) => {
+    if (reason === OTHER_REASON && isOtherSelected) {
+      setCustomReason('')
+    }
     setSelected((prev) =>
       prev.includes(reason) ? prev.filter((r) => r !== reason) : [...prev, reason]
     )
@@ -78,64 +87,96 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
       onClick={onClose}
     >
       <div
-        className="relative w-[480px] rounded-[12px] bg-white px-10 py-12"
+        className="relative w-[600px] h-[565px] rounded-[16px] bg-white"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute right-6 top-6 text-neutral-40 transition-colors hover:cursor-pointer hover:text-CoolNeutral-20"
+          className="absolute right-6 top-6 text-black hover:cursor-pointer"
         >
-          <X className="size-5" />
+          <X className="size-8" />
         </button>
 
         {step === 'reason' && (
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-title1_sb_28 text-black">정말 탈퇴하시겠어요?</h2>
-              <p className="text-body1_m_16 text-neutral-40">
-                탈퇴 사유를 알려주시면 더 나은 서비스를 만드는 데 도움이 됩니다.
+          <div className="flex flex-col gap-6 px-7 py-10">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-title1_sb_28 text-black">어떤 이유로 탈퇴하시나요?</h2>
+              <p className="text-body4_r_14 text-neutral-30">
+                탈퇴 사유를 알려주시면 더 나은 서비스를 만드는 데 도움이 됩니다. (복수 선택 가능)
               </p>
             </div>
 
-            <div className="flex flex-col gap-3">
-              {REASONS.map((reason) => (
-                <label key={reason} className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(reason)}
-                    onChange={() => toggleReason(reason)}
-                    className="h-5 w-5 accent-CoolNeutral-20"
-                  />
-                  <span className="text-body1_m_16 text-CoolNeutral-20">{reason}</span>
+            <div className="flex flex-col gap-1">
+              {REASONS.map((reason) => {
+                const isChecked = selected.includes(reason)
+                return (
+                  <label key={reason} className="flex cursor-pointer items-center gap-2 py-1">
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleReason(reason)}
+                        className={isChecked ? 'sr-only' : 'h-5 w-5 accent-neutral-50'}
+                      />
+                      {isChecked && (
+                        <Image
+                          src="/checkbox_fill.svg"
+                          alt=""
+                          width={20}
+                          height={20}
+                          className="h-5 w-5 shrink-0"
+                        />
+                      )}
+                    </div>
+                    <span className="text-body1_m_16 text-neutral-20">{reason}</span>
+                  </label>
+                )
+              })}
+              <div className="flex flex-col gap-2 py-1">
+                <label className="flex cursor-pointer items-center gap-2">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={isOtherSelected}
+                      onChange={() => toggleReason(OTHER_REASON)}
+                      className={isOtherSelected ? 'sr-only' : 'h-5 w-5 accent-neutral-50'}
+                    />
+                    {isOtherSelected && (
+                      <Image
+                        src="/checkbox_fill.svg"
+                        alt=""
+                        width={36}
+                        height={36}
+                        className="shrink-0"
+                      />
+                    )}
+                  </div>
+                  <span className="text-body1_m_16 text-neutral-20">{OTHER_REASON}</span>
                 </label>
-              ))}
-              {selected.includes('기타') && (
-                <textarea
-                  value={customReason}
-                  onChange={(e) => setCustomReason(e.target.value.slice(0, 200))}
-                  placeholder="직접 입력해주세요"
-                  rows={3}
-                  className="mt-1 w-full resize-none rounded-[8px] border border-neutral-95 p-4 text-body1_m_16 text-CoolNeutral-20 placeholder:text-neutral-80 outline-none focus:border-neutral-50"
-                />
-              )}
+                <div className="pl-7">
+                  <input
+                    type="text"
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value.slice(0, 200))}
+                    placeholder="직접 입력해주세요"
+                    disabled={!isOtherSelected}
+                    className="h-[50px] w-full rounded-[8px] border border-neutral-95 px-4 py-3 text-body1_m_16 text-CoolNeutral-20 placeholder:text-neutral-80 outline-none focus:border-neutral-50 disabled:bg-neutral-98 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="h-12 flex-1 rounded-[8px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
-              >
-                취소
-              </Button>
-              <Button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="h-12 flex-1 rounded-[8px] bg-red-500 text-sub3_sb_16 text-white hover:cursor-pointer hover:bg-red-600 disabled:opacity-60"
-              >
-                {isDeleting ? '처리 중...' : '탈퇴하기'}
-              </Button>
-            </div>
+            <Button
+              onClick={handleDelete}
+              disabled={isDeleting || !canWithdraw}
+              className={`w-full h-13 rounded-[8px] px-4 py-3 text-sub3_sb_16 hover:cursor-pointer ${
+                canWithdraw
+                  ? 'bg-CoolNeutral-20 text-white'
+                  : 'bg-neutral-95 text-neutral-70 cursor-not-allowed'
+              }`}
+            >
+              {isDeleting ? '처리 중...' : 'PROSEED 탈퇴하기'}
+            </Button>
           </div>
         )}
 

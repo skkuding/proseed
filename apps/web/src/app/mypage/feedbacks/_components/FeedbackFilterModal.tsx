@@ -24,35 +24,31 @@ export function FeedbackFilterModal({ mode, onClose, onApply }: FeedbackFilterMo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-title3_sb_24 text-neutral-10">필터 설정하기</h3>
+          <h3 className="text-title3_sb_24 text-black">필터 설정하기</h3>
           <button
             onClick={() => setDraft('all')}
-            className="inline-flex items-center gap-1.5 text-body3_r_16 text-neutral-40 hover:text-neutral-20 transition-colors"
+            className="inline-flex items-center gap-1 text-body2__m_14 text-neutral-40 hover:text-neutral-20 transition-colors"
           >
-            <RotateCcw className="size-4" />
+            <RotateCcw className="size-5" />
             필터 초기화
           </button>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <p className="text-sub2_m_18 text-neutral-30">피드백 노출</p>
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
+          <p className="text-body1_m_16 text-neutral-30">피드백 노출</p>
+          <div className="flex gap-1">
             <button
               onClick={() => setDraft('all')}
-              className={`h-11 px-5 rounded-[8px] text-body1_m_16 transition-colors ${
-                draft === 'all'
-                  ? 'bg-CoolNeutral-20 text-white'
-                  : 'border border-neutral-90 text-neutral-40 hover:bg-neutral-99'
+              className={`h-11 px-4 py-[9px] rounded-[8px] text-body1_m_16 transition-colors ${
+                draft === 'all' ? 'bg-neutral-30 text-white' : 'text-neutral-30 bg-neutral-99'
               }`}
             >
               전체 피드백
             </button>
             <button
               onClick={() => setDraft('adopted')}
-              className={`h-11 px-5 rounded-[8px] text-body1_m_16 transition-colors ${
-                draft === 'adopted'
-                  ? 'bg-CoolNeutral-20 text-white'
-                  : 'border border-neutral-90 text-neutral-40 hover:bg-neutral-99'
+              className={`h-11 px-4 py-[9px] rounded-[8px] text-body1_m_16 transition-colors ${
+                draft === 'adopted' ? 'bg-neutral-30 text-white' : 'text-neutral-30 bg-neutral-99'
               }`}
             >
               채택된 피드백만 보기
@@ -60,10 +56,10 @@ export function FeedbackFilterModal({ mode, onClose, onApply }: FeedbackFilterMo
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-1">
           <button
             onClick={onClose}
-            className="h-11 px-6 rounded-xl border border-neutral-90 text-body1_m_16 text-neutral-40 hover:bg-neutral-99 transition-colors"
+            className="h-12 w-[94px] rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 transition-colors"
           >
             취소
           </button>
@@ -72,7 +68,7 @@ export function FeedbackFilterModal({ mode, onClose, onApply }: FeedbackFilterMo
               onApply(draft)
               onClose()
             }}
-            className="h-11 px-6 rounded-xl bg-CoolNeutral-20 text-body1_m_16 text-white hover:bg-CoolNeutral-30 transition-colors"
+            className="h-12 w-[94px] rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 transition-colors"
           >
             적용하기
           </button>

@@ -108,13 +108,13 @@ export default function MyFeedbacks() {
                 필터
               </button>
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full z-20 mt-2 w-[320px] rounded-[12px] border border-neutral-90 bg-white p-5 shadow-md">
+                <div className="absolute right-0 top-full z-20 mt-2 w-[428px] rounded-[12px] border border-neutral-90 bg-white p-6 shadow-md flex flex-col gap-6">
                   {/* div1 */}
-                  <div className="mb-5 flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     <h3 className="text-title3_sb_24 text-black">필터 설정하기</h3>
                     <button
                       onClick={() => setPendingFilter('all')}
-                      className="flex items-center gap-1 text-body2__m_14 text-neutral-40 hover:cursor-pointer hover:text-neutral-30 transition-colors"
+                      className="flex items-center gap-1 text-body2__m_14 text-neutral-40 transition-colors hover:cursor-pointer hover:text-neutral-30"
                     >
                       <RotateCcw className="size-4" />
                       필터 초기화
@@ -122,7 +122,7 @@ export default function MyFeedbacks() {
                   </div>
 
                   {/* div2 */}
-                  <div className="mb-5 flex flex-col gap-3">
+                  <div className="flex flex-col gap-3">
                     <p className="text-body1__m_16 text-neutral-30">피드백 노출</p>
                     <div className="flex gap-2">
                       {FILTER_OPTIONS.map((option) => (
@@ -145,7 +145,7 @@ export default function MyFeedbacks() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setShowFilterDropdown(false)}
-                      className="h-12 flex-1 rounded-[8px] border border-CoolNeutral-50 bg-white px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer transition-colors hover:bg-neutral-99"
+                      className="h-12 flex-1 rounded-[8px] border border-CoolNeutral-50 bg-white px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 transition-colors hover:cursor-pointer hover:bg-neutral-99"
                     >
                       취소
                     </button>
@@ -154,7 +154,7 @@ export default function MyFeedbacks() {
                         setFilterMode(pendingFilter)
                         setShowFilterDropdown(false)
                       }}
-                      className="h-12 flex-1 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer transition-colors hover:bg-CoolNeutral-30"
+                      className="h-12 flex-1 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white transition-colors hover:cursor-pointer hover:bg-CoolNeutral-30"
                     >
                       적용하기
                     </button>
