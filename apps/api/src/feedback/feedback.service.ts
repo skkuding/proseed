@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common'
+import { UserRole } from '@prisma/client'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
   EntityNotExistException,
+  ForbiddenAccessException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
+
+const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
+  UserRole.Sprout,
+  UserRole.Seeder,
+]
 
 @Injectable()
 export class FeedbackService {
@@ -16,6 +23,8 @@ export class FeedbackService {
     versionId: number,
     dto: CreateFeedbackDto,
   ) {
+    await this.assertCanCreateFeedback(userId)
+
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {
         id: versionId,
@@ -159,6 +168,19 @@ export class FeedbackService {
         order: q.order,
         required: q.isRequired,
       })),
+    }
+  }
+
+  private async assertCanCreateFeedback(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { userRole: true },
+    })
+
+    if (!user || !FEEDBACK_ALLOWED_USER_ROLES.includes(user.userRole)) {
+      throw new ForbiddenAccessException(
+        'Only Sprout or Seeder users can create feedback.',
+      )
     }
   }
 }
