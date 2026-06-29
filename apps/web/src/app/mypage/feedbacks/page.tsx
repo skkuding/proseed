@@ -35,8 +35,8 @@ const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
 ]
 
 export default function MyFeedbacks() {
-  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
+  const router = useRouter()
   const [sort, setSort] = useState('latest')
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [pendingFilter, setPendingFilter] = useState<FilterMode>('all')
@@ -88,10 +88,11 @@ export default function MyFeedbacks() {
           projectCount={0}
           feedbackCount={0}
         />
-        <SideNav activeMenu="profile" onMenuChange={(menu) => router.push(`/mypage?tab=${menu}`)} />
+        <SideNav activeMenu="profile" onMenuChange={() => {}} />
+        {/* router.push(`/mypage?tab=${menu}`) — 소셜 로그인 복구 시 원복 */}
       </div>
 
-      <div className="flex-1 min-w-0 rounded-2xl bg-white px-9 py-10">
+      <div className="flex-1 min-w-0 bg-white px-9 py-10">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-head3_sb_36 text-black">작성한 피드백</h2>
           <div className="flex items-center gap-2">

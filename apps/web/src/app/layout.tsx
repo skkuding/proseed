@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${pretendard.className} bg-background-normal`}>
         <AuthProvider>
           <Header />
-          <div className="mx-auto max-w-340 px-10 pb-30">{children}</div>
+          <div className="mx-auto max-w-360 px-10 pb-30">{children}</div>
           <Footer />
           <Toaster position="top-center" />
         </AuthProvider>

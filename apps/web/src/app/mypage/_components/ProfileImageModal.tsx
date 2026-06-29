@@ -53,7 +53,7 @@ export function ProfileImageModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="flex w-[680px] flex-col gap-5 rounded-2xl bg-[#F4F4F6] px-10 py-10">
+      <div className="flex w-[680px] flex-col gap-5 rounded-[20px] bg-[#F4F4F6] px-10 py-10">
         <div className="flex items-center justify-between">
           <h2 className="text-head3_sb_36">프로필 이미지 변경하기</h2>
           <button

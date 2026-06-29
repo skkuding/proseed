@@ -58,7 +58,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
         body: JSON.stringify({}),
       })
 
-      if (res.status === 403) {
+      if (res.status === 400 || res.status === 403) {
         setStep('reauth')
         return
       }
@@ -181,7 +181,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
         )}
 
         {step === 'reauth' && (
-          <div className="flex flex-col items-center gap-8 text-center">
+          <div className="flex flex-col items-center justify-center gap-8 text-center h-full px-7 py-10">
             <div className="flex flex-col gap-2">
               <h2 className="text-title1_sb_28 text-black">다시 로그인이 필요해요</h2>
               <p className="text-body1_m_16 text-neutral-40">

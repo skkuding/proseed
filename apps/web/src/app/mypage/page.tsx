@@ -59,18 +59,20 @@ export default function MyPage() {
       </div>
 
       {/* 오른쪽 컬럼 */}
-      {activeMenu === 'profile' && (
-        <ProfileForm
-          initialName={user.name ?? ''}
-          initialJob={currentJob}
-          initialSkills={[]}
-          initialLinks={[]}
-          initialBio={''}
-          onJobChange={setCurrentJob}
-        />
-      )}
-      {activeMenu === 'account' && <AccountForm email={user.email} provider={provider} />}
-      {activeMenu === 'faq' && <FaqSection />}
+      <div className="w-235 rounded-[12px] overflow-hidden">
+        {activeMenu === 'profile' && (
+          <ProfileForm
+            initialName={user.name ?? ''}
+            initialJob={currentJob}
+            initialSkills={[]}
+            initialLinks={[]}
+            initialBio={''}
+            onJobChange={setCurrentJob}
+          />
+        )}
+        {activeMenu === 'account' && <AccountForm email={user.email} provider={provider} />}
+        {activeMenu === 'faq' && <FaqSection />}
+      </div>
     </div>
   )
 }

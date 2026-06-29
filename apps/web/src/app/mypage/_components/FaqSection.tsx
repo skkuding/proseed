@@ -55,7 +55,7 @@ export function FaqSection() {
   }
 
   return (
-    <div className="flex-1 min-w-0 rounded-2xl bg-white px-9 py-10 flex flex-col gap-5">
+    <div className="flex-1 min-w-0 bg-white px-9 py-10 flex flex-col gap-5">
       {/* div1 */}
       <h2 className="text-head3_sb_36 text-black">자주 묻는 질문</h2>
 
@@ -111,7 +111,7 @@ export function FaqSection() {
       </div>
 
       {/* div3 */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl bg-neutral-99 border border-neutral-95 p-5">
+      <div className="flex items-center justify-between gap-4 rounded-[12px] bg-neutral-99 border border-neutral-95 p-5">
         <div className="flex flex-col gap-1">
           <p className="text-title5_sb_20 text-black">추가적인 문의가 있으신가요?</p>
           <p className="text-body1_m_16 text-neutral-30">

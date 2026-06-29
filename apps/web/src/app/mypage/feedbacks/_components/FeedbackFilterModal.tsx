@@ -20,7 +20,7 @@ export function FeedbackFilterModal({ mode, onClose, onApply }: FeedbackFilterMo
       onClick={onClose}
     >
       <div
-        className="w-[400px] rounded-2xl bg-white p-8 flex flex-col gap-6"
+        className="w-[400px] rounded-[16px] bg-white p-8 flex flex-col gap-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
