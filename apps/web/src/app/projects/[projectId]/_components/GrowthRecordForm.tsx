@@ -1,5 +1,6 @@
 'use client'
 
+import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import Image from 'next/image'
@@ -165,9 +166,7 @@ export function GrowthRecordForm() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h2 className="text-title1_sb_28">성장기록 버전</h2>
-                  <span className="text-caption1_m_13 text-primary-strong bg-primary-light px-2 py-1 rounded-sm">
-                    필수
-                  </span>
+                  <FieldBadge type="필수" />
                 </div>
               </div>
               <p className="text-body3_r_16 text-CoolNeutral-40">
@@ -210,9 +209,7 @@ export function GrowthRecordForm() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="text-title1_sb_28">이미지 등록하기</h2>
-                <span className="text-caption1_m_13 text-primary-strong bg-primary-light px-2 py-1 rounded-sm">
-                  필수
-                </span>
+                <FieldBadge type="필수" />
               </div>
               <button
                 onClick={() => imageInputRef.current?.click()}
@@ -270,11 +267,7 @@ export function GrowthRecordForm() {
             >
               <div className="flex items-center gap-2">
                 <h2 className="text-title1_sb_28">{q.questionTitle}</h2>
-                {q.isRequired && (
-                  <span className="text-caption1_m_13 text-primary-strong bg-primary-light px-2 py-1 rounded-sm">
-                    필수
-                  </span>
-                )}
+                {q.isRequired && <FieldBadge type="필수" />}
               </div>
               <Editor
                 markdown={answers[q.questionId] ?? ''}

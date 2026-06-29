@@ -1,5 +1,6 @@
 'use client'
 
+import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Image from 'next/image'
@@ -188,9 +189,7 @@ export function CreateFeedbackContent() {
           <div className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
             <div className="flex items-center gap-2">
               <h2 className="text-title1_sb_28">피드백 한 줄 평가</h2>
-              <span className="text-caption1_m_13 text-primary-strong bg-primary-light px-2 py-1 rounded-sm">
-                필수
-              </span>
+              <FieldBadge type="필수" />
             </div>
             <div className="relative">
               <textarea
@@ -218,11 +217,7 @@ export function CreateFeedbackContent() {
             >
               <div className="flex items-center gap-2">
                 <h2 className="text-title1_sb_28">{q.questionTitle}</h2>
-                {q.isRequired && (
-                  <span className="text-caption1_m_13 text-primary-strong bg-primary-light px-2 py-1 rounded-sm">
-                    필수
-                  </span>
-                )}
+                {q.isRequired && <FieldBadge type="필수" />}
                 <button
                   onClick={() => fileInputRefs.current[q.questionId]?.click()}
                   disabled={(questionImages[q.questionId]?.length ?? 0) >= MAX_IMAGES}

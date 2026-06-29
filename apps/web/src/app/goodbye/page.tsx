@@ -13,7 +13,7 @@ export default function GoodbyePage() {
       </div>
       <Button
         asChild
-        className="rounded-[8px] bg-CoolNeutral-20 px-5 py-[15px] text-sub3_sb_16 text-white hover:cursor-pointer"
+        className="h-13 w-[166px] rounded-[8px] bg-CoolNeutral-20 px-5 py-[15px] text-sub3_sb_16 text-white hover:cursor-pointer"
       >
         <Link href="/">홈 화면으로 돌아가기</Link>
       </Button>

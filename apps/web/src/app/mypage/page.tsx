@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ProfileForm } from './_components/ProfileForm'
 import { AccountForm } from './_components/AccountForm'
 import { FaqSection } from './_components/FaqSection'
@@ -14,7 +14,13 @@ const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$
 type MenuItem = 'profile' | 'account' | 'faq'
 
 export default function MyPage() {
-  const [activeMenu, setActiveMenu] = useState<MenuItem>('profile')
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab') as MenuItem | null
+  const initialTab: MenuItem =
+    tabParam && (['profile', 'account', 'faq'] as MenuItem[]).includes(tabParam)
+      ? tabParam
+      : 'profile'
+  const [activeMenu, setActiveMenu] = useState<MenuItem>(initialTab)
   const [provider, setProvider] = useState('')
   const [currentJob, setCurrentJob] = useState('')
   const { data: session, isPending } = authClient.useSession()

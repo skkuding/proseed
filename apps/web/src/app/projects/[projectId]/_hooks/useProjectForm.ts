@@ -48,7 +48,7 @@ export function useProjectForm(init: ProjectFormInit = {}) {
     type: projectType !== null,
     title: title.trim().length > 0,
     link: projectLink.trim().length > 0,
-    description: oneLineDescription.trim().length >= 20 && description.trim().length >= 20,
+    description: oneLineDescription.trim().length >= 5 && description.trim().length >= 20,
     status: status !== null,
     contactPath: contactPath.trim().length > 0,
   }

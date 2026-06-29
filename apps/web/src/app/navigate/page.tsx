@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import navigateProjects from '@/app/_mockdata/project-list/navigate-projects.json'
-import CategoryTabs, { CategoryLabel } from '@/app/mainpage/_components/CategoryTabs'
+import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
+import { getProjects, type Project } from '@/lib/api'
+import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
 import ProjectCard from '@/app/mainpage/_components/ProjectCard'
 import {
   Pagination,
@@ -43,21 +44,22 @@ export default function Navigate() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')
   const [currentPage, setCurrentPage] = useState(1)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [allProjects, setAllProjects] = useState<Project[]>([])
 
-  const filteredProjects = useMemo(() => {
-    if (selectedCategory === '전체') return navigateProjects
-    return navigateProjects.filter((p) => p.category.includes(selectedCategory))
+  useEffect(() => {
+    const apiCategory = selectedCategory === '전체' ? undefined : CATEGORY_TO_API[selectedCategory]
+    getProjects({ category: apiCategory, take: 100 })
+      .then((res) => setAllProjects(res.data))
+      .catch(console.error)
   }, [selectedCategory])
 
-  const totalPages = Math.ceil(filteredProjects.length / PAGE_SIZE)
-  const pagedProjects = filteredProjects.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  )
+  const totalPages = Math.ceil(allProjects.length / PAGE_SIZE)
+  const pagedProjects = allProjects.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   const handleCategorySelect = (category: CategoryLabel) => {
     setSelectedCategory(category)
     setCurrentPage(1)
+    setAllProjects([])
   }
 
   const handlePageChange = (page: number) => {
@@ -83,7 +85,7 @@ export default function Navigate() {
             className="flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm hover:bg-neutral-99 transition-colors hover:cursor-pointer"
             aria-label="프로젝트 검색"
           >
-            <Image src="/search.svg" alt="검색" width={24} height={24} />
+            <Image src="/search.svg" alt="검색" width={32} height={32} />
           </button>
         </div>
 
@@ -93,7 +95,7 @@ export default function Navigate() {
         {/* Project grid */}
         {pagedProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-CoolNeutral-50">
-            <Image src="/info.svg" alt="정보" width={24} height={24} />
+            <Image src="/info_cool50.svg" alt="정보" width={24} height={24} />
             <p className="text-body3_r_16">해당 카테고리의 프로젝트가 없습니다.</p>
           </div>
         ) : (

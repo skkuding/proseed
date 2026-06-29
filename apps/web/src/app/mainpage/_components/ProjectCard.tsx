@@ -1,21 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
+import type { Project } from '@/lib/api'
 
-interface ProjectCardProps {
-  project: {
-    id: number
-    title: string
-    type: string
-    status: string
-    oneLineDescription: string
-    category: string[]
-    thumbnailUrl: string
-    feedbackCount: number
-    growthRecordCount: number
-  }
-}
-
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project }: { project: Project }) {
   return (
     <Link href={`/projects/${project.id}`} className="block">
       <article className="w-full cursor-pointer overflow-hidden rounded-[20px] bg-white shadow-sm px-2 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
@@ -29,17 +17,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <div className="flex items-center gap-1">
                 <h3 className="text-title3_sb_24 truncate">{project.title}</h3>
                 <div className="flex shrink-0 items-center gap-1">
-                  {project.category.map((category) => (
+                  {project.category.map((cat) => (
                     <span
-                      key={category}
+                      key={cat}
                       className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-body1_m_16 text-CoolNeutral-40"
                     >
-                      {category}
+                      {CATEGORY_LABELS[cat] ?? cat}
                     </span>
                   ))}
                 </div>
               </div>
-
               <p className="line-clamp-2 text-body3_r_16 text-CoolNeutral-30 pt-1 h-13">
                 {project.oneLineDescription}
               </p>
@@ -52,11 +39,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   피드백 {project.feedbackCount}
                 </span>
               </div>
-
               <div className="inline-flex items-center gap-1">
-                <Image src="/plant.svg" alt="성장과정" width={20} height={20} />
+                <Image src="/plant.svg" alt="성장기록" width={20} height={20} />
                 <span className="text-body1_m_16 text-CoolNeutral-30">
-                  성장기록 {project.growthRecordCount}
+                  성장기록 {project.growthRecordCount ?? 0}
                 </span>
               </div>
             </div>

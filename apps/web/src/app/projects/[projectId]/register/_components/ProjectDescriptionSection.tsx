@@ -1,3 +1,4 @@
+import { FieldBadge } from '@/components/FieldBadge'
 interface ProjectDescriptionSectionProps {
   oneLineDescription: string
   description: string
@@ -16,9 +17,7 @@ export function ProjectDescriptionSection({
       <div className="flex flex-col justify-start gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-title1_sb_28">프로젝트 설명</h2>
-          <span className="text-primary-strong text-caption1_m_16 bg-primary-light rounded-[4px] px-2 py-1">
-            필수
-          </span>
+          <FieldBadge type="필수" />
         </div>
         <p className="text-body3_r_16 text-CoolNeutral-30">
           프로젝트 설명과 한 줄 소개를 최소 20자 이상 작성해주세요

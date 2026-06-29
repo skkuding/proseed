@@ -57,7 +57,12 @@ export function Header() {
               activeTab={activeTab}
               onTabChange={(label) => {
                 const tab = NAV_TABS.find((t) => t.label === label)
-                if (tab) router.push(tab.href)
+                if (!tab) return
+                if (!session && (tab.href === '/mypage' || tab.href === '/myproject')) {
+                  openLoginModal()
+                  return
+                }
+                router.push(tab.href)
               }}
               textSize="text-body2_m_14"
             />

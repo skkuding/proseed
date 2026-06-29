@@ -1,3 +1,4 @@
+import { FieldBadge } from '@/components/FieldBadge'
 import Image from 'next/image'
 
 interface ProjectLinkSectionProps {
@@ -11,9 +12,7 @@ export function ProjectLinkSection({ value, onChange }: ProjectLinkSectionProps)
       <div className="flex flex-col justify-start gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-title1_sb_28">프로젝트 관련 링크</h2>
-          <span className="text-primary-strong text-caption1_m_16 bg-primary-light rounded-[4px] px-2 py-1">
-            필수
-          </span>
+          <FieldBadge type="필수" />
         </div>
 
         <p className="text-body3_r_16 text-CoolNeutral-30">

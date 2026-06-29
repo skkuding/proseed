@@ -1,5 +1,6 @@
 'use client'
 
+import { FieldBadge } from '@/components/FieldBadge'
 import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { ImageIcon } from 'lucide-react'
@@ -32,9 +33,7 @@ export function ProjectImagesSection({ images, onAdd, onRemove }: ProjectImagesS
         <div className="flex flex-col gap-1 items-start">
           <div className="flex items-center gap-2">
             <h2 className="text-title1_sb_28">프로젝트 이미지</h2>
-            <span className="text-primary-strong text-caption1_m_16 bg-primary-light rounded-[4px] px-2 py-1">
-              필수
-            </span>
+            <FieldBadge type="필수" />
           </div>
           <p className="text-body3_r_16 text-CoolNeutral-30">
             프로젝트를 나타낼 수 있는 이미지를 등록해주세요

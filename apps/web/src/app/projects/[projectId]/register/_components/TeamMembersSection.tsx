@@ -1,5 +1,6 @@
 'use client'
 
+import { FieldBadge } from '@/components/FieldBadge'
 import { useState } from 'react'
 import Image from 'next/image'
 import { toast } from 'sonner'
@@ -75,9 +76,7 @@ export function TeamMembersSection({
         <div className="flex flex-col justify-start gap-1">
           <div className="flex items-center gap-2">
             <h2 className="text-title1_sb_28">함께한 팀원</h2>
-            <span className="text-CoolNeutral-40 text-caption1_m_16 bg-neutral-99 rounded-[4px] px-2 py-1">
-              선택
-            </span>
+            <FieldBadge type="선택" />
           </div>
 
           <p className="text-body3_r_16 text-CoolNeutral-30">
