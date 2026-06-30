@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type ReactNode } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
@@ -85,7 +85,9 @@ function MyPageShell({ children }: { children: ReactNode }) {
 export default function MyPageLayout({ children }: { children: ReactNode }) {
   return (
     <MyPageProfileProvider>
-      <MyPageShell>{children}</MyPageShell>
+      <Suspense>
+        <MyPageShell>{children}</MyPageShell>
+      </Suspense>
     </MyPageProfileProvider>
   )
 }
