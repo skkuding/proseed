@@ -55,7 +55,7 @@ export function FaqSection() {
   }
 
   return (
-    <div className="flex-1 min-w-0 bg-white px-9 py-10 flex flex-col gap-5">
+    <div className="flex flex-col gap-5">
       {/* div1 */}
       <h2 className="text-head3_sb_36 text-black">자주 묻는 질문</h2>
 

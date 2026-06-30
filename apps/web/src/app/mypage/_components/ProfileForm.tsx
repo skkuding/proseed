@@ -134,7 +134,7 @@ export function ProfileForm({
     'flex h-[46px] w-[60px] shrink-0 items-center justify-center rounded-[8px] border-[1.4px] border-CoolNeutral-50 hover:cursor-pointer hover:bg-neutral-99'
 
   return (
-    <div className="flex-1 min-w-0 bg-white p-10 flex flex-col gap-7 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)]">
+    <div className="flex flex-col gap-7">
       <span className="text-head3_sb_36">내 프로필</span>
 
       <div className="flex flex-col gap-4 justify-center">
