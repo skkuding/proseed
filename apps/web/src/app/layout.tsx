@@ -3,6 +3,7 @@ import './globals.css'
 import localFont from 'next/font/local'
 import { Header } from '@/app/_components/Header'
 import { Footer } from '@/app/_components/Footer'
+import { MobileBlocker } from '@/app/_components/MobileBlocker'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/AuthProvider'
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={pretendard.variable}>
       <body className={`${pretendard.className} bg-background-normal`}>
         <AuthProvider>
+          <MobileBlocker />
           <Header />
           <div className="mx-auto max-w-360 px-10 pb-30">{children}</div>
           <Footer />
