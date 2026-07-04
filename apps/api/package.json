@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "generate:openapi": "nest build && node dist/src/generate-openapi.js",
     "start": "nest start",
     "start:dev": "docker compose up -d && nest start --watch",
     "start:debug": "nest start --debug --watch",
