@@ -1,0 +1,30 @@
+meta {
+  name: Sign In Lead (dev)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/sign-in/email
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "lead@proseed.local",
+    "password": "proseed123!"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  로컬 dev 전용 로그인 — API를 ENABLE_DEV_LOGIN=true로 실행해야 동작.
+  계정은 `pnpm --filter api exec prisma db seed`로 생성됨 (비밀번호 공통: proseed123!).
+  성공 시 Set-Cookie를 Bruno가 쿠키 저장소에 보관하므로, 이후 요청은 자동으로 인증됨.
+  lead@proseed.local은 데모 프로젝트(id=1)의 Lead — 발행/전체 draft/삭제 가능.
+}

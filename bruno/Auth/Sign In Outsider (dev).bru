@@ -1,0 +1,28 @@
+meta {
+  name: Sign In Outsider (dev)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/sign-in/email
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "feedback1@proseed.local",
+    "password": "proseed123!"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  외부인(비팀원) 관점 테스트용 — draft 접근 403, 피드백 작성 가능.
+  feedback1은 버전 1.0.0에 PLAN+DESIGN 다직군 피드백을 이미 제출한 상태(submission id=1, 태그 시 +5).
+}

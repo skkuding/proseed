@@ -1,0 +1,20 @@
+meta {
+  name: Get Drafts
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/project/1/drafts
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  리드는 4개 직군 draft 전부, 팀원은 자기 직군(ProjectRole.role 매핑) draft만 반환됨.
+}

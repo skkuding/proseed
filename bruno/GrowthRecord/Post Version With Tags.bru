@@ -1,0 +1,108 @@
+meta {
+  name: Post Version With Tags
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/project/1/versions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "version": "1.1.0",
+    "updateGoal": "피드백 반영 업데이트",
+    "updateResults": [
+      "지난 버전 피드백 기반 UI 개선"
+    ],
+    "growthRecords": [
+      {
+        "category": "PLAN",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "지난 버전 피드백에서 타겟 정의가 넓다는 지적이 있었습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "DESIGN",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "피드백 기반으로 스텝 인디케이터를 도입했습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "DEVELOPMENT",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "웹훅 기반 연동으로 데이터 불일치를 해결했습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "GENERAL",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "QA 체크리스트를 도입했습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      }
+    ],
+    "feedbackQuestions": [
+      {
+        "category": "PLAN",
+        "content": "좁힌 타겟 정의가 설득력 있나요?",
+        "isRequired": true
+      },
+      {
+        "category": "DESIGN",
+        "content": "스텝 인디케이터가 흐름 파악에 도움이 되었나요?"
+      },
+      {
+        "category": "DEVELOPMENT",
+        "content": "동기화 오류가 재발한 경우가 있었나요?"
+      },
+      {
+        "category": "GENERAL",
+        "content": "자유롭게 하고 싶은 말을 남겨주세요"
+      }
+    ],
+    "taggedFeedbacks": [
+      {
+        "category": "PLAN",
+        "submissionIds": [1]
+      },
+      {
+        "category": "DESIGN",
+        "submissionIds": [1, 2]
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  태그(=채택): 이전 버전 피드백 제출을 직군별로 태그. submissionIds는 FeedbackSubmission id.
+  규칙: 직군당 최대 3개, 이 프로젝트의 미채택 제출만(기채택 재태그 불가 409), 해당 직군 답변이 있는 제출만(아니면 422).
+  보상: 제출당 작성자 +3, 같은 제출이 2개 이상 직군에서 채택되면 총 +5.
+  예시의 submissionId 1은 PLAN+DESIGN 동시 채택이라 작성자가 +5를 받음.
+}

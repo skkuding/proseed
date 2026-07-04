@@ -1,0 +1,16 @@
+meta {
+  name: Get Draft
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/project/1/drafts/PLAN
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
