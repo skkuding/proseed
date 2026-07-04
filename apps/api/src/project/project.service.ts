@@ -131,7 +131,7 @@ export class ProjectService {
     }))
   }
 
-  async getProjectById(userId: number, projectId: number) {
+  async getProjectById(userId: number | undefined, projectId: number) {
     const [project, myRole] = await Promise.all([
       this.prisma.project.findUnique({
         where: { id: projectId },
@@ -157,12 +157,14 @@ export class ProjectService {
           },
         },
       }),
-      this.prisma.projectRole.findUnique({
-        where: {
-          userId_projectId: { userId, projectId },
-        },
-        select: { role: true },
-      }),
+      userId
+        ? this.prisma.projectRole.findUnique({
+            where: {
+              userId_projectId: { userId, projectId },
+            },
+            select: { role: true },
+          })
+        : Promise.resolve(null),
     ])
 
     if (!project) {
