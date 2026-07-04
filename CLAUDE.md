@@ -23,6 +23,9 @@ pnpm --filter api exec prisma generate
 pnpm --filter api exec prisma migrate dev --name <change>   # 스키마 변경 시
 pnpm --filter api exec prisma db seed                       # 로컬 시드 (계정/데이터 목록은 prisma/seed.ts 상단 주석)
 
+# API 계약 (Swagger는 dev에서 /api/docs)
+pnpm --filter web codegen:api     # openapi.json 재생성 + web 타입 생성 (apps/web/src/types/api.generated.ts)
+
 # Dev
 pnpm dev                          # Web (port 3000)
 pnpm --filter api start:dev       # API (port 4000) — docker compose up -d 자동 실행

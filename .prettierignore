@@ -3,3 +3,7 @@ pnpm-lock.yaml
 dist
 node_modules
 postcss.config.mjs
+
+# 생성 파일 (codegen:api)
+apps/api/openapi.json
+apps/web/src/types/api.generated.ts
