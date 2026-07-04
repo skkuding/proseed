@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { UserRole } from '@prisma/client'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
+import {
+  CreateFeedbackResponseDto,
+  FeedbackQuestionsResponseDto,
+} from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
   DuplicateFoundException,
@@ -23,7 +27,7 @@ export class FeedbackService {
     projectId: number,
     versionId: number,
     dto: CreateFeedbackDto,
-  ) {
+  ): Promise<CreateFeedbackResponseDto> {
     await this.assertCanCreateFeedback(userId)
 
     const targetVersion = await this.prisma.projectVersion.findFirst({
@@ -145,7 +149,10 @@ export class FeedbackService {
     }
   }
 
-  async findAllQuestions(projectId: number, versionId: number) {
+  async findAllQuestions(
+    projectId: number,
+    versionId: number,
+  ): Promise<FeedbackQuestionsResponseDto> {
     //1. 해당 버전이 프로젝트에 존재하는지 확인하며 질문 가져오기
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {

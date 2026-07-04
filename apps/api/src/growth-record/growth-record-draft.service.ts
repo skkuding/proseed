@@ -10,6 +10,7 @@ import {
   ForbiddenAccessException,
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
+import { GrowthRecordDraftResponseDto } from './dto/draft-response.dto'
 
 //팀원의 프로젝트 직군(ProjectRole.role) → 접근 가능한 draft 직군
 const JOB_TYPE_TO_CATEGORY: Record<JobType, RecordCategory> = {
@@ -40,7 +41,10 @@ type AccessibleCategories = 'ALL' | RecordCategory[]
 export class GrowthRecordDraftService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getDrafts(userId: number, projectId: number) {
+  async getDrafts(
+    userId: number,
+    projectId: number,
+  ): Promise<GrowthRecordDraftResponseDto[]> {
     const accessible = await this.getAccessibleCategories(userId, projectId)
     return this.prisma.growthRecordDraft.findMany({
       where: {
@@ -52,7 +56,11 @@ export class GrowthRecordDraftService {
     })
   }
 
-  async getDraft(userId: number, projectId: number, category: RecordCategory) {
+  async getDraft(
+    userId: number,
+    projectId: number,
+    category: RecordCategory,
+  ): Promise<GrowthRecordDraftResponseDto> {
     await this.assertCategoryAccess(userId, projectId, category)
 
     const draft = await this.prisma.growthRecordDraft.findUnique({
@@ -71,7 +79,7 @@ export class GrowthRecordDraftService {
     projectId: number,
     category: RecordCategory,
     content: Record<string, unknown>,
-  ) {
+  ): Promise<GrowthRecordDraftResponseDto> {
     await this.assertCategoryAccess(userId, projectId, category)
 
     //JSON body는 직렬화 가능함이 보장되므로 안전한 캐스팅

@@ -10,6 +10,10 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
+import {
+  CreateFeedbackResponseDto,
+  FeedbackQuestionsResponseDto,
+} from './dto/feedback-response.dto'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
 //전역 가드로 전 라우트 인증 필수
@@ -26,7 +30,7 @@ export class FeedbackController {
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
     @Body() createFeedbackDto: CreateFeedbackDto,
-  ) {
+  ): Promise<CreateFeedbackResponseDto> {
     const userId = req.user.id
     return await this.feedbackService.createFeedback(
       userId,
@@ -41,7 +45,7 @@ export class FeedbackController {
   async findAllQuestions(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
-  ) {
+  ): Promise<FeedbackQuestionsResponseDto> {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
 }

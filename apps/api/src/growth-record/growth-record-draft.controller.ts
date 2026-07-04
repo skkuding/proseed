@@ -14,6 +14,7 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { RecordCategory } from '@prisma/client'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
+import { GrowthRecordDraftResponseDto } from './dto/draft-response.dto'
 import { UpsertDraftDto } from './dto/upsert-draft.dto'
 import { GrowthRecordDraftService } from './growth-record-draft.service'
 
@@ -29,7 +30,7 @@ export class GrowthRecordDraftController {
   async getDrafts(
     @Req() req: RequestWithUser,
     @Param('id', ParseIntPipe) projectId: number,
-  ) {
+  ): Promise<GrowthRecordDraftResponseDto[]> {
     return this.draftService.getDrafts(req.user.id, projectId)
   }
 
@@ -39,7 +40,7 @@ export class GrowthRecordDraftController {
     @Param('id', ParseIntPipe) projectId: number,
     @Param('category', new ParseEnumPipe(RecordCategory))
     category: RecordCategory,
-  ) {
+  ): Promise<GrowthRecordDraftResponseDto> {
     return this.draftService.getDraft(req.user.id, projectId, category)
   }
 
@@ -51,7 +52,7 @@ export class GrowthRecordDraftController {
     @Param('category', new ParseEnumPipe(RecordCategory))
     category: RecordCategory,
     @Body() dto: UpsertDraftDto,
-  ) {
+  ): Promise<GrowthRecordDraftResponseDto> {
     return this.draftService.upsertDraft(
       req.user.id,
       projectId,
@@ -67,7 +68,7 @@ export class GrowthRecordDraftController {
     @Param('id', ParseIntPipe) projectId: number,
     @Param('category', new ParseEnumPipe(RecordCategory))
     category: RecordCategory,
-  ) {
+  ): Promise<void> {
     await this.draftService.deleteDraft(req.user.id, projectId, category)
   }
 }
