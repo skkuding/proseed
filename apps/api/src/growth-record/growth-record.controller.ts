@@ -7,11 +7,13 @@ import {
   Post,
   Req,
 } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { Public } from 'src/auth/decorators/public.decorator'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { CreateVersionDto } from './dto/create-version.dto'
 import { GrowthRecordService } from './growth-record.service'
 
+@ApiTags('GrowthRecord')
 @Controller('growth-records')
 export class GrowthRecordTemplateController {
   constructor(private readonly growthRecordService: GrowthRecordService) {}
@@ -23,11 +25,13 @@ export class GrowthRecordTemplateController {
   }
 }
 
+@ApiTags('GrowthRecord')
 @Controller('project/:id/versions')
 export class GrowthRecordController {
   constructor(private readonly growthRecordService: GrowthRecordService) {}
 
   //발행(성장기록 + 피드백 질문 + 피드백 태그) — Lead만 가능 (서비스에서 검증)
+  @ApiCookieAuth()
   @Post()
   async createVersion(
     @Req() req: RequestWithUser,

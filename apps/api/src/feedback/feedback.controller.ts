@@ -7,11 +7,14 @@ import {
   ParseIntPipe,
   Req,
 } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
 //전역 가드로 전 라우트 인증 필수
+@ApiTags('Feedback')
+@ApiCookieAuth()
 @Controller('project/:projectId/versions/:versionId')
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
