@@ -1,4 +1,5 @@
 import { Controller, Get, Body, Patch, Req } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 
 import { UserService } from './user.service'
 
@@ -7,6 +8,8 @@ import { generateRandomNickname } from 'src/user/utils/generateRandomNickname'
 import { OnboardingDto } from './dto/onboarding.dto'
 
 //전역 가드로 전 라우트 인증 필수
+@ApiTags('User')
+@ApiCookieAuth()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

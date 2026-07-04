@@ -11,12 +11,15 @@ import {
   Put,
   Req,
 } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { RecordCategory } from '@prisma/client'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { UpsertDraftDto } from './dto/upsert-draft.dto'
 import { GrowthRecordDraftService } from './growth-record-draft.service'
 
 //전역 가드로 전 라우트 인증 필수 — 직군별 접근 권한은 서비스에서 검증
+@ApiTags('GrowthRecordDraft')
+@ApiCookieAuth()
 @Controller('project/:id/drafts')
 export class GrowthRecordDraftController {
   constructor(private readonly draftService: GrowthRecordDraftService) {}

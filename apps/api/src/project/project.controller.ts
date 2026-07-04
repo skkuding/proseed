@@ -8,6 +8,7 @@ import {
   Query,
   Req,
 } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { OptionalAuth, Public } from 'src/auth/decorators/public.decorator'
 import type {
   OptionalUserRequest,
@@ -18,10 +19,12 @@ import { GetProjectsDto } from './dto/get-projects.dto'
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto'
 import { ProjectService } from './project.service'
 
+@ApiTags('Project')
 @Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  @ApiCookieAuth()
   @Post()
   async create(@Req() req: RequestWithUser, @Body() content: CreateProjectDto) {
     return this.projectService.create(req.user.id, content)
@@ -33,6 +36,7 @@ export class ProjectController {
     return this.projectService.getProjects(query)
   }
 
+  @ApiCookieAuth()
   @Get('my')
   async getMyProjects(@Req() req: RequestWithUser) {
     return this.projectService.getMyProjects(req.user.id)
@@ -48,6 +52,7 @@ export class ProjectController {
     return this.projectService.getProjectById(req.user?.id, projectId)
   }
 
+  @ApiCookieAuth()
   @Post(':id/invite')
   async inviteCollaborator(
     @Req() req: RequestWithUser,

@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 import { Public } from 'src/auth/decorators/public.decorator'
 import { StorageService } from './storage.service'
@@ -23,6 +24,7 @@ class GetUploadUrlDto {
 }
 
 //upload-url/download-url/delete는 전역 가드로 인증 필수 (health만 공개)
+@ApiTags('Storage')
 @Controller('storage')
 export class StorageController {
   constructor(private readonly storageService: StorageService) {}
@@ -33,6 +35,7 @@ export class StorageController {
     return this.storageService.getBucketStatus()
   }
 
+  @ApiCookieAuth()
   @Post('upload-url')
   async getUploadUrl(@Body() dto: GetUploadUrlDto) {
     const key = `uploads/${Date.now()}-${dto.filename}`
@@ -44,12 +47,14 @@ export class StorageController {
     return { url, key }
   }
 
+  @ApiCookieAuth()
   @Get('download-url/*key')
   async getDownloadUrl(@Param('key') key: string) {
     const url = await this.storageService.getSignedDownloadUrl(key)
     return { url }
   }
 
+  @ApiCookieAuth()
   @Delete('*key')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteFile(@Param('key') key: string) {
