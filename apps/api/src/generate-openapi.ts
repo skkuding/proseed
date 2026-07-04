@@ -29,14 +29,20 @@ async function generate() {
   const { AppModule } = await import('./app.module.js')
   const { createOpenApiDocument } = await import('./swagger.js')
 
-  const app = await NestFactory.create(AppModule, { logger: false })
-  const document = createOpenApiDocument(app)
-  await app.close()
+  //pnpm 스크립트는 항상 apps/api를 cwd로 실행하므로 빌드 산출물 구조와 무관하다
+  const outputPath = join(process.cwd(), 'openapi.json')
 
-  //dist/src에서 실행되므로 두 단계 위가 apps/api
-  const outputPath = join(__dirname, '../../openapi.json')
-  writeFileSync(outputPath, JSON.stringify(document, null, 2) + '\n')
-  console.log(`OpenAPI spec written to ${outputPath}`)
+  const app = await NestFactory.create(AppModule, { logger: false })
+  try {
+    const document = createOpenApiDocument(app)
+    writeFileSync(outputPath, JSON.stringify(document, null, 2) + '\n')
+    console.log(`OpenAPI spec written to ${outputPath}`)
+  } finally {
+    await app.close()
+  }
 }
 
-void generate()
+generate().catch((error: unknown) => {
+  console.error('Failed to generate OpenAPI spec:', error)
+  process.exitCode = 1
+})
