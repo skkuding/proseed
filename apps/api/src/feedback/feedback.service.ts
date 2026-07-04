@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
+  DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
   UnprocessableDataException,
@@ -55,6 +56,15 @@ export class FeedbackService {
       throw new UnprocessableDataException(
         'Feedback can only be submitted for the latest version',
       )
+    }
+
+    // 유저 × 버전 중복 제출 방지 (DB unique 제약과 이중 방어)
+    const existingSubmission = await this.prisma.feedbackSubmission.findUnique({
+      where: { versionId_userId: { versionId, userId } },
+      select: { id: true },
+    })
+    if (existingSubmission) {
+      throw new DuplicateFoundException('FeedbackSubmission')
     }
 
     const validQuestionIds = new Set(
@@ -129,7 +139,6 @@ export class FeedbackService {
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
-          isAdopted: f.isAdopted,
           createdAt: f.createdAt,
         })),
       },
