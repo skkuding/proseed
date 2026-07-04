@@ -15,6 +15,14 @@ import type {
   RequestWithUser,
 } from 'src/common/types/request-with-user.type'
 import { CreateProjectDto } from './dto/create-project.dto'
+import {
+  ProjectDetailResponseDto,
+  ProjectListItemDto,
+  ProjectListResponseDto,
+  ProjectResponseDto,
+  ProjectRoleResponseDto,
+  ProjectVersionListItemDto,
+} from './dto/project-response.dto'
 import { GetProjectsDto } from './dto/get-projects.dto'
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto'
 import { ProjectService } from './project.service'
@@ -26,19 +34,26 @@ export class ProjectController {
 
   @ApiCookieAuth()
   @Post()
-  async create(@Req() req: RequestWithUser, @Body() content: CreateProjectDto) {
+  async create(
+    @Req() req: RequestWithUser,
+    @Body() content: CreateProjectDto,
+  ): Promise<ProjectResponseDto> {
     return this.projectService.create(req.user.id, content)
   }
 
   @Public()
   @Get()
-  async getProjects(@Query() query: GetProjectsDto) {
+  async getProjects(
+    @Query() query: GetProjectsDto,
+  ): Promise<ProjectListResponseDto> {
     return this.projectService.getProjects(query)
   }
 
   @ApiCookieAuth()
   @Get('my')
-  async getMyProjects(@Req() req: RequestWithUser) {
+  async getMyProjects(
+    @Req() req: RequestWithUser,
+  ): Promise<ProjectListItemDto[]> {
     return this.projectService.getMyProjects(req.user.id)
   }
 
@@ -48,7 +63,7 @@ export class ProjectController {
   async getProjectById(
     @Req() req: OptionalUserRequest,
     @Param('id', ParseIntPipe) projectId: number,
-  ) {
+  ): Promise<ProjectDetailResponseDto> {
     return this.projectService.getProjectById(req.user?.id, projectId)
   }
 
@@ -58,7 +73,7 @@ export class ProjectController {
     @Req() req: RequestWithUser,
     @Param('id', ParseIntPipe) projectId: number,
     @Body() dto: InviteCollaboratorDto,
-  ) {
+  ): Promise<ProjectRoleResponseDto> {
     return this.projectService.inviteCollaborator(
       req.user.id,
       projectId,
@@ -69,7 +84,9 @@ export class ProjectController {
 
   @Public()
   @Get(':id/versions')
-  async getProjectVersions(@Param('id', ParseIntPipe) projectId: number) {
+  async getProjectVersions(
+    @Param('id', ParseIntPipe) projectId: number,
+  ): Promise<ProjectVersionListItemDto[]> {
     return this.projectService.getProjectVersions(projectId)
   }
 }

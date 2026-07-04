@@ -16,6 +16,11 @@ import {
   type TaggedFeedbacksDto,
 } from './dto/create-version.dto'
 import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
+import {
+  FeedbackTemplateDto,
+  PublishVersionResponseDto,
+  VersionDetailResponseDto,
+} from './dto/version-response.dto'
 
 //발행 시 팀원 전원에게 지급하는 티켓
 const VERSION_PUBLISH_REWARD = 1
@@ -45,8 +50,11 @@ export class GrowthRecordService {
     private readonly storage: StorageService,
   ) {}
 
-  getFeedbackTemplates() {
-    return FEEDBACK_TEMPLATES
+  getFeedbackTemplates(): FeedbackTemplateDto[] {
+    return FEEDBACK_TEMPLATES.map((template) => ({
+      category: template.category,
+      questions: [...template.questions],
+    }))
   }
 
   /**
@@ -58,7 +66,7 @@ export class GrowthRecordService {
     userId: number,
     projectId: number,
     dto: CreateVersionDto,
-  ) {
+  ): Promise<PublishVersionResponseDto> {
     const role = await this.prisma.projectRole.findUnique({
       where: { userId_projectId: { userId, projectId } },
     })
@@ -200,7 +208,7 @@ export class GrowthRecordService {
   }
 
   /** 특정 버전 상세 성장기록 조회 (이미지는 presigned URL, 태그된 피드백 포함) */
-  async getVersionDetail(versionId: number) {
+  async getVersionDetail(versionId: number): Promise<VersionDetailResponseDto> {
     const version = await this.prisma.projectVersion.findUnique({
       where: { id: versionId },
       include: {

@@ -11,6 +11,11 @@ import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { Public } from 'src/auth/decorators/public.decorator'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { CreateVersionDto } from './dto/create-version.dto'
+import {
+  FeedbackTemplateDto,
+  PublishVersionResponseDto,
+  VersionDetailResponseDto,
+} from './dto/version-response.dto'
 import { GrowthRecordService } from './growth-record.service'
 
 @ApiTags('GrowthRecord')
@@ -20,7 +25,7 @@ export class GrowthRecordTemplateController {
 
   @Public()
   @Get('feedback-templates')
-  getFeedbackTemplates() {
+  getFeedbackTemplates(): FeedbackTemplateDto[] {
     return this.growthRecordService.getFeedbackTemplates()
   }
 }
@@ -37,13 +42,15 @@ export class GrowthRecordController {
     @Req() req: RequestWithUser,
     @Param('id', ParseIntPipe) projectId: number,
     @Body() dto: CreateVersionDto,
-  ) {
+  ): Promise<PublishVersionResponseDto> {
     return this.growthRecordService.createVersion(req.user.id, projectId, dto)
   }
 
   @Public()
   @Get(':versionId')
-  async getVersionDetail(@Param('versionId', ParseIntPipe) versionId: number) {
+  async getVersionDetail(
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ): Promise<VersionDetailResponseDto> {
     return this.growthRecordService.getVersionDetail(versionId)
   }
 }

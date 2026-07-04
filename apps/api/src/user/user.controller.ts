@@ -6,6 +6,11 @@ import { UserService } from './user.service'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { generateRandomNickname } from 'src/user/utils/generateRandomNickname'
 import { OnboardingDto } from './dto/onboarding.dto'
+import {
+  NicknameResponseDto,
+  UserCheckResponseDto,
+  UserResponseDto,
+} from './dto/user-response.dto'
 
 //전역 가드로 전 라우트 인증 필수
 @ApiTags('User')
@@ -15,12 +20,14 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('check') //기존 or 신규 유저인지 확인 + 초기 생성 닉네임 반환
-  async checkIsNewUser(@Req() req: RequestWithUser) {
+  async checkIsNewUser(
+    @Req() req: RequestWithUser,
+  ): Promise<UserCheckResponseDto> {
     return await this.userService.checkIsNewUser(req.user.id)
   }
 
   @Get('nickname')
-  generateRandomNickname() {
+  generateRandomNickname(): NicknameResponseDto {
     return { nickname: generateRandomNickname() }
   }
 
@@ -28,7 +35,7 @@ export class UserController {
   async onboarding(
     @Req() req: RequestWithUser,
     @Body() onboardingDto: OnboardingDto,
-  ) {
+  ): Promise<UserResponseDto> {
     return await this.userService.onboarding(req.user.id, onboardingDto)
   }
 }
