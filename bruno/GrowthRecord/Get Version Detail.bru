@@ -1,0 +1,16 @@
+meta {
+  name: Get Version Detail
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/project/1/versions/1
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

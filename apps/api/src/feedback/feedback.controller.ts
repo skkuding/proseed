@@ -5,16 +5,14 @@ import {
   Body,
   Param,
   ParseIntPipe,
-  UseGuards,
   Req,
 } from '@nestjs/common'
 import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
-import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
+//전역 가드로 전 라우트 인증 필수
 @Controller('project/:projectId/versions/:versionId')
-@UseGuards(BetterAuthGuard)
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 

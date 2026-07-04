@@ -1,0 +1,43 @@
+meta {
+  name: Put Draft
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/project/1/drafts/PLAN
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": {
+      "answers": {
+        "배경 및 문제 정의": "온보딩 이탈률이 높아 개선이 필요했습니다.",
+        "해결 방안과 그 이유": "온보딩 단계를 5단계에서 3단계로 축소했습니다.",
+        "업데이트 인사이트": "가입 완료율이 40% 개선되었습니다."
+      },
+      "imageKeys": [],
+      "taggedSubmissionIds": [],
+      "feedbackQuestions": [
+        {
+          "content": "온보딩 플로우가 직관적이었나요?",
+          "isRequired": true
+        }
+      ]
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  생성/수정 통합(upsert) — 직군당 공유 draft 1개. 마지막 수정자가 기록됨.
+  팀원은 자기 직군(PLAN은 Planner)만 저장 가능, 리드는 전 직군 가능 (아니면 403).
+  content는 자유 형식 JSON 스냅샷 — 발행 시점에만 정식 검증되므로 부분 작성 저장 가능.
+  URL 경로의 직군: PLAN | DESIGN | DEVELOPMENT | GENERAL
+}

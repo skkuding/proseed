@@ -52,6 +52,11 @@ class EnvironmentVariables {
   @IsNotEmpty()
   BETTER_AUTH_SECRET!: string
 
+  // Dev 전용: seed 유저 email/password 로그인 활성화 ('true'일 때만) — 프로덕션 금지
+  @IsString()
+  @IsOptional()
+  ENABLE_DEV_LOGIN?: string
+
   // Optional: library falls back to localhost in dev; production gets the public URL from configmap
   @IsString()
   @IsOptional()

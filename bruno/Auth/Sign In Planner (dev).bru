@@ -1,0 +1,28 @@
+meta {
+  name: Sign In Planner (dev)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/sign-in/email
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "planner@proseed.local",
+    "password": "proseed123!"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  팀원(Planner) 관점 테스트용 — PLAN draft만 조회/수정 가능, DESIGN 접근은 403, 발행 403.
+  같은 요령으로 designer@ / other@proseed.local 로도 로그인 가능.
+}

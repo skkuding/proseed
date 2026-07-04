@@ -8,17 +8,26 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common'
+import { IsNotEmpty, IsString } from 'class-validator'
+import { Public } from 'src/auth/decorators/public.decorator'
 import { StorageService } from './storage.service'
 
 class GetUploadUrlDto {
+  @IsString()
+  @IsNotEmpty()
   filename: string
+
+  @IsString()
+  @IsNotEmpty()
   contentType: string
 }
 
+//upload-url/download-url/delete는 전역 가드로 인증 필수 (health만 공개)
 @Controller('storage')
 export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
+  @Public()
   @Get('health')
   async checkHealth() {
     return this.storageService.getBucketStatus()
