@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import type { JobType, Prisma } from '@prisma/client'
+import { ProjectMemberRole, type JobType, type Prisma } from '@prisma/client'
 import {
   EntityNotExistException,
   ForbiddenAccessException,
@@ -131,7 +131,7 @@ export class ProjectService {
     }))
   }
 
-  async getProjectById(userId: number, projectId: number) {
+  async getProjectById(userId: number | undefined, projectId: number) {
     const [project, myRole] = await Promise.all([
       this.prisma.project.findUnique({
         where: { id: projectId },
@@ -157,12 +157,14 @@ export class ProjectService {
           },
         },
       }),
-      this.prisma.projectRole.findUnique({
-        where: {
-          userId_projectId: { userId, projectId },
-        },
-        select: { role: true },
-      }),
+      userId
+        ? this.prisma.projectRole.findUnique({
+            where: {
+              userId_projectId: { userId, projectId },
+            },
+            select: { role: true },
+          })
+        : Promise.resolve(null),
     ])
 
     if (!project) {
@@ -192,7 +194,7 @@ export class ProjectService {
         projectRoles: {
           create: {
             userId,
-            isLeader: true,
+            projectMemberRole: ProjectMemberRole.Lead,
             role: dto.leaderJobType,
           },
         },
@@ -216,12 +218,12 @@ export class ProjectService {
       where: {
         userId,
         projectId,
-        isLeader: true,
+        projectMemberRole: ProjectMemberRole.Lead,
       },
     })
 
     if (!projectRole) {
-      throw new ForbiddenAccessException('Only Admin can invite collaborators.')
+      throw new ForbiddenAccessException('Only Lead can invite collaborators.')
     }
 
     const targetUser = await this.prisma.user.findFirst({
@@ -238,7 +240,7 @@ export class ProjectService {
       data: {
         userId: targetUser.id,
         projectId,
-        isLeader: false,
+        projectMemberRole: ProjectMemberRole.TeamMember,
         role,
       },
     })

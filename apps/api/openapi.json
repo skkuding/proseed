@@ -1,0 +1,2375 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/storage/health": {
+      "get": {
+        "operationId": "StorageController_checkHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
+    "/storage/upload-url": {
+      "post": {
+        "operationId": "StorageController_getUploadUrl",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUploadUrlDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrlResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
+    "/storage/download-url/{key}": {
+      "get": {
+        "operationId": "StorageController_getDownloadUrl",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadUrlResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
+    "/storage/{key}": {
+      "delete": {
+        "operationId": "StorageController_deleteFile",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Storage"
+        ]
+      }
+    },
+    "/user/check": {
+      "get": {
+        "operationId": "UserController_checkIsNewUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCheckResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/nickname": {
+      "get": {
+        "operationId": "UserController_generateRandomNickname",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NicknameResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/onboarding": {
+      "patch": {
+        "operationId": "UserController_onboarding",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/project": {
+      "post": {
+        "operationId": "ProjectController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
+      },
+      "get": {
+        "operationId": "ProjectController_getProjects",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "HEALTHCARE",
+                "FINANCE",
+                "PUBLIC",
+                "COMMERCE",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "MOBILITY",
+                "ENERGY",
+                "REALESTATE",
+                "LIFESTYLE",
+                "PRODUCTIVITY",
+                "COMMUNITY",
+                "AI"
+              ]
+            }
+          },
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 9,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/my": {
+      "get": {
+        "operationId": "ProjectController_getMyProjects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/{id}": {
+      "get": {
+        "operationId": "ProjectController_getProjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/{id}/invite": {
+      "post": {
+        "operationId": "ProjectController_inviteCollaborator",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteCollaboratorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRoleResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/{id}/versions": {
+      "get": {
+        "operationId": "ProjectController_getProjectVersions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectVersionListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Project"
+        ]
+      },
+      "post": {
+        "operationId": "GrowthRecordController_createVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVersionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishVersionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "GrowthRecord"
+        ]
+      }
+    },
+    "/project/{id}/versions/{versionId}": {
+      "get": {
+        "operationId": "GrowthRecordController_getVersionDetail",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "GrowthRecord"
+        ]
+      }
+    },
+    "/growth-records/feedback-templates": {
+      "get": {
+        "operationId": "GrowthRecordTemplateController_getFeedbackTemplates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeedbackTemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "GrowthRecord"
+        ]
+      }
+    },
+    "/project/{id}/drafts": {
+      "get": {
+        "operationId": "GrowthRecordDraftController_getDrafts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GrowthRecordDraftResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "GrowthRecordDraft"
+        ]
+      }
+    },
+    "/project/{id}/drafts/{category}": {
+      "get": {
+        "operationId": "GrowthRecordDraftController_getDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrowthRecordDraftResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "GrowthRecordDraft"
+        ]
+      },
+      "put": {
+        "operationId": "GrowthRecordDraftController_upsertDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertDraftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrowthRecordDraftResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "GrowthRecordDraft"
+        ]
+      },
+      "delete": {
+        "operationId": "GrowthRecordDraftController_deleteDraft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "GrowthRecordDraft"
+        ]
+      }
+    },
+    "/project/{projectId}/versions/{versionId}/feedbacks": {
+      "post": {
+        "operationId": "FeedbackController_createFeedback",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
+      "get": {
+        "operationId": "FeedbackController_findAllQuestions",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackQuestionsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Proseed API",
+    "description": "사이드 프로젝트 성장기록·피드백 플랫폼 API. 인증은 better-auth 세션 쿠키 기반이며, 로그인 라우트(/api/auth/*)는 better-auth가 별도로 처리하므로 이 문서에 포함되지 않는다. 로컬에서는 ENABLE_DEV_LOGIN=true 후 POST /api/auth/sign-in/email (seed 계정)으로 세션을 얻을 수 있다.",
+    "version": "0.0.1",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token"
+      }
+    },
+    "schemas": {
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "BucketStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "objectCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "bucket",
+          "status",
+          "objectCount"
+        ]
+      },
+      "GetUploadUrlDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UploadUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "presigned upload URL (PUT 대상)"
+          },
+          "key": {
+            "type": "string",
+            "description": "DB에 저장할 S3 object key"
+          }
+        },
+        "required": [
+          "url",
+          "key"
+        ]
+      },
+      "DownloadUrlResponseDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "presigned download URL"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "UserCheckResponseDto": {
+        "type": "object",
+        "properties": {
+          "isNewUser": {
+            "type": "boolean",
+            "description": "온보딩(jobType 설정) 미완료 여부"
+          },
+          "nickname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "isNewUser",
+          "nickname"
+        ]
+      },
+      "NicknameResponseDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname"
+        ]
+      },
+      "OnboardingDto": {
+        "type": "object",
+        "properties": {
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "Developer",
+              "Planner",
+              "Designer",
+              "Other"
+            ]
+          },
+          "nickname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobType",
+          "nickname"
+        ]
+      },
+      "JobType": {
+        "type": "string",
+        "enum": [
+          "Planner",
+          "Designer",
+          "Developer",
+          "Other"
+        ]
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "Sprout",
+          "Seeder"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "userRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              }
+            ]
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ownedTicketCount": {
+            "type": "number"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "jobType",
+          "userRole",
+          "bio",
+          "id",
+          "name",
+          "email",
+          "emailVerified",
+          "profileImageUrl",
+          "createdAt",
+          "updatedAt",
+          "ownedTicketCount",
+          "skills",
+          "links"
+        ]
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "APP",
+              "WEB"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Available",
+              "MVP",
+              "Ongoing",
+              "Hiring"
+            ]
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "HEALTHCARE",
+                "FINANCE",
+                "PUBLIC",
+                "COMMERCE",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "MOBILITY",
+                "ENERGY",
+                "REALESTATE",
+                "LIFESTYLE",
+                "PRODUCTIVITY",
+                "COMMUNITY",
+                "AI"
+              ]
+            }
+          },
+          "contactPath": {
+            "type": "string"
+          },
+          "leaderJobType": {
+            "type": "string",
+            "enum": [
+              "Developer",
+              "Planner",
+              "Designer",
+              "Other"
+            ]
+          },
+          "projectLink": {
+            "type": "string"
+          },
+          "iconKey": {
+            "type": "string"
+          },
+          "thumbnailKey": {
+            "type": "string"
+          },
+          "imageKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "type",
+          "status",
+          "oneLineDescription",
+          "description",
+          "category",
+          "contactPath",
+          "leaderJobType",
+          "projectLink",
+          "iconKey",
+          "thumbnailKey",
+          "imageKeys"
+        ]
+      },
+      "ProjectType": {
+        "type": "string",
+        "enum": [
+          "APP",
+          "WEB"
+        ]
+      },
+      "ProjectStatus": {
+        "type": "string",
+        "enum": [
+          "Available",
+          "MVP",
+          "Ongoing",
+          "Hiring"
+        ]
+      },
+      "ProjectCategory": {
+        "type": "string",
+        "enum": [
+          "HEALTHCARE",
+          "FINANCE",
+          "PUBLIC",
+          "COMMERCE",
+          "EDUCATION",
+          "ENTERTAINMENT",
+          "MOBILITY",
+          "ENERGY",
+          "REALESTATE",
+          "LIFESTYLE",
+          "PRODUCTIVITY",
+          "COMMUNITY",
+          "AI"
+        ]
+      },
+      "ProjectResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectType"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStatus"
+              }
+            ]
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectCategory"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdById": {
+            "type": "number"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "contactPath": {
+            "type": "string"
+          },
+          "projectLink": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "category",
+          "id",
+          "title",
+          "createdById",
+          "oneLineDescription",
+          "description",
+          "contactPath",
+          "projectLink",
+          "iconUrl",
+          "thumbnailUrl",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ProjectVersionCountDto": {
+        "type": "object",
+        "properties": {
+          "versions": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "versions"
+        ]
+      },
+      "ProjectListItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectCategory"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "raw S3 key (presigned 변환은 P0-5 미해결)"
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ProjectVersionCountDto"
+          },
+          "feedbackCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "title",
+          "oneLineDescription",
+          "thumbnailUrl",
+          "_count",
+          "feedbackCount"
+        ]
+      },
+      "ProjectListResponseDto": {
+        "type": "object",
+        "properties": {
+          "nextCursor": {
+            "type": "number",
+            "nullable": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectListItemDto"
+            }
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "nextCursor",
+          "data",
+          "hasNextPage"
+        ]
+      },
+      "ProjectImageDto": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "order",
+          "url"
+        ]
+      },
+      "ProjectMemberUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "ProjectMemberDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "user": {
+            "$ref": "#/components/schemas/ProjectMemberUserDto"
+          }
+        },
+        "required": [
+          "role",
+          "id",
+          "user"
+        ]
+      },
+      "ProjectDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectType"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectStatus"
+              }
+            ]
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectCategory"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdById": {
+            "type": "number"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "contactPath": {
+            "type": "string"
+          },
+          "projectLink": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectImageDto"
+            }
+          },
+          "projectRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMemberDto"
+            }
+          },
+          "isMyProject": {
+            "type": "boolean",
+            "description": "요청자가 이 프로젝트의 멤버인지 (비로그인 시 false)"
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "category",
+          "id",
+          "title",
+          "createdById",
+          "oneLineDescription",
+          "description",
+          "contactPath",
+          "projectLink",
+          "iconUrl",
+          "thumbnailUrl",
+          "createdAt",
+          "updatedAt",
+          "images",
+          "projectRoles",
+          "isMyProject"
+        ]
+      },
+      "InviteCollaboratorDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "Developer",
+              "Planner",
+              "Designer",
+              "Other"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "role"
+        ]
+      },
+      "ProjectMemberRole": {
+        "type": "string",
+        "enum": [
+          "Lead",
+          "TeamLeader",
+          "TeamMember"
+        ]
+      },
+      "ProjectRoleResponseDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "projectMemberRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMemberRole"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "role",
+          "projectMemberRole",
+          "id",
+          "userId",
+          "projectId"
+        ]
+      },
+      "ProjectVersionListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "version": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "createdAt"
+        ]
+      },
+      "CreateGrowthRecordContentDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ]
+      },
+      "CreateGrowthRecordDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "PLAN",
+              "DESIGN",
+              "DEVELOPMENT",
+              "GENERAL"
+            ]
+          },
+          "contents": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateGrowthRecordContentDto"
+            }
+          },
+          "imageKeys": {
+            "default": [],
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "contents"
+        ]
+      },
+      "CreateFeedbackQuestionDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "PLAN",
+              "DESIGN",
+              "DEVELOPMENT",
+              "GENERAL"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "isRequired": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "category",
+          "content"
+        ]
+      },
+      "TaggedFeedbacksDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "PLAN",
+              "DESIGN",
+              "DEVELOPMENT",
+              "GENERAL"
+            ]
+          },
+          "submissionIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "submissionIds"
+        ]
+      },
+      "CreateVersionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "updateGoal": {
+            "type": "string"
+          },
+          "updateResults": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "growthRecords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateGrowthRecordDto"
+            }
+          },
+          "feedbackQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateFeedbackQuestionDto"
+            }
+          },
+          "taggedFeedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaggedFeedbacksDto"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "updateGoal",
+          "updateResults",
+          "growthRecords",
+          "feedbackQuestions"
+        ]
+      },
+      "RecordCategory": {
+        "type": "string",
+        "enum": [
+          "PLAN",
+          "DESIGN",
+          "DEVELOPMENT",
+          "GENERAL"
+        ]
+      },
+      "PublishedGrowthRecordContentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "growthRecordId": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "growthRecordId",
+          "title",
+          "content",
+          "isDefault"
+        ]
+      },
+      "PublishedGrowthRecordImageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "growthRecordId": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "growthRecordId",
+          "url",
+          "order",
+          "createdAt"
+        ]
+      },
+      "PublishedGrowthRecordDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishedGrowthRecordContentDto"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishedGrowthRecordImageDto"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "versionId",
+          "createdAt",
+          "updatedAt",
+          "contents",
+          "images"
+        ]
+      },
+      "VersionFeedbackQuestionDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isRequired": {
+            "type": "boolean"
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "content",
+          "isRequired",
+          "order"
+        ]
+      },
+      "PublishVersionResponseDto": {
+        "type": "object",
+        "properties": {
+          "releasedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "version": {
+            "type": "string"
+          },
+          "updateGoal": {
+            "type": "string"
+          },
+          "updateResults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "growthRecords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublishedGrowthRecordDto"
+            }
+          },
+          "feedbackQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionFeedbackQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "releasedAt",
+          "id",
+          "projectId",
+          "version",
+          "updateGoal",
+          "updateResults",
+          "createdAt",
+          "updatedAt",
+          "growthRecords",
+          "feedbackQuestions"
+        ]
+      },
+      "VersionDetailContentDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "content",
+          "isDefault"
+        ]
+      },
+      "VersionDetailImageDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "presigned download URL"
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "url",
+          "order"
+        ]
+      },
+      "TaggedFeedbackAuthorDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "TaggedFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "태그된 피드백 제출(submission) id"
+          },
+          "author": {
+            "$ref": "#/components/schemas/TaggedFeedbackAuthorDto"
+          },
+          "content": {
+            "type": "string",
+            "description": "제출의 한 줄 평가(oneLineReview)"
+          }
+        },
+        "required": [
+          "id",
+          "author",
+          "content"
+        ]
+      },
+      "VersionDetailGrowthRecordDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionDetailContentDto"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionDetailImageDto"
+            }
+          },
+          "taggedFeedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaggedFeedbackDto"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "versionId",
+          "createdAt",
+          "updatedAt",
+          "contents",
+          "images",
+          "taggedFeedbacks"
+        ]
+      },
+      "VersionDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "releasedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "version": {
+            "type": "string"
+          },
+          "updateGoal": {
+            "type": "string"
+          },
+          "updateResults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "growthRecords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionDetailGrowthRecordDto"
+            }
+          },
+          "feedbackQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionFeedbackQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "releasedAt",
+          "id",
+          "projectId",
+          "version",
+          "updateGoal",
+          "updateResults",
+          "createdAt",
+          "updatedAt",
+          "growthRecords",
+          "feedbackQuestions"
+        ]
+      },
+      "FeedbackTemplateDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "questions"
+        ]
+      },
+      "DraftUpdatedByDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "GrowthRecordDraftResponseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "content": {
+            "type": "object",
+            "description": "FE 폼 스냅샷 (자유 형식 JSON — 발행 시점에만 정식 검증)",
+            "additionalProperties": true
+          },
+          "updatedBy": {
+            "nullable": true,
+            "description": "마지막 수정자 (탈퇴 시 null)",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DraftUpdatedByDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "content",
+          "updatedBy",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpsertDraftDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "FeedbackItemDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "questionId",
+          "content"
+        ]
+      },
+      "CreateFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "oneLineReview": {
+            "type": "string"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackItemDto"
+            }
+          }
+        },
+        "required": [
+          "oneLineReview",
+          "feedbacks"
+        ]
+      },
+      "CreatedFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "number"
+          },
+          "questionId": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "imageUrl",
+          "id",
+          "questionId",
+          "versionId",
+          "userId",
+          "content",
+          "createdAt"
+        ]
+      },
+      "CreateFeedbackDataDto": {
+        "type": "object",
+        "properties": {
+          "submittedCount": {
+            "type": "number"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatedFeedbackDto"
+            }
+          }
+        },
+        "required": [
+          "submittedCount",
+          "feedbacks"
+        ]
+      },
+      "CreateFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CreateFeedbackDataDto"
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "FeedbackQuestionItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "title",
+          "description",
+          "order",
+          "required"
+        ]
+      },
+      "FeedbackQuestionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackQuestionItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      }
+    }
+  }
+}

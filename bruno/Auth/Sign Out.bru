@@ -1,0 +1,24 @@
+meta {
+  name: Sign Out
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/sign-out
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  현재 세션 종료 — 다른 계정으로 전환하기 전에 호출.
+}

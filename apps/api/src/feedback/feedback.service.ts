@@ -1,10 +1,22 @@
 import { Injectable } from '@nestjs/common'
+import { UserRole } from '@prisma/client'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
+import {
+  CreateFeedbackResponseDto,
+  FeedbackQuestionsResponseDto,
+} from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
+  DuplicateFoundException,
   EntityNotExistException,
+  ForbiddenAccessException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
+
+const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
+  UserRole.Sprout,
+  UserRole.Seeder,
+]
 
 @Injectable()
 export class FeedbackService {
@@ -15,7 +27,9 @@ export class FeedbackService {
     projectId: number,
     versionId: number,
     dto: CreateFeedbackDto,
-  ) {
+  ): Promise<CreateFeedbackResponseDto> {
+    await this.assertCanCreateFeedback(userId)
+
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {
         id: versionId,
@@ -33,6 +47,28 @@ export class FeedbackService {
 
     if (!targetVersion) {
       throw new EntityNotExistException('projectVersion')
+    }
+
+    // 최신 버전만 피드백 작성 가능하도록 검증
+    const latestVersion = await this.prisma.projectVersion.findFirst({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+    })
+
+    if (!latestVersion || latestVersion.id !== versionId) {
+      throw new UnprocessableDataException(
+        'Feedback can only be submitted for the latest version',
+      )
+    }
+
+    // 유저 × 버전 중복 제출 방지 (DB unique 제약과 이중 방어)
+    const existingSubmission = await this.prisma.feedbackSubmission.findUnique({
+      where: { versionId_userId: { versionId, userId } },
+      select: { id: true },
+    })
+    if (existingSubmission) {
+      throw new DuplicateFoundException('FeedbackSubmission')
     }
 
     const validQuestionIds = new Set(
@@ -107,14 +143,16 @@ export class FeedbackService {
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
-          isAdopted: f.isAdopted,
           createdAt: f.createdAt,
         })),
       },
     }
   }
 
-  async findAllQuestions(projectId: number, versionId: number) {
+  async findAllQuestions(
+    projectId: number,
+    versionId: number,
+  ): Promise<FeedbackQuestionsResponseDto> {
     //1. 해당 버전이 프로젝트에 존재하는지 확인하며 질문 가져오기
     const targetVersion = await this.prisma.projectVersion.findFirst({
       where: {
@@ -146,6 +184,19 @@ export class FeedbackService {
         order: q.order,
         required: q.isRequired,
       })),
+    }
+  }
+
+  private async assertCanCreateFeedback(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { userRole: true },
+    })
+
+    if (!user || !FEEDBACK_ALLOWED_USER_ROLES.includes(user.userRole)) {
+      throw new ForbiddenAccessException(
+        'Only Sprout or Seeder users can create feedback.',
+      )
     }
   }
 }

@@ -4,57 +4,53 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Req,
 } from '@nestjs/common'
-import type { AuthenticatedRequest } from 'libs/auth/src/authenticated-request.interface'
-import { AdoptFeedbackDto } from './dto/adopt-feedback.dto'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
+import { Public } from 'src/auth/decorators/public.decorator'
+import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { CreateVersionDto } from './dto/create-version.dto'
+import {
+  FeedbackTemplateDto,
+  PublishVersionResponseDto,
+  VersionDetailResponseDto,
+} from './dto/version-response.dto'
 import { GrowthRecordService } from './growth-record.service'
 
+@ApiTags('GrowthRecord')
 @Controller('growth-records')
 export class GrowthRecordTemplateController {
   constructor(private readonly growthRecordService: GrowthRecordService) {}
 
+  @Public()
   @Get('feedback-templates')
-  getFeedbackTemplates() {
+  getFeedbackTemplates(): FeedbackTemplateDto[] {
     return this.growthRecordService.getFeedbackTemplates()
   }
 }
 
+@ApiTags('GrowthRecord')
 @Controller('project/:id/versions')
 export class GrowthRecordController {
   constructor(private readonly growthRecordService: GrowthRecordService) {}
 
+  //발행(성장기록 + 피드백 질문 + 피드백 태그) — Lead만 가능 (서비스에서 검증)
+  @ApiCookieAuth()
   @Post()
   async createVersion(
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithUser,
     @Param('id', ParseIntPipe) projectId: number,
     @Body() dto: CreateVersionDto,
-  ) {
+  ): Promise<PublishVersionResponseDto> {
     return this.growthRecordService.createVersion(req.user.id, projectId, dto)
   }
 
+  @Public()
   @Get(':versionId')
-  async getVersionDetail(@Param('versionId', ParseIntPipe) versionId: number) {
-    return this.growthRecordService.getVersionDetail(versionId)
-  }
-
-  @Patch(':versionId/feedbacks/:feedbackId/adopt')
-  async adoptFeedback(
-    @Req() req: AuthenticatedRequest,
-    @Param('id', ParseIntPipe) projectId: number,
+  async getVersionDetail(
     @Param('versionId', ParseIntPipe) versionId: number,
-    @Param('feedbackId', ParseIntPipe) feedbackId: number,
-    @Body() dto: AdoptFeedbackDto,
-  ) {
-    return this.growthRecordService.adoptFeedback(
-      req.user.id,
-      projectId,
-      versionId,
-      feedbackId,
-      dto.category,
-    )
+  ): Promise<VersionDetailResponseDto> {
+    return this.growthRecordService.getVersionDetail(versionId)
   }
 }

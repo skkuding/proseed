@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "generate:openapi": "nest build && node dist/src/generate-openapi.js",
     "start": "nest start",
     "start:dev": "docker compose up -d && nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -30,6 +31,7 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.4.5",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/core": "^2.4.0",
     "@opentelemetry/exporter-logs-otlp-grpc": "^0.210.0",
@@ -80,6 +82,9 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
@@ -87,6 +92,9 @@
       "ts"
     ],
     "rootDir": "src",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

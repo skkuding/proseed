@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { FieldBadge } from '@/components/FieldBadge'
 
 interface MyFeedbackCardProps {
   feedbackId: number
@@ -17,41 +18,35 @@ export function MyFeedbackCard({
   createdAt,
   isAdopted,
   onelineReview,
-  content,
   projectId,
   projectName,
   projectIconUrl,
 }: MyFeedbackCardProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-neutral-95 p-6">
-      <div className="flex items-center justify-between">
-        <span className="text-body3_r_16 text-neutral-50">{createdAt}</span>
-        {isAdopted && (
-          <span className="rounded-full bg-primary-light px-3 py-1 text-caption1_m_16 text-primary-strong">
-            채택됨
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-title5_sb_22 text-neutral-10 line-clamp-1">{onelineReview}</p>
-        <p className="mt-2 text-body3_r_16 text-neutral-40 line-clamp-2">{content}</p>
-      </div>
-      <div className="flex items-center justify-between border-t border-neutral-95 pt-4">
-        <div className="flex items-center gap-2">
-          <Image
-            src={projectIconUrl}
-            alt={projectName}
-            width={28}
-            height={28}
-            className="rounded-full"
-          />
-          <span className="text-body1_m_16 text-neutral-20">{projectName}</span>
+    <div className="flex gap-5 justify-between rounded-[16px] bg-white px-6 py-5 shadow-[0_4px_20px_0_rgba(27,29,38,0.08)]">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-start gap-[6px]">
+          <div className="flex items-center gap-2">
+            <div className="relative h-6 w-6 overflow-hidden rounded-full bg-[#F5F6F8]">
+              <Image src={projectIconUrl} alt={projectName} fill className="object-cover" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sub3_sb_16 text-neutral-20 line-clamp-1">{projectName}</p>
+            </div>
+          </div>
+          {isAdopted && <FieldBadge type="채택됨" />}
         </div>
+        <p className="text-title5_sb_20 text-CoolNeutral-20 line-clamp-2">{onelineReview}</p>
+
+        <span className="text-caption1_m_14 text-neutral-40">{createdAt}</span>
+      </div>
+
+      <div className="flex items-center justify-center">
         <Link
           href={`/projects/${projectId}/feedback#feedback-${feedbackId}`}
-          className="inline-flex items-center justify-center rounded-[8px] border border-neutral-90 px-4 py-2 text-body1_m_16 text-neutral-20 hover:bg-neutral-99 transition-colors"
+          className="inline-flex h-12 items-center justify-center rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white"
         >
-          피드백 자세히 보기
+          자세히 보기
         </Link>
       </div>
     </div>

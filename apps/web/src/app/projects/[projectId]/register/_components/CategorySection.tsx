@@ -1,3 +1,4 @@
+import { FieldBadge } from '@/components/FieldBadge'
 import Image from 'next/image'
 import { categories } from '@/app/mainpage/_components/CategoryTabs'
 
@@ -12,9 +13,7 @@ export function CategorySection({ selected, onToggle }: CategorySectionProps) {
       <div className="flex flex-col justify-start gap-1">
         <div className="flex items-center gap-2">
           <h2 className="text-title1_sb_28">카테고리 설정</h2>
-          <span className="text-primary-strong text-caption1_m_16 bg-primary-light rounded-[4px] px-2 py-1">
-            필수
-          </span>
+          <FieldBadge type="필수" />
         </div>
 
         <p className="text-body3_r_16 text-CoolNeutral-30">

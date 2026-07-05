@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { APP_FILTER } from '@nestjs/core'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
+import { BusinessExceptionFilter } from './common/filters/business-exception.filter'
 import { validate } from './config/env.validation'
 import { HealthController } from './health.controller'
 import { PrismaModule } from './prisma/prisma.module'
@@ -27,6 +29,9 @@ import { FeedbackModule } from './feedback/feedback.module'
     FeedbackModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: BusinessExceptionFilter },
+  ],
 })
 export class AppModule {}

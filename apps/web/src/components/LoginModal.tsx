@@ -21,14 +21,14 @@ const PROVIDERS = [
     id: 'kakao' as const,
     label: 'Kakao로 시작하기',
     icon: '/kakao.svg',
-    iconSize: 30,
+    iconSize: 32,
     rounded: true,
   },
   {
     id: 'naver' as const,
     label: 'Naver로 시작하기',
     icon: '/naver.svg',
-    iconSize: 30,
+    iconSize: 32,
     rounded: true,
   },
 ]
@@ -88,7 +88,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       className={rounded ? 'rounded-[4px]' : ''}
                     />
                   </span>
-
                   <span>{label}</span>
                 </button>
               ))}

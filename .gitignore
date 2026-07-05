@@ -41,6 +41,9 @@ next-env.d.ts
 # IDE
 .idea
 
+# local agent instructions
+AGENTS.md
+
 # backend (Spring)
 backend/build/
 backend/.gradle/

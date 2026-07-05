@@ -4,28 +4,26 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
-import navigateProjects from '@/app/_mockdata/project-list/navigate-projects.json'
+import { getProjects, type Project } from '@/lib/api'
+import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 const STORAGE_KEY = 'proseed_recent_projects'
 const MAX_RECENT = 3
 
-type Project = (typeof navigateProjects)[number]
-
 function getRecentProjects(): Project[] {
   if (typeof window === 'undefined') return []
   try {
-    const ids: number[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    return ids.map((id) => navigateProjects.find((p) => p.id === id)).filter(Boolean) as Project[]
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Project[]
   } catch {
     return []
   }
 }
 
-export function saveRecentProject(projectId: number) {
+export function saveRecentProject(project: Project) {
   if (typeof window === 'undefined') return
   try {
-    const ids: number[] = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    const updated = [projectId, ...ids.filter((id) => id !== projectId)].slice(0, MAX_RECENT)
+    const recent = getRecentProjects()
+    const updated = [project, ...recent.filter((p) => p.id !== project.id)].slice(0, MAX_RECENT)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
   } catch {
     // ignore
@@ -52,6 +50,7 @@ interface SearchModalProps {
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Project[]>([])
   const [clearCount, setClearCount] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -67,16 +66,28 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
+  useEffect(() => {
+    const trimmed = query.trim()
+    if (!trimmed) return
+    let cancelled = false
+    getProjects({ search: trimmed })
+      .then((res) => {
+        if (!cancelled) setSearchResults(res.data)
+      })
+      .catch(console.error)
+    return () => {
+      cancelled = true
+    }
+  }, [query])
+
   if (!isOpen) return null
 
   const recentProjects = clearCount >= 0 ? getRecentProjects() : []
   const trimmedQuery = query.trim()
-  const matchedProjects = trimmedQuery
-    ? navigateProjects.filter((p) => p.title.toLowerCase().includes(trimmedQuery.toLowerCase()))
-    : []
+  const matchedProjects = trimmedQuery ? searchResults : []
 
   const handleProjectClick = (project: Project) => {
-    saveRecentProject(project.id)
+    saveRecentProject(project)
     onClose()
     router.push(`/projects/${project.id}`)
   }
@@ -102,25 +113,25 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <h3 className="text-head3_sb_36">프로젝트 검색</h3>
             <button
               onClick={onClose}
-              className="flex items-center justify-center w-9 h-9 hover:cursor-pointer"
+              className="flex items-center justify-center hover:cursor-pointer"
               aria-label="닫기"
             >
-              <XIcon className="size-[21px] text-neutral-30" />
+              <XIcon className="size-9 text-neutral-30" />
             </button>
           </div>
 
           {/* Search input + dropdown */}
           <div className="relative">
-            <div className="flex items-center rounded-full border-[1.4px] border-black px-6 py-3">
+            <div className="flex items-center rounded-full border-[1.4px] border-black pl-6 pr-4 py-3">
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="프로젝트명을 검색해보세요"
-                className="flex-1 text-body3_r_16 text-black placeholder:text-CoolNeutral-60 outline-none bg-transparent"
+                className="flex-1 text-body3_r_16 text-black placeholder:text-neutral-70 outline-none bg-transparent"
               />
-              <Image src="/search.svg" alt="검색" width={24} height={24} />
+              <Image src="/search.svg" alt="검색" width={32} height={32} />
             </div>
 
             {trimmedQuery !== '' && (
@@ -137,7 +148,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   ))
                 ) : (
                   <div className="flex items-center justify-center h-full gap-2 text-CoolNeutral-50">
-                    <Image src="/info.svg" alt="정보" width={16} height={16} />
+                    <Image src="/info_cool50.svg" alt="정보" width={16} height={16} />
                     <p className="text-body3_r_16">검색 결과가 없습니다</p>
                   </div>
                 )}
@@ -160,7 +171,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
             {recentProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 gap-2 text-CoolNeutral-50">
-                <Image src="/info.svg" alt="정보" width={20} height={20} />
+                <Image src="/info_cool50.svg" alt="정보" width={20} height={20} />
                 <p className="text-body3_r_16">최근에 조회한 프로젝트가 없습니다</p>
               </div>
             ) : (
@@ -187,7 +198,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             key={cat}
                             className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-caption1_m_13 text-CoolNeutral-40"
                           >
-                            {cat}
+                            {CATEGORY_LABELS[cat] ?? cat}
                           </span>
                         ))}
                       </div>

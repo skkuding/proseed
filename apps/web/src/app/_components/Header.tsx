@@ -3,15 +3,30 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { NavLink } from './NavLink'
+import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
 import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
+import { RoleFilterTabs } from '@/components/RoleTabs'
+
+const NAV_TABS = [
+  { label: '메인 페이지', href: '/' },
+  { label: '탐색하기', href: '/navigate' },
+  { label: '내 프로젝트', href: '/myproject' },
+  { label: '마이 페이지', href: '/mypage' },
+] as const
 
 export function Header() {
   const { data: session } = authClient.useSession()
   const { openLoginModal } = useAuthStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const activeTab =
+    NAV_TABS.find(({ href }) =>
+      href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+    )?.label ?? '메인 페이지'
 
   const handleSignOut = async () => {
     setIsDropdownOpen(false)
@@ -37,12 +52,20 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center">
-            <div className="flex items-center h-[58px] w-[460px] shrink-0 rounded-full p-[6px] bg-white shadow-md">
-              <NavLink href="/" text="메인 페이지" />
-              <NavLink href="/navigate" text="탐색하기" />
-              <NavLink href="/myproject" text="내 프로젝트" />
-              <NavLink href="/mypage" text="마이 페이지" />
-            </div>
+            <RoleFilterTabs
+              tabs={NAV_TABS.map((t) => t.label)}
+              activeTab={activeTab}
+              onTabChange={(label) => {
+                const tab = NAV_TABS.find((t) => t.label === label)
+                if (!tab) return
+                if (!session && (tab.href === '/mypage' || tab.href === '/myproject')) {
+                  openLoginModal()
+                  return
+                }
+                router.push(tab.href)
+              }}
+              textSize="text-body2_m_14"
+            />
           </nav>
 
           {session ? (

@@ -36,6 +36,11 @@ const createAuth = (
         enabled: true,
       },
     },
+    //로컬 개발 전용: seed 유저로 email/password 로그인 (Bruno 등 API 테스트용).
+    //프로덕션 설정(configmap/secret)에는 ENABLE_DEV_LOGIN을 절대 넣지 말 것.
+    emailAndPassword: {
+      enabled: configService.get('ENABLE_DEV_LOGIN') === 'true',
+    },
     databaseHooks: {
       //user:create:before: User를 DB에 저장하기 전 실행되는 hook
       user: {
@@ -59,16 +64,19 @@ const createAuth = (
       google: {
         clientId: configService.getOrThrow('GOOGLE_CLIENT_ID'),
         clientSecret: configService.getOrThrow('GOOGLE_CLIENT_SECRET'),
-        scope: ['email'],
+        disableDefaultScope: true,
+        scope: ['openid', 'email'],
       },
       kakao: {
         clientId: configService.getOrThrow('KAKAO_CLIENT_ID'),
         clientSecret: configService.getOrThrow('KAKAO_CLIENT_SECRET'),
-        scope: ['email'],
+        disableDefaultScope: true,
+        scope: ['account_email'],
       },
       naver: {
         clientId: configService.getOrThrow('NAVER_CLIENT_ID'),
         clientSecret: configService.getOrThrow('NAVER_CLIENT_SECRET'),
+        disableDefaultScope: true,
         scope: ['email'],
       },
     },

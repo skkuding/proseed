@@ -66,6 +66,9 @@ export const JOB_TO_API: Record<string, string> = {
 export const JOB_TABS = ['기획자', '디자이너', '개발자', '기타'] as const
 export type JobTab = (typeof JOB_TABS)[number]
 
+export const JOB_FILTER_TABS = ['기획', '디자인', '프론트엔드', '백엔드', '기타'] as const
+export type JobFilter = (typeof JOB_FILTER_TABS)[number]
+
 // ─── 공통 타입 ──────────────────────────────────────────────────────────────
 export type Member = {
   email: string

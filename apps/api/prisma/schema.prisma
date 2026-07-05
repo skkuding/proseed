@@ -38,6 +38,11 @@ enum JobType {
   Other
 }
 
+enum UserRole {
+  Sprout //새싹
+  Seeder //시더
+}
+
 model User {
   id              Int      @id @default(autoincrement())
   name            String
@@ -49,6 +54,7 @@ model User {
 
   ownedTicketCount Int      @default(0) @map("owned_ticket_count")
   jobType          JobType? @map("job_type")
+  userRole         UserRole @default(Sprout) @map("user_role")
   skills           String[] @default([])
   links            String[] @default([])
   bio              String? //자기소개
@@ -56,6 +62,7 @@ model User {
   projectRoles        ProjectRole[]
   feedbackSubmissions FeedbackSubmission[]
   projects            Project[]
+  growthRecordDrafts  GrowthRecordDraft[]
 
   //세션 및 Auth 관련
   sessions Session[]
@@ -121,6 +128,12 @@ enum ProjectStatus {
   Hiring
 }
 
+enum ProjectMemberRole {
+  Lead
+  TeamLeader
+  TeamMember
+}
+
 model Project {
   id                 Int               @id @default(autoincrement())
   title              String
@@ -142,6 +155,7 @@ model Project {
   projectRoles        ProjectRole[]
   feedbackSubmissions FeedbackSubmission[]
   images              ProjectImage[]
+  growthRecordDrafts  GrowthRecordDraft[]
 
   @@map("project")
 }
@@ -184,12 +198,30 @@ model GrowthRecord {
   createdAt DateTime       @default(now()) @map("created_at")
   updatedAt DateTime       @updatedAt @map("updated_at")
 
-  version  ProjectVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  contents GrowthRecordContent[]
-  images   GrowthRecordImage[]
+  version   ProjectVersion        @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  contents  GrowthRecordContent[]
+  images    GrowthRecordImage[]
+  adoptions FeedbackAdoption[]
 
   @@unique([versionId, category])
   @@map("growth_record")
+}
+
+// 발행 전 직군별 공유 임시저장 — 팀원은 자기 직군만, 리드는 전체 접근. 발행 시 자동 삭제
+model GrowthRecordDraft {
+  id          Int            @id @default(autoincrement())
+  projectId   Int            @map("project_id")
+  category    RecordCategory
+  content     Json //FE 폼 스냅샷 (발행 시점에만 정식 검증)
+  updatedById Int?           @map("updated_by_id")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  updatedBy User?   @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, category])
+  @@map("growth_record_draft")
 }
 
 model GrowthRecordImage {
@@ -205,11 +237,11 @@ model GrowthRecordImage {
 }
 
 model ProjectRole {
-  id        Int     @id @default(autoincrement())
-  userId    Int     @map("user_id")
-  projectId Int     @map("project_id")
-  role      JobType
-  isLeader  Boolean @default(false)
+  id                Int               @id @default(autoincrement())
+  userId            Int               @map("user_id")
+  projectId         Int               @map("project_id")
+  role              JobType
+  projectMemberRole ProjectMemberRole @default(TeamMember) @map("project_member_role")
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -254,31 +286,45 @@ model FeedbackSubmission {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  version   ProjectVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version   ProjectVersion     @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   feedbacks Feedback[]
+  adoptions FeedbackAdoption[]
 
+  @@unique([versionId, userId])
   @@index([projectId])
-  @@index([versionId, userId])
   @@map("feedback_submission")
 }
 
 model Feedback {
-  id              Int             @id @default(autoincrement())
-  submissionId    Int             @map("submission_id")
-  questionId      Int             @map("question_id")
-  content         String
-  isAdopted       Boolean         @default(false) @map("is_adopted")
-  adoptedCategory RecordCategory? @map("adopted_category")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
+  id           Int      @id @default(autoincrement())
+  submissionId Int      @map("submission_id")
+  questionId   Int      @map("question_id")
+  content      String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   submission FeedbackSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   question   FeedbackQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   images     FeedbackImage[]
 
   @@map("feedback")
+}
+
+// 태그 = 채택: 새 버전 발행 시 이전 버전 피드백 제출을 성장기록(직군)에 태그
+model FeedbackAdoption {
+  id             Int      @id @default(autoincrement())
+  growthRecordId Int      @map("growth_record_id")
+  submissionId   Int      @map("submission_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  growthRecord GrowthRecord       @relation(fields: [growthRecordId], references: [id], onDelete: Cascade)
+  submission   FeedbackSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([growthRecordId, submissionId])
+  @@index([submissionId])
+  @@map("feedback_adoption")
 }
 
 model FeedbackImage {

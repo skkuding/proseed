@@ -1,0 +1,16 @@
+meta {
+  name: Get Session
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/auth/get-session
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,107 @@
+meta {
+  name: Post Version
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/project/1/versions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "version": "1.0.0",
+    "updateGoal": "MVP 핵심 기능 안정화 및 온보딩 플로우 개선",
+    "updateResults": [
+      "소셜 로그인(구글/카카오/네이버) 연동 완료",
+      "온보딩 단계 5단계 → 3단계 축소"
+    ],
+    "growthRecords": [
+      {
+        "category": "PLAN",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "온보딩 이탈률이 60%를 넘어 초기 사용자 확보에 어려움이 있었습니다.",
+            "isDefault": true
+          },
+          {
+            "title": "해결 방안과 그 이유",
+            "content": "필수 입력만 남기고 온보딩을 3단계로 축소했습니다."
+          },
+          {
+            "title": "업데이트 인사이트",
+            "content": "가입 완료율이 40% 개선되었습니다."
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "DESIGN",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "화면별 버튼 크기와 간격이 제각각이라 일관성이 부족했습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "DEVELOPMENT",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "인증 라우트 가드 누락으로 500 에러가 발생하던 문제를 전역 가드로 해결했습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      },
+      {
+        "category": "GENERAL",
+        "contents": [
+          {
+            "title": "배경 및 문제 정의",
+            "content": "스프린트 회고 프로세스를 도입해 커뮤니케이션 비용을 줄였습니다.",
+            "isDefault": true
+          }
+        ],
+        "imageKeys": []
+      }
+    ],
+    "feedbackQuestions": [
+      {
+        "category": "PLAN",
+        "content": "온보딩 플로우가 직관적이었나요?",
+        "isRequired": true
+      },
+      {
+        "category": "DESIGN",
+        "content": "새 디자인이 일관적으로 느껴지나요?"
+      },
+      {
+        "category": "DEVELOPMENT",
+        "content": "로딩 지연이나 에러를 경험한 페이지가 있었나요?"
+      },
+      {
+        "category": "GENERAL",
+        "content": "자유롭게 하고 싶은 말을 남겨주세요"
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  발행은 프로젝트 Lead만 가능 (403).
+  version은 major.minor.patch 형식이며 기존 모든 버전보다 커야 함 (중복 409, 낮으면 422).
+  growthRecords와 feedbackQuestions는 4개 직군(PLAN/DESIGN/DEVELOPMENT/GENERAL) 전부 필수.
+  발행 성공 시: 팀원 전원 티켓 +1, 프로젝트 draft 자동 삭제.
+}

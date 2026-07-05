@@ -52,8 +52,8 @@ export function ProfileImageModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="flex w-[680px] flex-col gap-5 rounded-2xl bg-white px-10 py-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="flex w-[680px] flex-col gap-5 rounded-[20px] bg-[#F4F4F6] px-10 py-10">
         <div className="flex items-center justify-between">
           <h2 className="text-head3_sb_36">프로필 이미지 변경하기</h2>
           <button
@@ -64,7 +64,7 @@ export function ProfileImageModal({
             <X className="size-9" />
           </button>
         </div>
-        <div className="rounded-2xl bg-neutral-99 px-7 py-6">
+        <div className="rounded-[12px] bg-white px-7 py-6">
           <div className="grid grid-cols-5 gap-5">
             {PROFILE_OPTIONS.map(({ src, label }) => (
               <button
@@ -89,7 +89,7 @@ export function ProfileImageModal({
           <Button
             variant="outline"
             onClick={onClose}
-            className="h-auto rounded-[8px] border-CoolNeutral-50 px-5 py-[15px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
+            className="h-auto rounded-[8px] border-[1.4px] border-CoolNeutral-50 px-5 py-[15px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
           >
             취소하기
           </Button>
