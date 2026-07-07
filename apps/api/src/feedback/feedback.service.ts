@@ -4,6 +4,7 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
   FeedbackQuestionsResponseDto,
+  MyFeedbackProjectsResponseDto,
 } from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import {
@@ -21,6 +22,44 @@ const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
 @Injectable()
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findMyFeedbackProjects(
+    userId: number,
+  ): Promise<MyFeedbackProjectsResponseDto> {
+    const submissions = await this.prisma.feedbackSubmission.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        createdAt: true,
+        adoptions: {
+          select: { id: true },
+          take: 1,
+        },
+        project: {
+          select: {
+            id: true,
+            title: true,
+            thumbnailUrl: true,
+            oneLineDescription: true,
+          },
+        },
+      },
+    })
+
+    return {
+      success: true,
+      data: submissions.map((submission) => ({
+        submissionId: submission.id,
+        projectId: submission.project.id,
+        projectTitle: submission.project.title,
+        projectThumbnailUrl: submission.project.thumbnailUrl,
+        oneLineDescription: submission.project.oneLineDescription,
+        isAdopted: submission.adoptions.length > 0,
+        createdAt: submission.createdAt,
+      })),
+    }
+  }
 
   async createFeedback(
     userId: number,
