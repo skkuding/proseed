@@ -2,9 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획자',
-  design: '디자이너',
-  dev: '개발자',
+  plan: '기획',
+  design: '디자인',
+  dev: '개발',
   general: '기타',
 }
 

@@ -4,21 +4,14 @@ import { useState } from 'react'
 import { X, Dot } from 'lucide-react'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions> = {
-  기획자: 'plan',
-  디자이너: 'design',
-  개발자: 'dev',
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
   기타: 'general',
-}
-
-const TAB_TO_ROLE_LABEL: Record<TabLabel, string> = {
-  기획자: '기획',
-  디자이너: '디자인',
-  개발자: '개발',
-  기타: '기타',
 }
 
 interface FeedbackRoleSelectModalProps {
@@ -32,8 +25,8 @@ export function FeedbackRoleSelectModal({
   onClose,
   onConfirm,
 }: FeedbackRoleSelectModalProps) {
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
-  const [selectedRoles, setSelectedRoles] = useState<Set<TabLabel>>(new Set(['기획자']))
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
+  const [selectedRoles, setSelectedRoles] = useState<Set<TabLabel>>(new Set(['기획']))
 
   if (!isOpen) return null
 
@@ -116,7 +109,7 @@ export function FeedbackRoleSelectModal({
         >
           <div className="flex flex-col gap-1 text-left">
             <p className="text-sub3_sb_16 text-CoolNeutral-20">
-              {TAB_TO_ROLE_LABEL[activeTab]} 직군의 피드백을 작성할게요
+              {activeTab} 직군의 피드백을 작성할게요
             </p>
             <p className="text-body2_m_14 text-CoolNeutral-40">
               해당 직군뿐만 아니라, 선택하신 다른 직군에 대한 피드백도 함께 작성하실 수 있어요.

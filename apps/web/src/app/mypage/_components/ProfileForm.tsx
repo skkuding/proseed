@@ -6,17 +6,12 @@ import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TextInput } from '@/components/TextInput'
 import { authClient } from '@/lib/auth-client'
+import { JOB_TABS, JOB_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import { useAuthStore } from '@/store/authStore'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
-const JOB_OPTIONS = ['디자이너', '개발자', '기획', '기타']
-
-const JOB_TO_ENUM: Record<string, string> = {
-  디자이너: 'Designer',
-  개발자: 'Developer',
-  기획: 'Planner',
-  기타: 'Other',
-}
+const JOB_OPTIONS = JOB_TABS
 
 const MAX_SKILLS = 10
 const MAX_LINKS = 3
@@ -104,13 +99,14 @@ export function ProfileForm({
     setIsSaving(true)
     try {
       await authClient.updateUser({ name })
-      if (job && JOB_TO_ENUM[job]) {
+      if (job && JOB_TO_API[job]) {
         await fetch(`${API_URL}/user/onboarding`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ jobType: JOB_TO_ENUM[job], nickname: name }),
+          body: JSON.stringify({ jobType: JOB_TO_API[job], nickname: name }),
         })
+        useAuthStore.getState().setJobType(job as JobTab)
       }
       onJobChange?.(job)
       setSavedOk(true)

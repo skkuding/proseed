@@ -41,20 +41,20 @@ import { usePathname, useRouter } from 'next/navigation'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { FeedbackRoleSelectModal } from '@/components/FeedbackRoleSelectModal'
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackData.feedbacks> = {
-  기획자: 'plan',
-  디자이너: 'design',
-  개발자: 'dev',
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
   기타: 'general',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획자',
-  design: '디자이너',
-  dev: '개발자',
+  plan: '기획',
+  design: '디자인',
+  dev: '개발',
   general: '기타',
 }
 
@@ -110,7 +110,7 @@ type FilterMode = 'all' | 'closed'
 export function Feedbacks() {
   const pathname = usePathname()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
   const [currentPage, setCurrentPage] = useState(1)
   const [openFeedbackId, setOpenFeedbackId] = useState<string>('')

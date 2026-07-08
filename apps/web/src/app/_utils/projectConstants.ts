@@ -55,19 +55,36 @@ export const STATUS_OPTIONS = [
   '새로운 인력 모집 중',
 ] as const
 
+export const STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_TO_API).map(([label, api]) => [api, label])
+)
+
 // ─── 직군 (백엔드 JobType enum, Prisma) ────────────────────────────────────
 export const JOB_TO_API: Record<string, string> = {
-  기획자: 'Planner',
-  디자이너: 'Designer',
-  개발자: 'Developer',
+  기획: 'Planner',
+  디자인: 'Designer',
+  개발: 'Developer',
   기타: 'Other',
 }
 
-export const JOB_TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+export const JOB_TABS = ['기획', '디자인', '개발', '기타'] as const
 export type JobTab = (typeof JOB_TABS)[number]
 
-export const JOB_FILTER_TABS = ['기획', '디자인', '프론트엔드', '백엔드', '기타'] as const
-export type JobFilter = (typeof JOB_FILTER_TABS)[number]
+export const JOB_API_TO_LABEL: Record<string, JobTab> = Object.fromEntries(
+  Object.entries(JOB_TO_API).map(([label, api]) => [api, label])
+) as Record<string, JobTab>
+
+// ─── 성장기록/피드백 카테고리 (백엔드 RecordCategory enum) ────────────────────
+export const RECORD_CATEGORY_TO_API: Record<JobTab, string> = {
+  기획: 'PLAN',
+  디자인: 'DESIGN',
+  개발: 'DEVELOPMENT',
+  기타: 'GENERAL',
+}
+
+export const RECORD_CATEGORY_LABELS: Record<string, JobTab> = Object.fromEntries(
+  Object.entries(RECORD_CATEGORY_TO_API).map(([label, api]) => [api, label])
+) as Record<string, JobTab>
 
 // ─── 공통 타입 ──────────────────────────────────────────────────────────────
 export type Member = {

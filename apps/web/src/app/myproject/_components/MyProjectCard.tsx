@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface MyProjectCardProps {
   project: {
@@ -32,7 +33,7 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
                       key={cat}
                       className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-body1_m_16 text-CoolNeutral-40"
                     >
-                      {cat}
+                      {CATEGORY_LABELS[cat] ?? cat}
                     </span>
                   ))}
                 </div>

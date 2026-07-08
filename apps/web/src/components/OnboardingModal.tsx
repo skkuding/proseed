@@ -3,15 +3,17 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { RotateCcw } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 type JobType = 'Planner' | 'Designer' | 'Developer' | 'Other'
 
 const JOB_TYPE_OPTIONS: { value: JobType; label: string }[] = [
-  { value: 'Planner', label: '기획자' },
-  { value: 'Designer', label: '디자이너' },
-  { value: 'Developer', label: '개발자' },
+  { value: 'Planner', label: '기획' },
+  { value: 'Designer', label: '디자인' },
+  { value: 'Developer', label: '개발' },
   { value: 'Other', label: '기타' },
 ]
 
@@ -62,12 +64,16 @@ export function OnboardingModal({
     if (!jobType) return
     setIsSubmitting(true)
     try {
-      await fetch(`${API_URL}/user/onboarding`, {
+      const res = await fetch(`${API_URL}/user/onboarding`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ jobType, nickname }),
       })
+      const data = (await res.json()) as { jobType: string }
+      if (JOB_API_TO_LABEL[data.jobType]) {
+        useAuthStore.getState().setJobType(JOB_API_TO_LABEL[data.jobType])
+      }
       onClose()
     } catch (e) {
       console.error(e)

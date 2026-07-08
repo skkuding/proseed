@@ -21,6 +21,7 @@ export default function MyPageContent() {
     <>
       {activeMenu === 'profile' && (
         <ProfileForm
+          key={user.email || 'loading'}
           initialName={user.name}
           initialJob={currentJob}
           initialSkills={[]}

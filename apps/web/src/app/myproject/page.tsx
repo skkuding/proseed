@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
-import { type CategoryLabel } from '@/app/_utils/projectConstants'
+import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
 import MyProjectCard from './_components/MyProjectCard'
 import ProjectCard from '@/app/mainpage/_components/ProjectCard'
+import { getMyProjects } from '@/lib/api'
 import {
   Pagination,
   PaginationContent,
@@ -45,20 +46,31 @@ function getVisiblePages(current: number, total: number): (number | 'ellipsis')[
   return result
 }
 
-// TODO: 백엔드 연결 시 아래 mock 제거 후 fetch 로직 복원
-// fetch('http://localhost:4000/project/my', { credentials: 'include' })
-const MOCK_PROJECTS: Project[] = (navigateProjects as Project[]).slice(0, 10)
-
 export default function MyProject() {
-  const [projects] = useState<Project[]>(MOCK_PROJECTS)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')
   const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    getMyProjects()
+      .then((data) =>
+        setProjects(
+          data.map((p) => ({
+            ...p,
+            growthRecordCount: p._count?.versions ?? 0,
+          }))
+        )
+      )
+      .catch(console.error)
+      .finally(() => setIsLoading(false))
+  }, [])
 
   const filteredProjects = useMemo(
     () =>
       selectedCategory === '전체'
         ? projects
-        : projects.filter((p) => p.category.includes(selectedCategory)),
+        : projects.filter((p) => p.category.includes(CATEGORY_TO_API[selectedCategory])),
     [projects, selectedCategory]
   )
 
@@ -79,7 +91,7 @@ export default function MyProject() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const isEmpty = projects.length === 0
+  const isEmpty = !isLoading && projects.length === 0
 
   return (
     <main className="min-h-screen pt-10 ">

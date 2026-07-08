@@ -42,7 +42,7 @@ export function Header() {
         <div className="flex items-center gap-5">
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo.svg"
+              src="/logo_black.svg"
               alt="PROSEED"
               width={120}
               height={22}

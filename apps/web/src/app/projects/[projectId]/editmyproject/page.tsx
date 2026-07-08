@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { CategorySection } from '../register/_components/CategorySection'
 import { ProjectTypeSection } from '../register/_components/ProjectTypeSection'
 import { ProjectNameSection } from '../register/_components/ProjectNameSection'
@@ -32,6 +33,17 @@ export default function EditMyProject() {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href)
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href)
+      setShowLeaveModal(true)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   const {
     selectedCategories,
@@ -187,6 +199,14 @@ export default function EditMyProject() {
           setShowSaveConfirm(false)
           handleSave()
         }}
+      />
+
+      <LeaveConfirmModal
+        isOpen={showLeaveModal}
+        title="프로젝트 편집을 취소하고 이전 페이지로 돌아가시겠습니까?"
+        description="프로젝트 편집 취소 후, 지금까지 작성한 내용은 복구가 불가합니다."
+        onCancel={() => setShowLeaveModal(false)}
+        onConfirm={() => window.history.go(-2)}
       />
     </main>
   )

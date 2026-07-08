@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { XIcon, Dot } from 'lucide-react'
-import templateData from '@/app/_mockdata/project-detail/project-growthRecord-feedbacktemplate.json'
+import { getFeedbackTemplates, type FeedbackTemplate } from '@/lib/api'
+import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 import {
   Pagination,
   PaginationContent,
@@ -13,15 +14,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
-type TabLabel = (typeof TABS)[number]
-
-const TAB_TO_CATEGORY: Record<TabLabel, string> = {
-  기획자: 'PLAN',
-  디자이너: 'DESIGN',
-  개발자: 'DEVELOPMENT',
-  기타: 'GENERAL',
-}
+const TABS = JOB_TABS
+type TabLabel = JobTab
 
 const ITEMS_PER_PAGE = 4
 
@@ -31,14 +25,22 @@ interface Props {
 }
 
 export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [currentPage, setCurrentPage] = useState(1)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [templates, setTemplates] = useState<FeedbackTemplate[]>([])
+
+  useEffect(() => {
+    if (!isOpen) return
+    getFeedbackTemplates()
+      .then(setTemplates)
+      .catch(() => setTemplates([]))
+  }, [isOpen])
 
   if (!isOpen) return null
 
-  const category = TAB_TO_CATEGORY[activeTab]
-  const questions = templateData.find((d) => d.category === category)?.questions ?? []
+  const category = RECORD_CATEGORY_TO_API[activeTab]
+  const questions = templates.find((d) => d.category === category)?.questions ?? []
   const totalPages = Math.ceil(questions.length / ITEMS_PER_PAGE)
   const pagedQuestions = questions.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, type ReactNode } from 'react'
+import { Suspense, useEffect, useSyncExternalStore, type ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
@@ -11,11 +11,22 @@ const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$
 
 type MenuItem = 'profile' | 'account' | 'faq'
 
+// SSR/첫 클라이언트 렌더는 항상 false를 반환해 하이드레이션 mismatch를 방지하고,
+// mount 이후에만 true로 전환한다 (setState-in-effect 없이 client-only 값을 읽는 표준 패턴).
+function useMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
+}
+
 function MyPageShell({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
-  const { currentJob, provider, setProvider } = useMyPageProfile()
+  const { currentJob, provider, setProvider, setUser } = useMyPageProfile()
+  const mounted = useMounted()
 
   const tabParam = searchParams.get('tab') as MenuItem | null
   const activeMenu: MenuItem =
@@ -31,6 +42,15 @@ function MyPageShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return
+    setUser({
+      name: session.user.name ?? '',
+      email: session.user.email ?? '',
+      image: session.user.image ?? '',
+    })
+  }, [session, setUser])
+
+  useEffect(() => {
+    if (!session) return
     fetch(`${BETTER_AUTH_BASE}/api/auth/list-accounts`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data: unknown) => {
@@ -41,7 +61,7 @@ function MyPageShell({ children }: { children: ReactNode }) {
       .catch(() => {})
   }, [session, setProvider])
 
-  if (isPending || !session) return null
+  if (!mounted || isPending || !session) return null
 
   const handleMenuChange = (menu: MenuItem) => {
     router.push(`/mypage?tab=${menu}`, { scroll: false })

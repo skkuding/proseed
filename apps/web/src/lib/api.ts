@@ -1,4 +1,19 @@
+import type { components } from '@/types/api.generated'
+
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+
+export type CreateVersionDto = components['schemas']['CreateVersionDto']
+export type PublishVersionResponseDto = components['schemas']['PublishVersionResponseDto']
+export type FeedbackTemplate = components['schemas']['FeedbackTemplateDto']
+export type UploadUrlResponse = components['schemas']['UploadUrlResponseDto']
+export type CreateProjectDto = components['schemas']['CreateProjectDto']
+export type ProjectResponseDto = components['schemas']['ProjectResponseDto']
+export type InviteCollaboratorDto = components['schemas']['InviteCollaboratorDto']
+export type ProjectRoleResponseDto = components['schemas']['ProjectRoleResponseDto']
+export type ProjectListItemDto = components['schemas']['ProjectListItemDto']
+export type ProjectDetailResponseDto = components['schemas']['ProjectDetailResponseDto']
+export type ProjectVersionListItemDto = components['schemas']['ProjectVersionListItemDto']
+export type VersionDetailResponseDto = components['schemas']['VersionDetailResponseDto']
 
 export type Project = {
   id: number
@@ -28,5 +43,112 @@ export async function getProjects(
 
   const res = await fetch(`${BASE}/project?${qs}`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch projects')
+  return res.json()
+}
+
+export async function getProjectById(id: string | number): Promise<ProjectDetailResponseDto> {
+  const res = await fetch(`${BASE}/project/${id}`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch project')
+  return res.json()
+}
+
+export async function getMyProjects(): Promise<ProjectListItemDto[]> {
+  const res = await fetch(`${BASE}/project/my`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch my projects')
+  return res.json()
+}
+
+export async function getProjectVersions(
+  projectId: string | number
+): Promise<ProjectVersionListItemDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch versions')
+  return res.json()
+}
+
+export async function getVersionDetail(
+  projectId: string | number,
+  versionId: string | number
+): Promise<VersionDetailResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions/${versionId}`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch version detail')
+  return res.json()
+}
+
+export async function getUploadUrl(
+  filename: string,
+  contentType: string
+): Promise<UploadUrlResponse> {
+  const res = await fetch(`${BASE}/storage/upload-url`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filename, contentType }),
+  })
+  if (!res.ok) throw new Error('Failed to get upload url')
+  return res.json()
+}
+
+export async function uploadToS3(presignedUrl: string, file: File) {
+  await fetch(presignedUrl, {
+    method: 'PUT',
+    body: file,
+    headers: { 'Content-Type': file.type },
+  })
+}
+
+export async function createProject(dto: CreateProjectDto): Promise<ProjectResponseDto> {
+  const res = await fetch(`${BASE}/project`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '프로젝트 등록에 실패했습니다')
+  }
+  return res.json()
+}
+
+export async function inviteCollaborator(
+  projectId: string | number,
+  dto: InviteCollaboratorDto
+): Promise<ProjectRoleResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/invite`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '팀원 초대에 실패했습니다')
+  }
+  return res.json()
+}
+
+export async function publishVersion(
+  projectId: string | number,
+  dto: CreateVersionDto
+): Promise<PublishVersionResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '성장기록 발행에 실패했습니다')
+  }
+  return res.json()
+}
+
+export async function getFeedbackTemplates(): Promise<FeedbackTemplate[]> {
+  const res = await fetch(`${BASE}/growth-records/feedback-templates`)
+  if (!res.ok) throw new Error('Failed to fetch feedback templates')
   return res.json()
 }

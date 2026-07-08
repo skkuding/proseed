@@ -27,26 +27,26 @@ export function ConfirmModal({
       onClick={onCancel}
     >
       <div
-        className="w-96 bg-white rounded-2xl p-8 flex flex-col gap-5"
+        className="w-100 bg-white rounded-[12px] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col gap-3">
           <Image src="/info_cool30.svg" alt="info" width={24} height={24} />
           <div className="flex flex-col gap-2">
-            <p className="text-title5_sb_20 text-CoolNeutral-20">{title}</p>
-            {description && <p className="text-body2_m_14 text-CoolNeutral-40">{description}</p>}
+            <p className="text-title5_sb_20 text-black">{title}</p>
+            {description && <p className="text-body2_m_14 text-CoolNeutral-30">{description}</p>}
           </div>
         </div>
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-1">
           <button
             onClick={onCancel}
-            className="w-25 h-10 rounded-lg border-[1.4px] border-CoolNeutral-50 text-sub4_sb_14 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+            className="w-25 h-10 rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub4_sb_14 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="w-25 h-10 rounded-lg bg-CoolNeutral-20 text-sub4_sb_14 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+            className="w-25 h-10 rounded-[8px] bg-CoolNeutral-20 text-sub4_sb_14 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
           >
             {confirmLabel}
           </button>

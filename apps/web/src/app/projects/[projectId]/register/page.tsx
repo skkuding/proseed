@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { CategorySection } from './_components/CategorySection'
 import { ProjectTypeSection } from './_components/ProjectTypeSection'
 import { ProjectNameSection } from './_components/ProjectNameSection'
@@ -19,17 +20,19 @@ import { ThumbnailSection } from './_components/ThumbnailSection'
 import { ProjectImagesSection } from './_components/ProjectImagesSection'
 import { CATEGORY_TO_API, STATUS_TO_API, JOB_TO_API, type JobTab } from './_components/constants'
 import { useProjectForm } from '../_hooks/useProjectForm'
-
-const API = 'http://localhost:4000'
+import { useAuthStore } from '@/store/authStore'
+import {
+  createProject,
+  inviteCollaborator,
+  getUploadUrl,
+  uploadToS3,
+  type CreateProjectDto,
+  type InviteCollaboratorDto,
+} from '@/lib/api'
 
 async function uploadImage(file: File): Promise<string> {
-  const res = await fetch(`${API}/storage/upload-url`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename: file.name, contentType: file.type }),
-  })
-  const { url, key } = (await res.json()) as { url: string; key: string }
-  await fetch(url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } })
+  const { url, key } = await getUploadUrl(file.name, file.type)
+  await uploadToS3(url, file)
   return key
 }
 
@@ -38,8 +41,20 @@ export default function RegisterProject() {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showRegisterConfirm, setShowRegisterConfirm] = useState(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
 
-  const leaderJobType: JobTab = '기획자'
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href)
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href)
+      setShowLeaveModal(true)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const cachedJobType = useAuthStore((s) => s.jobType)
+  const leaderJobType: JobTab = cachedJobType ?? '기획'
 
   const {
     selectedCategories,
@@ -90,36 +105,26 @@ export default function RegisterProject() {
         ...projectImages.map((img) => uploadImage(img.file)),
       ])
 
-      const res = await fetch(`${API}/project`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          title,
-          type: projectType,
-          status: STATUS_TO_API[status!],
-          oneLineDescription,
-          description,
-          category: selectedCategories.map((c) => CATEGORY_TO_API[c]),
-          contactPath,
-          leaderJobType: JOB_TO_API[leaderJobType],
-          projectLink,
-          iconKey,
-          thumbnailKey,
-          imageKeys,
-        }),
+      const project = await createProject({
+        title,
+        type: projectType as CreateProjectDto['type'],
+        status: STATUS_TO_API[status!] as CreateProjectDto['status'],
+        oneLineDescription,
+        description,
+        category: selectedCategories.map((c) => CATEGORY_TO_API[c]) as CreateProjectDto['category'],
+        contactPath,
+        leaderJobType: JOB_TO_API[leaderJobType] as CreateProjectDto['leaderJobType'],
+        projectLink,
+        iconKey,
+        thumbnailKey,
+        imageKeys,
       })
-
-      if (!res.ok) throw new Error()
-      const project = await res.json()
 
       await Promise.allSettled(
         members.map((m) =>
-          fetch(`${API}/project/${project.id}/invite`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ email: m.email, role: JOB_TO_API[m.role] }),
+          inviteCollaborator(project.id, {
+            email: m.email,
+            role: JOB_TO_API[m.role] as InviteCollaboratorDto['role'],
           })
         )
       )
@@ -215,6 +220,14 @@ export default function RegisterProject() {
           setShowRegisterConfirm(false)
           handleSubmit()
         }}
+      />
+
+      <LeaveConfirmModal
+        isOpen={showLeaveModal}
+        title="프로젝트 등록을 취소하고 이전 페이지로 돌아가시겠습니까?"
+        description="프로젝트 등록 취소 후, 지금까지 작성한 정보는 복구가 불가합니다."
+        onCancel={() => setShowLeaveModal(false)}
+        onConfirm={() => window.history.go(-2)}
       />
     </main>
   )

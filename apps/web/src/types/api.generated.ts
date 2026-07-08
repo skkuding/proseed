@@ -455,6 +455,10 @@ export interface components {
             type: components["schemas"]["ProjectType"];
             status: components["schemas"]["ProjectStatus"];
             category: components["schemas"]["ProjectCategory"][];
+            images: components["schemas"]["ProjectImageDto"][];
+            projectRoles: components["schemas"]["ProjectMemberDto"][];
+            /** @description 요청자가 이 프로젝트의 멤버인지 (비로그인 시 false) */
+            isMyProject: boolean;
             id: number;
             title: string;
             createdById: number;
@@ -468,10 +472,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            images: components["schemas"]["ProjectImageDto"][];
-            projectRoles: components["schemas"]["ProjectMemberDto"][];
-            /** @description 요청자가 이 프로젝트의 멤버인지 (비로그인 시 false) */
-            isMyProject: boolean;
         };
         InviteCollaboratorDto: {
             /** Format: email */

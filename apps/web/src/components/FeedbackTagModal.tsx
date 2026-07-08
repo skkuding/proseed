@@ -6,20 +6,20 @@ import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackData.feedbacks> = {
-  기획자: 'plan',
-  디자이너: 'design',
-  개발자: 'dev',
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
   기타: 'general',
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획자',
-  design: '디자이너',
-  dev: '개발자',
+  plan: '기획',
+  design: '디자인',
+  dev: '개발',
   general: '기타',
 }
 
@@ -34,11 +34,11 @@ interface Props {
 
 export function FeedbackTagModal({ isOpen, onClose }: Props) {
   const { taggedFeedbacks, setTaggedFeedbacks } = useFeedbackTagStore()
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [selectedByTab, setSelectedByTab] = useState<Record<TabLabel, number[]>>({
-    기획자: taggedFeedbacks.plan ?? [],
-    디자이너: taggedFeedbacks.design ?? [],
-    개발자: taggedFeedbacks.dev ?? [],
+    기획: taggedFeedbacks.plan ?? [],
+    디자인: taggedFeedbacks.design ?? [],
+    개발: taggedFeedbacks.dev ?? [],
     기타: taggedFeedbacks.general ?? [],
   })
   const [detailFeedback, setDetailFeedback] = useState<Feedback | null>(null)
@@ -68,9 +68,9 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
 
   const handleConfirm = () => {
     setTaggedFeedbacks({
-      plan: selectedByTab['기획자'],
-      design: selectedByTab['디자이너'],
-      dev: selectedByTab['개발자'],
+      plan: selectedByTab['기획'],
+      design: selectedByTab['디자인'],
+      dev: selectedByTab['개발'],
       general: selectedByTab['기타'],
     })
     onClose()
@@ -211,52 +211,55 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 shrink-0">
-          <h2 className="text-title1_sb_28 text-CoolNeutral-20">도움이 된 피드백 태그하기</h2>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="h-12 px-6 rounded-xl border border-neutral-200 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-            >
-              취소하기
-            </button>
-            <button
-              onClick={handleConfirm}
-              disabled={totalSelected === 0}
-              className="h-12 px-6 rounded-xl bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              선택한 피드백 태그하기
-            </button>
+        <div className="px-7 pt-8 shrink-0 gap-3 flex flex-col">
+          <div className="flex items-center justify-between ">
+            <h2 className="text-head3_sb_36">도움이 된 피드백 태그하기</h2>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onClose}
+                className="h-12 px-5 rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+              >
+                취소하기
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={totalSelected === 0}
+                className="h-12 px-5 rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                선택한 피드백 태그하기
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="px-8 pt-5 shrink-0">
-          <div className="flex">
-            {TABS.map((tab) => {
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-3 text-body2_m_14 w-21 h-[38px] px-auto py-2 hover:cursor-pointer transition-colors relative ${
-                    activeTab === tab ? 'text-black' : 'text-neutral-40'
-                  }`}
-                >
-                  <span className="flex items-center justify-center gap-1">
-                    {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
-                    {tab}
-                  </span>
-                </button>
-              )
-            })}
+          {/* Tabs */}
+          <div className="flex flex-col gap-1">
+            <div className="flex shrink-0">
+              {TABS.map((tab) => {
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`text-body2_m_14 w-21 h-[38px] px-4 py-2 hover:cursor-pointer transition-colors relative ${
+                      activeTab === tab ? 'text-black' : 'text-neutral-40'
+                    }`}
+                  >
+                    <span className="flex items-center justify-center gap-1">
+                      {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
+                      {tab}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <p className="pl-5 text-caption1_m_13 text-CoolNeutral-50">
+              직군당 최대 {MAX_PER_TAB}개 선택 가능 ({selected.length}/{MAX_PER_TAB})
+            </p>
           </div>
-          <p className="text-caption1_m_13 text-CoolNeutral-50 mt-2 mb-1">
-            직군당 최대 {MAX_PER_TAB}개 선택 가능 ({selected.length}/{MAX_PER_TAB})
-          </p>
         </div>
 
         {/* Feedback list */}
-        <div className="overflow-y-auto flex-1 px-8 py-4">
+        <div className="overflow-y-auto flex-1 px-8 pt-4 pb-6">
           {feedbacks.length === 0 ? (
             <p className="text-body3_r_16 text-CoolNeutral-40 py-10 text-center">
               해당 카테고리의 피드백이 없습니다.
@@ -270,7 +273,7 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                 return (
                   <div
                     key={feedback.feedbackId}
-                    className={`relative rounded-2xl border-2 p-5 flex flex-col gap-3 transition-colors ${
+                    className={`relative rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${
                       isSelected
                         ? 'border-primary-strong bg-white'
                         : disabled
@@ -282,7 +285,7 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                     <button
                       onClick={() => toggleSelect(feedback.feedbackId)}
                       disabled={disabled}
-                      className="absolute top-4 right-4 hover:cursor-pointer disabled:cursor-not-allowed"
+                      className="absolute top-5 right-5 hover:cursor-pointer disabled:cursor-not-allowed"
                     >
                       <div
                         className={`size-5 rounded border-2 flex items-center justify-center transition-colors ${
@@ -307,7 +310,7 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                       className="flex items-center gap-3 text-left hover:cursor-pointer w-fit"
                       onClick={() => openDetail(feedback)}
                     >
-                      <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0 bg-neutral-100">
+                      <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0">
                         <Image
                           src={feedback.profileImageUrl}
                           alt={feedback.nickname}
@@ -319,7 +322,7 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                         <span className={`text-body2_m_14 text-primary-strong`}>
                           {CATEGORY_LABEL[feedback.category]}
                         </span>
-                        <span className="text-title3_sb_20 leading-tight">{feedback.nickname}</span>
+                        <span className="text-title5_sb_20 leading-tight">{feedback.nickname}</span>
                       </div>
                     </button>
 
@@ -329,9 +332,7 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                       onClick={() => openDetail(feedback)}
                     >
                       <div className="bg-[#0000000A] border border-[#00000033] rounded-xl px-4 py-3">
-                        <p className="text-body2_m_14 text-CoolNeutral-20 truncate">
-                          {feedback.onelineReview}
-                        </p>
+                        <p className="text-body1_m_16 truncate">{feedback.onelineReview}</p>
                       </div>
                     </button>
                   </div>
