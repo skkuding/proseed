@@ -13,6 +13,7 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
   FeedbackQuestionsResponseDto,
+  MyFeedbackProjectsResponseDto,
 } from './dto/feedback-response.dto'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
@@ -47,5 +48,21 @@ export class FeedbackController {
     @Param('versionId', ParseIntPipe) versionId: number,
   ): Promise<FeedbackQuestionsResponseDto> {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
+  }
+}
+
+//전역 가드로 전 라우트 인증 필수
+@ApiTags('Feedback')
+@ApiCookieAuth()
+@Controller('feedbacks')
+export class MyFeedbackController {
+  constructor(private readonly feedbackService: FeedbackService) {}
+
+  // GET feedbacks/my/projects
+  @Get('my/projects')
+  async findMyFeedbackProjects(
+    @Req() req: RequestWithUser,
+  ): Promise<MyFeedbackProjectsResponseDto> {
+    return await this.feedbackService.findMyFeedbackProjects(req.user.id)
   }
 }
