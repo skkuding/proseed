@@ -1,8 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { EntityNotExistException } from 'src/common/exceptions/business.exception'
 import { PrismaService } from 'src/prisma/prisma.service'
 
 import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
+import { UserProfileResponseDto } from './dto/user-response.dto'
 
 @Injectable()
 export class UserService {
@@ -30,6 +32,25 @@ export class UserService {
       }
       throw error
     }
+  }
+
+  //다른 유저의 공개 프로필 조회 (프로젝트 상세 - 함께한 팀원용, 민감 정보 제외)
+  async getUserProfile(userId: number): Promise<UserProfileResponseDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        profileImageUrl: true,
+        jobType: true,
+        skills: true,
+        links: true,
+        bio: true,
+      },
+    })
+    if (!user) throw new EntityNotExistException('User')
+
+    return user
   }
 
   async checkIsNewUser(

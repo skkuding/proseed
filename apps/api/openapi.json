@@ -251,6 +251,36 @@
         ]
       }
     },
+    "/user/{userId}/profile": {
+      "get": {
+        "operationId": "UserController_getUserProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/project": {
       "post": {
         "operationId": "ProjectController_create",
@@ -851,6 +881,32 @@
           "Feedback"
         ]
       }
+    },
+    "/feedbacks/my/projects": {
+      "get": {
+        "operationId": "MyFeedbackController_findMyFeedbackProjects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
     }
   },
   "info": {
@@ -1063,6 +1119,53 @@
           "createdAt",
           "updatedAt",
           "ownedTicketCount",
+          "skills",
+          "links"
+        ]
+      },
+      "UserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "jobType",
+          "bio",
+          "id",
+          "name",
+          "profileImageUrl",
           "skills",
           "links"
         ]
@@ -2222,6 +2325,12 @@
           },
           "imageUrl": {
             "type": "string"
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -2254,6 +2363,12 @@
             "type": "string",
             "nullable": true
           },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "id": {
             "type": "number"
           },
@@ -2276,6 +2391,7 @@
         },
         "required": [
           "imageUrl",
+          "imageUrls",
           "id",
           "questionId",
           "versionId",
@@ -2362,6 +2478,60 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeedbackQuestionItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "MyFeedbackProjectItemDto": {
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "projectTitle": {
+            "type": "string"
+          },
+          "projectThumbnailUrl": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "isAdopted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "submissionId",
+          "projectId",
+          "projectTitle",
+          "projectThumbnailUrl",
+          "oneLineDescription",
+          "isAdopted",
+          "createdAt"
+        ]
+      },
+      "MyFeedbackProjectsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyFeedbackProjectItemDto"
             }
           }
         },

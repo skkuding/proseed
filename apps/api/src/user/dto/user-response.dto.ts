@@ -12,6 +12,22 @@ export class NicknameResponseDto {
   nickname: string
 }
 
+/** 다른 유저의 공개 프로필 — email/티켓 등 민감 정보 제외 */
+export class UserProfileResponseDto {
+  id: number
+  name: string
+  profileImageUrl: string
+
+  @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
+  jobType: JobType | null
+
+  skills: string[]
+  links: string[]
+
+  @ApiProperty({ nullable: true, type: String })
+  bio: string | null
+}
+
 export class UserResponseDto {
   id: number
   name: string
