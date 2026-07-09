@@ -8,9 +8,22 @@ import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
 import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
 import { toast } from 'sonner'
+import { useGrowthRecordStore } from '@/store/growthRecordStore'
+import { publishVersion, type CreateVersionDto } from '@/lib/api'
+import { JOB_TABS, RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
+import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+const FREE_COMMENT_CONTENT = '자유롭게 하고 싶은 말을 남겨주세요'
+
+const TABS = JOB_TABS
 type TabLabel = (typeof TABS)[number]
+
+const TAB_TO_MOCK_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.questions> = {
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
+  기타: 'general',
+}
 
 const MAX_QUESTIONS = 4 // 자유롭게 하고 싶은 말을 남겨주세요 포함
 const MAX_LENGTH = 200
@@ -51,16 +64,17 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 export function FeedbackQuestionsForm() {
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [questionsByTab, setQuestionsByTab] = useState<Record<TabLabel, Question[]>>({
-    기획자: [createQuestion(), createFreeComment()],
-    디자이너: [createQuestion(), createFreeComment()],
-    개발자: [createQuestion(), createFreeComment()],
+    기획: [createQuestion(), createFreeComment()],
+    디자인: [createQuestion(), createFreeComment()],
+    개발: [createQuestion(), createFreeComment()],
     기타: [createQuestion(), createFreeComment()],
   })
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   const params = useParams()
   const projectId = params.projectId as string
 
@@ -204,7 +218,7 @@ export function FeedbackQuestionsForm() {
 
           {/* 프로젝트 업데이트 */}
           <button
-            onClick={() => {
+            onClick={async () => {
               const allTabs = Object.keys(questionsByTab) as TabLabel[]
               const hasEmpty = allTabs.some((tab) =>
                 questionsByTab[tab].some((q) => !q.isFreeComment && q.text.trim().length === 0)
@@ -213,11 +227,56 @@ export function FeedbackQuestionsForm() {
                 toast.error('모든 질문란을 채워주세요')
                 return
               }
-              setShowSuccessModal(true)
+
+              const { version, imagesByTab, answers, updateGoal, updateResult } =
+                useGrowthRecordStore.getState()
+
+              const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
+                category: RECORD_CATEGORY_TO_API[
+                  tab
+                ] as CreateVersionDto['growthRecords'][number]['category'],
+                contents: growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].map((q) => ({
+                  title: q.questionTitle,
+                  content: answers[q.questionId] ?? '',
+                  isDefault: true,
+                })),
+                imageKeys: imagesByTab[tab] ?? [],
+              }))
+
+              const feedbackQuestions: CreateVersionDto['feedbackQuestions'] = JOB_TABS.flatMap(
+                (tab) =>
+                  questionsByTab[tab].map((q) => ({
+                    category: RECORD_CATEGORY_TO_API[
+                      tab
+                    ] as CreateVersionDto['feedbackQuestions'][number]['category'],
+                    content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
+                    isRequired: q.isRequired,
+                  }))
+              )
+
+              const payload: CreateVersionDto = {
+                version: `${version.major}.${version.minor}.${version.patch}`,
+                updateGoal,
+                updateResults: [updateResult],
+                growthRecords,
+                feedbackQuestions,
+                taggedFeedbacks: [],
+              }
+
+              setIsPublishing(true)
+              try {
+                await publishVersion(projectId, payload)
+                setShowSuccessModal(true)
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')
+              } finally {
+                setIsPublishing(false)
+              }
             }}
-            className="w-full h-12 rounded-lg bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+            disabled={isPublishing}
+            className="w-full h-12 rounded-lg bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
-            프로젝트 업데이트
+            {isPublishing ? '업데이트 중...' : '프로젝트 업데이트'}
           </button>
         </div>
       </div>

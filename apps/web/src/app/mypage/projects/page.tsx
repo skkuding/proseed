@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import { JOB_FILTER_TABS, type JobFilter } from '@/app/_utils/projectConstants'
+import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
 import {
   ParticipatedProject,
   ParticipatedProjectCard,
 } from '@/app/mypage/projects/_components/ParticipatedProjectCard'
 
 export default function MyParticipatedProjects() {
-  const [selectedJob, setSelectedJob] = useState<JobFilter>('기획')
+  const [selectedJob, setSelectedJob] = useState<JobTab>('기획')
   const [projects] = useState<ParticipatedProject[]>([])
 
   const filteredProjects = projects.filter((project) => project.role === selectedJob)
@@ -21,9 +21,9 @@ export default function MyParticipatedProjects() {
         <p className="text-head3_sb_36 text-black">참여한 프로젝트</p>
 
         <RoleFilterTabs
-          tabs={JOB_FILTER_TABS}
+          tabs={JOB_TABS}
           activeTab={selectedJob}
-          onTabChange={(tab) => setSelectedJob(tab as JobFilter)}
+          onTabChange={(tab) => setSelectedJob(tab as JobTab)}
         />
       </div>
 

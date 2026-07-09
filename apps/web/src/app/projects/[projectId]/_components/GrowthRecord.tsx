@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter, useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
@@ -12,52 +12,59 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import growthData from '@/app/_mockdata/project-detail/project-growthrecord.json'
-import versionList from '@/app/_mockdata/project-detail/project-version.json'
+import {
+  getProjectVersions,
+  getVersionDetail,
+  type ProjectVersionListItemDto,
+  type VersionDetailResponseDto,
+} from '@/lib/api'
+import { RECORD_CATEGORY_LABELS, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { formatDate } from '@/lib/utils'
 import { ImageLightbox } from './ImageLightbox'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 
-const TABS = ['전체 요약', '기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['전체 요약', '기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
-const CATEGORY_TO_TAB: Record<string, TabLabel> = {
-  PLAN: '기획자',
-  DESIGN: '디자이너',
-  DEVELOP: '개발자',
-  COMMON: '기타',
-}
-
-const ROLE_LABEL: Record<string, string> = {
-  PLANNER: '기획자',
-  DESIGNER: '디자이너',
-  DEVELOPER: '개발자',
-}
-
-type GrowthRecordItem = {
-  id: number
-  versionId: number
-  category: string
-  createdAt: string
-  updatedAt: string
-  contents: { title: string; content: string }[]
-  images: { order: number; url: string }[]
-  taggedFeedbacks: {
-    id: number
-    author: { name: string; profileImageUrl: string; role: string }
-    content: string
-  }[]
-}
+type GrowthRecordItem = VersionDetailResponseDto['growthRecords'][number]
 
 export function GrowthRecord() {
   const router = useRouter()
   const params = useParams()
-  const [activeTab, setActiveTab] = useState<TabLabel>('전체 요약')
-  const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
+  const projectId = params.projectId as string
 
-  const activeRecord = growthData.growthRecords.find(
-    (r) => CATEGORY_TO_TAB[r.category] === activeTab
-  ) as GrowthRecordItem | undefined
+  const [activeTab, setActiveTab] = useState<TabLabel>('전체 요약')
+  const [versions, setVersions] = useState<ProjectVersionListItemDto[]>([])
+  const [versionsLoaded, setVersionsLoaded] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState('')
+  const [versionDetail, setVersionDetail] = useState<VersionDetailResponseDto | null>(null)
+
+  useEffect(() => {
+    getProjectVersions(projectId)
+      .then((v) => {
+        setVersions(v)
+        if (v.length > 0) setSelectedVersion(v[0].id.toString())
+      })
+      .catch(console.error)
+      .finally(() => setVersionsLoaded(true))
+  }, [projectId])
+
+  useEffect(() => {
+    if (!selectedVersion) return
+    getVersionDetail(projectId, selectedVersion).then(setVersionDetail).catch(console.error)
+  }, [projectId, selectedVersion])
+
+  if (!versionsLoaded) return null
+
+  if (versions.length === 0) {
+    return <p className="text-body3_r_16 text-CoolNeutral-40">아직 발행된 성장기록이 없습니다.</p>
+  }
+
+  if (!versionDetail) return null
+
+  const activeRecord = versionDetail.growthRecords.find(
+    (r) => RECORD_CATEGORY_LABELS[r.category] === activeTab
+  )
 
   return (
     <div className="flex flex-col gap-5">
@@ -66,19 +73,18 @@ export function GrowthRecord() {
         <div>
           <h1 className="text-head3_sb_36">프로젝트 성장기록</h1>
           <p className="text-body3_r_16 text-CoolNeutral-40 mt-2">
-            업데이트 날짜 {formatDate(growthData.releasedAt)}
+            업데이트 날짜 {versionDetail.releasedAt ? formatDate(versionDetail.releasedAt) : '-'}
           </p>
         </div>
         <div className="flex items-center">
           <Select value={selectedVersion} onValueChange={setSelectedVersion}>
             <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-lg border-neutral-200">
               <SelectValue>
-                업데이트 버전{' '}
-                {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
+                업데이트 버전 {versions.find((v) => v.id.toString() === selectedVersion)?.version}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {versionList.map((v) => (
+              {versions.map((v) => (
                 <SelectItem key={v.id} value={v.id.toString()}>
                   버전 {v.version}
                 </SelectItem>
@@ -87,7 +93,7 @@ export function GrowthRecord() {
           </Select>
           <Button
             onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
-            disabled={selectedVersion !== versionList[0].id.toString()}
+            disabled={selectedVersion !== versions[0].id.toString()}
             className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
           >
             <p className="text-sub3_sb_16 text-white">성장기록 작성하기</p>
@@ -104,7 +110,7 @@ export function GrowthRecord() {
 
       {/* Content */}
       {activeTab === '전체 요약' ? (
-        <SummarySection />
+        <SummarySection versionDetail={versionDetail} />
       ) : activeRecord ? (
         <RecordSection record={activeRecord} />
       ) : (
@@ -114,19 +120,19 @@ export function GrowthRecord() {
   )
 }
 
-function SummarySection() {
+function SummarySection({ versionDetail }: { versionDetail: VersionDetailResponseDto }) {
   return (
     <div className="flex flex-col gap-10 mt-5">
       <section className="flex flex-col gap-3">
         <h2 className="text-title3_sb_20">이번 업데이트 목표</h2>
         <p className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed">
-          {growthData.updateGoal}
+          {versionDetail.updateGoal}
         </p>
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-title3_sb_20">이번 업데이트 결과물</h2>
         <ul className="flex flex-col gap-2">
-          {growthData.updateResults.map((result, idx) => (
+          {versionDetail.updateResults.map((result, idx) => (
             <li
               key={idx}
               className="flex items-start gap-2 text-body3_r_16 text-CoolNeutral-30 leading-relaxed"
@@ -194,7 +200,8 @@ function RecordSection({ record }: { record: GrowthRecordItem }) {
                 className="border border-neutral-200 rounded-xl p-5 flex flex-col"
               >
                 <span className={`text-caption1_m_13 text-primary-strong`}>
-                  {ROLE_LABEL[feedback.author.role] ?? feedback.author.role}
+                  {(feedback.author.role && JOB_API_TO_LABEL[feedback.author.role]) ??
+                    feedback.author.role}
                 </span>
                 <p className="text-sub1_sb_18">{feedback.author.name}</p>
                 <p className="text-body2_m_14 text-CoolNeutral-40 mt-3 line-clamp-2">

@@ -1,2 +1,13 @@
 packages:
   - 'apps/*'
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  argon2: true
+  es5-ext: true
+  prisma: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true

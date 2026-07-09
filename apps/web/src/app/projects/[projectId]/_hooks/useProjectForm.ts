@@ -29,7 +29,7 @@ export function useProjectForm(init: ProjectFormInit = {}) {
   const [contactPath, setContactPath] = useState(init.contactPath ?? '')
 
   // 팀원
-  const [memberTab, setMemberTab] = useState<JobTab>('기획자')
+  const [memberTab, setMemberTab] = useState<JobTab>('기획')
   const [memberEmail, setMemberEmail] = useState('')
   const [members, setMembers] = useState<Member[]>([])
 

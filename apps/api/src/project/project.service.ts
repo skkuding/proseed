@@ -5,12 +5,16 @@ import {
   ForbiddenAccessException,
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import { CreateProjectDto } from './dto/create-project.dto'
 import type { GetProjectsDto } from './dto/get-projects.dto'
 
 @Injectable()
 export class ProjectService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async getProjects(dto: GetProjectsDto) {
     const { search, category, take = 9, cursor } = dto
@@ -55,9 +59,12 @@ export class ProjectService {
     const sliced = hasNextPage ? projects.slice(0, take) : projects
     const projectIds = sliced.map((p) => p.id)
 
-    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+    const [feedbackCounts, resolved] = await Promise.all([
+      this.getFeedbackCountsByProjectIds(projectIds),
+      this.resolveThumbnailUrls(sliced),
+    ])
 
-    const data = sliced.map((project) => ({
+    const data = resolved.map((project) => ({
       ...project,
       feedbackCount: feedbackCounts.get(project.id) ?? 0,
     }))
@@ -123,11 +130,33 @@ export class ProjectService {
     })
 
     const projectIds = projects.map((p) => p.id)
-    const feedbackCounts = await this.getFeedbackCountsByProjectIds(projectIds)
+    const [feedbackCounts, resolved] = await Promise.all([
+      this.getFeedbackCountsByProjectIds(projectIds),
+      this.resolveThumbnailUrls(projects),
+    ])
 
-    return projects.map((project) => ({
+    return resolved.map((project) => ({
       ...project,
       feedbackCount: feedbackCounts.get(project.id) ?? 0,
+    }))
+  }
+
+  /** 목록용: thumbnailUrl (S3 key) → presigned download URL 일괄 변환 */
+  private async resolveThumbnailUrls<T extends { thumbnailUrl: string }>(
+    projects: T[],
+  ): Promise<T[]> {
+    if (projects.length === 0) return projects
+
+    const urlMap = new Map<string, string>()
+    await Promise.all(
+      [...new Set(projects.map((p) => p.thumbnailUrl))].map(async (key) => {
+        urlMap.set(key, await this.storage.getSignedDownloadUrl(key))
+      }),
+    )
+
+    return projects.map((p) => ({
+      ...p,
+      thumbnailUrl: urlMap.get(p.thumbnailUrl) ?? p.thumbnailUrl,
     }))
   }
 
@@ -171,8 +200,22 @@ export class ProjectService {
       throw new EntityNotExistException('Project')
     }
 
+    const [iconUrl, thumbnailUrl, images] = await Promise.all([
+      this.storage.getSignedDownloadUrl(project.iconUrl),
+      this.storage.getSignedDownloadUrl(project.thumbnailUrl),
+      Promise.all(
+        project.images.map(async (image) => ({
+          ...image,
+          url: await this.storage.getSignedDownloadUrl(image.url),
+        })),
+      ),
+    ])
+
     return {
       ...project,
+      iconUrl,
+      thumbnailUrl,
+      images,
       isMyProject: myRole !== null,
     }
   }

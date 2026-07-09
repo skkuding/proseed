@@ -14,20 +14,21 @@ import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
+import { getUploadUrl, uploadToS3 } from '@/lib/api'
 
 const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획자',
-  design: '디자이너',
-  dev: '개발자',
+  plan: '기획',
+  design: '디자인',
+  dev: '개발',
   general: '기타',
 }
 
 type TabLabel = JobTab
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.questions> = {
-  기획자: 'plan',
-  디자이너: 'design',
-  개발자: 'dev',
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
   기타: 'general',
 }
 
@@ -35,32 +36,16 @@ type ImageItem = {
   id: string
   preview: string
   uploading: boolean
-}
-
-async function getUploadUrl(filename: string, contentType: string) {
-  const res = await fetch('http://localhost:4000/storage/upload-url', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename, contentType }),
-  })
-  return res.json() as Promise<{ url: string; key: string }>
-}
-
-async function uploadToS3(presignedUrl: string, file: File) {
-  await fetch(presignedUrl, {
-    method: 'PUT',
-    body: file,
-    headers: { 'Content-Type': file.type },
-  })
+  key: string | null
 }
 
 export function GrowthRecordForm() {
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [version, setVersion] = useState({ major: '', minor: '', patch: '' })
   const [imagesByTab, setImagesByTab] = useState<Record<TabLabel, ImageItem[]>>({
-    기획자: [],
-    디자이너: [],
-    개발자: [],
+    기획: [],
+    디자인: [],
+    개발: [],
     기타: [],
   })
   const [imageModalIndex, setImageModalIndex] = useState<number | null>(null)
@@ -107,6 +92,7 @@ export function GrowthRecordForm() {
       id: crypto.randomUUID(),
       preview: URL.createObjectURL(file),
       uploading: true,
+      key: null,
     }))
 
     setImages((prev) => [...prev, ...newImages])
@@ -115,10 +101,10 @@ export function GrowthRecordForm() {
       selected.map(async (file, i) => {
         const imageId = newImages[i].id
         try {
-          const { url } = await getUploadUrl(file.name, file.type)
+          const { url, key } = await getUploadUrl(file.name, file.type)
           await uploadToS3(url, file)
           setImages((prev) =>
-            prev.map((img) => (img.id === imageId ? { ...img, uploading: false } : img))
+            prev.map((img) => (img.id === imageId ? { ...img, uploading: false, key } : img))
           )
         } catch {
           setImages((prev) =>
@@ -302,7 +288,7 @@ export function GrowthRecordForm() {
               )
               if (taggedItems.length === 0) return null
               return (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   {taggedItems.map((feedback) => (
                     <div
                       key={feedback.feedbackId}
@@ -310,7 +296,7 @@ export function GrowthRecordForm() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col">
-                          <span className="text-body2_m_14 text-primary-strong">
+                          <span className="text-caption1_m_13 text-primary-strong">
                             {CATEGORY_LABEL[feedback.category]}
                           </span>
                           <span className="text-title5_sb_20 leading-tight">
@@ -319,12 +305,12 @@ export function GrowthRecordForm() {
                         </div>
                         <button
                           onClick={() => removeTaggedFeedback(category, feedback.feedbackId)}
-                          className="shrink-0 w-15 h-10 text-caption1_m_13 text-CoolNeutral-20 border border-CoolNeutral-20 rounded-lg px-2 py-1 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+                          className="shrink-0 w-15 h-10 text-sub4_sb_14 text-CoolNeutral-20 border-[1.4px] border-CoolNeutral-50 rounded-[8px] px-3 py-[10px] hover:bg-neutral-99 hover:cursor-pointer transition-colors"
                         >
                           삭제
                         </button>
                       </div>
-                      <p className="text-body2_m_14 text-CoolNeutral-30 line-clamp-2">
+                      <p className="text-body2_m_14 text-neutral-30 line-clamp-2">
                         {feedback.onelineReview}
                       </p>
                     </div>
@@ -351,7 +337,7 @@ export function GrowthRecordForm() {
             </p>
           </button>
           <button
-            //disabled={!isNextEnabled}
+            disabled={!isNextEnabled}
             onClick={() => setShowSubmitModal(true)}
             className={`w-full h-12 mt-4 rounded-lg text-sub3_sb_16 transition-colors ${isNextEnabled ? 'bg-neutral-20 text-white hover:bg-neutral-30 cursor-pointer' : 'bg-neutral-200 text-CoolNeutral-50 cursor-not-allowed'}`}
           >
@@ -379,7 +365,10 @@ export function GrowthRecordForm() {
         formData={{
           version,
           imagesByTab: Object.fromEntries(
-            Object.entries(imagesByTab).map(([tab, imgs]) => [tab, imgs.map((img) => img.id)])
+            Object.entries(imagesByTab).map(([tab, imgs]) => [
+              tab,
+              imgs.filter((img) => !img.uploading && img.key).map((img) => img.key as string),
+            ])
           ),
           answers,
           taggedFeedbacks,

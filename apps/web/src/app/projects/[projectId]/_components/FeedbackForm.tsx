@@ -17,13 +17,13 @@ import { ChevronRightIcon } from 'lucide-react'
 const latestVersionId = versionList[0].id.toString()
 const ONE_LINE_MAX = 200
 const MAX_IMAGES = 8
-const TABS = ['기획자', '디자이너', '개발자', '기타'] as const
+const TABS = ['기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
 
 const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions> = {
-  기획자: 'plan',
-  디자이너: 'design',
-  개발자: 'dev',
+  기획: 'plan',
+  디자인: 'design',
+  개발: 'dev',
   기타: 'general',
 }
 
@@ -67,7 +67,7 @@ export function CreateFeedbackContent() {
 
   const isLatestVersion = version === latestVersionId
 
-  const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획자')
+  const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획')
   const [oneLineReview, setOneLineReview] = useState('')
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [questionImages, setQuestionImages] = useState<Record<number, ImageItem[]>>({})

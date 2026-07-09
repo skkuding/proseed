@@ -11,6 +11,9 @@ export class CreatedFeedbackDto {
   @ApiProperty({ nullable: true, type: String })
   imageUrl: string | null
 
+  @ApiProperty({ type: [String] })
+  imageUrls: string[]
+
   createdAt: Date
 }
 
@@ -39,4 +42,19 @@ export class FeedbackQuestionItemDto {
 export class FeedbackQuestionsResponseDto {
   success: boolean
   data: FeedbackQuestionItemDto[]
+}
+
+export class MyFeedbackProjectItemDto {
+  submissionId: number
+  projectId: number
+  projectTitle: string
+  projectThumbnailUrl: string
+  oneLineDescription: string
+  isAdopted: boolean
+  createdAt: Date
+}
+
+export class MyFeedbackProjectsResponseDto {
+  success: boolean
+  data: MyFeedbackProjectItemDto[]
 }

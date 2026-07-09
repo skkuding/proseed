@@ -8,14 +8,14 @@ import recentGrowthRecords from '@/app/_mockdata/mainpage/recent-growth-records.
 import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
 
 const TAB_TO_CATEGORY: Record<JobTab, string> = {
-  기획자: 'PLAN',
-  디자이너: 'DESIGN',
-  개발자: 'DEVELOPMENT',
+  기획: 'PLAN',
+  디자인: 'DESIGN',
+  개발: 'DEVELOPMENT',
   기타: 'GENERAL',
 }
 
 export default function GrowthRecordSection() {
-  const [activeTab, setActiveTab] = useState<JobTab>('기획자')
+  const [activeTab, setActiveTab] = useState<JobTab>('기획')
 
   const filtered = useMemo(() => {
     return recentGrowthRecords.filter((rg) => rg.category === TAB_TO_CATEGORY[activeTab])
