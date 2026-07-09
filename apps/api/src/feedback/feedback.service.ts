@@ -250,7 +250,9 @@ export class FeedbackService {
     imageUrls?: string[],
     legacyImageUrl?: string,
   ): FeedbackImageInput[] {
-    const urls = imageUrls ?? (legacyImageUrl && legacyImageUrl.trim() !== '' ? [legacyImageUrl] : [])
+    const urls =
+      imageUrls ??
+      (legacyImageUrl && legacyImageUrl.trim() !== '' ? [legacyImageUrl] : [])
 
     if (urls.length > MAX_FEEDBACK_IMAGES_PER_ITEM) {
       throw new UnprocessableDataException(
