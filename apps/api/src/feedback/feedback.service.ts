@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { UserRole } from '@prisma/client'
-import { CreateFeedbackDto } from './dto/create-feedback.dto'
+import {
+  CreateFeedbackDto,
+  MAX_FEEDBACK_IMAGES_PER_ITEM,
+} from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
   FeedbackQuestionsResponseDto,
@@ -18,6 +21,8 @@ const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
   UserRole.Sprout,
   UserRole.Seeder,
 ]
+
+type FeedbackImageInput = { url: string; order: number }
 
 @Injectable()
 export class FeedbackService {
@@ -149,24 +154,25 @@ export class FeedbackService {
         versionId,
         oneLineReview: dto.oneLineReview,
         feedbacks: {
-          create: dto.feedbacks.map((f) => ({
-            questionId: f.questionId,
-            content: f.content,
-            images: f.imageUrl
-              ? {
-                  create: {
-                    url: f.imageUrl,
-                  },
-                }
-              : undefined,
-          })),
+          create: dto.feedbacks.map((f) => {
+            const images = this.buildFeedbackImages(f.imageUrls, f.imageUrl)
+
+            return {
+              questionId: f.questionId,
+              content: f.content,
+              images:
+                images.length > 0
+                  ? {
+                      create: images,
+                    }
+                  : undefined,
+            }
+          }),
         },
       },
       include: {
         feedbacks: {
-          include: {
-            images: true,
-          },
+          include: { images: { orderBy: { order: 'asc' } } },
         },
       },
     })
@@ -182,6 +188,7 @@ export class FeedbackService {
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
+          imageUrls: f.images.map((image) => image.url),
           createdAt: f.createdAt,
         })),
       },
@@ -237,5 +244,20 @@ export class FeedbackService {
         'Only Sprout or Seeder users can create feedback.',
       )
     }
+  }
+
+  private buildFeedbackImages(
+    imageUrls?: string[],
+    legacyImageUrl?: string,
+  ): FeedbackImageInput[] {
+    const urls = imageUrls ?? (legacyImageUrl ? [legacyImageUrl] : [])
+
+    if (urls.length > MAX_FEEDBACK_IMAGES_PER_ITEM) {
+      throw new UnprocessableDataException(
+        `Feedback item can include up to ${MAX_FEEDBACK_IMAGES_PER_ITEM} images`,
+      )
+    }
+
+    return urls.map((url, order) => ({ url, order }))
   }
 }

@@ -11,6 +11,9 @@ export class CreatedFeedbackDto {
   @ApiProperty({ nullable: true, type: String })
   imageUrl: string | null
 
+  @ApiProperty({ type: [String] })
+  imageUrls: string[]
+
   createdAt: Date
 }
 
