@@ -3,10 +3,14 @@ import { UserService } from './user.service'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common'
 import { MypageUpdateDto } from './dto/mypageUpdate.dto'
+import type { FeedbackService } from 'src/feedback/feedback.service'
 
 @Controller('me')
 export class MypageController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly feedbackService: FeedbackService,
+  ) {}
 
   @Get('profile')
   @UseGuards(BetterAuthGuard)
@@ -21,5 +25,13 @@ export class MypageController {
     @Body() mypageUpdateDto: MypageUpdateDto,
   ) {
     return await this.userService.updateProfile(req.user.id, mypageUpdateDto)
+  }
+
+  //Get('profile/projects)
+
+  @Get('profile/feedbacks')
+  @UseGuards(BetterAuthGuard)
+  async getMyFeedbacks(@Req() req: RequestWithUser) {
+    return this.feedbackService.findMyFeedbackProjects(req.user.id)
   }
 }

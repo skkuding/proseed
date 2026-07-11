@@ -133,7 +133,4 @@ export class UserService {
       throw error
     }
   }
-
-  async getMyProjects() {}
-  async getMyFeedbacks() {}
 }
