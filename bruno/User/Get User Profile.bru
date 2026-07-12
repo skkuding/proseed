@@ -1,0 +1,25 @@
+meta {
+  name: Get User Profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/user/1/profile
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  다른 유저의 공개 프로필 조회 (비로그인 접근 가능).
+
+  - 응답: id / name / profileImageUrl / jobType / skills / links / bio
+  - email, 티켓 개수 등 민감 정보는 포함하지 않음
+  - 프로젝트 상세 페이지의 "함께한 팀원"에서 사용
+  - 404: 존재하지 않는 유저
+}

@@ -148,6 +148,22 @@ export interface paths {
         patch: operations["UserController_onboarding"];
         trace?: never;
     };
+    "/user/{userId}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserController_getUserProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project": {
         parameters: {
             query?: never;
@@ -324,6 +340,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feedbacks/my/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MyFeedbackController_findMyFeedbackProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -376,6 +408,15 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             ownedTicketCount: number;
+            skills: string[];
+            links: string[];
+        };
+        UserProfileResponseDto: {
+            jobType: components["schemas"]["JobType"] | null;
+            bio: string | null;
+            id: number;
+            name: string;
+            profileImageUrl: string;
             skills: string[];
             links: string[];
         };
@@ -455,10 +496,6 @@ export interface components {
             type: components["schemas"]["ProjectType"];
             status: components["schemas"]["ProjectStatus"];
             category: components["schemas"]["ProjectCategory"][];
-            images: components["schemas"]["ProjectImageDto"][];
-            projectRoles: components["schemas"]["ProjectMemberDto"][];
-            /** @description 요청자가 이 프로젝트의 멤버인지 (비로그인 시 false) */
-            isMyProject: boolean;
             id: number;
             title: string;
             createdById: number;
@@ -472,6 +509,10 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            images: components["schemas"]["ProjectImageDto"][];
+            projectRoles: components["schemas"]["ProjectMemberDto"][];
+            /** @description 요청자가 이 프로젝트의 멤버인지 (비로그인 시 false) */
+            isMyProject: boolean;
         };
         InviteCollaboratorDto: {
             /** Format: email */
@@ -657,6 +698,7 @@ export interface components {
             questionId: number;
             content: string;
             imageUrl?: string;
+            imageUrls?: string[];
         };
         CreateFeedbackDto: {
             oneLineReview: string;
@@ -664,6 +706,7 @@ export interface components {
         };
         CreatedFeedbackDto: {
             imageUrl: string | null;
+            imageUrls: string[];
             id: number;
             questionId: number;
             versionId: number;
@@ -691,6 +734,20 @@ export interface components {
         FeedbackQuestionsResponseDto: {
             success: boolean;
             data: components["schemas"]["FeedbackQuestionItemDto"][];
+        };
+        MyFeedbackProjectItemDto: {
+            submissionId: number;
+            projectId: number;
+            projectTitle: string;
+            projectThumbnailUrl: string;
+            oneLineDescription: string;
+            isAdopted: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MyFeedbackProjectsResponseDto: {
+            success: boolean;
+            data: components["schemas"]["MyFeedbackProjectItemDto"][];
         };
     };
     responses: never;
@@ -878,6 +935,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    UserController_getUserProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
         };
@@ -1213,6 +1291,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FeedbackQuestionsResponseDto"];
+                };
+            };
+        };
+    };
+    MyFeedbackController_findMyFeedbackProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyFeedbackProjectsResponseDto"];
                 };
             };
         };
