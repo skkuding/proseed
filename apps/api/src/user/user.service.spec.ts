@@ -9,16 +9,20 @@ describe('UserService', () => {
   let service: UserService
   let prisma: {
     user: { findUnique: MockFn; update: MockFn }
+    projectRole: { count: MockFn }
+    feedbackSubmission: { count: MockFn }
   }
 
   beforeEach(() => {
     prisma = {
       user: { findUnique: jest.fn(), update: jest.fn() },
+      projectRole: { count: jest.fn().mockResolvedValue(0) },
+      feedbackSubmission: { count: jest.fn().mockResolvedValue(0) },
     }
     service = new UserService(prisma as unknown as PrismaService)
   })
 
-  describe('getUserProfile', () => {
+  describe('getOtherProfile', () => {
     it('공개 프로필 필드만 조회해 반환한다', async () => {
       const profile = {
         id: 2,
@@ -30,8 +34,14 @@ describe('UserService', () => {
         bio: '안녕하세요',
       }
       prisma.user.findUnique.mockResolvedValue(profile)
+      prisma.projectRole.count.mockResolvedValue(2)
+      prisma.feedbackSubmission.count.mockResolvedValue(3)
 
-      await expect(service.getUserProfile(2)).resolves.toEqual(profile)
+      await expect(service.getOtherProfile(2)).resolves.toEqual({
+        ...profile,
+        participatingProjectCount: 2,
+        feedbackCount: 3,
+      })
 
       const [[query]] = prisma.user.findUnique.mock.calls as [
         [{ where: { id: number }; select: Record<string, boolean> }],
@@ -41,18 +51,24 @@ describe('UserService', () => {
       expect(Object.keys(query.select)).toEqual([
         'id',
         'name',
-        'profileImageUrl',
         'jobType',
+        'profileImageUrl',
         'skills',
         'links',
         'bio',
       ])
+      expect(prisma.projectRole.count).toHaveBeenCalledWith({
+        where: { userId: 2 },
+      })
+      expect(prisma.feedbackSubmission.count).toHaveBeenCalledWith({
+        where: { userId: 2 },
+      })
     })
 
     it('존재하지 않는 유저면 EntityNotExistException을 던진다', async () => {
       prisma.user.findUnique.mockResolvedValue(null)
 
-      await expect(service.getUserProfile(999)).rejects.toThrow(
+      await expect(service.getOtherProfile(999)).rejects.toThrow(
         EntityNotExistException,
       )
     })
