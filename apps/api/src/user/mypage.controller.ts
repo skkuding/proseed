@@ -15,7 +15,7 @@ export class MypageController {
   @Get('profile')
   @UseGuards(BetterAuthGuard)
   async getProfile(@Req() req: RequestWithUser) {
-    return await this.userService.getProfile(req.user.id)
+    return await this.userService.getMyProfile(req.user.id)
   }
 
   @Patch('profile')
@@ -24,7 +24,7 @@ export class MypageController {
     @Req() req: RequestWithUser,
     @Body() mypageUpdateDto: MypageUpdateDto,
   ) {
-    return await this.userService.updateProfile(req.user.id, mypageUpdateDto)
+    return await this.userService.updateMyProfile(req.user.id, mypageUpdateDto)
   }
 
   //Get('profile/projects)

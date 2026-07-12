@@ -56,6 +56,6 @@ export class UserController {
   async getUserProfile(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserProfileResponseDto> {
-    return await this.userService.getUserProfile(userId)
+    return await this.userService.getOtherProfile(userId)
   }
 }
