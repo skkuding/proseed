@@ -1,0 +1,27 @@
+meta {
+  name: Redirect to social login
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:4000/api/sign-in/social
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: http://localhost:3000
+}
+
+body:json {
+  {
+    "provider": "naver",
+    "callbackURL": "http://localhost:3000"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

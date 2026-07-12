@@ -7,5 +7,6 @@ import { AuthModule } from '../auth/auth.module'
   imports: [AuthModule],
   controllers: [FeedbackController, MyFeedbackController],
   providers: [FeedbackService],
+  exports: [FeedbackService],
 })
 export class FeedbackModule {}
