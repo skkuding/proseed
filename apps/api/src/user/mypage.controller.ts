@@ -3,7 +3,7 @@ import { UserService } from './user.service'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common'
 import { MypageUpdateDto } from './dto/mypageUpdate.dto'
-import type { FeedbackService } from 'src/feedback/feedback.service'
+import { FeedbackService } from 'src/feedback/feedback.service'
 
 @Controller('me')
 export class MypageController {
