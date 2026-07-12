@@ -1,0 +1,20 @@
+meta {
+  name: Get generatedNickname
+  type: http
+  seq: 2
+}
+
+get {
+  url: ttp://localhost:4000/api/user/nickname
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

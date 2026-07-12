@@ -1,0 +1,27 @@
+meta {
+  name: Onboarding
+  type: http
+  seq: 3
+}
+
+patch {
+  url: http://localhost:4000/api/user/onboarding
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: 
+}
+
+body:json {
+  {
+    "jobType": "Developer",
+    "nickname": "화난 드래곤"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
