@@ -73,7 +73,7 @@ export default function PrivacyPage() {
         <p>회사는 안정적인 서비스 운영을 위해 아래와 같이 개인정보 처리를 위탁합니다.</p>
         <ul className="flex flex-col gap-2 pl-4">
           <li className="list-disc">
-            Amazon Web Services (AWS) — 서비스 인프라 및 데이터 저장·처리
+            Amazon Web Services (AWS) — 클라우드 스토리지(S3)를 통한 파일 저장 및 인프라 관리
           </li>
         </ul>
       </LegalSection>
