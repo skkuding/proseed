@@ -68,7 +68,7 @@ export class UserService {
    * 유저 본인의 프로필 정보들을 조회합니다.
    *
    * @param userId 유저 아이디
-   * @returns 마이페이지 화면 표시 정보가 담긴 user 객체
+   * @returns 내 프로필 정보
    */
   async getMyProfile(userId: number) {
     const [user, participatingProjectCount, myFeedbackCount] =
@@ -151,8 +151,8 @@ export class UserService {
 
   /**
    * 다른 유저의 공개 프로필을 조회합니다. (프로젝트 상세 - 함께한 팀원용, 민감한 정보 제외)
-   * @param userId number
-   * @returns
+   * @param userId 유저 아이디
+   * @returns 공개 프로필 정보
    */
   async getOtherProfile(userId: number): Promise<UserProfileResponseDto> {
     const [user, participatingProjectCount, feedbackCount] = await Promise.all([
