@@ -39,7 +39,7 @@ export class ProjectListResponseDto {
   hasNextPage: boolean
 }
 
-export class ParticipatingProjectListItemDto {
+export class MypageJoinedProjectListDto {
   id: number
   title: string
   oneLineDescription: string
