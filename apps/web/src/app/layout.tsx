@@ -7,7 +7,24 @@ import { MobileBlocker } from '@/app/_components/MobileBlocker'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/AuthProvider'
 import { JsonLd } from '@/components/JsonLd'
-import { SITE_DESCRIPTION, SITE_URL } from '@/lib/site'
+import {
+  GOOGLE_SITE_VERIFICATION,
+  NAVER_SITE_VERIFICATION,
+  SITE_DESCRIPTION,
+  SITE_URL,
+} from '@/lib/site'
+
+/** 발급된 코드가 있을 때만 verification 태그를 내보낸다 (빈 값이면 undefined → 태그 없음). */
+function buildVerification(): Metadata['verification'] {
+  const verification: NonNullable<Metadata['verification']> = {}
+  if (GOOGLE_SITE_VERIFICATION) {
+    verification.google = GOOGLE_SITE_VERIFICATION
+  }
+  if (NAVER_SITE_VERIFICATION) {
+    verification.other = { 'naver-site-verification': NAVER_SITE_VERIFICATION }
+  }
+  return Object.keys(verification).length > 0 ? verification : undefined
+}
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',
@@ -45,6 +62,7 @@ export const metadata: Metadata = {
     title: 'PROSEED',
     description: SITE_DESCRIPTION,
   },
+  verification: buildVerification(),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
