@@ -6,6 +6,7 @@ import { Footer } from '@/app/_components/Footer'
 import { MobileBlocker } from '@/app/_components/MobileBlocker'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/AuthProvider'
+import { SITE_DESCRIPTION, SITE_URL } from '@/lib/site'
 
 const pretendard = localFont({
   src: '../font/PretendardVariable.woff2',
@@ -15,13 +16,30 @@ const pretendard = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'PROSEED',
-  description: 'Proseed Now!!!',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'PROSEED',
+    template: '%s | PROSEED',
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    siteName: 'PROSEED',
+    title: 'PROSEED',
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    locale: 'ko_KR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PROSEED',
+    description: SITE_DESCRIPTION,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={pretendard.variable}>
+    <html lang="ko" className={pretendard.variable}>
       <body className={`${pretendard.className} bg-background-normal`}>
         <AuthProvider>
           <MobileBlocker />
