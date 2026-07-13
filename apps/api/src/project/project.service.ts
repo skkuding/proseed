@@ -160,11 +160,16 @@ export class ProjectService {
       },
     })
 
-    return projectRoles.map((projectRole) => ({
-      ...projectRole.project,
-      role: projectRole.role,
-      projectMemberRole: projectRole.projectMemberRole,
-    }))
+    return Promise.all(
+      projectRoles.map(async (projectRole) => ({
+        ...projectRole.project,
+        iconUrl: await this.storage.getSignedDownloadUrl(
+          projectRole.project.iconUrl,
+        ),
+        role: projectRole.role,
+        projectMemberRole: projectRole.projectMemberRole,
+      })),
+    )
   }
 
   /** 목록용: thumbnailUrl (S3 key) → presigned download URL 일괄 변환 */
