@@ -141,7 +141,7 @@ export class ProjectService {
     }))
   }
 
-  /* 내가 참여중인 프로젝트 (나의 직무, 역할도 포함) */
+  /* 마이페이지 - 내가 참여중인 프로젝트 (나의 직무, 역할도 포함) */
   async getJoinedProjects(userId: number) {
     const projectRoles = await this.prisma.projectRole.findMany({
       where: { userId },
