@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Req,
+  UseGuards,
 } from '@nestjs/common'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 
@@ -21,6 +22,7 @@ import {
   UserProfileResponseDto,
   UserResponseDto,
 } from './dto/user-response.dto'
+import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 
 @ApiTags('User')
 @Controller('user')
@@ -28,6 +30,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiCookieAuth()
+  @UseGuards(BetterAuthGuard)
   @Get('check') //기존 or 신규 유저인지 확인 + 초기 생성 닉네임 반환
   async checkIsNewUser(
     @Req() req: RequestWithUser,
@@ -36,12 +39,14 @@ export class UserController {
   }
 
   @ApiCookieAuth()
+  @UseGuards(BetterAuthGuard)
   @Get('nickname')
   generateRandomNickname(): NicknameResponseDto {
     return { nickname: generateRandomNickname() }
   }
 
   @ApiCookieAuth()
+  @UseGuards(BetterAuthGuard)
   @Patch('onboarding') //온보딩 정보 업데이트 후 user 반환
   async onboarding(
     @Req() req: RequestWithUser,
