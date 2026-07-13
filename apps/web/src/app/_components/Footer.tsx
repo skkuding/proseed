@@ -23,21 +23,15 @@ export function Footer() {
               <p className="mt-[10px] text-body4_r_14 text-neutral-80">
                 © 2026. Proseed Co. all rights reserved.
               </p>
-              <ul className="mt-3 flex items-center gap-4 text-body4_r_14">
+              <ul className="mt-4 flex flex-col gap-3 text-body2_m_14">
                 <li>
                   <Link href="/terms" className="text-neutral-80 hover:text-neutral-99">
-                    이용약관
+                    서비스 이용약관
                   </Link>
                 </li>
-                <li aria-hidden className="text-neutral-70">
-                  ·
-                </li>
                 <li>
-                  <Link
-                    href="/privacy"
-                    className="font-semibold text-neutral-90 hover:text-neutral-99"
-                  >
-                    개인정보처리방침
+                  <Link href="/privacy" className="text-neutral-80 hover:text-neutral-99">
+                    개인정보 처리방침
                   </Link>
                 </li>
               </ul>
