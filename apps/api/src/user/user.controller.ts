@@ -58,7 +58,7 @@ export class UserController {
   //프로젝트 상세(비로그인 열람 가능)의 팀원 프로필용 — 공개 정보만 반환
   @Public()
   @Get(':userId/profile')
-  async getUserProfile(
+  async getOtherProfile(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<UserProfileResponseDto> {
     return await this.userService.getOtherProfile(userId)

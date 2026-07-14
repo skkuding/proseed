@@ -5,8 +5,9 @@ import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common'
 import { MypageUpdateDto } from './dto/mypageUpdate.dto'
 import { FeedbackService } from 'src/feedback/feedback.service'
 import type { ProjectService } from 'src/project/project.service'
-import { ApiCookieAuth } from '@nestjs/swagger'
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Mypage')
 @Controller('me')
 export class MypageController {
   constructor(
@@ -18,14 +19,14 @@ export class MypageController {
   @ApiCookieAuth()
   @Get('profile')
   @UseGuards(BetterAuthGuard)
-  async getProfile(@Req() req: RequestWithUser) {
+  async getMyProfile(@Req() req: RequestWithUser) {
     return await this.userService.getMyProfile(req.user.id)
   }
 
   @ApiCookieAuth()
   @Patch('profile')
   @UseGuards(BetterAuthGuard)
-  async updateProfile(
+  async updateMyProfile(
     @Req() req: RequestWithUser,
     @Body() mypageUpdateDto: MypageUpdateDto,
   ) {
