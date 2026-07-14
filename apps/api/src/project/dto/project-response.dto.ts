@@ -39,6 +39,19 @@ export class ProjectListResponseDto {
   hasNextPage: boolean
 }
 
+export class MypageJoinedProjectListDto {
+  id: number
+  title: string
+  oneLineDescription: string
+  iconUrl: string
+
+  @ApiProperty({ enum: JobType, enumName: 'JobType' })
+  role: JobType
+
+  @ApiProperty({ enum: ProjectMemberRole, enumName: 'ProjectMemberRole' })
+  projectMemberRole: ProjectMemberRole
+}
+
 export class ProjectResponseDto {
   id: number
   title: string

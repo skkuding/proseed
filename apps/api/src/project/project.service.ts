@@ -141,6 +141,37 @@ export class ProjectService {
     }))
   }
 
+  /* 마이페이지 - 내가 참여중인 프로젝트 (나의 직무, 역할도 포함) */
+  async getJoinedProjects(userId: number) {
+    const projectRoles = await this.prisma.projectRole.findMany({
+      where: { userId },
+      orderBy: { projectId: 'desc' },
+      select: {
+        role: true,
+        projectMemberRole: true,
+        project: {
+          select: {
+            id: true,
+            title: true,
+            oneLineDescription: true,
+            iconUrl: true,
+          },
+        },
+      },
+    })
+
+    return Promise.all(
+      projectRoles.map(async (projectRole) => ({
+        ...projectRole.project,
+        iconUrl: await this.storage.getSignedDownloadUrl(
+          projectRole.project.iconUrl,
+        ),
+        role: projectRole.role,
+        projectMemberRole: projectRole.projectMemberRole,
+      })),
+    )
+  }
+
   /** 목록용: thumbnailUrl (S3 key) → presigned download URL 일괄 변환 */
   private async resolveThumbnailUrls<T extends { thumbnailUrl: string }>(
     projects: T[],
