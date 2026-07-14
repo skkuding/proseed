@@ -41,7 +41,7 @@ describe('UserService', () => {
 
       expect(result).toEqual({
         ...profile,
-        participatingProjectCount: 2,
+        joinedProjectCount: 2,
         feedbackCount: 3,
       })
 

@@ -154,7 +154,7 @@ export class UserService {
    * @returns 공개 프로필 정보
    */
   async getOtherUserProfile(userId: number): Promise<UserProfileResponseDto> {
-    const [user, participatingProjectCount, feedbackCount] = await Promise.all([
+    const [user, joinedProjectCount, feedbackCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -179,7 +179,7 @@ export class UserService {
 
     return {
       ...user,
-      participatingProjectCount,
+      joinedProjectCount,
       feedbackCount,
     }
   }

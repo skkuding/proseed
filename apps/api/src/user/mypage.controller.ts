@@ -4,10 +4,12 @@ import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common'
 import { MypageUpdateDto } from './dto/mypageUpdate.dto'
 import { FeedbackService } from 'src/feedback/feedback.service'
-import type { ProjectService } from 'src/project/project.service'
+import { ProjectService } from 'src/project/project.service'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 
 @ApiTags('Mypage')
+@ApiCookieAuth()
+@UseGuards(BetterAuthGuard)
 @Controller('me')
 export class MypageController {
   constructor(
@@ -16,16 +18,12 @@ export class MypageController {
     private readonly projectService: ProjectService,
   ) {}
 
-  @ApiCookieAuth()
   @Get('profile')
-  @UseGuards(BetterAuthGuard)
   async getMyProfile(@Req() req: RequestWithUser) {
     return await this.userService.getMyProfile(req.user.id)
   }
 
-  @ApiCookieAuth()
   @Patch('profile')
-  @UseGuards(BetterAuthGuard)
   async updateMyProfile(
     @Req() req: RequestWithUser,
     @Body() mypageUpdateDto: MypageUpdateDto,
@@ -33,16 +31,12 @@ export class MypageController {
     return await this.userService.updateMyProfile(req.user.id, mypageUpdateDto)
   }
 
-  @ApiCookieAuth()
   @Get('profile/projects')
-  @UseGuards(BetterAuthGuard)
   async getMyJoinedProjects(@Req() req: RequestWithUser) {
     return this.projectService.getJoinedProjects(req.user.id)
   }
 
-  @ApiCookieAuth()
   @Get('profile/feedbacks')
-  @UseGuards(BetterAuthGuard)
   async getMyFeedbacks(@Req() req: RequestWithUser) {
     return this.feedbackService.findMyFeedbackProjects(req.user.id)
   }

@@ -27,7 +27,7 @@ export class UserProfileResponseDto {
   @ApiProperty({ nullable: true, type: String })
   bio!: string | null
 
-  participatingProjectCount!: number
+  joinedProjectCount!: number
   feedbackCount!: number
 }
 
