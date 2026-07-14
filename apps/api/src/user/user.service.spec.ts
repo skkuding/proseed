@@ -22,7 +22,7 @@ describe('UserService', () => {
     service = new UserService(prisma as unknown as PrismaService)
   })
 
-  describe('getOtherProfile', () => {
+  describe('getOtherUserProfile', () => {
     it('공개 프로필 필드만 조회해 반환한다', async () => {
       const profile = {
         id: 2,
@@ -37,7 +37,9 @@ describe('UserService', () => {
       prisma.projectRole.count.mockResolvedValue(2)
       prisma.feedbackSubmission.count.mockResolvedValue(3)
 
-      await expect(service.getOtherProfile(2)).resolves.toEqual({
+      const result = await service.getOtherUserProfile(2)
+
+      expect(result).toEqual({
         ...profile,
         participatingProjectCount: 2,
         feedbackCount: 3,
@@ -68,9 +70,12 @@ describe('UserService', () => {
     it('존재하지 않는 유저면 EntityNotExistException을 던진다', async () => {
       prisma.user.findUnique.mockResolvedValue(null)
 
-      await expect(service.getOtherProfile(999)).rejects.toThrow(
-        EntityNotExistException,
-      )
+      try {
+        await service.getOtherUserProfile(999)
+        throw new Error('Expected getOtherUserProfile to throw')
+      } catch (error) {
+        expect(error).toBeInstanceOf(EntityNotExistException)
+      }
     })
   })
 })
