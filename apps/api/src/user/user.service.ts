@@ -71,40 +71,39 @@ export class UserService {
    * @returns 내 프로필 정보
    */
   async getMyProfile(userId: number) {
-    const [user, participatingProjectCount, myFeedbackCount] =
-      await Promise.all([
-        this.prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            name: true,
-            email: true,
-            accounts: {
-              select: {
-                providerId: true,
-              },
+    const [user, joinedProjectCount, feedbackCount] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          name: true,
+          email: true,
+          accounts: {
+            select: {
+              providerId: true,
             },
-            jobType: true,
-            profileImageUrl: true,
-            skills: true,
-            links: true,
-            bio: true,
-            ownedTicketCount: true,
           },
-        }),
-        this.prisma.projectRole.count({
-          where: { userId },
-        }),
-        this.prisma.feedbackSubmission.count({
-          where: { userId },
-        }),
-      ])
+          jobType: true,
+          profileImageUrl: true,
+          skills: true,
+          links: true,
+          bio: true,
+          ownedTicketCount: true,
+        },
+      }),
+      this.prisma.projectRole.count({
+        where: { userId },
+      }),
+      this.prisma.feedbackSubmission.count({
+        where: { userId },
+      }),
+    ])
 
-    if (!user) throw new NotFoundException('User not found')
+    if (!user) throw new EntityNotExistException('User')
 
     return {
       ...user,
-      participatingProjectCount,
-      myFeedbackCount,
+      joinedProjectCount,
+      feedbackCount,
     }
   }
 
@@ -154,7 +153,7 @@ export class UserService {
    * @param userId 유저 아이디
    * @returns 공개 프로필 정보
    */
-  async getOtherProfile(userId: number): Promise<UserProfileResponseDto> {
+  async getOtherUserProfile(userId: number): Promise<UserProfileResponseDto> {
     const [user, participatingProjectCount, feedbackCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
