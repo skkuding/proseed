@@ -12,6 +12,7 @@ import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
+  FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
   MyFeedbackProjectsResponseDto,
 } from './dto/feedback-response.dto'
@@ -64,5 +65,13 @@ export class MyFeedbackController {
     @Req() req: RequestWithUser,
   ): Promise<MyFeedbackProjectsResponseDto> {
     return await this.feedbackService.findMyFeedbackProjects(req.user.id)
+  }
+
+  // GET feedbacks/:submissionId
+  @Get(':submissionId')
+  async findFeedbackSubmissionDetail(
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+  ): Promise<FeedbackSubmissionDetailResponseDto> {
+    return await this.feedbackService.findFeedbackSubmissionDetail(submissionId)
   }
 }

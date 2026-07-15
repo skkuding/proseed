@@ -6,10 +6,12 @@ import {
 } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
+  FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
   MyFeedbackProjectsResponseDto,
 } from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import {
   DuplicateFoundException,
   EntityNotExistException,
@@ -26,7 +28,96 @@ type FeedbackImageInput = { url: string; order: number }
 
 @Injectable()
 export class FeedbackService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
+
+  async findFeedbackSubmissionDetail(
+    submissionId: number,
+  ): Promise<FeedbackSubmissionDetailResponseDto> {
+    const submission = await this.prisma.feedbackSubmission.findUnique({
+      where: { id: submissionId },
+      select: {
+        id: true,
+        projectId: true,
+        versionId: true,
+        oneLineReview: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            name: true,
+            profileImageUrl: true,
+            jobType: true,
+          },
+        },
+        feedbacks: {
+          select: {
+            id: true,
+            questionId: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+            question: {
+              select: {
+                category: true,
+                title: true,
+                description: true,
+                order: true,
+              },
+            },
+            images: {
+              select: { url: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+
+    if (!submission) {
+      throw new EntityNotExistException('FeedbackSubmission')
+    }
+
+    const feedbacks = await Promise.all(
+      submission.feedbacks
+        .sort((a, b) => a.question.order - b.question.order)
+        .map(async (feedback) => ({
+          id: feedback.id,
+          questionId: feedback.questionId,
+          category: feedback.question.category,
+          questionTitle: feedback.question.title,
+          questionContent: feedback.question.description,
+          content: feedback.content,
+          imageUrls: await Promise.all(
+            feedback.images.map((image) =>
+              this.storage.getSignedDownloadUrl(image.url),
+            ),
+          ),
+          createdAt: feedback.createdAt,
+          updatedAt: feedback.updatedAt,
+        })),
+    )
+
+    return {
+      success: true,
+      data: {
+        id: submission.id,
+        projectId: submission.projectId,
+        versionId: submission.versionId,
+        oneLineReview: submission.oneLineReview,
+        author: {
+          name: submission.user.name,
+          profileImageUrl: submission.user.profileImageUrl,
+          role: submission.user.jobType,
+        },
+        createdAt: submission.createdAt,
+        updatedAt: submission.updatedAt,
+        feedbacks,
+      },
+    }
+  }
 
   async findMyFeedbackProjects(
     userId: number,
