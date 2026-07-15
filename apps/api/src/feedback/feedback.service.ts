@@ -286,6 +286,40 @@ export class FeedbackService {
     }
   }
 
+  async findFeedbacksForVersion(
+    projectId: number,
+    versionId: number,
+  ): Promise<CreateFeedbackResponseDto> {
+    const submissions = await this.prisma.feedbackSubmission.findMany({
+      where: { projectId, versionId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        feedbacks: { include: { images: { orderBy: { order: 'asc' } } } },
+      },
+    })
+
+    const feedbacks = submissions.flatMap((submission) =>
+      submission.feedbacks.map((f) => ({
+        id: f.id,
+        questionId: f.questionId,
+        versionId: submission.versionId,
+        userId: submission.userId,
+        content: f.content,
+        imageUrl: f.images[0]?.url || null,
+        imageUrls: f.images.map((i) => i.url),
+        createdAt: f.createdAt,
+      })),
+    )
+
+    return {
+      success: true,
+      data: {
+        submittedCount: feedbacks.length,
+        feedbacks,
+      },
+    }
+  }
+
   async findAllQuestions(
     projectId: number,
     versionId: number,

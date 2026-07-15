@@ -50,6 +50,18 @@ export class FeedbackController {
   ): Promise<FeedbackQuestionsResponseDto> {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
+
+  // GET project/:projectId/versions/:versionId/feedbacks
+  @Get('feedbacks')
+  async findFeedbacksForVersion(
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ): Promise<CreateFeedbackResponseDto> {
+    return await this.feedbackService.findFeedbacksForVersion(
+      projectId,
+      versionId,
+    )
+  }
 }
 
 //전역 가드로 전 라우트 인증 필수
