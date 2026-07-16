@@ -161,6 +161,11 @@ export class UserService {
           id: true,
           name: true,
           email: true,
+          accounts: {
+            select: {
+              providerId: true,
+            },
+          },
           jobType: true,
           profileImageUrl: true,
           skills: true,
