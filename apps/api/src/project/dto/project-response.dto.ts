@@ -105,6 +105,10 @@ export class ProjectDetailResponseDto extends ProjectResponseDto {
 
   /** 요청자가 이 프로젝트의 멤버인지 (비로그인 시 false) */
   isMyProject: boolean
+
+  /** 요청자가 참여한 직군 (비로그인·비참여 시 null). 성장기록은 이 직군만 작성 가능 */
+  @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
+  myJobType: JobType | null
 }
 
 export class ProjectRoleResponseDto {

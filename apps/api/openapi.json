@@ -1890,6 +1890,31 @@
               "$ref": "#/components/schemas/ProjectCategory"
             }
           },
+          "myJobType": {
+            "nullable": true,
+            "description": "요청자가 참여한 직군 (비로그인·비참여 시 null). 성장기록은 이 직군만 작성 가능",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectImageDto"
+            }
+          },
+          "projectRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMemberDto"
+            }
+          },
+          "isMyProject": {
+            "type": "boolean",
+            "description": "요청자가 이 프로젝트의 멤버인지 (비로그인 시 false)"
+          },
           "id": {
             "type": "number"
           },
@@ -1924,28 +1949,16 @@
           "updatedAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProjectImageDto"
-            }
-          },
-          "projectRoles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProjectMemberDto"
-            }
-          },
-          "isMyProject": {
-            "type": "boolean",
-            "description": "요청자가 이 프로젝트의 멤버인지 (비로그인 시 false)"
           }
         },
         "required": [
           "type",
           "status",
           "category",
+          "myJobType",
+          "images",
+          "projectRoles",
+          "isMyProject",
           "id",
           "title",
           "createdById",
@@ -1956,10 +1969,7 @@
           "iconUrl",
           "thumbnailUrl",
           "createdAt",
-          "updatedAt",
-          "images",
-          "projectRoles",
-          "isMyProject"
+          "updatedAt"
         ]
       },
       "InviteCollaboratorDto": {

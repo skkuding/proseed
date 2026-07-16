@@ -248,6 +248,7 @@ export class ProjectService {
       thumbnailUrl,
       images,
       isMyProject: myRole !== null,
+      myJobType: myRole?.role ?? null,
     }
   }
 
