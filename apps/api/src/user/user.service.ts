@@ -160,6 +160,7 @@ export class UserService {
         select: {
           id: true,
           name: true,
+          email: true,
           jobType: true,
           profileImageUrl: true,
           skills: true,
