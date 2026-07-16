@@ -253,7 +253,7 @@
     },
     "/user/{userId}/profile": {
       "get": {
-        "operationId": "UserController_getUserProfile",
+        "operationId": "UserController_getOtherUserProfile",
         "parameters": [
           {
             "name": "userId",
@@ -278,6 +278,219 @@
         },
         "tags": [
           "User"
+        ]
+      }
+    },
+    "/me/profile": {
+      "get": {
+        "operationId": "MypageController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Mypage"
+        ]
+      },
+      "patch": {
+        "operationId": "MypageController_updateMyProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MypageUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Mypage"
+        ]
+      }
+    },
+    "/me/profile/projects": {
+      "get": {
+        "operationId": "MypageController_getMyJoinedProjects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Mypage"
+        ]
+      }
+    },
+    "/me/profile/feedbacks": {
+      "get": {
+        "operationId": "MypageController_getMyFeedbacks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Mypage"
+        ]
+      }
+    },
+    "/project/{projectId}/versions/{versionId}/feedbacks": {
+      "post": {
+        "operationId": "FeedbackController_createFeedback",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
+      "get": {
+        "operationId": "FeedbackController_findAllQuestions",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackQuestionsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/feedbacks/my/projects": {
+      "get": {
+        "operationId": "MyFeedbackController_findMyFeedbackProjects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
         ]
       }
     },
@@ -785,128 +998,6 @@
           "GrowthRecordDraft"
         ]
       }
-    },
-    "/project/{projectId}/versions/{versionId}/feedbacks": {
-      "post": {
-        "operationId": "FeedbackController_createFeedback",
-        "parameters": [
-          {
-            "name": "projectId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateFeedbackDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "tags": [
-          "Feedback"
-        ]
-      }
-    },
-    "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
-      "get": {
-        "operationId": "FeedbackController_findAllQuestions",
-        "parameters": [
-          {
-            "name": "projectId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FeedbackQuestionsResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "tags": [
-          "Feedback"
-        ]
-      }
-    },
-    "/feedbacks/my/projects": {
-      "get": {
-        "operationId": "MyFeedbackController_findMyFeedbackProjects",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "tags": [
-          "Feedback"
-        ]
-      }
     }
   },
   "info": {
@@ -1158,6 +1249,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "joinedProjectCount": {
+            "type": "number"
+          },
+          "feedbackCount": {
+            "type": "number"
           }
         },
         "required": [
@@ -1167,7 +1264,279 @@
           "name",
           "profileImageUrl",
           "skills",
-          "links"
+          "links",
+          "joinedProjectCount",
+          "feedbackCount"
+        ]
+      },
+      "MypageUpdateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "Developer",
+              "Planner",
+              "Designer",
+              "Other"
+            ]
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bio": {
+            "type": "string"
+          }
+        }
+      },
+      "MyFeedbackProjectItemDto": {
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "projectTitle": {
+            "type": "string"
+          },
+          "projectThumbnailUrl": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "isAdopted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "submissionId",
+          "projectId",
+          "projectTitle",
+          "projectThumbnailUrl",
+          "oneLineDescription",
+          "isAdopted",
+          "createdAt"
+        ]
+      },
+      "MyFeedbackProjectsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyFeedbackProjectItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "FeedbackItemDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "questionId",
+          "content"
+        ]
+      },
+      "CreateFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "oneLineReview": {
+            "type": "string"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackItemDto"
+            }
+          }
+        },
+        "required": [
+          "oneLineReview",
+          "feedbacks"
+        ]
+      },
+      "CreatedFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "questionId": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "imageUrl",
+          "imageUrls",
+          "id",
+          "questionId",
+          "versionId",
+          "userId",
+          "content",
+          "createdAt"
+        ]
+      },
+      "CreateFeedbackDataDto": {
+        "type": "object",
+        "properties": {
+          "submittedCount": {
+            "type": "number"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreatedFeedbackDto"
+            }
+          }
+        },
+        "required": [
+          "submittedCount",
+          "feedbacks"
+        ]
+      },
+      "CreateFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CreateFeedbackDataDto"
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "RecordCategory": {
+        "type": "string",
+        "enum": [
+          "PLAN",
+          "DESIGN",
+          "DEVELOPMENT",
+          "GENERAL"
+        ]
+      },
+      "FeedbackQuestionItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "order": {
+            "type": "number"
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "title",
+          "description",
+          "order",
+          "required"
+        ]
+      },
+      "FeedbackQuestionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackQuestionItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
         ]
       },
       "CreateProjectDto": {
@@ -1823,15 +2192,6 @@
           "feedbackQuestions"
         ]
       },
-      "RecordCategory": {
-        "type": "string",
-        "enum": [
-          "PLAN",
-          "DESIGN",
-          "DEVELOPMENT",
-          "GENERAL"
-        ]
-      },
       "PublishedGrowthRecordContentDto": {
         "type": "object",
         "properties": {
@@ -2312,232 +2672,6 @@
         },
         "required": [
           "content"
-        ]
-      },
-      "FeedbackItemDto": {
-        "type": "object",
-        "properties": {
-          "questionId": {
-            "type": "number"
-          },
-          "content": {
-            "type": "string"
-          },
-          "imageUrl": {
-            "type": "string"
-          },
-          "imageUrls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "questionId",
-          "content"
-        ]
-      },
-      "CreateFeedbackDto": {
-        "type": "object",
-        "properties": {
-          "oneLineReview": {
-            "type": "string"
-          },
-          "feedbacks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FeedbackItemDto"
-            }
-          }
-        },
-        "required": [
-          "oneLineReview",
-          "feedbacks"
-        ]
-      },
-      "CreatedFeedbackDto": {
-        "type": "object",
-        "properties": {
-          "imageUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "imageUrls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "id": {
-            "type": "number"
-          },
-          "questionId": {
-            "type": "number"
-          },
-          "versionId": {
-            "type": "number"
-          },
-          "userId": {
-            "type": "number"
-          },
-          "content": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "imageUrl",
-          "imageUrls",
-          "id",
-          "questionId",
-          "versionId",
-          "userId",
-          "content",
-          "createdAt"
-        ]
-      },
-      "CreateFeedbackDataDto": {
-        "type": "object",
-        "properties": {
-          "submittedCount": {
-            "type": "number"
-          },
-          "feedbacks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreatedFeedbackDto"
-            }
-          }
-        },
-        "required": [
-          "submittedCount",
-          "feedbacks"
-        ]
-      },
-      "CreateFeedbackResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/CreateFeedbackDataDto"
-          }
-        },
-        "required": [
-          "success",
-          "data"
-        ]
-      },
-      "FeedbackQuestionItemDto": {
-        "type": "object",
-        "properties": {
-          "category": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RecordCategory"
-              }
-            ]
-          },
-          "id": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "order": {
-            "type": "number"
-          },
-          "required": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "category",
-          "id",
-          "title",
-          "description",
-          "order",
-          "required"
-        ]
-      },
-      "FeedbackQuestionsResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FeedbackQuestionItemDto"
-            }
-          }
-        },
-        "required": [
-          "success",
-          "data"
-        ]
-      },
-      "MyFeedbackProjectItemDto": {
-        "type": "object",
-        "properties": {
-          "submissionId": {
-            "type": "number"
-          },
-          "projectId": {
-            "type": "number"
-          },
-          "projectTitle": {
-            "type": "string"
-          },
-          "projectThumbnailUrl": {
-            "type": "string"
-          },
-          "oneLineDescription": {
-            "type": "string"
-          },
-          "isAdopted": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": [
-          "submissionId",
-          "projectId",
-          "projectTitle",
-          "projectThumbnailUrl",
-          "oneLineDescription",
-          "isAdopted",
-          "createdAt"
-        ]
-      },
-      "MyFeedbackProjectsResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MyFeedbackProjectItemDto"
-            }
-          }
-        },
-        "required": [
-          "success",
-          "data"
         ]
       }
     }
