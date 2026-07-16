@@ -287,7 +287,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -314,7 +321,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfileUpdateResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -333,7 +347,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MypageJoinedProjectListDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1269,6 +1293,83 @@
           "feedbackCount"
         ]
       },
+      "MyProfileAccountDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId"
+        ]
+      },
+      "MyProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyProfileAccountDto"
+            }
+          },
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ownedTicketCount": {
+            "type": "number"
+          },
+          "joinedProjectCount": {
+            "type": "number"
+          },
+          "feedbackCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "accounts",
+          "jobType",
+          "bio",
+          "name",
+          "email",
+          "profileImageUrl",
+          "skills",
+          "links",
+          "ownedTicketCount",
+          "joinedProjectCount",
+          "feedbackCount"
+        ]
+      },
       "MypageUpdateDto": {
         "type": "object",
         "properties": {
@@ -1303,6 +1404,96 @@
             "type": "string"
           }
         }
+      },
+      "MyProfileUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "jobType",
+          "bio",
+          "name",
+          "profileImageUrl",
+          "skills",
+          "links"
+        ]
+      },
+      "ProjectMemberRole": {
+        "type": "string",
+        "enum": [
+          "Lead",
+          "TeamLeader",
+          "TeamMember"
+        ]
+      },
+      "MypageJoinedProjectListDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "projectMemberRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMemberRole"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "projectMemberRole",
+          "id",
+          "title",
+          "oneLineDescription",
+          "iconUrl"
+        ]
       },
       "MyFeedbackProjectItemDto": {
         "type": "object",
@@ -1992,14 +2183,6 @@
         "required": [
           "email",
           "role"
-        ]
-      },
-      "ProjectMemberRole": {
-        "type": "string",
-        "enum": [
-          "Lead",
-          "TeamLeader",
-          "TeamMember"
         ]
       },
       "ProjectRoleResponseDto": {
