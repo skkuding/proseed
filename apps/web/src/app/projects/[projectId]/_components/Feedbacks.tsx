@@ -232,11 +232,12 @@ export function Feedbacks() {
           </div>
           {/* 피드백 버튼 누르면 /create 페이지로 이동 */}
           <Button
+            size="md"
             onClick={() => setShowRoleSelectModal(true)}
             disabled={selectedVersion !== versionList[0].id.toString()}
-            className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
+            className="ml-1.5 w-[137px] text-sub3_sb_16"
           >
-            <p className="text-sub3_sb_16 text-white">피드백 작성하기</p>
+            피드백 작성하기
           </Button>
         </div>
       </div>
@@ -276,13 +277,15 @@ export function Feedbacks() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-title1_sb_24">필터 설정하기</span>
-                <button
+                <Button
+                  variant="iconMuted"
+                  size="bare"
                   onClick={() => setPendingFilter('all')}
-                  className="flex items-center gap-1 text-caption1_m_13 text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
+                  className="flex items-center gap-1 text-body2_m_14"
                 >
                   <RotateCcwIcon className="size-4" />
-                  <p className="text-body2_m_14">필터 초기화</p>
-                </button>
+                  필터 초기화
+                </Button>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -312,23 +315,26 @@ export function Feedbacks() {
               </div>
 
               <div className="flex gap-1 justify-end">
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setIsFilterOpen(false)}
-                  className="py-2.5 rounded-lg h-12 w-23.5 border-[1.4px] border-CoolNeutral-50 text-body3_r_16 text-CoolNeutral-40 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+                  className="w-23.5 text-sub3_sb_16"
                 >
-                  <p className="text-sub3_sb_16 text-CoolNeutral-20">취소</p>
-                </button>
-                <button
+                  취소
+                </Button>
+                <Button
+                  size="sm"
                   onClick={() => {
                     setFilterMode(pendingFilter)
                     setCurrentPage(1)
                     setOpenFeedbackId('')
                     setIsFilterOpen(false)
                   }}
-                  className="py-2.5 rounded-lg h-12 w-23.5 bg-CoolNeutral-20 text-body3_r_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+                  className="w-23.5 text-sub3_sb_16"
                 >
-                  <p className="text-sub3_sb_16 ">적용하기</p>
-                </button>
+                  적용하기
+                </Button>
               </div>
             </PopoverContent>
           </Popover>

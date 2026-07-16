@@ -56,13 +56,9 @@ export function ProfileImageModal({
       <div className="flex w-[680px] flex-col gap-5 rounded-[20px] bg-[#F4F4F6] px-10 py-10">
         <div className="flex items-center justify-between">
           <h2 className="text-head3_sb_36">프로필 이미지 변경하기</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-neutral-30 hover:text-CoolNeutral-20 hover:cursor-pointer"
-          >
+          <Button variant="iconMuted" size="bare" onClick={onClose}>
             <X className="size-9" />
-          </button>
+          </Button>
         </div>
         <div className="rounded-[12px] bg-white px-7 py-6">
           <div className="grid grid-cols-5 gap-5">
@@ -86,18 +82,10 @@ export function ProfileImageModal({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="h-auto rounded-[8px] border-[1.4px] border-CoolNeutral-50 px-5 py-[15px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
-          >
+          <Button variant="outline" size="lg" onClick={onClose} className="text-sub3_sb_16">
             취소하기
           </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={isSaving}
-            className="h-auto rounded-[8px] bg-CoolNeutral-20 px-5 py-[15px] text-sub3_sb_16 text-white hover:cursor-pointer disabled:opacity-60"
-          >
+          <Button size="lg" onClick={handleConfirm} disabled={isSaving} className="text-sub3_sb_16">
             이미지 변경하기
           </Button>
         </div>

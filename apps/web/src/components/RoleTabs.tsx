@@ -26,7 +26,7 @@ export function RoleFilterTabs({
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
-            className={`relative z-10 h-[50px] w-28 rounded-full px-4 py-3 transition-colors ${textSize} ${
+            className={`relative z-10 h-[50px] w-28 rounded-full px-4 py-3 transition-colors hover:cursor-pointer ${textSize} ${
               isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'
             }`}
           >

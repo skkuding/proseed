@@ -5,9 +5,7 @@ import { X } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { authClient } from '@/lib/auth-client'
-
-const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$/, '')
+import { authClient, authBaseURL } from '@/lib/auth-client'
 
 const REASONS = [
   '기대했던 서비스와 달라요',
@@ -51,7 +49,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
-      const res = await fetch(`${BETTER_AUTH_BASE}/api/auth/delete-user`, {
+      const res = await fetch(`${authBaseURL}/api/auth/delete-user`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -90,12 +88,14 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
         className="relative w-[600px] h-[565px] rounded-[16px] bg-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
+        <Button
+          variant="iconMuted"
+          size="bare"
           onClick={onClose}
-          className="absolute right-6 top-6 text-black hover:cursor-pointer"
+          className="absolute right-6 top-6 text-black"
         >
           <X className="size-8" />
-        </button>
+        </Button>
 
         {step === 'reason' && (
           <div className="flex flex-col gap-6 px-7 py-10">
@@ -167,13 +167,10 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
             </div>
 
             <Button
+              size="lg"
               onClick={handleDelete}
               disabled={isDeleting || !canWithdraw}
-              className={`w-full h-13 rounded-[8px] px-4 py-3 text-sub3_sb_16 hover:cursor-pointer ${
-                canWithdraw
-                  ? 'bg-CoolNeutral-20 text-white'
-                  : 'bg-neutral-95 text-neutral-70 cursor-not-allowed'
-              }`}
+              className="w-full text-sub3_sb_16"
             >
               {isDeleting ? '처리 중...' : 'PROSEED 탈퇴하기'}
             </Button>
@@ -190,10 +187,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
                 소셜 로그인으로 다시 인증 후 탈퇴를 진행해주세요.
               </p>
             </div>
-            <Button
-              onClick={handleReauth}
-              className="h-12 w-full rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:cursor-pointer"
-            >
+            <Button size="md" onClick={handleReauth} className="w-full text-sub3_sb_16">
               다시 로그인하기
             </Button>
           </div>

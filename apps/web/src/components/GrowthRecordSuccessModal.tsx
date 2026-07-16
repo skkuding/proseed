@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import projects from '@/app/_mockdata/project-list/recent-projects.json'
 
 interface GrowthRecordSuccessModalProps {
@@ -46,35 +47,34 @@ export function GrowthRecordSuccessModal({
         {/* Header */}
         <div className="flex items-start justify-between mb-8 px-7">
           <h2 className="text-head3_sb_36">성공적으로 성장기록과 피드백 질문을 업로드했어요!</h2>
-          <button
-            onClick={onClose}
-            className="text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
-          >
+          <Button variant="iconMuted" size="bare" onClick={onClose}>
             <X className="size-6" />
-          </button>
+          </Button>
         </div>
 
         {/* Carousel */}
         <div className="flex flex-col">
           <div className="flex items-center justify-between">
             <p className="text-title3_sb_24 px-7">이런 프로젝트는 어떠세요?</p>
-            <div className="flex gap-1">
-              <button
+            <div className="flex gap-1 pr-7">
+              <Button
+                variant="iconCircle"
+                size="icon-sm"
                 onClick={() => setStartIndex((i) => Math.max(0, i - 1))}
                 disabled={!canPrev}
-                className="size-8 flex items-center justify-center rounded-full border border-neutral-200 text-CoolNeutral-40 disabled:opacity-30 hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="size-4" />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="iconCircle"
+                size="icon-sm"
                 onClick={() =>
                   setStartIndex((i) => Math.min(displayProjects.length - VISIBLE_COUNT + 1, i + 1))
                 }
                 disabled={!canNext}
-                className="size-8 flex items-center justify-center rounded-full border border-neutral-200 text-CoolNeutral-40 disabled:opacity-30 hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="size-4" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -117,18 +117,21 @@ export function GrowthRecordSuccessModal({
 
         {/* Action buttons */}
         <div className="flex justify-end gap-2 px-7">
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             onClick={() => router.push('/')}
-            className="h-13 w-[140px] rounded-xl border border-neutral-200 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+            className="w-[140px] text-sub3_sb_16"
           >
             홈 화면 바로가기
-          </button>
-          <button
+          </Button>
+          <Button
+            size="lg"
             onClick={() => router.push(`/projects/${projectId}`)}
-            className="h-13 w-[179px] rounded-xl bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+            className="w-[179px] text-sub3_sb_16"
           >
             작성된 성장기록 바로가기
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,10 +1,12 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useAuthGuard } from '@/lib/useAuthGuard'
 
 const TABS = ['프로젝트 성장기록', '프로젝트 피드백 질문'] as const
 
 export default function GrowthRecordEditorLayout({ children }: { children: React.ReactNode }) {
+  useAuthGuard()
   const pathname = usePathname()
   const activeIndex = pathname.includes('feedback-questions') ? 1 : 0
 

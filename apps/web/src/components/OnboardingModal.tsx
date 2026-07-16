@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+import { BASE as API_URL } from '@/lib/api'
 
 type JobType = 'Planner' | 'Designer' | 'Developer' | 'Other'
 
@@ -162,17 +162,14 @@ export function OnboardingModal({
             </div>
           </div>
           {/* div6 */}
-          <button
+          <Button
+            size="lg"
             onClick={handleSubmit}
             disabled={isDisabled}
-            className={`h-13 w-full rounded-[8px] px-5 py-[15px] text-sub3_sb_16 transition-colors hover:cursor-pointer ${
-              isDisabled
-                ? 'cursor-not-allowed bg-neutral-95 text-neutral-70'
-                : 'bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30'
-            }`}
+            className="w-full text-sub3_sb_16"
           >
             PROSEED 시작하기
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export type ParticipatedProject = {
   id: number
@@ -32,12 +33,9 @@ export function ParticipatedProjectCard({ project }: { project: ParticipatedProj
           <p className="text-body2_m_14 text-neutral-40">{project.description}</p>
         </div>
       </div>
-      <button
-        type="button"
-        className="rounded-[8px] border-[1.4px] border-CoolNeutral-50 bg-white px-5 py-[13px] text-sub3_sb_16 text-black"
-      >
+      <Button variant="outline" size="md" className="text-sub3_sb_16" tabIndex={-1}>
         바로가기
-      </button>
+      </Button>
     </Link>
   )
 }

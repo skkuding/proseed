@@ -7,12 +7,14 @@ import Image from 'next/image'
 import { Dot, ImageIcon } from 'lucide-react'
 import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
+import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { ChevronRightIcon } from 'lucide-react'
+import { getUploadUrl, uploadToS3 } from '@/lib/api'
 
 const latestVersionId = versionList[0].id.toString()
 const ONE_LINE_MAX = 200
@@ -35,23 +37,6 @@ type ImageItem = {
 }
 
 type ImageModal = { questionId: number; index: number } | null
-
-async function getUploadUrl(filename: string, contentType: string) {
-  const res = await fetch('http://localhost:4000/storage/upload-url', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename, contentType }),
-  })
-  return res.json() as Promise<{ url: string; key: string }>
-}
-
-async function uploadToS3(presignedUrl: string, file: File) {
-  await fetch(presignedUrl, {
-    method: 'PUT',
-    body: file,
-    headers: { 'Content-Type': file.type },
-  })
-}
 
 export function CreateFeedbackContent() {
   const router = useRouter()
@@ -218,13 +203,14 @@ export function CreateFeedbackContent() {
               <div className="flex items-center gap-2">
                 <h2 className="text-title1_sb_28">{q.questionTitle}</h2>
                 {q.isRequired && <FieldBadge type="필수" />}
-                <button
+                <Button
+                  size="sm"
                   onClick={() => fileInputRefs.current[q.questionId]?.click()}
                   disabled={(questionImages[q.questionId]?.length ?? 0) >= MAX_IMAGES}
-                  className="ml-auto flex items-center gap-1.5 px-5 py-3.25 w-34.25 h-12 rounded-lg bg-neutral-20 hover:bg-neutral-30 hover:cursor-pointer transition-colors disabled:bg-neutral-90 disabled:cursor-not-allowed"
+                  className="ml-auto w-34.25 px-5 text-sub3_sb_16"
                 >
-                  <p className="text-sub3_sb_16 text-white">이미지 등록하기</p>
-                </button>
+                  이미지 등록하기
+                </Button>
                 <input
                   ref={(el) => {
                     fileInputRefs.current[q.questionId] = el
@@ -293,12 +279,13 @@ export function CreateFeedbackContent() {
               ))}
             </div>
           </div>
-          <button
+          <Button
+            size="sm"
             onClick={() => setShowSuccessModal(true)}
-            className="w-full h-12 mt-4 bg-CoolNeutral-20 text-white rounded-lg text-sub3_sb_16 hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
+            className="w-full mt-4 text-sub3_sb_16"
           >
             피드백 등록하기
-          </button>
+          </Button>
         </div>
       </div>
 

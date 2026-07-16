@@ -55,8 +55,9 @@ export function AccountForm({ email, provider }: AccountFormProps) {
             <label className="w-20 shrink-0 text-sub2_m_18 text-black">탈퇴하기</label>
             <Button
               variant="outline"
+              size="md"
               onClick={() => setShowWithdrawal(true)}
-              className="rounded-lg w-[123px] h-12 border-CoolNeutral-50 border-[1.4px] px-5 py-[13px] text-CoolNeutral-20 text-sub3_sb_16 hover:cursor-pointer"
+              className="w-[123px] text-sub3_sb_16"
             >
               회원 탈퇴하기
             </Button>

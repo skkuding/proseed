@@ -21,6 +21,7 @@ import { ProjectImagesSection } from './_components/ProjectImagesSection'
 import { CATEGORY_TO_API, STATUS_TO_API, JOB_TO_API, type JobTab } from './_components/constants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthStore } from '@/store/authStore'
+import { useAuthGuard } from '@/lib/useAuthGuard'
 import {
   createProject,
   inviteCollaborator,
@@ -37,6 +38,7 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 export default function RegisterProject() {
+  useAuthGuard()
   const router = useRouter()
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)

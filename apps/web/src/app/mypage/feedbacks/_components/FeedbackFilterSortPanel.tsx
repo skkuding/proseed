@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { FeedbackSortDropdown } from './FeedbackSortDropdown'
 
 export type FilterMode = 'all' | 'adopted'
@@ -91,23 +92,24 @@ export function FeedbackFilterSortPanel({
             </div>
 
             <div className="flex gap-2">
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="md"
                 onClick={() => setShowFilterDropdown(false)}
-                className="h-12 flex-1 rounded-[8px] border border-CoolNeutral-50 bg-white px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 transition-colors hover:cursor-pointer hover:bg-neutral-99"
+                className="flex-1 text-sub3_sb_16"
               >
                 취소
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="md"
                 onClick={() => {
                   onApplyFilter(draftFilter)
                   setShowFilterDropdown(false)
                 }}
-                className="h-12 flex-1 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white transition-colors hover:cursor-pointer hover:bg-CoolNeutral-30"
+                className="flex-1 text-sub3_sb_16"
               >
                 적용하기
-              </button>
+              </Button>
             </div>
           </div>
         )}

@@ -1,26 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MyFeedbackCard } from './_components/MyFeedbackCard'
 import { FeedbackFilterSortPanel } from './_components/FeedbackFilterSortPanel'
+import { getMyFeedbacks, type MyFeedbackProjectItemDto } from '@/lib/api'
 
 type FilterMode = 'all' | 'adopted'
-
-type FeedbackItem = {
-  feedbackId: number
-  createdAt: string
-  isAdopted: boolean
-  onelineReview: string
-  content: string
-  projectId: number
-  projectName: string
-  projectIconUrl: string
-}
 
 export default function MyFeedbacks() {
   const [sort, setSort] = useState<'latest' | 'oldest'>('latest')
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
-  const [feedbacks] = useState<FeedbackItem[]>([])
+  const [feedbacks, setFeedbacks] = useState<MyFeedbackProjectItemDto[]>([])
+
+  useEffect(() => {
+    getMyFeedbacks().then(setFeedbacks).catch(console.error)
+  }, [])
 
   const displayed = feedbacks
     .filter((f) => filterMode === 'all' || f.isAdopted)
@@ -49,7 +43,16 @@ export default function MyFeedbacks() {
       ) : (
         <div className="flex flex-col gap-4">
           {displayed.map((feedback) => (
-            <MyFeedbackCard key={feedback.feedbackId} {...feedback} />
+            <MyFeedbackCard
+              key={feedback.submissionId}
+              feedbackId={feedback.submissionId}
+              createdAt={feedback.createdAt}
+              isAdopted={feedback.isAdopted}
+              oneLineDescription={feedback.oneLineDescription}
+              projectId={feedback.projectId}
+              projectName={feedback.projectTitle}
+              projectIconUrl={feedback.projectThumbnailUrl}
+            />
           ))}
         </div>
       )}

@@ -11,10 +11,7 @@ export default function GoodbyePage() {
           <br />더 나은 서비스로 발전하겠습니다.
         </p>
       </div>
-      <Button
-        asChild
-        className="h-13 w-[166px] rounded-[8px] bg-CoolNeutral-20 px-5 py-[15px] text-sub3_sb_16 text-white hover:cursor-pointer"
-      >
+      <Button asChild size="lg" className="w-[166px] text-sub3_sb_16">
         <Link href="/">홈 화면으로 돌아가기</Link>
       </Button>
     </div>

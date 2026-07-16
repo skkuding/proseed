@@ -8,8 +8,7 @@ import { TextInput } from '@/components/TextInput'
 import { authClient } from '@/lib/auth-client'
 import { JOB_TABS, JOB_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 import { useAuthStore } from '@/store/authStore'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+import { BASE as API_URL, updateMyProfile } from '@/lib/api'
 
 const JOB_OPTIONS = JOB_TABS
 
@@ -108,6 +107,11 @@ export function ProfileForm({
         })
         useAuthStore.getState().setJobType(job as JobTab)
       }
+      await updateMyProfile({
+        skills: skills.map((s) => s.trim()).filter(Boolean),
+        links: links.map((l) => l.trim()).filter(Boolean),
+        bio,
+      })
       onJobChange?.(job)
       setSavedOk(true)
       setTimeout(() => setSavedOk(false), 2000)
@@ -120,11 +124,6 @@ export function ProfileForm({
 
   const isSkillsMax = skills.length >= MAX_SKILLS
   const isLinksMax = links.length >= MAX_LINKS
-
-  const addBtnBase = 'h-12 shrink-0 rounded-[8px] px-5 py-[13px] text-sub3_sb_16'
-  const addBtnEnabled = 'border-CoolNeutral-50 text-CoolNeutral-20 hover:cursor-pointer'
-  const addBtnDisabled =
-    'bg-neutral-95 text-neutral-70 border-neutral-90 cursor-not-allowed hover:bg-neutral-95'
 
   const trashBtn =
     'flex h-[46px] w-[60px] shrink-0 items-center justify-center rounded-[8px] border-[1.4px] border-CoolNeutral-50 hover:cursor-pointer hover:bg-neutral-99'
@@ -222,9 +221,10 @@ export function ProfileForm({
                   {index === 0 ? (
                     <Button
                       variant="outline"
+                      size="md"
                       onClick={addSkill}
                       disabled={isSkillsMax}
-                      className={`w-full ${addBtnBase} ${isSkillsMax ? addBtnDisabled : addBtnEnabled}`}
+                      className="w-full text-sub3_sb_16"
                     >
                       추가하기
                     </Button>
@@ -256,9 +256,10 @@ export function ProfileForm({
                   {index === 0 ? (
                     <Button
                       variant="outline"
+                      size="md"
                       onClick={addLink}
                       disabled={isLinksMax}
-                      className={`w-full ${addBtnBase} ${isLinksMax ? addBtnDisabled : addBtnEnabled}`}
+                      className="w-full text-sub3_sb_16"
                     >
                       추가하기
                     </Button>
@@ -293,18 +294,10 @@ export function ProfileForm({
 
       {/* 액션 버튼 */}
       <div className="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onClick={handleReset}
-          className="h-12 rounded-[8px] border-CoolNeutral-50 px-5 py-[13px] text-sub3_sb_16 text-CoolNeutral-20 hover:cursor-pointer"
-        >
+        <Button variant="outline" size="md" onClick={handleReset} className="text-sub3_sb_16">
           초기화하기
         </Button>
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="h-12 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer disabled:opacity-60"
-        >
+        <Button size="md" onClick={handleSave} disabled={isSaving} className="text-sub3_sb_16">
           {isSaving ? '저장 중...' : savedOk ? '저장 완료' : '프로필 업데이트'}
         </Button>
       </div>

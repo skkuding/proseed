@@ -2,6 +2,7 @@ import { FieldBadge } from '@/components/FieldBadge'
 import { useRef } from 'react'
 import Image from 'next/image'
 import { ImageIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface IconSectionProps {
   preview: string | null
@@ -24,13 +25,14 @@ export function IconSection({ preview, onSelect }: IconSectionProps) {
           </p>
         </div>
 
-        <button
+        <Button
           type="button"
+          size="xs"
           onClick={() => inputRef.current?.click()}
-          className="shrink-0 h-10 px-4 rounded-[8px] text-sub3_sb_16 bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30 cursor-pointer transition-colors"
+          className="shrink-0 px-4 text-sub3_sb_16"
         >
           이미지 등록하기
-        </button>
+        </Button>
         <input
           ref={inputRef}
           type="file"

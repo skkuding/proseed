@@ -1,6 +1,6 @@
 import type { components } from '@/types/api.generated'
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
+export const BASE = process.env.NEXT_PUBLIC_API_URL || '/api'
 
 export type CreateVersionDto = components['schemas']['CreateVersionDto']
 export type PublishVersionResponseDto = components['schemas']['PublishVersionResponseDto']
@@ -14,6 +14,31 @@ export type ProjectListItemDto = components['schemas']['ProjectListItemDto']
 export type ProjectDetailResponseDto = components['schemas']['ProjectDetailResponseDto']
 export type ProjectVersionListItemDto = components['schemas']['ProjectVersionListItemDto']
 export type VersionDetailResponseDto = components['schemas']['VersionDetailResponseDto']
+export type MyFeedbackProjectItemDto = components['schemas']['MyFeedbackProjectItemDto']
+export type MypageUpdateDto = components['schemas']['MypageUpdateDto']
+
+export type MyProfile = {
+  name: string
+  email: string
+  accounts: { providerId: string }[]
+  jobType: 'Planner' | 'Designer' | 'Developer' | 'Other' | null
+  profileImageUrl: string
+  skills: string[]
+  links: string[]
+  bio: string | null
+  ownedTicketCount: number
+  joinedProjectCount: number
+  feedbackCount: number
+}
+
+export type JoinedProject = {
+  id: number
+  title: string
+  oneLineDescription: string
+  iconUrl: string
+  role: 'Planner' | 'Designer' | 'Developer' | 'Other'
+  projectMemberRole: string
+}
 
 export type Project = {
   id: number
@@ -150,5 +175,35 @@ export async function publishVersion(
 export async function getFeedbackTemplates(): Promise<FeedbackTemplate[]> {
   const res = await fetch(`${BASE}/growth-records/feedback-templates`)
   if (!res.ok) throw new Error('Failed to fetch feedback templates')
+  return res.json()
+}
+
+export async function getMyFeedbacks(): Promise<MyFeedbackProjectItemDto[]> {
+  const res = await fetch(`${BASE}/feedbacks/my/projects`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch my feedbacks')
+  const body = await res.json()
+  return body.data
+}
+
+export async function getMyProfile(): Promise<MyProfile> {
+  const res = await fetch(`${BASE}/me/profile`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch my profile')
+  return res.json()
+}
+
+export async function updateMyProfile(dto: MypageUpdateDto): Promise<MyProfile> {
+  const res = await fetch(`${BASE}/me/profile`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) throw new Error('Failed to update my profile')
+  return res.json()
+}
+
+export async function getMyJoinedProjects(): Promise<JoinedProject[]> {
+  const res = await fetch(`${BASE}/me/profile/projects`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch joined projects')
   return res.json()
 }

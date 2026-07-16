@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 
@@ -25,24 +26,31 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const MAX_PER_TAB = 3
 
-type Feedback = (typeof feedbackData.feedbacks.plan)[number]
+export type Feedback = (typeof feedbackData.feedbacks.plan)[number]
 
 interface Props {
   isOpen: boolean
   onClose: () => void
+  initialDetailFeedback?: Feedback | null
 }
 
-export function FeedbackTagModal({ isOpen, onClose }: Props) {
+export function FeedbackTagModal({ isOpen, onClose, initialDetailFeedback }: Props) {
   const { taggedFeedbacks, setTaggedFeedbacks } = useFeedbackTagStore()
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
+  const [activeTab, setActiveTab] = useState<TabLabel>(
+    initialDetailFeedback ? (CATEGORY_LABEL[initialDetailFeedback.category] as TabLabel) : '기획'
+  )
   const [selectedByTab, setSelectedByTab] = useState<Record<TabLabel, number[]>>({
     기획: taggedFeedbacks.plan ?? [],
     디자인: taggedFeedbacks.design ?? [],
     개발: taggedFeedbacks.dev ?? [],
     기타: taggedFeedbacks.general ?? [],
   })
-  const [detailFeedback, setDetailFeedback] = useState<Feedback | null>(null)
-  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null)
+  const [detailFeedback, setDetailFeedback] = useState<Feedback | null>(
+    initialDetailFeedback ?? null
+  )
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
+    initialDetailFeedback?.questions[0]?.questionId ?? null
+  )
 
   if (!isOpen) return null
 
@@ -100,28 +108,24 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
               {/* Header */}
               <div className="flex items-center justify-between px-8 py-6">
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setDetailFeedback(null)}
-                    className="text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
-                  >
+                  <Button variant="iconMuted" size="bare" onClick={() => setDetailFeedback(null)}>
                     <ChevronLeftIcon className="size-6" />
-                  </button>
+                  </Button>
                   <h2 className="text-title1_sb_28 text-CoolNeutral-20">피드백 자세히 보기</h2>
                 </div>
-                <button
+                <Button
+                  size="sm"
                   onClick={() => {
                     toggleSelect(detailFeedback.feedbackId)
                     setDetailFeedback(null)
                   }}
-                  className={`h-12 px-6 rounded-xl text-sub3_sb_16 hover:cursor-pointer transition-colors ${
-                    isSelected
-                      ? 'bg-neutral-200 text-CoolNeutral-40 hover:bg-neutral-300'
-                      : 'bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30'
+                  className={`px-6 text-sub3_sb_16 ${
+                    isSelected ? 'bg-neutral-200 text-CoolNeutral-40 hover:bg-neutral-300' : ''
                   }`}
                   disabled={!isSelected && selected.length >= MAX_PER_TAB}
                 >
                   {isSelected ? '선택 해제하기' : '피드백 선택하기'}
-                </button>
+                </Button>
               </div>
 
               {/* Body */}
@@ -215,19 +219,17 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
           <div className="flex items-center justify-between ">
             <h2 className="text-head3_sb_36">도움이 된 피드백 태그하기</h2>
             <div className="flex items-center gap-3">
-              <button
-                onClick={onClose}
-                className="h-12 px-5 rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-              >
+              <Button variant="outline" size="md" onClick={onClose} className="text-sub3_sb_16">
                 취소하기
-              </button>
-              <button
+              </Button>
+              <Button
+                size="md"
                 onClick={handleConfirm}
                 disabled={totalSelected === 0}
-                className="h-12 px-5 rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="text-sub3_sb_16"
               >
                 선택한 피드백 태그하기
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -273,7 +275,11 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                 return (
                   <div
                     key={feedback.feedbackId}
-                    className={`relative rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${
+                    onClick={() => {
+                      if (disabled) return
+                      toggleSelect(feedback.feedbackId)
+                    }}
+                    className={`rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${disabled ? '' : 'hover:cursor-pointer'} ${
                       isSelected
                         ? 'border-primary-strong bg-white'
                         : disabled
@@ -281,14 +287,30 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                           : 'border-none bg-white'
                     }`}
                   >
-                    {/* Checkbox */}
-                    <button
-                      onClick={() => toggleSelect(feedback.feedbackId)}
-                      disabled={disabled}
-                      className="absolute top-5 right-5 hover:cursor-pointer disabled:cursor-not-allowed"
-                    >
+                    <div className="flex items-center justify-between gap-10">
+                      {/* Profile */}
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0">
+                          <Image
+                            src={feedback.profileImageUrl}
+                            alt={feedback.nickname}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className={`text-body2_m_14 text-primary-strong`}>
+                            {CATEGORY_LABEL[feedback.category]}
+                          </span>
+                          <span className="text-title5_sb_20 leading-tight">
+                            {feedback.nickname}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Checkbox */}
                       <div
-                        className={`size-5 rounded border-2 flex items-center justify-center transition-colors ${
+                        className={`size-8 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
                           isSelected
                             ? 'bg-primary-strong border-primary-strong'
                             : 'border-neutral-300 bg-white'
@@ -297,44 +319,28 @@ export function FeedbackTagModal({ isOpen, onClose }: Props) {
                         {isSelected && (
                           <svg
                             viewBox="0 0 12 10"
-                            className="size-3 text-white fill-none stroke-current stroke-2"
+                            className="size-4 text-white fill-none stroke-current stroke-2"
                           >
                             <polyline points="1,5 4.5,8.5 11,1" />
                           </svg>
                         )}
                       </div>
-                    </button>
-
-                    {/* Profile */}
-                    <button
-                      className="flex items-center gap-3 text-left hover:cursor-pointer w-fit"
-                      onClick={() => openDetail(feedback)}
-                    >
-                      <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0">
-                        <Image
-                          src={feedback.profileImageUrl}
-                          alt={feedback.nickname}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className={`text-body2_m_14 text-primary-strong`}>
-                          {CATEGORY_LABEL[feedback.category]}
-                        </span>
-                        <span className="text-title5_sb_20 leading-tight">{feedback.nickname}</span>
-                      </div>
-                    </button>
+                    </div>
 
                     {/* One-line review */}
-                    <button
-                      className="w-full text-left hover:cursor-pointer"
-                      onClick={() => openDetail(feedback)}
+                    <Button
+                      variant="iconMuted"
+                      size="bare"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openDetail(feedback)
+                      }}
+                      className="w-full text-left text-black"
                     >
-                      <div className="bg-[#0000000A] border border-[#00000033] rounded-xl px-4 py-3">
+                      <div className="rounded-[12px] border border-[#00000033] bg-[#0000000A] px-4 py-3 w-full">
                         <p className="text-body1_m_16 truncate">{feedback.onelineReview}</p>
                       </div>
-                    </button>
+                    </Button>
                   </div>
                 )
               })}

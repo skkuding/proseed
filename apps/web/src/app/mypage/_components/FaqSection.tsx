@@ -118,7 +118,7 @@ export function FaqSection() {
             자주 묻는 질문에서 답을 찾지 못하셨다면 PROSEED에게 언제든지 문의해주세요
           </p>
         </div>
-        <Button className="shrink-0 rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white hover:cursor-pointer h-12 w-[94px]">
+        <Button size="md" className="shrink-0 w-[94px] text-sub3_sb_16">
           문의하기
         </Button>
       </div>

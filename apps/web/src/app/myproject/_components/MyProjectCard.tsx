@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface MyProjectCardProps {
@@ -16,15 +17,15 @@ interface MyProjectCardProps {
 
 export default function MyProjectCard({ project }: MyProjectCardProps) {
   return (
-    <article className="h-[500px] w-full px-2 overflow-hidden rounded-[20px] bg-white shadow-sm flex flex-col pt-2 pb-6 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
-      <Link href={`/projects/${project.id}`} className="block flex-1 min-h-0">
-        <div className="flex h-full flex-col">
-          <div className="relative mb-4 h-[245px] w-full shrink-0 overflow-hidden rounded-[20px] bg-gray-200">
-            <Image src={project.thumbnailUrl} alt={project.title} fill className="object-cover" />
-          </div>
+    <article className="w-full px-2 overflow-hidden rounded-[20px] bg-white shadow-sm flex flex-col pt-2 pb-6 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-[20px] bg-gray-200">
+        <Image src={project.thumbnailUrl} alt={project.title} fill className="object-cover" />
+      </div>
 
-          <div className="flex flex-col px-2 gap-4">
-            <div className="flex flex-col">
+      <div className="flex flex-1 min-h-0 flex-col gap-6 pt-4 px-2">
+        <Link href={`/projects/${project.id}`} className="block">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center gap-1">
                 <h3 className="text-title3_sb_24 truncate">{project.title}</h3>
                 <div className="flex shrink-0 items-center gap-1">
@@ -58,22 +59,21 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
               </div>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
 
-      <div className="flex gap-2 px-2 pt-3">
-        <Link
-          href={`/projects/${project.id}/editmyproject`}
-          className="flex-1 flex items-center justify-center px-5 py-[15px] h-13 rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 transition-colors"
-        >
-          편집하기
-        </Link>
-        <Link
-          href={`/projects/${project.id}/growthrecord/create`}
-          className="flex-1 flex h-13 items-center px-5 py-[15px] justify-center rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 transition-colors"
-        >
-          성장기록 작성하기
-        </Link>
+        <div className="flex gap-2">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="min-w-0 flex-1 truncate text-sub3_sb_16"
+          >
+            <Link href={`/projects/${project.id}/editmyproject`}>편집하기</Link>
+          </Button>
+          <Button asChild size="lg" className="min-w-0 flex-1 truncate text-sub3_sb_16">
+            <Link href={`/projects/${project.id}/growthrecord/create`}>성장기록 작성하기</Link>
+          </Button>
+        </div>
       </div>
     </article>
   )

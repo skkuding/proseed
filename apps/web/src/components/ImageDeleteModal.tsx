@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { Button } from '@/components/ui/button'
 import { ConfirmModal } from './ConfirmModal'
 
 interface Props {
@@ -57,16 +58,18 @@ export function ImageDeleteModal({
       </div>
 
       {/* Delete button */}
-      <button
+      <Button
+        variant="outline"
+        size="lg"
         onClick={(e) => {
           e.stopPropagation()
           setShowConfirm(true)
         }}
-        className="mt-4 flex w-[900px] justify-center h-13 items-center gap-2 px-6 py-3.5 bg-white rounded-lg text-CoolNeutral-20 text-sub3_sb_16 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+        className="mt-4 w-[900px] gap-2 border-none text-sub3_sb_16"
       >
         <Image src="/trash_fill.svg" alt="삭제" width={20} height={20} />
         이미지 삭제하기
-      </button>
+      </Button>
 
       <ConfirmModal
         isOpen={showConfirm}

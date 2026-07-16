@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { getProjects, type Project } from '@/lib/api'
 import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
@@ -160,13 +161,15 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <div className="flex flex-col gap-3 pt-3">
             <div className="flex items-center justify-between">
               <span className="text-title5_sb_20">최근 조회한 프로젝트</span>
-              <button
+              <Button
+                variant="iconMuted"
+                size="bare"
                 onClick={handleClearAll}
-                className="flex items-center gap-0.5 text-body2_m_14 text-CoolNeutral-40 hover:text-CoolNeutral-20 transition-colors hover:cursor-pointer"
+                className="flex items-center gap-0.5 text-body2_m_14"
               >
                 전체 삭제
                 <ChevronRightIcon className="size-4" />
-              </button>
+              </Button>
             </div>
 
             {recentProjects.length === 0 ? (
@@ -193,7 +196,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     <div className="flex flex-col items-start flex-1 min-w-0">
                       <div className="flex items-center gap-1 flex-wrap">
                         <span className="text-sub1_sb_18 text-CoolNeutral-20">{project.title}</span>
-                        {project.category.map((cat) => (
+                        {(project.category ?? []).map((cat) => (
                           <span
                             key={cat}
                             className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-caption1_m_13 text-CoolNeutral-40"

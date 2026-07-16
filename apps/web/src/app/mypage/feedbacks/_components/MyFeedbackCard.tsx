@@ -1,13 +1,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { FieldBadge } from '@/components/FieldBadge'
+import { formatDate } from '@/lib/utils'
 
 interface MyFeedbackCardProps {
   feedbackId: number
   createdAt: string
   isAdopted: boolean
-  onelineReview: string
-  content: string
+  oneLineDescription: string
   projectId: number
   projectName: string
   projectIconUrl: string
@@ -17,7 +18,7 @@ export function MyFeedbackCard({
   feedbackId,
   createdAt,
   isAdopted,
-  onelineReview,
+  oneLineDescription,
   projectId,
   projectName,
   projectIconUrl,
@@ -36,18 +37,15 @@ export function MyFeedbackCard({
           </div>
           {isAdopted && <FieldBadge type="채택됨" />}
         </div>
-        <p className="text-title5_sb_20 text-CoolNeutral-20 line-clamp-2">{onelineReview}</p>
+        <p className="text-title5_sb_20 text-CoolNeutral-20 line-clamp-2">{oneLineDescription}</p>
 
-        <span className="text-caption1_m_14 text-neutral-40">{createdAt}</span>
+        <span className="text-caption1_m_14 text-neutral-40">{formatDate(createdAt)}</span>
       </div>
 
       <div className="flex items-center justify-center">
-        <Link
-          href={`/projects/${projectId}/feedback#feedback-${feedbackId}`}
-          className="inline-flex h-12 items-center justify-center rounded-[8px] bg-CoolNeutral-20 px-5 py-[13px] text-sub3_sb_16 text-white"
-        >
-          자세히 보기
-        </Link>
+        <Button asChild size="md" className="text-sub3_sb_16">
+          <Link href={`/projects/${projectId}/feedback#feedback-${feedbackId}`}>자세히 보기</Link>
+        </Button>
       </div>
     </div>
   )

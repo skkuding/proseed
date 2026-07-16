@@ -42,7 +42,7 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
                     <Image src={bookmarkline} alt="북마크" width={24} height={24} />
                   </Button> */}
             <Link href={project.projectLink} target="_blank">
-              <Button className="w-[137px] h-12 rounded-md bg-CoolNeutral-20 hover:bg-CoolNeutral-30 hover:cursor-pointer">
+              <Button className="w-[137px] h-12 rounded-md bg-CoolNeutral-20 hover:bg-CoolNeutral-30">
                 <p className="text-white text-sub3_sb_16">직접 사용해보기</p>
               </Button>
             </Link>

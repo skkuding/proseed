@@ -110,8 +110,9 @@ export function UserInfoCard({
         </div>
 
         <Button
+          size="lg"
           onClick={() => setIsPickerOpen(true)}
-          className="mt-7 h-13 px-5 py-[15px] w-full rounded-[8px] bg-CoolNeutral-20 text-white! text-sub3_sb_16 hover:bg-neutral-20 hover:cursor-pointer"
+          className="mt-7 w-full text-sub3_sb_16"
         >
           프로필 이미지 변경
         </Button>

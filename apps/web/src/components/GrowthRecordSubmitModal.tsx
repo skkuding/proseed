@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
 
 const MAX_LENGTH = 600
@@ -74,23 +75,17 @@ export function GrowthRecordSubmitModal({
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={onCancel}
-              className="h-12 px-5 rounded-lg border border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-            >
+            <Button variant="outline" size="md" onClick={onCancel} className="text-sub3_sb_16">
               취소하기
-            </button>
-            <button
+            </Button>
+            <Button
+              size="md"
               onClick={handleSubmit}
               disabled={!isSubmitEnabled}
-              className={`h-12 px-5 rounded-lg text-sub3_sb_16 transition-colors ${
-                isSubmitEnabled
-                  ? 'bg-neutral-20 text-white hover:bg-neutral-30 cursor-pointer'
-                  : 'bg-neutral-200 text-CoolNeutral-50 cursor-not-allowed'
-              }`}
+              className="text-sub3_sb_16"
             >
               성장기록 등록하기
-            </button>
+            </Button>
           </div>
         </div>
 

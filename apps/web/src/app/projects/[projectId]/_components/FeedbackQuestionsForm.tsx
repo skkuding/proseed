@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { ChevronRightIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
@@ -161,13 +162,14 @@ export function FeedbackQuestionsForm() {
                         <span className="text-body2_m_14 text-CoolNeutral-40">필수 질문</span>
                         <Toggle checked={q.isRequired} onChange={() => toggleRequired(q.id)} />
                       </div>
-                      <button
+                      <Button
+                        size="xs"
                         onClick={() => removeQuestion(q.id)}
                         disabled={questions.length === 1}
-                        className="px-4 py-2 rounded-lg text-sub4_sb_14 text-white bg-CoolNeutral-20 hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:bg-neutral-200 disabled:text-CoolNeutral-50 disabled:cursor-not-allowed"
+                        className="px-4 text-sub4_sb_14"
                       >
                         삭제하기
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   {!q.isFreeComment && (
@@ -208,16 +210,20 @@ export function FeedbackQuestionsForm() {
           </button>
 
           {/* 피드백 질문 섹션 추가하기 */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={addQuestion}
             disabled={!canAdd}
-            className="w-full h-12 bg-white rounded-lg border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-95 hover:cursor-pointer transition-colors disabled:border-none disabled:bg-neutral-95 disabled:cursor-not-allowed disabled:text-neutral-70"
+            className="w-full text-sub3_sb_16"
           >
             피드백 질문 섹션 추가하기
-          </button>
+          </Button>
 
           {/* 프로젝트 업데이트 */}
-          <button
+          <Button
+            size="sm"
+            className="w-full text-sub3_sb_16"
             onClick={async () => {
               const allTabs = Object.keys(questionsByTab) as TabLabel[]
               const hasEmpty = allTabs.some((tab) =>
@@ -274,10 +280,9 @@ export function FeedbackQuestionsForm() {
               }
             }}
             disabled={isPublishing}
-            className="w-full h-12 rounded-lg bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPublishing ? '업데이트 중...' : '프로젝트 업데이트'}
-          </button>
+          </Button>
         </div>
       </div>
 

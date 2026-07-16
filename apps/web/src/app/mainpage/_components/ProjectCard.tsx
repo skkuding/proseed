@@ -8,7 +8,7 @@ export default function ProjectCard({ project }: { project: Project }) {
     <Link href={`/projects/${project.id}`} className="block">
       <article className="w-full cursor-pointer overflow-hidden rounded-[20px] bg-white shadow-sm px-2 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
         <div className="flex flex-col pt-2 pb-6">
-          <div className="relative mb-3 h-[245px] w-full shrink-0 overflow-hidden rounded-[16px] bg-gray-200">
+          <div className="relative mb-3 aspect-video w-full shrink-0 overflow-hidden rounded-[16px] bg-gray-200">
             <Image src={project.thumbnailUrl} alt={project.title} fill className="object-cover" />
           </div>
 
@@ -17,7 +17,7 @@ export default function ProjectCard({ project }: { project: Project }) {
               <div className="flex items-center gap-1">
                 <h3 className="text-title3_sb_24 truncate">{project.title}</h3>
                 <div className="flex shrink-0 items-center gap-1">
-                  {project.category.map((cat) => (
+                  {(project.category ?? []).map((cat) => (
                     <span
                       key={cat}
                       className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-body1_m_16 text-CoolNeutral-40"
