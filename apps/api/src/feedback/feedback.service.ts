@@ -34,12 +34,14 @@ export class FeedbackService {
   ) {}
 
   async findFeedbackSubmissionDetail(
+    userId: number,
     submissionId: number,
   ): Promise<FeedbackSubmissionDetailResponseDto> {
     const submission = await this.prisma.feedbackSubmission.findUnique({
       where: { id: submissionId },
       select: {
         id: true,
+        userId: true,
         projectId: true,
         versionId: true,
         oneLineReview: true,
@@ -78,6 +80,22 @@ export class FeedbackService {
 
     if (!submission) {
       throw new EntityNotExistException('FeedbackSubmission')
+    }
+
+    const isAuthor = submission.userId === userId
+    if (!isAuthor) {
+      const isProjectMember = await this.prisma.projectRole.findUnique({
+        where: {
+          userId_projectId: {
+            userId,
+            projectId: submission.projectId,
+          },
+        },
+      })
+
+      if (!isProjectMember) {
+        throw new ForbiddenAccessException('Access denied')
+      }
     }
 
     const feedbacks = await Promise.all(

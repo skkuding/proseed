@@ -82,8 +82,12 @@ export class MyFeedbackController {
   // GET feedbacks/:submissionId
   @Get(':submissionId')
   async findFeedbackSubmissionDetail(
+    @Req() req: RequestWithUser,
     @Param('submissionId', ParseIntPipe) submissionId: number,
   ): Promise<FeedbackSubmissionDetailResponseDto> {
-    return await this.feedbackService.findFeedbackSubmissionDetail(submissionId)
+    return await this.feedbackService.findFeedbackSubmissionDetail(
+      req.user.id,
+      submissionId,
+    )
   }
 }

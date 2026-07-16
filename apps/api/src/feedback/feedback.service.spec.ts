@@ -6,12 +6,13 @@ import { FeedbackService } from './feedback.service'
 
 describe('FeedbackService', () => {
   let service: FeedbackService
-  let prisma: { feedbackSubmission: { findUnique: jest.Mock } }
+  let prisma: { feedbackSubmission: { findUnique: jest.Mock }; projectRole: { findUnique: jest.Mock } }
   let storage: { getSignedDownloadUrl: jest.Mock }
 
   beforeEach(() => {
     prisma = {
       feedbackSubmission: { findUnique: jest.fn() },
+      projectRole: { findUnique: jest.fn() },
     }
     storage = {
       getSignedDownloadUrl: jest.fn((key: string) =>
@@ -29,6 +30,7 @@ describe('FeedbackService', () => {
       const createdAt = new Date('2026-07-15T00:00:00.000Z')
       prisma.feedbackSubmission.findUnique.mockResolvedValue({
         id: 10,
+        userId: 1,
         projectId: 1,
         versionId: 2,
         oneLineReview: '좋은 프로젝트입니다.',
@@ -74,7 +76,7 @@ describe('FeedbackService', () => {
         ],
       })
 
-      await expect(service.findFeedbackSubmissionDetail(10)).resolves.toEqual({
+      await expect(service.findFeedbackSubmissionDetail(1, 10)).resolves.toEqual({
         success: true,
         data: {
           id: 10,
@@ -120,9 +122,55 @@ describe('FeedbackService', () => {
     it('제출 묶음이 없으면 404 BusinessException을 던진다', async () => {
       prisma.feedbackSubmission.findUnique.mockResolvedValue(null)
 
-      await expect(service.findFeedbackSubmissionDetail(999)).rejects.toThrow(
+      await expect(service.findFeedbackSubmissionDetail(1, 999)).rejects.toThrow(
         EntityNotExistException,
       )
+    })
+
+    it('작성자가 아니지만 프로젝트 팀원일 경우 접근 허용', async () => {
+      const createdAt = new Date('2026-07-15T00:00:00.000Z')
+      prisma.feedbackSubmission.findUnique.mockResolvedValue({
+        id: 20,
+        userId: 10,
+        projectId: 2,
+        versionId: 3,
+        oneLineReview: '코멘트',
+        createdAt,
+        updatedAt: createdAt,
+        user: {
+          name: '작성자',
+          profileImageUrl: 'profile-key',
+          jobType: JobType.Designer,
+        },
+        feedbacks: [],
+      })
+      prisma.projectRole.findUnique.mockResolvedValue({ id: 1 })
+
+      await expect(service.findFeedbackSubmissionDetail(2, 20)).resolves.toHaveProperty(
+        'success',
+      )
+    })
+
+    it('작성자도 아니고 팀원도 아니면 권한 예외를 던진다', async () => {
+      const createdAt = new Date('2026-07-15T00:00:00.000Z')
+      prisma.feedbackSubmission.findUnique.mockResolvedValue({
+        id: 30,
+        userId: 11,
+        projectId: 3,
+        versionId: 4,
+        oneLineReview: '코멘트',
+        createdAt,
+        updatedAt: createdAt,
+        user: {
+          name: '작성자',
+          profileImageUrl: 'profile-key',
+          jobType: JobType.Designer,
+        },
+        feedbacks: [],
+      })
+      prisma.projectRole.findUnique.mockResolvedValue(null)
+
+      await expect(service.findFeedbackSubmissionDetail(2, 30)).rejects.toThrow()
     })
   })
 })
