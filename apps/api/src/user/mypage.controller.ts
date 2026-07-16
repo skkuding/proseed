@@ -6,6 +6,12 @@ import { MypageUpdateDto } from './dto/mypageUpdate.dto'
 import { FeedbackService } from 'src/feedback/feedback.service'
 import { ProjectService } from 'src/project/project.service'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
+import {
+  MyProfileResponseDto,
+  MyProfileUpdateResponseDto,
+} from './dto/user-response.dto'
+import { MypageJoinedProjectListDto } from 'src/project/dto/project-response.dto'
+import { MyFeedbackProjectsResponseDto } from 'src/feedback/dto/feedback-response.dto'
 
 @ApiTags('Mypage')
 @ApiCookieAuth()
@@ -19,7 +25,9 @@ export class MypageController {
   ) {}
 
   @Get('profile')
-  async getMyProfile(@Req() req: RequestWithUser) {
+  async getMyProfile(
+    @Req() req: RequestWithUser,
+  ): Promise<MyProfileResponseDto> {
     return await this.userService.getMyProfile(req.user.id)
   }
 
@@ -27,17 +35,21 @@ export class MypageController {
   async updateMyProfile(
     @Req() req: RequestWithUser,
     @Body() mypageUpdateDto: MypageUpdateDto,
-  ) {
+  ): Promise<MyProfileUpdateResponseDto> {
     return await this.userService.updateMyProfile(req.user.id, mypageUpdateDto)
   }
 
   @Get('profile/projects')
-  async getMyJoinedProjects(@Req() req: RequestWithUser) {
+  async getMyJoinedProjects(
+    @Req() req: RequestWithUser,
+  ): Promise<MypageJoinedProjectListDto[]> {
     return this.projectService.getJoinedProjects(req.user.id)
   }
 
   @Get('profile/feedbacks')
-  async getMyFeedbacks(@Req() req: RequestWithUser) {
+  async getMyFeedbacks(
+    @Req() req: RequestWithUser,
+  ): Promise<MyFeedbackProjectsResponseDto> {
     return this.feedbackService.findMyFeedbackProjects(req.user.id)
   }
 }

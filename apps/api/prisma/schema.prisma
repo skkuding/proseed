@@ -294,6 +294,7 @@ model FeedbackSubmission {
 
   @@unique([versionId, userId])
   @@index([projectId])
+  @@index([userId])
   @@map("feedback_submission")
 }
 
