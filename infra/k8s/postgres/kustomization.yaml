@@ -4,7 +4,12 @@ namespace: proseed-postgres
 
 resources:
   - db-credentials.yaml
+  # Add these together after Terraform apply and kubeseal:
+  # - backup-s3-credentials.yaml
+  # - backup-cronjob.yaml
   - deployment.yaml
   - namespace.yaml
   - service.yaml
   - pvc.yaml
+
+# Do not sync the CronJob before its SealedSecret is committed.
