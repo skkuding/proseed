@@ -4,6 +4,7 @@ import { FieldBadge } from '@/components/FieldBadge'
 import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { ImageIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import type { ImageItem } from './constants'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 
@@ -40,18 +41,15 @@ export function ProjectImagesSection({ images, onAdd, onRemove }: ProjectImagesS
           </p>
         </div>
 
-        <button
+        <Button
           type="button"
+          size="xs"
           onClick={() => inputRef.current?.click()}
           disabled={images.length >= 10}
-          className={`shrink-0 h-10 px-4 rounded-[8px] text-sub3_sb_16 transition-colors ${
-            images.length >= 10
-              ? 'bg-neutral-200 text-CoolNeutral-60 cursor-not-allowed'
-              : 'bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30 cursor-pointer'
-          }`}
+          className="shrink-0 px-4 text-sub3_sb_16"
         >
           이미지 등록하기
-        </button>
+        </Button>
         <input
           ref={inputRef}
           type="file"

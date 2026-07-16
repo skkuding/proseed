@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import Image from 'next/image'
 import { ChevronRightIcon, ImageIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
-import { FeedbackTagModal } from '@/components/FeedbackTagModal'
+import { FeedbackTagModal, type Feedback } from '@/components/FeedbackTagModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
@@ -52,6 +53,7 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
+  const [detailTargetFeedback, setDetailTargetFeedback] = useState<Feedback | null>(null)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
@@ -197,13 +199,14 @@ export function GrowthRecordForm() {
                 <h2 className="text-title1_sb_28">이미지 등록하기</h2>
                 <FieldBadge type="필수" />
               </div>
-              <button
+              <Button
+                size="sm"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={images.length >= 8}
-                className="flex items-center gap-1.5 px-5 py-3.25 w-34.25 h-12 rounded-lg bg-neutral-20 hover:bg-neutral-30 hover:cursor-pointer transition-colors disabled:bg-neutral-90 disabled:cursor-not-allowed"
+                className="w-34.25 px-5 text-sub3_sb_16"
               >
-                <p className="text-sub3_sb_16 text-white">이미지 등록하기</p>
-              </button>
+                이미지 등록하기
+              </Button>
               <input
                 ref={imageInputRef}
                 type="file"
@@ -274,12 +277,17 @@ export function GrowthRecordForm() {
                   선택 가능)
                 </p>
               </div>
-              <button
-                onClick={() => setShowFeedbackTagModal(true)}
-                className="shrink-0 flex items-center gap-1.5 px-5 py-3.25 h-12 rounded-lg bg-neutral-20 hover:bg-neutral-30 hover:cursor-pointer transition-colors"
+              <Button
+                size="sm"
+                onClick={() => {
+                  setDetailTargetFeedback(null)
+                  setShowFeedbackTagModal(true)
+                }}
+                disabled={(taggedFeedbacks[category] ?? []).length >= 3}
+                className="shrink-0 px-5 text-sub3_sb_16"
               >
-                <p className="text-sub3_sb_16 text-white">피드백 태그하기</p>
-              </button>
+                피드백 태그하기
+              </Button>
             </div>
             {(() => {
               const taggedIds = taggedFeedbacks[category] ?? []
@@ -292,9 +300,13 @@ export function GrowthRecordForm() {
                   {taggedItems.map((feedback) => (
                     <div
                       key={feedback.feedbackId}
-                      className="flex flex-col gap-2 rounded-xl border border-neutral-200 p-4"
+                      onClick={() => {
+                        setDetailTargetFeedback(feedback)
+                        setShowFeedbackTagModal(true)
+                      }}
+                      className="flex flex-col gap-2 rounded-xl border border-neutral-200 px-5 py-4 hover:cursor-pointer"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col">
                           <span className="text-caption1_m_13 text-primary-strong">
                             {CATEGORY_LABEL[feedback.category]}
@@ -303,12 +315,17 @@ export function GrowthRecordForm() {
                             {feedback.nickname}
                           </span>
                         </div>
-                        <button
-                          onClick={() => removeTaggedFeedback(category, feedback.feedbackId)}
-                          className="shrink-0 w-15 h-10 text-sub4_sb_14 text-CoolNeutral-20 border-[1.4px] border-CoolNeutral-50 rounded-[8px] px-3 py-[10px] hover:bg-neutral-99 hover:cursor-pointer transition-colors"
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeTaggedFeedback(category, feedback.feedbackId)
+                          }}
+                          className="w-15 shrink-0 text-sub4_sb_14"
                         >
                           삭제
-                        </button>
+                        </Button>
                       </div>
                       <p className="text-body2_m_14 text-neutral-30 line-clamp-2">
                         {feedback.onelineReview}
@@ -324,7 +341,10 @@ export function GrowthRecordForm() {
         {/* Sidebar */}
         <div className="sticky top-6">
           <button
-            onClick={() => setShowFeedbackTagModal(true)}
+            onClick={() => {
+              setDetailTargetFeedback(null)
+              setShowFeedbackTagModal(true)
+            }}
             className="w-90 shrink-0 flex flex-col gap-3 bg-white rounded-xl p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
           >
             <div className="flex items-center justify-between">
@@ -336,13 +356,14 @@ export function GrowthRecordForm() {
               선택 가능)
             </p>
           </button>
-          <button
+          <Button
+            size="sm"
             disabled={!isNextEnabled}
             onClick={() => setShowSubmitModal(true)}
-            className={`w-full h-12 mt-4 rounded-lg text-sub3_sb_16 transition-colors ${isNextEnabled ? 'bg-neutral-20 text-white hover:bg-neutral-30 cursor-pointer' : 'bg-neutral-200 text-CoolNeutral-50 cursor-not-allowed'}`}
+            className="w-full mt-4 text-sub3_sb_16"
           >
             다음 단계로
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -355,7 +376,11 @@ export function GrowthRecordForm() {
       <FeedbackTagModal
         key={String(showFeedbackTagModal)}
         isOpen={showFeedbackTagModal}
-        onClose={() => setShowFeedbackTagModal(false)}
+        initialDetailFeedback={detailTargetFeedback}
+        onClose={() => {
+          setShowFeedbackTagModal(false)
+          setDetailTargetFeedback(null)
+        }}
       />
 
       <GrowthRecordSubmitModal

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export type FilterMode = 'all' | 'adopted'
 
@@ -57,21 +58,24 @@ export function FeedbackFilterModal({ mode, onClose, onApply }: FeedbackFilterMo
         </div>
 
         <div className="flex justify-end gap-1">
-          <button
+          <Button
+            variant="outline"
+            size="md"
             onClick={onClose}
-            className="h-12 w-[94px] rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 transition-colors"
+            className="w-[94px] text-sub3_sb_16"
           >
             취소
-          </button>
-          <button
+          </Button>
+          <Button
+            size="md"
             onClick={() => {
               onApply(draft)
               onClose()
             }}
-            className="h-12 w-[94px] rounded-[8px] bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 transition-colors"
+            className="w-[94px] text-sub3_sb_16"
           >
             적용하기
-          </button>
+          </Button>
         </div>
       </div>
     </div>

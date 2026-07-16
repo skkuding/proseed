@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { XIcon, Dot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { getFeedbackTemplates, type FeedbackTemplate } from '@/lib/api'
 import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 import {
@@ -77,12 +78,9 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-8 py-6 shrink-0">
           <h2 className="text-title1_sb_28 text-CoolNeutral-20">프로젝트 피드백 질문 템플릿</h2>
-          <button
-            onClick={onClose}
-            className="text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
-          >
+          <Button variant="iconMuted" size="bare" onClick={onClose}>
             <XIcon className="size-6" />
-          </button>
+          </Button>
         </div>
 
         {/* Tabs */}
@@ -115,7 +113,7 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
               <button
                 key={globalIndex}
                 onClick={() => handleCopy(question, globalIndex)}
-                className="flex w-5xl h-[91px] items-center gap-3 bg-white rounded-xl px-5 py-4 text-left hover:bg-neutral-99 hover:cursor-pointer transition-colors border border-transparent hover:border-neutral-200 relative"
+                className="flex w-full h-[91px] items-center gap-3 bg-white rounded-xl px-5 py-4 text-left hover:bg-neutral-99 hover:cursor-pointer transition-colors border border-transparent hover:border-neutral-200 relative"
               >
                 <Dot className="size-6 text-primary-strong shrink-0 m-[-6px]" />
                 <span className="text-sub1_sb_18 flex-1">{question}</span>

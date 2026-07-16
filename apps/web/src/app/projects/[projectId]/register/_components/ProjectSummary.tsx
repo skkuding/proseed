@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { Button } from '@/components/ui/button'
 
 function Row({ label, done, value }: { label: string; done: boolean; value?: string }) {
   return (
@@ -92,31 +93,25 @@ export function ProjectSummary({
         </div>
 
         {tab === 'basic' ? (
-          <button
+          <Button
             type="button"
+            size="lg"
             onClick={onNext}
             disabled={!allBasicDone}
-            className={`w-full h-13 rounded-[8px] text-sub3_sb_16 transition-colors ${
-              allBasicDone
-                ? 'bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30 cursor-pointer'
-                : 'bg-neutral-200 text-CoolNeutral-60 cursor-not-allowed'
-            }`}
+            className="w-full text-sub3_sb_16"
           >
             다음 단계로 넘어가기
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             type="button"
+            size="lg"
             onClick={onSubmit}
             disabled={!canSubmit || submitting}
-            className={`w-full h-12 rounded-xl text-sub3_sb_16 transition-colors ${
-              canSubmit && !submitting
-                ? 'bg-CoolNeutral-20 text-white hover:bg-CoolNeutral-30 cursor-pointer'
-                : 'bg-neutral-200 text-CoolNeutral-60 cursor-not-allowed'
-            }`}
+            className="w-full text-sub3_sb_16"
           >
             {submitting ? '등록 중...' : submitLabel}
-          </button>
+          </Button>
         )}
       </div>
     </aside>

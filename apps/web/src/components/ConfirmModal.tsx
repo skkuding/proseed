@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { Button } from '@/components/ui/button'
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -38,18 +39,12 @@ export function ConfirmModal({
           </div>
         </div>
         <div className="flex justify-end gap-1">
-          <button
-            onClick={onCancel}
-            className="w-25 h-10 rounded-[8px] border-[1.4px] border-CoolNeutral-50 text-sub4_sb_14 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-          >
+          <Button variant="outline" size="xs" onClick={onCancel} className="w-25 text-sub4_sb_14">
             {cancelLabel}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="w-25 h-10 rounded-[8px] bg-CoolNeutral-20 text-sub4_sb_14 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors"
-          >
+          </Button>
+          <Button size="xs" onClick={onConfirm} className="w-25 text-sub4_sb_14">
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

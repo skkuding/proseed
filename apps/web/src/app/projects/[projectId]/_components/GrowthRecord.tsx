@@ -94,7 +94,7 @@ export function GrowthRecord() {
           <Button
             onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
             disabled={selectedVersion !== versions[0].id.toString()}
-            className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20 hover:cursor-pointer"
+            className="ml-1.5 h-12 w-[137px] px-5 py-[13px] bg-CoolNeutral-20"
           >
             <p className="text-sub3_sb_16 text-white">성장기록 작성하기</p>
           </Button>

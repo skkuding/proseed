@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { X, Dot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { RoleFilterTabs } from '@/components/RoleTabs'
 import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
 
 const TABS = ['기획', '디자인', '개발', '기타'] as const
@@ -64,30 +66,17 @@ export function FeedbackRoleSelectModal({
           <h2 className="text-title1_sb_28 text-CoolNeutral-20">
             어떤 직군의 피드백을 작성하시겠어요?
           </h2>
-          <button
-            onClick={onClose}
-            className="text-CoolNeutral-40 hover:text-CoolNeutral-20 hover:cursor-pointer transition-colors"
-          >
+          <Button variant="iconMuted" size="bare" onClick={onClose}>
             <X className="size-6" />
-          </button>
+          </Button>
         </div>
 
         {/* Role tabs */}
-        <div className="flex gap-1 bg-neutral-99 border border-neutral-200 rounded-full p-1 w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 hover:cursor-pointer rounded-full text-body1_m_16 transition-colors ${
-                activeTab === tab
-                  ? 'bg-CoolNeutral-20 text-white'
-                  : 'text-CoolNeutral-40 hover:text-CoolNeutral-20'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <RoleFilterTabs
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as TabLabel)}
+        />
 
         {/* Question preview */}
         <div className="flex flex-col gap-3 bg-neutral-99 rounded-xl p-5">
@@ -135,19 +124,17 @@ export function FeedbackRoleSelectModal({
 
         {/* Action buttons */}
         <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="h-12 px-6 rounded-xl border border-neutral-200 text-sub3_sb_16 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors"
-          >
+          <Button variant="outline" size="sm" onClick={onClose} className="px-6 text-sub3_sb_16">
             취소하기
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
             onClick={handleConfirm}
             disabled={selectedRoles.size === 0}
-            className="h-12 px-6 rounded-xl bg-CoolNeutral-20 text-sub3_sb_16 text-white hover:bg-CoolNeutral-30 hover:cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-6 text-sub3_sb_16"
           >
             피드백 작성 시작하기
-          </button>
+          </Button>
         </div>
       </div>
     </div>
