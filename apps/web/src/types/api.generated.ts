@@ -155,7 +155,103 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["UserController_getUserProfile"];
+        get: operations["UserController_getOtherUserProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MypageController_getMyProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["MypageController_updateMyProfile"];
+        trace?: never;
+    };
+    "/me/profile/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MypageController_getMyJoinedProjects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/profile/feedbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MypageController_getMyFeedbacks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/project/{projectId}/versions/{versionId}/feedbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["FeedbackController_createFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FeedbackController_findAllQuestions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/feedbacks/my/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MyFeedbackController_findMyFeedbackProjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -308,54 +404,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/project/{projectId}/versions/{versionId}/feedbacks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["FeedbackController_createFeedback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["FeedbackController_findAllQuestions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/feedbacks/my/projects": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["MyFeedbackController_findMyFeedbackProjects"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -419,6 +467,74 @@ export interface components {
             profileImageUrl: string;
             skills: string[];
             links: string[];
+            joinedProjectCount: number;
+            feedbackCount: number;
+        };
+        MypageUpdateDto: {
+            name?: string;
+            /** @enum {string} */
+            jobType?: "Developer" | "Planner" | "Designer" | "Other";
+            profileImageUrl?: string;
+            skills?: string[];
+            links?: string[];
+            bio?: string;
+        };
+        MyFeedbackProjectItemDto: {
+            submissionId: number;
+            projectId: number;
+            projectTitle: string;
+            projectThumbnailUrl: string;
+            oneLineDescription: string;
+            isAdopted: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MyFeedbackProjectsResponseDto: {
+            success: boolean;
+            data: components["schemas"]["MyFeedbackProjectItemDto"][];
+        };
+        FeedbackItemDto: {
+            questionId: number;
+            content: string;
+            imageUrl?: string;
+            imageUrls?: string[];
+        };
+        CreateFeedbackDto: {
+            oneLineReview: string;
+            feedbacks: components["schemas"]["FeedbackItemDto"][];
+        };
+        CreatedFeedbackDto: {
+            imageUrl: string | null;
+            imageUrls: string[];
+            id: number;
+            questionId: number;
+            versionId: number;
+            userId: number;
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        CreateFeedbackDataDto: {
+            submittedCount: number;
+            feedbacks: components["schemas"]["CreatedFeedbackDto"][];
+        };
+        CreateFeedbackResponseDto: {
+            success: boolean;
+            data: components["schemas"]["CreateFeedbackDataDto"];
+        };
+        /** @enum {string} */
+        RecordCategory: "PLAN" | "DESIGN" | "DEVELOPMENT" | "GENERAL";
+        FeedbackQuestionItemDto: {
+            category: components["schemas"]["RecordCategory"];
+            id: number;
+            title: string;
+            description: string;
+            order: number;
+            required: boolean;
+        };
+        FeedbackQuestionsResponseDto: {
+            success: boolean;
+            data: components["schemas"]["FeedbackQuestionItemDto"][];
         };
         CreateProjectDto: {
             title: string;
@@ -568,8 +684,6 @@ export interface components {
             feedbackQuestions: components["schemas"]["CreateFeedbackQuestionDto"][];
             taggedFeedbacks?: components["schemas"]["TaggedFeedbacksDto"][];
         };
-        /** @enum {string} */
-        RecordCategory: "PLAN" | "DESIGN" | "DEVELOPMENT" | "GENERAL";
         PublishedGrowthRecordContentDto: {
             id: number;
             growthRecordId: number;
@@ -693,61 +807,6 @@ export interface components {
             content: {
                 [key: string]: unknown;
             };
-        };
-        FeedbackItemDto: {
-            questionId: number;
-            content: string;
-            imageUrl?: string;
-            imageUrls?: string[];
-        };
-        CreateFeedbackDto: {
-            oneLineReview: string;
-            feedbacks: components["schemas"]["FeedbackItemDto"][];
-        };
-        CreatedFeedbackDto: {
-            imageUrl: string | null;
-            imageUrls: string[];
-            id: number;
-            questionId: number;
-            versionId: number;
-            userId: number;
-            content: string;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CreateFeedbackDataDto: {
-            submittedCount: number;
-            feedbacks: components["schemas"]["CreatedFeedbackDto"][];
-        };
-        CreateFeedbackResponseDto: {
-            success: boolean;
-            data: components["schemas"]["CreateFeedbackDataDto"];
-        };
-        FeedbackQuestionItemDto: {
-            category: components["schemas"]["RecordCategory"];
-            id: number;
-            title: string;
-            description: string;
-            order: number;
-            required: boolean;
-        };
-        FeedbackQuestionsResponseDto: {
-            success: boolean;
-            data: components["schemas"]["FeedbackQuestionItemDto"][];
-        };
-        MyFeedbackProjectItemDto: {
-            submissionId: number;
-            projectId: number;
-            projectTitle: string;
-            projectThumbnailUrl: string;
-            oneLineDescription: string;
-            isAdopted: boolean;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        MyFeedbackProjectsResponseDto: {
-            success: boolean;
-            data: components["schemas"]["MyFeedbackProjectItemDto"][];
         };
     };
     responses: never;
@@ -939,7 +998,7 @@ export interface operations {
             };
         };
     };
-    UserController_getUserProfile: {
+    UserController_getOtherUserProfile: {
         parameters: {
             query?: never;
             header?: never;
@@ -956,6 +1015,147 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserProfileResponseDto"];
+                };
+            };
+        };
+    };
+    MypageController_getMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MypageController_updateMyProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MypageUpdateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MypageController_getMyJoinedProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MypageController_getMyFeedbacks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyFeedbackProjectsResponseDto"];
+                };
+            };
+        };
+    };
+    FeedbackController_createFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                versionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFeedbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateFeedbackResponseDto"];
+                };
+            };
+        };
+    };
+    FeedbackController_findAllQuestions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                versionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackQuestionsResponseDto"];
+                };
+            };
+        };
+    };
+    MyFeedbackController_findMyFeedbackProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyFeedbackProjectsResponseDto"];
                 };
             };
         };
@@ -1244,73 +1444,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    FeedbackController_createFeedback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-                versionId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateFeedbackDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateFeedbackResponseDto"];
-                };
-            };
-        };
-    };
-    FeedbackController_findAllQuestions: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                projectId: number;
-                versionId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeedbackQuestionsResponseDto"];
-                };
-            };
-        };
-    };
-    MyFeedbackController_findMyFeedbackProjects: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyFeedbackProjectsResponseDto"];
-                };
             };
         };
     };

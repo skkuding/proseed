@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, type ReactNode } from 'react'
+import type { MyProfile } from '@/lib/api'
 
 type MyPageUser = {
   name: string
@@ -15,6 +16,8 @@ type MyPageProfileContextValue = {
   setProvider: (provider: string) => void
   user: MyPageUser
   setUser: (user: MyPageUser) => void
+  profile: MyProfile | null
+  setProfile: (profile: MyProfile) => void
 }
 
 const MyPageProfileContext = createContext<MyPageProfileContextValue | undefined>(undefined)
@@ -23,10 +26,20 @@ export function MyPageProfileProvider({ children }: { children: ReactNode }) {
   const [currentJob, setCurrentJob] = useState('')
   const [provider, setProvider] = useState('')
   const [user, setUser] = useState<MyPageUser>({ name: '', email: '', image: '' })
+  const [profile, setProfile] = useState<MyProfile | null>(null)
 
   return (
     <MyPageProfileContext.Provider
-      value={{ currentJob, setCurrentJob, provider, setProvider, user, setUser }}
+      value={{
+        currentJob,
+        setCurrentJob,
+        provider,
+        setProvider,
+        user,
+        setUser,
+        profile,
+        setProfile,
+      }}
     >
       {children}
     </MyPageProfileContext.Provider>

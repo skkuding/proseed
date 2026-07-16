@@ -20,6 +20,7 @@ import { ThumbnailSection } from '../register/_components/ThumbnailSection'
 import { ProjectImagesSection } from '../register/_components/ProjectImagesSection'
 import { CATEGORY_LABELS, STATUS_TO_API } from '../register/_components/constants'
 import { useProjectForm } from '../_hooks/useProjectForm'
+import { useAuthGuard } from '@/lib/useAuthGuard'
 import mockData from '@/app/_mockdata/project-detail/project-basicdata.json'
 
 const API_TO_STATUS = Object.fromEntries(
@@ -29,6 +30,7 @@ const API_TO_STATUS = Object.fromEntries(
 const { mockProject } = mockData
 
 export default function EditMyProject() {
+  useAuthGuard()
   const router = useRouter()
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)

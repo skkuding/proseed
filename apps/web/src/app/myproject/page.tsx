@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
 import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
 import MyProjectCard from './_components/MyProjectCard'
 import ProjectCard from '@/app/mainpage/_components/ProjectCard'
-import { getMyProjects } from '@/lib/api'
+import { getMyProjects, getProjects, type Project as RecommendedProject } from '@/lib/api'
 import {
   Pagination,
   PaginationContent,
@@ -16,7 +17,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import navigateProjects from '@/app/_mockdata/project-list/navigate-projects.json'
 
 const PAGE_SIZE = 9
 
@@ -51,6 +51,7 @@ export default function MyProject() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')
   const [currentPage, setCurrentPage] = useState(1)
+  const [recommendedProjects, setRecommendedProjects] = useState<RecommendedProject[]>([])
 
   useEffect(() => {
     getMyProjects()
@@ -64,6 +65,12 @@ export default function MyProject() {
       )
       .catch(console.error)
       .finally(() => setIsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    getProjects({ take: 3 })
+      .then((res) => setRecommendedProjects(res.data))
+      .catch(console.error)
   }, [])
 
   const filteredProjects = useMemo(
@@ -104,12 +111,9 @@ export default function MyProject() {
                 프로젝트를 업로드하여 다양한 피드백을 받고 성장하세요
               </p>
             </div>
-            <Link
-              href="/projects/new/register"
-              className="inline-flex items-center justify-center h-13 px-5 py-[15px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub3_sb_16 hover:bg-CoolNeutral-30 transition-colors"
-            >
-              프로젝트 등록하기
-            </Link>
+            <Button asChild size="lg" className="text-sub3_sb_16">
+              <Link href="/projects/new/register">프로젝트 등록하기</Link>
+            </Button>
           </div>
           <CategoryTabs
             selectedCategory={selectedCategory}
@@ -125,12 +129,9 @@ export default function MyProject() {
                 <p>성장기록을 작성하며 커리어 성장을 이뤄보세요</p>
               </div>
 
-              <Link
-                href="/projects/new/register"
-                className="mt-4 inline-flex items-center justify-center h-13 px-5 py-[15px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub3_sb_16 hover:bg-CoolNeutral-30 transition-colors"
-              >
-                프로젝트 등록하기
-              </Link>
+              <Button asChild size="lg" className="mt-4 text-sub3_sb_16">
+                <Link href="/projects/new/register">프로젝트 등록하기</Link>
+              </Button>
             </div>
           )}
           {projects.length > 0 && (
@@ -138,12 +139,9 @@ export default function MyProject() {
               {pagedProjects.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
                   해당 카테고리의 프로젝트가 없습니다.
-                  <Link
-                    href="/projects/new/register"
-                    className="mt-4 inline-flex items-center justify-center h-13 px-5 py-[15px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub3_sb_16 hover:bg-CoolNeutral-30 transition-colors"
-                  >
-                    프로젝트 등록하기
-                  </Link>
+                  <Button asChild size="lg" className="mt-4 text-sub3_sb_16">
+                    <Link href="/projects/new/register">프로젝트 등록하기</Link>
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-x-2 gap-y-5">
@@ -204,11 +202,11 @@ export default function MyProject() {
           )}
         </div>
 
-        {pagedProjects.length <= 6 && (
+        {pagedProjects.length <= 6 && recommendedProjects.length > 0 && (
           <div className="flex flex-col gap-3">
             <h2 className="text-title3_sb_24">추천 프로젝트</h2>
             <div className="grid grid-cols-3 gap-x-2 gap-y-5">
-              {navigateProjects.slice(0, 3).map((project) => (
+              {recommendedProjects.map((project) => (
                 <ProjectCard key={project.id} project={project} />
               ))}
             </div>

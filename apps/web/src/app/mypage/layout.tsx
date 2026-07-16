@@ -4,10 +4,11 @@ import { Suspense, useEffect, useSyncExternalStore, type ReactNode } from 'react
 import { useRouter, useSearchParams } from 'next/navigation'
 import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
-import { authClient } from '@/lib/auth-client'
+import { authClient, authBaseURL } from '@/lib/auth-client'
+import { getMyProfile } from '@/lib/api'
+import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { useAuthGuard } from '@/lib/useAuthGuard'
 import { MyPageProfileProvider, useMyPageProfile } from './_components/MyPageProfileContext'
-
-const BETTER_AUTH_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/api$/, '')
 
 type MenuItem = 'profile' | 'account' | 'faq'
 
@@ -25,20 +26,16 @@ function MyPageShell({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
-  const { currentJob, provider, setProvider, setUser } = useMyPageProfile()
+  const { currentJob, setCurrentJob, provider, setProvider, setUser, profile, setProfile } =
+    useMyPageProfile()
   const mounted = useMounted()
+  useAuthGuard()
 
   const tabParam = searchParams.get('tab') as MenuItem | null
   const activeMenu: MenuItem =
     tabParam && (['profile', 'account', 'faq'] as MenuItem[]).includes(tabParam)
       ? tabParam
       : 'profile'
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      router.push('/')
-    }
-  }, [isPending, session, router])
 
   useEffect(() => {
     if (!session) return
@@ -51,7 +48,7 @@ function MyPageShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session) return
-    fetch(`${BETTER_AUTH_BASE}/api/auth/list-accounts`, { credentials: 'include' })
+    fetch(`${authBaseURL}/api/auth/list-accounts`, { credentials: 'include' })
       .then((res) => res.json())
       .then((data: unknown) => {
         const accounts = Array.isArray(data) ? data : []
@@ -60,6 +57,16 @@ function MyPageShell({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
   }, [session, setProvider])
+
+  useEffect(() => {
+    if (!session) return
+    getMyProfile()
+      .then((data) => {
+        setProfile(data)
+        setCurrentJob(data.jobType ? (JOB_API_TO_LABEL[data.jobType] ?? '') : '')
+      })
+      .catch(console.error)
+  }, [session, setProfile, setCurrentJob])
 
   if (!mounted || isPending || !session) return null
 
@@ -87,8 +94,8 @@ function MyPageShell({ children }: { children: ReactNode }) {
               job={currentJob || '직무 미입력'}
               loginProvider={provider || 'local'}
               profileImageUrl={currentUser?.image ?? ''}
-              projectCount={0}
-              feedbackCount={0}
+              projectCount={profile?.joinedProjectCount ?? 0}
+              feedbackCount={profile?.feedbackCount ?? 0}
             />
             <SideNav activeMenu={activeMenu} onMenuChange={handleMenuChange} />
           </div>

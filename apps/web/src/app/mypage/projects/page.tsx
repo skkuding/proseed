@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_LABEL, JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
+import { getMyJoinedProjects } from '@/lib/api'
 import {
   ParticipatedProject,
   ParticipatedProjectCard,
@@ -11,7 +13,24 @@ import {
 
 export default function MyParticipatedProjects() {
   const [selectedJob, setSelectedJob] = useState<JobTab>('기획')
-  const [projects] = useState<ParticipatedProject[]>([])
+  const [projects, setProjects] = useState<ParticipatedProject[]>([])
+
+  useEffect(() => {
+    getMyJoinedProjects()
+      .then((data) =>
+        setProjects(
+          data.map((project) => ({
+            id: project.id,
+            title: project.title,
+            role: JOB_API_TO_LABEL[project.role] ?? project.role,
+            description: project.oneLineDescription,
+            href: `/projects/${project.id}`,
+            imageUrl: project.iconUrl,
+          }))
+        )
+      )
+      .catch(console.error)
+  }, [])
 
   const filteredProjects = projects.filter((project) => project.role === selectedJob)
 
@@ -36,12 +55,9 @@ export default function MyParticipatedProjects() {
               <p>프로젝트를 수행하고 커리어 성장을 이뤄보세요</p>
             </div>
           </div>
-          <Link
-            href="/myproject"
-            className="inline-flex h-13 items-center justify-center rounded-[8px] bg-CoolNeutral-20 px-5 py-[15px] text-sub3_sb_16 text-white transition-colors hover:bg-CoolNeutral-30"
-          >
-            프로젝트 참여하기
-          </Link>
+          <Button asChild size="lg" className="text-sub3_sb_16">
+            <Link href="/myproject">프로젝트 참여하기</Link>
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

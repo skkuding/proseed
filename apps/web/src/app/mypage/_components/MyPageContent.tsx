@@ -15,18 +15,18 @@ export default function MyPageContent() {
     tabParam && (['profile', 'account', 'faq'] as MenuItem[]).includes(tabParam)
       ? tabParam
       : 'profile'
-  const { currentJob, setCurrentJob, provider, user } = useMyPageProfile()
+  const { currentJob, setCurrentJob, provider, user, profile } = useMyPageProfile()
 
   return (
     <>
       {activeMenu === 'profile' && (
         <ProfileForm
-          key={user.email || 'loading'}
+          key={`${user.email || 'loading'}-${profile ? 'ready' : 'loading'}`}
           initialName={user.name}
           initialJob={currentJob}
-          initialSkills={[]}
-          initialLinks={[]}
-          initialBio={''}
+          initialSkills={profile?.skills ?? []}
+          initialLinks={profile?.links ?? []}
+          initialBio={profile?.bio ?? ''}
           onJobChange={setCurrentJob}
         />
       )}
