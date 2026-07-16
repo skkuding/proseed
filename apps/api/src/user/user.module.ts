@@ -4,9 +4,10 @@ import { UserService } from './user.service'
 import { UserController } from './user.controller'
 import { MypageController } from './mypage.controller'
 import { FeedbackModule } from 'src/feedback/feedback.module'
+import { ProjectModule } from 'src/project/project.module'
 
 @Module({
-  imports: [AuthModule, FeedbackModule],
+  imports: [AuthModule, FeedbackModule, ProjectModule],
   controllers: [UserController, MypageController],
   providers: [UserService],
 })
