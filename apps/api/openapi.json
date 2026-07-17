@@ -251,6 +251,45 @@
         ]
       }
     },
+    "/user/profile/preview": {
+      "get": {
+        "operationId": "UserController_getProfilePreviewByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "description": "검색할 유저의 이메일 주소",
+            "schema": {
+              "format": "email",
+              "example": "user@example.com",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilePreviewResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "다른 팀원의 공개 프로필 미리보기를 이메일 주소를 통해 조회합니다.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/user/{userId}/profile": {
       "get": {
         "operationId": "UserController_getOtherUserProfile",
@@ -1273,6 +1312,26 @@
           "links"
         ]
       },
+      "ProfilePreviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobType",
+          "name"
+        ]
+      },
       "MyProfileAccountDto": {
         "type": "object",
         "properties": {
@@ -1288,7 +1347,10 @@
         "type": "object",
         "properties": {
           "accounts": {
-            "$ref": "#/components/schemas/MyProfileAccountDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyProfileAccountDto"
+            }
           },
           "jobType": {
             "nullable": true,
@@ -1398,7 +1460,10 @@
         "type": "object",
         "properties": {
           "accounts": {
-            "$ref": "#/components/schemas/MyProfileAccountDto"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyProfileAccountDto"
+            }
           },
           "jobType": {
             "nullable": true,
