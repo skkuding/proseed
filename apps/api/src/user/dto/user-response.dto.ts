@@ -74,6 +74,13 @@ export class OtherUserProfileResponseDto {
   feedbackCount!: number
 }
 
+export class ProfilePreviewResponseDto {
+  name!: string
+
+  @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
+  jobType!: JobType | null
+}
+
 export class UserResponseDto {
   id!: number
   name!: string
