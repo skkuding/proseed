@@ -101,6 +101,17 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)
     expect(prisma.feedbackAdoption.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ orderBy: { id: 'desc' }, take: 6 }),
     )
+    //(제출, 직군) 쌍 단위 조회 — 채택 안 된 직군 답변은 가져오지 않는다
+    expect(prisma.feedback.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          OR: [
+            { submissionId: 1, question: { category: RecordCategory.PLAN } },
+            { submissionId: 1, question: { category: RecordCategory.DESIGN } },
+          ],
+        },
+      }),
+    )
   })
 
   it('해당 직군 답변이 없으면 본문은 빈 문자열, 같은 아이콘은 presign 1회', async () => {

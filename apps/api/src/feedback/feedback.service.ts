@@ -58,13 +58,13 @@ export class FeedbackService {
       return { success: true, data: [] }
     }
 
-    //채택 직군의 첫 답변을 카드 본문으로 사용
+    //채택 직군의 첫 답변을 카드 본문으로 사용 — (제출, 직군) 쌍 단위로 정확히 조회
     const answers = await this.prisma.feedback.findMany({
       where: {
-        submissionId: { in: adoptions.map((a) => a.submissionId) },
-        question: {
-          category: { in: adoptions.map((a) => a.growthRecord.category) },
-        },
+        OR: adoptions.map((a) => ({
+          submissionId: a.submissionId,
+          question: { category: a.growthRecord.category },
+        })),
       },
       orderBy: [{ question: { order: 'asc' } }, { id: 'asc' }],
       select: {
