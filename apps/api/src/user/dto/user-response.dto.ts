@@ -20,7 +20,7 @@ export class MyProfileResponseDto {
   name!: string
   email!: string
 
-  @ApiProperty({ type: [MyProfileAccountDto] })
+  @ApiProperty({ type: MyProfileAccountDto, isArray: true })
   accounts!: MyProfileAccountDto[]
 
   @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
@@ -57,7 +57,7 @@ export class OtherUserProfileResponseDto {
   name!: string
   email!: string
 
-  @ApiProperty({ type: [MyProfileAccountDto] })
+  @ApiProperty({ type: MyProfileAccountDto, isArray: true })
   accounts!: MyProfileAccountDto[]
 
   @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
