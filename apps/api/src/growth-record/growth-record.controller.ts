@@ -5,15 +5,18 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Req,
 } from '@nestjs/common'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { Public } from 'src/auth/decorators/public.decorator'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 import { CreateVersionDto } from './dto/create-version.dto'
+import { GetRecentGrowthRecordsDto } from './dto/get-recent-growth-records.dto'
 import {
   FeedbackTemplateDto,
   PublishVersionResponseDto,
+  RecentGrowthRecordDto,
   VersionDetailResponseDto,
 } from './dto/version-response.dto'
 import { GrowthRecordService } from './growth-record.service'
@@ -27,6 +30,15 @@ export class GrowthRecordTemplateController {
   @Get('feedback-templates')
   getFeedbackTemplates(): FeedbackTemplateDto[] {
     return this.growthRecordService.getFeedbackTemplates()
+  }
+
+  // GET growth-records/recent — mainpage 최근 성장기록 (공개)
+  @Public()
+  @Get('recent')
+  async getRecentGrowthRecords(
+    @Query() dto: GetRecentGrowthRecordsDto,
+  ): Promise<RecentGrowthRecordDto[]> {
+    return this.growthRecordService.getRecentGrowthRecords(dto.take ?? 5)
   }
 }
 

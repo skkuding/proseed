@@ -1,0 +1,28 @@
+meta {
+  name: Get Recent Feedbacks
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/feedbacks/recent?take=6
+  body: none
+  auth: inherit
+}
+
+params:query {
+  take: 6
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  mainpage 최근 피드백 — 공개(@Public).
+  채택(FeedbackAdoption)된 제출만 최신순 take개(기본 6, 최대 30).
+  카드 단위 = 채택(제출×직군), content = 해당 직군 질문의 첫 답변.
+  미채택 피드백 본문은 노출되지 않음 (게이팅 정책 정합).
+  에러: take가 1~30 범위 밖이거나 정수가 아니면 400.
+}

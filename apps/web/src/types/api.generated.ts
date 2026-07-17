@@ -260,6 +260,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feedbacks/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MyFeedbackController_getRecentFeedbacks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project": {
         parameters: {
             query?: never;
@@ -372,6 +388,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/growth-records/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GrowthRecordTemplateController_getRecentGrowthRecords"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/{id}/drafts": {
         parameters: {
             query?: never;
@@ -470,6 +502,22 @@ export interface components {
             joinedProjectCount: number;
             feedbackCount: number;
         };
+        MyProfileAccountDto: {
+            providerId: string;
+        };
+        MyProfileResponseDto: {
+            accounts: components["schemas"]["MyProfileAccountDto"][];
+            jobType: components["schemas"]["JobType"] | null;
+            bio: string | null;
+            name: string;
+            email: string;
+            profileImageUrl: string;
+            skills: string[];
+            links: string[];
+            ownedTicketCount: number;
+            joinedProjectCount: number;
+            feedbackCount: number;
+        };
         MypageUpdateDto: {
             name?: string;
             /** @enum {string} */
@@ -478,6 +526,24 @@ export interface components {
             skills?: string[];
             links?: string[];
             bio?: string;
+        };
+        MyProfileUpdateResponseDto: {
+            jobType: components["schemas"]["JobType"] | null;
+            bio: string | null;
+            name: string;
+            profileImageUrl: string;
+            skills: string[];
+            links: string[];
+        };
+        /** @enum {string} */
+        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
+        MypageJoinedProjectListDto: {
+            role: components["schemas"]["JobType"];
+            projectMemberRole: components["schemas"]["ProjectMemberRole"];
+            id: number;
+            title: string;
+            oneLineDescription: string;
+            iconUrl: string;
         };
         MyFeedbackProjectItemDto: {
             submissionId: number;
@@ -535,6 +601,23 @@ export interface components {
         FeedbackQuestionsResponseDto: {
             success: boolean;
             data: components["schemas"]["FeedbackQuestionItemDto"][];
+        };
+        RecentFeedbackItemDto: {
+            category: components["schemas"]["RecordCategory"];
+            submissionId: number;
+            nickname: string;
+            profileImageUrl: string;
+            oneLineReview: string;
+            /** @description 채택된 직군 질문에 대한 첫 번째 답변 본문 */
+            content: string;
+            projectId: number;
+            projectName: string;
+            /** @description presigned download URL */
+            projectIconUrl: string;
+        };
+        RecentFeedbacksResponseDto: {
+            success: boolean;
+            data: components["schemas"]["RecentFeedbackItemDto"][];
         };
         CreateProjectDto: {
             title: string;
@@ -638,8 +721,6 @@ export interface components {
             /** @enum {string} */
             role: "Developer" | "Planner" | "Designer" | "Other";
         };
-        /** @enum {string} */
-        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
         ProjectRoleResponseDto: {
             role: components["schemas"]["JobType"];
             projectMemberRole: components["schemas"]["ProjectMemberRole"];
@@ -786,6 +867,21 @@ export interface components {
         FeedbackTemplateDto: {
             category: components["schemas"]["RecordCategory"];
             questions: string[];
+        };
+        RecentGrowthRecordDto: {
+            projectCategories: components["schemas"]["ProjectCategory"][];
+            category: components["schemas"]["RecordCategory"];
+            growthRecordId: number;
+            versionId: number;
+            projectId: number;
+            projectName: string;
+            /** @description presigned download URL */
+            projectIconUrl: string;
+            /** @description 해당 직군 성장기록의 첫 번째 content title */
+            title: string;
+            updateGoal: string;
+            /** Format: date-time */
+            releasedAt: string;
         };
         DraftUpdatedByDto: {
             id: number;
@@ -1034,7 +1130,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MyProfileResponseDto"];
+                };
             };
         };
     };
@@ -1055,7 +1153,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MyProfileUpdateResponseDto"];
+                };
             };
         };
     };
@@ -1072,7 +1172,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MypageJoinedProjectListDto"][];
+                };
             };
         };
     };
@@ -1158,6 +1260,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MyFeedbackProjectsResponseDto"];
+                };
+            };
+        };
+    };
+    MyFeedbackController_getRecentFeedbacks: {
+        parameters: {
+            query?: {
+                take?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecentFeedbacksResponseDto"];
                 };
             };
         };
@@ -1356,6 +1479,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FeedbackTemplateDto"][];
+                };
+            };
+        };
+    };
+    GrowthRecordTemplateController_getRecentGrowthRecords: {
+        parameters: {
+            query?: {
+                /** @description 최근 발행 버전 수 (버전당 4개 직군 카드가 반환됨) */
+                take?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecentGrowthRecordDto"][];
                 };
             };
         };

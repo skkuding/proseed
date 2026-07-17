@@ -58,3 +58,29 @@ export class MyFeedbackProjectsResponseDto {
   success: boolean
   data: MyFeedbackProjectItemDto[]
 }
+
+//mainpage 최근 피드백 카드 — 채택(FeedbackAdoption)된 제출×직군 단위
+export class RecentFeedbackItemDto {
+  submissionId: number
+
+  @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
+  category: RecordCategory
+
+  nickname: string
+  profileImageUrl: string
+  oneLineReview: string
+
+  /** 채택된 직군 질문에 대한 첫 번째 답변 본문 */
+  content: string
+
+  projectId: number
+  projectName: string
+
+  /** presigned download URL */
+  projectIconUrl: string
+}
+
+export class RecentFeedbacksResponseDto {
+  success: boolean
+  data: RecentFeedbackItemDto[]
+}
