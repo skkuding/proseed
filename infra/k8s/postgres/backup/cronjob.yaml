@@ -40,7 +40,14 @@ spec:
                   set -eu
                   set -o pipefail
 
-                  backup_key="postgres/skkuding-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+                  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Checking database connectivity..."
+                  pg_isready \
+                    --host="${POSTGRES_HOST}" \
+                    --port="${POSTGRES_PORT}" \
+                    --username="${POSTGRES_USER}" \
+                    --timeout=10
+
+                  backup_key="postgres/skkuding-$(date -u +%Y%m%dT%H%M%SZ).dump"
                   backup_uri="s3://${S3_BUCKET}/${backup_key}"
 
                   echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] PostgreSQL backup started: ${backup_uri}"
@@ -50,10 +57,9 @@ spec:
                     --port="${POSTGRES_PORT}" \
                     --username="${POSTGRES_USER}" \
                     --dbname="${POSTGRES_DB}" \
-                    --format=plain \
+                    --format=custom \
                     --no-owner \
                     --no-privileges \
-                    | gzip -c \
                     | aws s3 cp - "${backup_uri}" \
                       --sse AES256 \
                       --only-show-errors; then
