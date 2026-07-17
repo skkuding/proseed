@@ -307,7 +307,7 @@ export class ProjectService {
 
     const { iconKey, thumbnailKey, imageKeys, ...scalars } = dto
 
-    return this.prisma.$transaction(async (tx) => {
+    const updated = await this.prisma.$transaction(async (tx) => {
       if (imageKeys) {
         await tx.projectImage.deleteMany({ where: { projectId } })
       }
@@ -329,6 +329,14 @@ export class ProjectService {
         },
       })
     })
+
+    //응답은 FE가 바로 렌더링할 수 있도록 presigned URL로 변환 (getProjectById와 동일)
+    const [iconUrl, thumbnailUrl] = await Promise.all([
+      this.storage.getSignedDownloadUrl(updated.iconUrl),
+      this.storage.getSignedDownloadUrl(updated.thumbnailUrl),
+    ])
+
+    return { ...updated, iconUrl, thumbnailUrl }
   }
 
   async inviteCollaborator(

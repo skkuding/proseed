@@ -23,11 +23,18 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
     projectRole: { findFirst: MockFn }
     $transaction: MockFn
   }
+  let storage: { getSignedDownloadUrl: MockFn }
 
   beforeEach(() => {
     tx = {
       projectImage: { deleteMany: jest.fn().mockResolvedValue({}) },
-      project: { update: jest.fn().mockResolvedValue({ id: PROJECT_ID }) },
+      project: {
+        update: jest.fn().mockResolvedValue({
+          id: PROJECT_ID,
+          iconUrl: 'icon-key',
+          thumbnailUrl: 'thumb-key',
+        }),
+      },
     }
     prisma = {
       project: { findUnique: jest.fn().mockResolvedValue({ id: PROJECT_ID }) },
@@ -38,9 +45,14 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
       },
       $transaction: jest.fn((cb: (t: typeof tx) => Promise<unknown>) => cb(tx)),
     }
+    storage = {
+      getSignedDownloadUrl: jest
+        .fn()
+        .mockImplementation((key: string) => Promise.resolve(`signed-${key}`)),
+    }
     service = new ProjectService(
       prisma as unknown as PrismaService,
-      {} as unknown as StorageService,
+      storage as unknown as StorageService,
     )
   })
 
@@ -70,7 +82,7 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
   })
 
   it('scalar 필드만 오면 이미지는 건드리지 않고 key 필드를 컬럼으로 매핑한다', async () => {
-    await service.update(LEAD_ID, PROJECT_ID, {
+    const result = await service.update(LEAD_ID, PROJECT_ID, {
       title: 'new-title',
       iconKey: 'new-icon-key',
       thumbnailKey: 'new-thumb-key',
@@ -85,6 +97,9 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
         thumbnailUrl: 'new-thumb-key',
       },
     })
+    //응답의 icon/thumbnail은 presigned URL로 변환된다
+    expect(result.iconUrl).toBe('signed-icon-key')
+    expect(result.thumbnailUrl).toBe('signed-thumb-key')
   })
 
   it('imageKeys가 오면 기존 이미지를 지우고 순서대로 재생성한다', async () => {
