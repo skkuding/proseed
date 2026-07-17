@@ -75,7 +75,7 @@ printf 'AWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\n' \
   --controller-name sealed-secrets-controller \
   --controller-namespace kube-system \
   --format yaml \
-> infra/k8s/postgres/backup-s3-credentials.yaml
+> infra/k8s/postgres/backup/s3-credentials.yaml
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
 ```
@@ -88,7 +88,7 @@ kubeseal \
   --controller-name sealed-secrets-controller \
   --controller-namespace kube-system \
   --validate \
-  < infra/k8s/postgres/backup-s3-credentials.yaml
+  < infra/k8s/postgres/backup/s3-credentials.yaml
 ```
 
 생성된 파일에 `encryptedData`만 있고 실제 AWS 키가 없는지 확인합니다. 이후
@@ -97,8 +97,8 @@ kubeseal \
 ```yaml
 resources:
   - db-credentials.yaml
-  - backup-s3-credentials.yaml
-  - backup-cronjob.yaml
+  - backup/s3-credentials.yaml
+  - backup/cronjob.yaml
   - deployment.yaml
   - namespace.yaml
   - service.yaml

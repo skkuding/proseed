@@ -5,7 +5,7 @@ on:
     paths:
       - 'apps/web/**'
       - 'apps/api/**'
-      - 'infra/k8s/postgres/backup/**'
+      - 'infra/k8s/postgres/backup/image/**'
       - '.github/workflows/build-and-push.yaml'
     branches:
       - main
@@ -44,7 +44,7 @@ jobs:
         with:
           filters: |
             postgres_backup:
-              - 'infra/k8s/postgres/backup/**'
+              - 'infra/k8s/postgres/backup/image/**'
               - '.github/workflows/build-and-push.yaml'
 
   build-and-push:
@@ -109,8 +109,8 @@ jobs:
       - name: Build and push Postgres backup image
         uses: docker/build-push-action@v6
         with:
-          context: infra/k8s/postgres/backup
-          file: infra/k8s/postgres/backup/Dockerfile
+          context: infra/k8s/postgres/backup/image
+          file: infra/k8s/postgres/backup/image/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
