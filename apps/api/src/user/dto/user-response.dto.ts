@@ -20,7 +20,7 @@ export class MyProfileResponseDto {
   name!: string
   email!: string
 
-  @ApiProperty({ type: [MyProfileAccountDto] })
+  @ApiProperty({ type: MyProfileAccountDto, isArray: true })
   accounts!: MyProfileAccountDto[]
 
   @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
@@ -52,10 +52,13 @@ export class MyProfileUpdateResponseDto {
   bio!: string | null
 }
 
-/** 다른 유저의 공개 프로필 — email/티켓 등 민감 정보 제외 */
-export class UserProfileResponseDto {
+export class OtherUserProfileResponseDto {
   id!: number
   name!: string
+  email!: string
+
+  @ApiProperty({ type: MyProfileAccountDto, isArray: true })
+  accounts!: MyProfileAccountDto[]
 
   @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
   jobType!: JobType | null
@@ -69,6 +72,13 @@ export class UserProfileResponseDto {
 
   joinedProjectCount!: number
   feedbackCount!: number
+}
+
+export class ProfilePreviewResponseDto {
+  name!: string
+
+  @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
+  jobType!: JobType | null
 }
 
 export class UserResponseDto {

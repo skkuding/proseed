@@ -4,8 +4,11 @@ import { PrismaService } from 'src/prisma/prisma.service'
 
 import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
-import { UserProfileResponseDto } from './dto/user-response.dto'
-import type { MypageUpdateDto } from './dto/mypageUpdate.dto'
+import {
+  OtherUserProfileResponseDto,
+  type ProfilePreviewResponseDto,
+} from './dto/user-response.dto'
+import type { MypageUpdateDto } from './dto/mypage-update.dto'
 
 @Injectable()
 export class UserService {
@@ -153,13 +156,21 @@ export class UserService {
    * @param userId 유저 아이디
    * @returns 공개 프로필 정보
    */
-  async getOtherUserProfile(userId: number): Promise<UserProfileResponseDto> {
+  async getOtherUserProfile(
+    userId: number,
+  ): Promise<OtherUserProfileResponseDto> {
     const [user, joinedProjectCount, feedbackCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
         select: {
           id: true,
           name: true,
+          email: true,
+          accounts: {
+            select: {
+              providerId: true,
+            },
+          },
           jobType: true,
           profileImageUrl: true,
           skills: true,
@@ -182,5 +193,26 @@ export class UserService {
       joinedProjectCount,
       feedbackCount,
     }
+  }
+
+  /**
+   * 프로젝트 생성 시 함께할 팀원 초대를 위해 이메일 주소로 다른 팀원의 공개 프로필을 미리보기합니다.
+   * @param email 유저 이메일
+   * @returns 프로필 미리보기 정보
+   */
+  async getProfilePreviewByEmail(
+    email: string,
+  ): Promise<ProfilePreviewResponseDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        name: true,
+        jobType: true,
+      },
+    })
+
+    if (!user) throw new EntityNotExistException('User')
+
+    return user
   }
 }

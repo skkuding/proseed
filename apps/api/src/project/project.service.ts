@@ -206,6 +206,7 @@ export class ProjectService {
           projectRoles: {
             select: {
               id: true,
+              userId: true,
               user: {
                 select: {
                   name: true,
