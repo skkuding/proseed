@@ -20,7 +20,6 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
   }
   let prisma: {
     project: { findUnique: MockFn }
-    projectRole: { findFirst: MockFn }
     $transaction: MockFn
   }
   let storage: { getSignedDownloadUrl: MockFn }
@@ -37,11 +36,11 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
       },
     }
     prisma = {
-      project: { findUnique: jest.fn().mockResolvedValue({ id: PROJECT_ID }) },
-      projectRole: {
-        findFirst: jest
+      project: {
+        //기본: 프로젝트 존재 + 요청자가 Lead
+        findUnique: jest
           .fn()
-          .mockResolvedValue({ projectMemberRole: ProjectMemberRole.Lead }),
+          .mockResolvedValue({ id: PROJECT_ID, projectRoles: [{ id: 1 }] }),
       },
       $transaction: jest.fn((cb: (t: typeof tx) => Promise<unknown>) => cb(tx)),
     }
@@ -66,16 +65,26 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
   })
 
   it('Lead가 아니면 403', async () => {
-    prisma.projectRole.findFirst.mockResolvedValue(null)
+    prisma.project.findUnique.mockResolvedValue({
+      id: PROJECT_ID,
+      projectRoles: [],
+    })
 
     await expect(
       service.update(2, PROJECT_ID, { title: 'new' }),
     ).rejects.toThrow(ForbiddenAccessException)
-    expect(prisma.projectRole.findFirst).toHaveBeenCalledWith({
-      where: {
-        userId: 2,
-        projectId: PROJECT_ID,
-        projectMemberRole: ProjectMemberRole.Lead,
+    //존재+권한을 한 번의 쿼리로 검증 (Lead 조건은 관계 필터로)
+    expect(prisma.project.findUnique).toHaveBeenCalledWith({
+      where: { id: PROJECT_ID },
+      select: {
+        id: true,
+        projectRoles: {
+          where: {
+            userId: 2,
+            projectMemberRole: ProjectMemberRole.Lead,
+          },
+          select: { id: true },
+        },
       },
     })
     expect(prisma.$transaction).not.toHaveBeenCalled()

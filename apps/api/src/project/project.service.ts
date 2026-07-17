@@ -286,22 +286,24 @@ export class ProjectService {
 
   /** 프로젝트 편집 저장 — Lead만. imageKeys가 오면 이미지 전체 교체 */
   async update(userId: number, projectId: number, dto: UpdateProjectDto) {
+    //존재(404)와 Lead 권한(403)을 한 번의 쿼리로 검증
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true },
+      select: {
+        id: true,
+        projectRoles: {
+          where: {
+            userId,
+            projectMemberRole: ProjectMemberRole.Lead,
+          },
+          select: { id: true },
+        },
+      },
     })
     if (!project) {
       throw new EntityNotExistException('Project')
     }
-
-    const lead = await this.prisma.projectRole.findFirst({
-      where: {
-        userId,
-        projectId,
-        projectMemberRole: ProjectMemberRole.Lead,
-      },
-    })
-    if (!lead) {
+    if (project.projectRoles.length === 0) {
       throw new ForbiddenAccessException('Only Lead can update the project.')
     }
 
