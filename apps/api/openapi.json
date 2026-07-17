@@ -270,12 +270,47 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                  "$ref": "#/components/schemas/OtherUserProfileResponseDto"
                 }
               }
             }
           }
         },
+        "summary": "다른 팀원의 공개 프로필을 조회합니다. (접근 경로: 프로젝트 상세)",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{userId}/profile/projects": {
+      "get": {
+        "operationId": "UserController_getOtherUserJoinedProjects",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MypageJoinedProjectListDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "다른 팀원의 공개 프로필에서 참여중인 프로젝트 목록을 조회합니다.",
         "tags": [
           "User"
         ]
@@ -1238,9 +1273,23 @@
           "links"
         ]
       },
-      "UserProfileResponseDto": {
+      "MyProfileAccountDto": {
         "type": "object",
         "properties": {
+          "providerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId"
+        ]
+      },
+      "OtherUserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "$ref": "#/components/schemas/MyProfileAccountDto"
+          },
           "jobType": {
             "nullable": true,
             "allOf": [
@@ -1257,6 +1306,9 @@
             "type": "number"
           },
           "name": {
+            "type": "string"
+          },
+          "email": {
             "type": "string"
           },
           "profileImageUrl": {
@@ -1282,10 +1334,12 @@
           }
         },
         "required": [
+          "accounts",
           "jobType",
           "bio",
           "id",
           "name",
+          "email",
           "profileImageUrl",
           "skills",
           "links",
@@ -1293,25 +1347,58 @@
           "feedbackCount"
         ]
       },
-      "MyProfileAccountDto": {
+      "ProjectMemberRole": {
+        "type": "string",
+        "enum": [
+          "Lead",
+          "TeamLeader",
+          "TeamMember"
+        ]
+      },
+      "MypageJoinedProjectListDto": {
         "type": "object",
         "properties": {
-          "providerId": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "projectMemberRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMemberRole"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "iconUrl": {
             "type": "string"
           }
         },
         "required": [
-          "providerId"
+          "role",
+          "projectMemberRole",
+          "id",
+          "title",
+          "oneLineDescription",
+          "iconUrl"
         ]
       },
       "MyProfileResponseDto": {
         "type": "object",
         "properties": {
           "accounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MyProfileAccountDto"
-            }
+            "$ref": "#/components/schemas/MyProfileAccountDto"
           },
           "jobType": {
             "nullable": true,
@@ -1446,53 +1533,6 @@
           "profileImageUrl",
           "skills",
           "links"
-        ]
-      },
-      "ProjectMemberRole": {
-        "type": "string",
-        "enum": [
-          "Lead",
-          "TeamLeader",
-          "TeamMember"
-        ]
-      },
-      "MypageJoinedProjectListDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JobType"
-              }
-            ]
-          },
-          "projectMemberRole": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProjectMemberRole"
-              }
-            ]
-          },
-          "id": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "oneLineDescription": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "role",
-          "projectMemberRole",
-          "id",
-          "title",
-          "oneLineDescription",
-          "iconUrl"
         ]
       },
       "MyFeedbackProjectItemDto": {
@@ -2048,6 +2088,9 @@
           "id": {
             "type": "number"
           },
+          "userId": {
+            "type": "number"
+          },
           "user": {
             "$ref": "#/components/schemas/ProjectMemberUserDto"
           }
@@ -2055,6 +2098,7 @@
         "required": [
           "role",
           "id",
+          "userId",
           "user"
         ]
       },
