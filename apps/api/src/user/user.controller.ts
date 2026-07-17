@@ -19,7 +19,7 @@ import { OnboardingDto } from './dto/onboarding.dto'
 import {
   NicknameResponseDto,
   UserCheckResponseDto,
-  UserProfileResponseDto,
+  OtherUserProfileResponseDto,
   UserResponseDto,
 } from './dto/user-response.dto'
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
@@ -70,7 +70,7 @@ export class UserController {
   @Get(':userId/profile')
   async getOtherUserProfile(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<UserProfileResponseDto> {
+  ): Promise<OtherUserProfileResponseDto> {
     return await this.userService.getOtherUserProfile(userId)
   }
 

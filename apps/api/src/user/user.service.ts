@@ -4,7 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service'
 
 import { Prisma, User } from '@prisma/client'
 import { OnboardingDto } from './dto/onboarding.dto'
-import { UserProfileResponseDto } from './dto/user-response.dto'
+import { OtherUserProfileResponseDto } from './dto/user-response.dto'
 import type { MypageUpdateDto } from './dto/mypageUpdate.dto'
 
 @Injectable()
@@ -153,7 +153,9 @@ export class UserService {
    * @param userId 유저 아이디
    * @returns 공개 프로필 정보
    */
-  async getOtherUserProfile(userId: number): Promise<UserProfileResponseDto> {
+  async getOtherUserProfile(
+    userId: number,
+  ): Promise<OtherUserProfileResponseDto> {
     const [user, joinedProjectCount, feedbackCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },

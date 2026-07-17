@@ -93,6 +93,7 @@ export class ProjectMemberUserDto {
 
 export class ProjectMemberDto {
   id: number
+  userId: number
   user: ProjectMemberUserDto
 
   @ApiProperty({ enum: JobType, enumName: 'JobType' })
