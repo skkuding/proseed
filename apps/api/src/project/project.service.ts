@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import { CreateProjectDto } from './dto/create-project.dto'
 import type { GetProjectsDto } from './dto/get-projects.dto'
+import type { UpdateProjectDto } from './dto/update-project.dto'
 
 @Injectable()
 export class ProjectService {
@@ -280,6 +281,53 @@ export class ProjectService {
           })),
         },
       },
+    })
+  }
+
+  /** 프로젝트 편집 저장 — Lead만. imageKeys가 오면 이미지 전체 교체 */
+  async update(userId: number, projectId: number, dto: UpdateProjectDto) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { id: true },
+    })
+    if (!project) {
+      throw new EntityNotExistException('Project')
+    }
+
+    const lead = await this.prisma.projectRole.findFirst({
+      where: {
+        userId,
+        projectId,
+        projectMemberRole: ProjectMemberRole.Lead,
+      },
+    })
+    if (!lead) {
+      throw new ForbiddenAccessException('Only Lead can update the project.')
+    }
+
+    const { iconKey, thumbnailKey, imageKeys, ...scalars } = dto
+
+    return this.prisma.$transaction(async (tx) => {
+      if (imageKeys) {
+        await tx.projectImage.deleteMany({ where: { projectId } })
+      }
+
+      return tx.project.update({
+        where: { id: projectId },
+        data: {
+          ...scalars,
+          ...(iconKey && { iconUrl: iconKey }),
+          ...(thumbnailKey && { thumbnailUrl: thumbnailKey }),
+          ...(imageKeys && {
+            images: {
+              create: imageKeys.map((key, index) => ({
+                url: key,
+                order: index,
+              })),
+            },
+          }),
+        },
+      })
     })
   }
 
