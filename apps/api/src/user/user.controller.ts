@@ -27,7 +27,7 @@ import {
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
 import { MypageJoinedProjectListDto } from 'src/project/dto/project-response.dto'
 import { ProjectService } from 'src/project/project.service'
-import type { ProfilePreviewByEmailDto } from './dto/profile-preview-by-email.dto'
+import { ProfilePreviewByEmailDto } from './dto/profile-preview-by-email.dto'
 
 @ApiTags('User')
 @Controller('user')
