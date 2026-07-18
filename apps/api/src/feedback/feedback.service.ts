@@ -192,6 +192,7 @@ export class FeedbackService {
         feedbackQuestions: {
           select: {
             id: true,
+            category: true,
             isRequired: true,
           },
         },
@@ -234,6 +235,10 @@ export class FeedbackService {
     const submittedQuestionIds = dto.feedbacks.map((f) => f.questionId)
     const submittedQuestionSet = new Set(submittedQuestionIds)
 
+    if (submittedQuestionIds.length === 0) {
+      throw new UnprocessableDataException('Feedback must include answers')
+    }
+
     // 1. 모든 제출된 질문 ID가 해당 버전의 유효한 질문인지 확인
     if (!submittedQuestionIds.every((id) => validQuestionIds.has(id))) {
       throw new EntityNotExistException('feedbackQuestion')
@@ -246,10 +251,25 @@ export class FeedbackService {
       )
     }
 
-    // 3. 필수 질문이 모두 포함되었는지 확인
-    const missingRequired = requiredQuestionIds.filter(
-      (id) => !submittedQuestionSet.has(id),
+    const submittedCategories = new Set(
+      targetVersion.feedbackQuestions
+        .filter((q) => submittedQuestionSet.has(q.id))
+        .map((q) => q.category),
     )
+    const questionCategoryById = new Map(
+      targetVersion.feedbackQuestions.map((q) => [q.id, q.category]),
+    )
+
+    // 3. 제출한 직군 범위 안의 필수 질문이 모두 포함되었는지 확인
+    const missingRequired = requiredQuestionIds.filter((id) => {
+      const category = questionCategoryById.get(id)
+
+      return (
+        category !== undefined &&
+        submittedCategories.has(category) &&
+        !submittedQuestionSet.has(id)
+      )
+    })
     if (missingRequired.length > 0) {
       throw new UnprocessableDataException(
         'Missing required questions: ' + missingRequired.join(', '),
