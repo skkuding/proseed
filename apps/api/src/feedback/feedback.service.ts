@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { UserRole } from '@prisma/client'
+import { RecordCategory, UserRole } from '@prisma/client'
 import {
   CreateFeedbackDto,
   MAX_FEEDBACK_IMAGES_PER_ITEM,
@@ -266,7 +266,8 @@ export class FeedbackService {
 
       return (
         category !== undefined &&
-        submittedCategories.has(category) &&
+        (category === RecordCategory.GENERAL ||
+          submittedCategories.has(category)) &&
         !submittedQuestionSet.has(id)
       )
     })

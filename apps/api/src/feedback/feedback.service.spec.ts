@@ -297,6 +297,33 @@ describe('FeedbackService', () => {
       expect(prisma.feedbackSubmission.create).not.toHaveBeenCalled()
     })
 
+    it('GENERAL 필수 질문은 답변한 직군과 관계없이 누락 시 예외를 던진다', async () => {
+      prisma.projectVersion.findFirst
+        .mockResolvedValueOnce({
+          feedbackQuestions: [
+            {
+              id: 2,
+              category: RecordCategory.DEVELOPMENT,
+              isRequired: true,
+            },
+            {
+              id: 5,
+              category: RecordCategory.GENERAL,
+              isRequired: true,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ id: 20 })
+
+      await expect(
+        service.createFeedback(10, 1, 20, {
+          oneLineReview: '좋았습니다.',
+          feedbacks: [{ questionId: 2, content: '개발 직군 답변' }],
+        }),
+      ).rejects.toThrow(UnprocessableDataException)
+      expect(prisma.feedbackSubmission.create).not.toHaveBeenCalled()
+    })
+
     it('feedbacks가 없으면 서비스 레벨에서 예외를 던진다', async () => {
       prisma.projectVersion.findFirst
         .mockResolvedValueOnce({
