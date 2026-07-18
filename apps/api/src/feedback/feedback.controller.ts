@@ -12,6 +12,7 @@ import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
+  FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
   MyFeedbackProjectsResponseDto,
 } from './dto/feedback-response.dto'
@@ -49,6 +50,18 @@ export class FeedbackController {
   ): Promise<FeedbackQuestionsResponseDto> {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
+
+  // GET project/:projectId/versions/:versionId/feedbacks
+  @Get('feedbacks')
+  async findFeedbacksForVersion(
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+  ): Promise<CreateFeedbackResponseDto> {
+    return await this.feedbackService.findFeedbacksForVersion(
+      projectId,
+      versionId,
+    )
+  }
 }
 
 //전역 가드로 전 라우트 인증 필수
@@ -64,5 +77,17 @@ export class MyFeedbackController {
     @Req() req: RequestWithUser,
   ): Promise<MyFeedbackProjectsResponseDto> {
     return await this.feedbackService.findMyFeedbackProjects(req.user.id)
+  }
+
+  // GET feedbacks/:submissionId
+  @Get(':submissionId')
+  async findFeedbackSubmissionDetail(
+    @Req() req: RequestWithUser,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+  ): Promise<FeedbackSubmissionDetailResponseDto> {
+    return await this.feedbackService.findFeedbackSubmissionDetail(
+      req.user.id,
+      submissionId,
+    )
   }
 }
