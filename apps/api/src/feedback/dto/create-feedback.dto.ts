@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer'
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsNotEmpty,
   IsNumber,
@@ -37,6 +38,7 @@ export class CreateFeedbackDto {
   oneLineReview!: string
 
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => FeedbackItemDto)
   feedbacks!: FeedbackItemDto[]

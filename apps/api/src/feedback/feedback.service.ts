@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { UserRole } from '@prisma/client'
+import { RecordCategory, UserRole } from '@prisma/client'
 import {
   CreateFeedbackDto,
   MAX_FEEDBACK_IMAGES_PER_ITEM,
 } from './dto/create-feedback.dto'
 import {
   CreateFeedbackResponseDto,
+  FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
   MyFeedbackProjectsResponseDto,
   RecentFeedbacksResponseDto,
@@ -112,6 +113,110 @@ export class FeedbackService {
     return { success: true, data }
   }
 
+  async findFeedbackSubmissionDetail(
+    userId: number,
+    submissionId: number,
+  ): Promise<FeedbackSubmissionDetailResponseDto> {
+    const submission = await this.prisma.feedbackSubmission.findUnique({
+      where: { id: submissionId },
+      select: {
+        id: true,
+        userId: true,
+        projectId: true,
+        versionId: true,
+        oneLineReview: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            name: true,
+            profileImageUrl: true,
+            jobType: true,
+          },
+        },
+        feedbacks: {
+          select: {
+            id: true,
+            questionId: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+            question: {
+              select: {
+                category: true,
+                title: true,
+                description: true,
+                order: true,
+              },
+            },
+            images: {
+              select: { url: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+
+    if (!submission) {
+      throw new EntityNotExistException('FeedbackSubmission')
+    }
+
+    const isAuthor = submission.userId === userId
+    if (!isAuthor) {
+      const isProjectMember = await this.prisma.projectRole.findUnique({
+        where: {
+          userId_projectId: {
+            userId,
+            projectId: submission.projectId,
+          },
+        },
+      })
+
+      if (!isProjectMember) {
+        throw new ForbiddenAccessException('Access denied')
+      }
+    }
+
+    const feedbacks = await Promise.all(
+      submission.feedbacks
+        .sort((a, b) => a.question.order - b.question.order)
+        .map(async (feedback) => ({
+          id: feedback.id,
+          questionId: feedback.questionId,
+          category: feedback.question.category,
+          questionTitle: feedback.question.title,
+          questionContent: feedback.question.description,
+          content: feedback.content,
+          imageUrls: await Promise.all(
+            feedback.images.map((image) =>
+              this.storage.getSignedDownloadUrl(image.url),
+            ),
+          ),
+          createdAt: feedback.createdAt,
+          updatedAt: feedback.updatedAt,
+        })),
+    )
+
+    return {
+      success: true,
+      data: {
+        id: submission.id,
+        projectId: submission.projectId,
+        versionId: submission.versionId,
+        oneLineReview: submission.oneLineReview,
+        author: {
+          name: submission.user.name,
+          profileImageUrl: submission.user.profileImageUrl,
+          role: submission.user.jobType,
+        },
+        createdAt: submission.createdAt,
+        updatedAt: submission.updatedAt,
+        feedbacks,
+      },
+    }
+  }
+
   async findMyFeedbackProjects(
     userId: number,
   ): Promise<MyFeedbackProjectsResponseDto> {
@@ -167,6 +272,7 @@ export class FeedbackService {
         feedbackQuestions: {
           select: {
             id: true,
+            category: true,
             isRequired: true,
           },
         },
@@ -206,6 +312,10 @@ export class FeedbackService {
       .filter((q) => q.isRequired)
       .map((q) => q.id)
 
+    if (!Array.isArray(dto.feedbacks) || dto.feedbacks.length === 0) {
+      throw new UnprocessableDataException('Feedback must include answers')
+    }
+
     const submittedQuestionIds = dto.feedbacks.map((f) => f.questionId)
     const submittedQuestionSet = new Set(submittedQuestionIds)
 
@@ -221,10 +331,26 @@ export class FeedbackService {
       )
     }
 
-    // 3. 필수 질문이 모두 포함되었는지 확인
-    const missingRequired = requiredQuestionIds.filter(
-      (id) => !submittedQuestionSet.has(id),
+    const submittedCategories = new Set(
+      targetVersion.feedbackQuestions
+        .filter((q) => submittedQuestionSet.has(q.id))
+        .map((q) => q.category),
     )
+    const questionCategoryById = new Map(
+      targetVersion.feedbackQuestions.map((q) => [q.id, q.category]),
+    )
+
+    // 3. 제출한 직군 범위 안의 필수 질문이 모두 포함되었는지 확인
+    const missingRequired = requiredQuestionIds.filter((id) => {
+      const category = questionCategoryById.get(id)
+
+      return (
+        category !== undefined &&
+        (category === RecordCategory.GENERAL ||
+          submittedCategories.has(category)) &&
+        !submittedQuestionSet.has(id)
+      )
+    })
     if (missingRequired.length > 0) {
       throw new UnprocessableDataException(
         'Missing required questions: ' + missingRequired.join(', '),
@@ -275,6 +401,40 @@ export class FeedbackService {
           imageUrls: f.images.map((image) => image.url),
           createdAt: f.createdAt,
         })),
+      },
+    }
+  }
+
+  async findFeedbacksForVersion(
+    projectId: number,
+    versionId: number,
+  ): Promise<CreateFeedbackResponseDto> {
+    const submissions = await this.prisma.feedbackSubmission.findMany({
+      where: { projectId, versionId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        feedbacks: { include: { images: { orderBy: { order: 'asc' } } } },
+      },
+    })
+
+    const feedbacks = submissions.flatMap((submission) =>
+      submission.feedbacks.map((f) => ({
+        id: f.id,
+        questionId: f.questionId,
+        versionId: submission.versionId,
+        userId: submission.userId,
+        content: f.content,
+        imageUrl: f.images[0]?.url || null,
+        imageUrls: f.images.map((i) => i.url),
+        createdAt: f.createdAt,
+      })),
+    )
+
+    return {
+      success: true,
+      data: {
+        submittedCount: feedbacks.length,
+        feedbacks,
       },
     }
   }

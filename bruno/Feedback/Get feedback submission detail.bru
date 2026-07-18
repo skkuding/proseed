@@ -1,0 +1,21 @@
+meta {
+  name: Get feedback submission detail
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/feedbacks/1
+  body: none
+  auth: inherit
+}
+
+docs {
+  인증된 사용자가 FeedbackSubmission 한 건의 한 줄 평가와 질문별 답변을 조회합니다.
+  존재하지 않는 submissionId는 404를 반환합니다.
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

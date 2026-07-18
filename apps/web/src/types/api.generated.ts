@@ -148,6 +148,23 @@ export interface paths {
         patch: operations["UserController_onboarding"];
         trace?: never;
     };
+    "/user/profile/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 다른 팀원의 공개 프로필 미리보기를 이메일 주소를 통해 조회합니다. */
+        get: operations["UserController_getProfilePreviewByEmail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/{userId}/profile": {
         parameters: {
             query?: never;
@@ -155,7 +172,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** 다른 팀원의 공개 프로필을 조회합니다. (접근 경로: 프로젝트 상세) */
         get: operations["UserController_getOtherUserProfile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/{userId}/profile/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 다른 팀원의 공개 프로필에서 참여중인 프로젝트 목록을 조회합니다. */
+        get: operations["UserController_getOtherUserJoinedProjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -219,7 +254,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["FeedbackController_findFeedbacksForVersion"];
         put?: never;
         post: operations["FeedbackController_createFeedback"];
         delete?: never;
@@ -244,6 +279,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feedbacks/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MyFeedbackController_getRecentFeedbacks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/feedbacks/my/projects": {
         parameters: {
             query?: never;
@@ -260,14 +311,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/feedbacks/recent": {
+    "/feedbacks/{submissionId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["MyFeedbackController_getRecentFeedbacks"];
+        get: operations["MyFeedbackController_findFeedbackSubmissionDetail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -321,7 +372,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["ProjectController_update"];
         trace?: never;
     };
     "/project/{id}/invite": {
@@ -491,19 +542,35 @@ export interface components {
             skills: string[];
             links: string[];
         };
-        UserProfileResponseDto: {
+        ProfilePreviewResponseDto: {
+            jobType: components["schemas"]["JobType"] | null;
+            name: string;
+        };
+        MyProfileAccountDto: {
+            providerId: string;
+        };
+        OtherUserProfileResponseDto: {
+            accounts: components["schemas"]["MyProfileAccountDto"][];
             jobType: components["schemas"]["JobType"] | null;
             bio: string | null;
             id: number;
             name: string;
+            email: string;
             profileImageUrl: string;
             skills: string[];
             links: string[];
             joinedProjectCount: number;
             feedbackCount: number;
         };
-        MyProfileAccountDto: {
-            providerId: string;
+        /** @enum {string} */
+        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
+        MypageJoinedProjectListDto: {
+            role: components["schemas"]["JobType"];
+            projectMemberRole: components["schemas"]["ProjectMemberRole"];
+            id: number;
+            title: string;
+            oneLineDescription: string;
+            iconUrl: string;
         };
         MyProfileResponseDto: {
             accounts: components["schemas"]["MyProfileAccountDto"][];
@@ -534,16 +601,6 @@ export interface components {
             profileImageUrl: string;
             skills: string[];
             links: string[];
-        };
-        /** @enum {string} */
-        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
-        MypageJoinedProjectListDto: {
-            role: components["schemas"]["JobType"];
-            projectMemberRole: components["schemas"]["ProjectMemberRole"];
-            id: number;
-            title: string;
-            oneLineDescription: string;
-            iconUrl: string;
         };
         MyFeedbackProjectItemDto: {
             submissionId: number;
@@ -619,6 +676,40 @@ export interface components {
             success: boolean;
             data: components["schemas"]["RecentFeedbackItemDto"][];
         };
+        FeedbackSubmissionAuthorDto: {
+            role: components["schemas"]["JobType"] | null;
+            name: string;
+            profileImageUrl: string;
+        };
+        FeedbackSubmissionAnswerDto: {
+            category: components["schemas"]["RecordCategory"];
+            imageUrls: string[];
+            id: number;
+            questionId: number;
+            questionTitle: string;
+            questionContent: string;
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        FeedbackSubmissionDetailDto: {
+            id: number;
+            projectId: number;
+            versionId: number;
+            oneLineReview: string;
+            author: components["schemas"]["FeedbackSubmissionAuthorDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            feedbacks: components["schemas"]["FeedbackSubmissionAnswerDto"][];
+        };
+        FeedbackSubmissionDetailResponseDto: {
+            success: boolean;
+            data: components["schemas"]["FeedbackSubmissionDetailDto"];
+        };
         CreateProjectDto: {
             title: string;
             /** @enum {string} */
@@ -689,6 +780,7 @@ export interface components {
         ProjectMemberDto: {
             role: components["schemas"]["JobType"];
             id: number;
+            userId: number;
             user: components["schemas"]["ProjectMemberUserDto"];
         };
         ProjectDetailResponseDto: {
@@ -714,6 +806,21 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        UpdateProjectDto: {
+            title?: string;
+            /** @enum {string} */
+            type?: "APP" | "WEB";
+            /** @enum {string} */
+            status?: "Available" | "MVP" | "Ongoing" | "Hiring";
+            oneLineDescription?: string;
+            description?: string;
+            category?: ("HEALTHCARE" | "FINANCE" | "PUBLIC" | "COMMERCE" | "EDUCATION" | "ENTERTAINMENT" | "MOBILITY" | "ENERGY" | "REALESTATE" | "LIFESTYLE" | "PRODUCTIVITY" | "COMMUNITY" | "AI")[];
+            contactPath?: string;
+            projectLink?: string;
+            iconKey?: string;
+            thumbnailKey?: string;
+            imageKeys?: string[];
         };
         InviteCollaboratorDto: {
             /** Format: email */
@@ -1096,6 +1203,28 @@ export interface operations {
             };
         };
     };
+    UserController_getProfilePreviewByEmail: {
+        parameters: {
+            query: {
+                /** @description 검색할 유저의 이메일 주소 */
+                email: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfilePreviewResponseDto"];
+                };
+            };
+        };
+    };
     UserController_getOtherUserProfile: {
         parameters: {
             query?: never;
@@ -1112,7 +1241,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserProfileResponseDto"];
+                    "application/json": components["schemas"]["OtherUserProfileResponseDto"];
+                };
+            };
+        };
+    };
+    UserController_getOtherUserJoinedProjects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MypageJoinedProjectListDto"][];
                 };
             };
         };
@@ -1197,6 +1347,28 @@ export interface operations {
             };
         };
     };
+    FeedbackController_findFeedbacksForVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                versionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateFeedbackResponseDto"];
+                };
+            };
+        };
+    };
     FeedbackController_createFeedback: {
         parameters: {
             query?: never;
@@ -1245,6 +1417,27 @@ export interface operations {
             };
         };
     };
+    MyFeedbackController_getRecentFeedbacks: {
+        parameters: {
+            query?: {
+                take?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecentFeedbacksResponseDto"];
+                };
+            };
+        };
+    };
     MyFeedbackController_findMyFeedbackProjects: {
         parameters: {
             query?: never;
@@ -1264,13 +1457,13 @@ export interface operations {
             };
         };
     };
-    MyFeedbackController_getRecentFeedbacks: {
+    MyFeedbackController_findFeedbackSubmissionDetail: {
         parameters: {
-            query?: {
-                take?: number;
-            };
+            query?: never;
             header?: never;
-            path?: never;
+            path: {
+                submissionId: number;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -1280,7 +1473,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RecentFeedbacksResponseDto"];
+                    "application/json": components["schemas"]["FeedbackSubmissionDetailResponseDto"];
                 };
             };
         };
@@ -1368,6 +1561,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectDetailResponseDto"];
+                };
+            };
+        };
+    };
+    ProjectController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProjectDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectResponseDto"];
                 };
             };
         };

@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import { CreateProjectDto } from './dto/create-project.dto'
 import type { GetProjectsDto } from './dto/get-projects.dto'
+import type { UpdateProjectDto } from './dto/update-project.dto'
 
 @Injectable()
 export class ProjectService {
@@ -206,6 +207,7 @@ export class ProjectService {
           projectRoles: {
             select: {
               id: true,
+              userId: true,
               user: {
                 select: {
                   name: true,
@@ -281,6 +283,63 @@ export class ProjectService {
         },
       },
     })
+  }
+
+  /** 프로젝트 편집 저장 — Lead만. imageKeys가 오면 이미지 전체 교체 */
+  async update(userId: number, projectId: number, dto: UpdateProjectDto) {
+    //존재(404)와 Lead 권한(403)을 한 번의 쿼리로 검증
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        projectRoles: {
+          where: {
+            userId,
+            projectMemberRole: ProjectMemberRole.Lead,
+          },
+          select: { id: true },
+        },
+      },
+    })
+    if (!project) {
+      throw new EntityNotExistException('Project')
+    }
+    if (project.projectRoles.length === 0) {
+      throw new ForbiddenAccessException('Only Lead can update the project.')
+    }
+
+    const { iconKey, thumbnailKey, imageKeys, ...scalars } = dto
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      if (imageKeys) {
+        await tx.projectImage.deleteMany({ where: { projectId } })
+      }
+
+      return tx.project.update({
+        where: { id: projectId },
+        data: {
+          ...scalars,
+          ...(iconKey && { iconUrl: iconKey }),
+          ...(thumbnailKey && { thumbnailUrl: thumbnailKey }),
+          ...(imageKeys && {
+            images: {
+              create: imageKeys.map((key, index) => ({
+                url: key,
+                order: index,
+              })),
+            },
+          }),
+        },
+      })
+    })
+
+    //응답은 FE가 바로 렌더링할 수 있도록 presigned URL로 변환 (getProjectById와 동일)
+    const [iconUrl, thumbnailUrl] = await Promise.all([
+      this.storage.getSignedDownloadUrl(updated.iconUrl),
+      this.storage.getSignedDownloadUrl(updated.thumbnailUrl),
+    ])
+
+    return { ...updated, iconUrl, thumbnailUrl }
   }
 
   async inviteCollaborator(

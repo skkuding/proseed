@@ -251,6 +251,45 @@
         ]
       }
     },
+    "/user/profile/preview": {
+      "get": {
+        "operationId": "UserController_getProfilePreviewByEmail",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "description": "검색할 유저의 이메일 주소",
+            "schema": {
+              "format": "email",
+              "example": "user@example.com",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilePreviewResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "다른 팀원의 공개 프로필 미리보기를 이메일 주소를 통해 조회합니다.",
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/user/{userId}/profile": {
       "get": {
         "operationId": "UserController_getOtherUserProfile",
@@ -270,12 +309,47 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                  "$ref": "#/components/schemas/OtherUserProfileResponseDto"
                 }
               }
             }
           }
         },
+        "summary": "다른 팀원의 공개 프로필을 조회합니다. (접근 경로: 프로젝트 상세)",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/user/{userId}/profile/projects": {
+      "get": {
+        "operationId": "UserController_getOtherUserJoinedProjects",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MypageJoinedProjectListDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "다른 팀원의 공개 프로필에서 참여중인 프로젝트 목록을 조회합니다.",
         "tags": [
           "User"
         ]
@@ -447,6 +521,47 @@
         "tags": [
           "Feedback"
         ]
+      },
+      "get": {
+        "operationId": "FeedbackController_findFeedbacksForVersion",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
       }
     },
     "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
@@ -492,32 +607,6 @@
         ]
       }
     },
-    "/feedbacks/my/projects": {
-      "get": {
-        "operationId": "MyFeedbackController_findMyFeedbackProjects",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
-        "tags": [
-          "Feedback"
-        ]
-      }
-    },
     "/feedbacks/recent": {
       "get": {
         "operationId": "MyFeedbackController_getRecentFeedbacks",
@@ -546,6 +635,67 @@
             }
           }
         },
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/feedbacks/my/projects": {
+      "get": {
+        "operationId": "MyFeedbackController_findMyFeedbackProjects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/feedbacks/{submissionId}": {
+      "get": {
+        "operationId": "MyFeedbackController_findFeedbackSubmissionDetail",
+        "parameters": [
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackSubmissionDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "tags": [
           "Feedback"
         ]
@@ -710,6 +860,49 @@
             }
           }
         },
+        "tags": [
+          "Project"
+        ]
+      },
+      "patch": {
+        "operationId": "ProjectController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "tags": [
           "Project"
         ]
@@ -1308,9 +1501,46 @@
           "links"
         ]
       },
-      "UserProfileResponseDto": {
+      "ProfilePreviewResponseDto": {
         "type": "object",
         "properties": {
+          "jobType": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "jobType",
+          "name"
+        ]
+      },
+      "MyProfileAccountDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId"
+        ]
+      },
+      "OtherUserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyProfileAccountDto"
+            }
+          },
           "jobType": {
             "nullable": true,
             "allOf": [
@@ -1327,6 +1557,9 @@
             "type": "number"
           },
           "name": {
+            "type": "string"
+          },
+          "email": {
             "type": "string"
           },
           "profileImageUrl": {
@@ -1352,10 +1585,12 @@
           }
         },
         "required": [
+          "accounts",
           "jobType",
           "bio",
           "id",
           "name",
+          "email",
           "profileImageUrl",
           "skills",
           "links",
@@ -1363,15 +1598,51 @@
           "feedbackCount"
         ]
       },
-      "MyProfileAccountDto": {
+      "ProjectMemberRole": {
+        "type": "string",
+        "enum": [
+          "Lead",
+          "TeamLeader",
+          "TeamMember"
+        ]
+      },
+      "MypageJoinedProjectListDto": {
         "type": "object",
         "properties": {
-          "providerId": {
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "projectMemberRole": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMemberRole"
+              }
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "iconUrl": {
             "type": "string"
           }
         },
         "required": [
-          "providerId"
+          "role",
+          "projectMemberRole",
+          "id",
+          "title",
+          "oneLineDescription",
+          "iconUrl"
         ]
       },
       "MyProfileResponseDto": {
@@ -1518,53 +1789,6 @@
           "links"
         ]
       },
-      "ProjectMemberRole": {
-        "type": "string",
-        "enum": [
-          "Lead",
-          "TeamLeader",
-          "TeamMember"
-        ]
-      },
-      "MypageJoinedProjectListDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JobType"
-              }
-            ]
-          },
-          "projectMemberRole": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ProjectMemberRole"
-              }
-            ]
-          },
-          "id": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "oneLineDescription": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "role",
-          "projectMemberRole",
-          "id",
-          "title",
-          "oneLineDescription",
-          "iconUrl"
-        ]
-      },
       "MyFeedbackProjectItemDto": {
         "type": "object",
         "properties": {
@@ -1650,6 +1874,7 @@
             "type": "string"
           },
           "feedbacks": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeedbackItemDto"
@@ -1860,6 +2085,141 @@
             "items": {
               "$ref": "#/components/schemas/RecentFeedbackItemDto"
             }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "FeedbackSubmissionAuthorDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "FeedbackSubmissionAnswerDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "questionId": {
+            "type": "number"
+          },
+          "questionTitle": {
+            "type": "string"
+          },
+          "questionContent": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "imageUrls",
+          "id",
+          "questionId",
+          "questionTitle",
+          "questionContent",
+          "content",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "FeedbackSubmissionDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "oneLineReview": {
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/FeedbackSubmissionAuthorDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackSubmissionAnswerDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "versionId",
+          "oneLineReview",
+          "author",
+          "createdAt",
+          "updatedAt",
+          "feedbacks"
+        ]
+      },
+      "FeedbackSubmissionDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FeedbackSubmissionDetailDto"
           }
         },
         "required": [
@@ -2185,6 +2545,9 @@
           "id": {
             "type": "number"
           },
+          "userId": {
+            "type": "number"
+          },
           "user": {
             "$ref": "#/components/schemas/ProjectMemberUserDto"
           }
@@ -2192,6 +2555,7 @@
         "required": [
           "role",
           "id",
+          "userId",
           "user"
         ]
       },
@@ -2299,6 +2663,75 @@
           "createdAt",
           "updatedAt"
         ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "APP",
+              "WEB"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "Available",
+              "MVP",
+              "Ongoing",
+              "Hiring"
+            ],
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "HEALTHCARE",
+                "FINANCE",
+                "PUBLIC",
+                "COMMERCE",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "MOBILITY",
+                "ENERGY",
+                "REALESTATE",
+                "LIFESTYLE",
+                "PRODUCTIVITY",
+                "COMMUNITY",
+                "AI"
+              ]
+            }
+          },
+          "contactPath": {
+            "type": "string"
+          },
+          "projectLink": {
+            "type": "string"
+          },
+          "iconKey": {
+            "type": "string"
+          },
+          "thumbnailKey": {
+            "type": "string"
+          },
+          "imageKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "InviteCollaboratorDto": {
         "type": "object",

@@ -7,6 +7,7 @@ import {
   Patch,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 
@@ -19,15 +20,22 @@ import { OnboardingDto } from './dto/onboarding.dto'
 import {
   NicknameResponseDto,
   UserCheckResponseDto,
-  UserProfileResponseDto,
+  OtherUserProfileResponseDto,
   UserResponseDto,
+  ProfilePreviewResponseDto,
 } from './dto/user-response.dto'
 import { BetterAuthGuard } from 'src/auth/guards/better-auth.guard'
+import { MypageJoinedProjectListDto } from 'src/project/dto/project-response.dto'
+import { ProjectService } from 'src/project/project.service'
+import { ProfilePreviewByEmailDto } from './dto/profile-preview-by-email.dto'
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly projectService: ProjectService,
+  ) {}
 
   @ApiCookieAuth()
   @UseGuards(BetterAuthGuard)
@@ -55,12 +63,46 @@ export class UserController {
     return await this.userService.onboarding(req.user.id, onboardingDto)
   }
 
-  //프로젝트 상세(비로그인 열람 가능)의 팀원 프로필용 — 공개 정보만 반환
+  /**
+   * 다른 팀원의 공개 프로필 미리보기를 이메일 주소를 통해 조회합니다.
+   *
+   * @param email 검색 시 입력하는 다른 팀원의 이메일 주소
+   * @returns 프로필 미리보기에 필요한 정보: name & jobType
+   */
+  @ApiCookieAuth()
+  @UseGuards(BetterAuthGuard)
+  @Get('profile/preview')
+  async getProfilePreviewByEmail(
+    @Query() query: ProfilePreviewByEmailDto,
+  ): Promise<ProfilePreviewResponseDto> {
+    return this.userService.getProfilePreviewByEmail(query.email)
+  }
+
+  /**
+   * 다른 팀원의 공개 프로필을 조회합니다. (접근 경로: 프로젝트 상세)
+   *
+   * @param userId 다른 팀원의 유저 아이디
+   * @returns 댜른 팀원의 공개 프로필 정보
+   */
   @Public()
   @Get(':userId/profile')
   async getOtherUserProfile(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<UserProfileResponseDto> {
+  ): Promise<OtherUserProfileResponseDto> {
     return await this.userService.getOtherUserProfile(userId)
+  }
+
+  /**
+   * 다른 팀원의 공개 프로필에서 참여중인 프로젝트 목록을 조회합니다.
+   *
+   * @param userId 다른 팀원의 유저 아이디
+   * @returns 다른 팀원이 참여중인 프로젝트 목록
+   */
+  @Public()
+  @Get(':userId/profile/projects')
+  async getOtherUserJoinedProjects(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<MypageJoinedProjectListDto[]> {
+    return this.projectService.getJoinedProjects(userId)
   }
 }
