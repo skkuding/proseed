@@ -9,6 +9,7 @@ import {
   FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
   MyFeedbackProjectsResponseDto,
+  RecentFeedbacksResponseDto,
 } from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
@@ -32,6 +33,85 @@ export class FeedbackService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
   ) {}
+
+  /**
+   * mainpage 최근 피드백 — 채택(FeedbackAdoption)된 제출만 공개 (본문 게이팅 정책과 정합).
+   * 카드 단위 = 채택(제출×직군), 본문 = 해당 직군 질문에 대한 첫 답변.
+   */
+  async getRecentFeedbacks(take: number): Promise<RecentFeedbacksResponseDto> {
+    const adoptions = await this.prisma.feedbackAdoption.findMany({
+      orderBy: { id: 'desc' },
+      take,
+      select: {
+        submissionId: true,
+        growthRecord: { select: { category: true } },
+        submission: {
+          select: {
+            oneLineReview: true,
+            user: { select: { name: true, profileImageUrl: true } },
+            project: { select: { id: true, title: true, iconUrl: true } },
+          },
+        },
+      },
+    })
+
+    if (adoptions.length === 0) {
+      return { success: true, data: [] }
+    }
+
+    //채택 직군의 첫 답변을 카드 본문으로 사용 — (제출, 직군) 쌍 단위로 정확히 조회
+    const answers = await this.prisma.feedback.findMany({
+      where: {
+        OR: adoptions.map((a) => ({
+          submissionId: a.submissionId,
+          question: { category: a.growthRecord.category },
+        })),
+      },
+      orderBy: [{ question: { order: 'asc' } }, { id: 'asc' }],
+      select: {
+        submissionId: true,
+        content: true,
+        question: { select: { category: true } },
+      },
+    })
+
+    const firstAnswerByKey = new Map<string, string>()
+    for (const answer of answers) {
+      const key = `${answer.submissionId}:${answer.question.category}`
+      if (!firstAnswerByKey.has(key)) {
+        firstAnswerByKey.set(key, answer.content)
+      }
+    }
+
+    //프로젝트 아이콘 S3 key → presigned URL (중복 프로젝트는 1회만 변환)
+    const iconUrlByKey = new Map<string, string>()
+    await Promise.all(
+      [...new Set(adoptions.map((a) => a.submission.project.iconUrl))].map(
+        async (key) => {
+          iconUrlByKey.set(key, await this.storage.getSignedDownloadUrl(key))
+        },
+      ),
+    )
+
+    const data = adoptions.map((adoption) => ({
+      submissionId: adoption.submissionId,
+      category: adoption.growthRecord.category,
+      nickname: adoption.submission.user.name,
+      profileImageUrl: adoption.submission.user.profileImageUrl,
+      oneLineReview: adoption.submission.oneLineReview,
+      content:
+        firstAnswerByKey.get(
+          `${adoption.submissionId}:${adoption.growthRecord.category}`,
+        ) ?? '',
+      projectId: adoption.submission.project.id,
+      projectName: adoption.submission.project.title,
+      projectIconUrl:
+        iconUrlByKey.get(adoption.submission.project.iconUrl) ??
+        adoption.submission.project.iconUrl,
+    }))
+
+    return { success: true, data }
+  }
 
   async findFeedbackSubmissionDetail(
     userId: number,

@@ -444,3 +444,86 @@ describe('GrowthRecordService', () => {
     })
   })
 })
+
+describe('getRecentGrowthRecords — mainpage 최근 성장기록', () => {
+  const buildVersion = (id: number, iconUrl = 'icon-key') => ({
+    id,
+    updateGoal: `goal-${id}`,
+    releasedAt: new Date('2026-07-01T00:00:00Z'),
+    createdAt: new Date('2026-06-30T00:00:00Z'),
+    project: {
+      id: id * 10,
+      title: `project-${id}`,
+      iconUrl,
+      category: ['PRODUCTIVITY'],
+    },
+    growthRecords: ALL_CATEGORIES.map((category, index) => ({
+      id: id * 100 + index,
+      category,
+      contents: [{ title: `title-${category}` }],
+    })),
+  })
+
+  const setup = (versions: unknown[]) => {
+    const prisma = {
+      projectVersion: { findMany: jest.fn().mockResolvedValue(versions) },
+    }
+    const storage = {
+      getSignedDownloadUrl: jest.fn().mockResolvedValue('signed-icon-url'),
+    }
+    const service = new GrowthRecordService(
+      prisma as unknown as PrismaService,
+      storage as unknown as StorageService,
+    )
+    return { service, prisma, storage }
+  }
+
+  it('발행 버전 × 4개 직군을 flat하게 매핑한다 (아이콘은 presigned)', async () => {
+    const { service, prisma } = setup([buildVersion(1)])
+
+    const result = await service.getRecentGrowthRecords(5)
+
+    expect(prisma.projectVersion.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { releasedAt: { not: null } },
+        orderBy: { releasedAt: 'desc' },
+        take: 5,
+      }),
+    )
+    expect(result).toHaveLength(4)
+    expect(result[0]).toEqual({
+      growthRecordId: 100,
+      versionId: 1,
+      projectId: 10,
+      projectName: 'project-1',
+      projectIconUrl: 'signed-icon-url',
+      projectCategories: ['PRODUCTIVITY'],
+      category: ALL_CATEGORIES[0],
+      title: `title-${ALL_CATEGORIES[0]}`,
+      updateGoal: 'goal-1',
+      releasedAt: new Date('2026-07-01T00:00:00Z'),
+    })
+  })
+
+  it('같은 프로젝트 아이콘은 presign을 1회만 호출한다', async () => {
+    const { service, storage } = setup([
+      buildVersion(1, 'same-key'),
+      buildVersion(2, 'same-key'),
+    ])
+
+    const result = await service.getRecentGrowthRecords(5)
+
+    expect(result).toHaveLength(8)
+    expect(storage.getSignedDownloadUrl).toHaveBeenCalledTimes(1)
+  })
+
+  it('content가 없는 성장기록의 title은 빈 문자열이다', async () => {
+    const version = buildVersion(1)
+    version.growthRecords[0].contents = []
+    const { service } = setup([version])
+
+    const result = await service.getRecentGrowthRecords(5)
+
+    expect(result[0].title).toBe('')
+  })
+})

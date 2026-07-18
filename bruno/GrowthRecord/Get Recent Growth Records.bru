@@ -1,0 +1,27 @@
+meta {
+  name: Get Recent Growth Records
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/growth-records/recent?take=5
+  body: none
+  auth: inherit
+}
+
+params:query {
+  take: 5
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  mainpage 최근 성장기록 — 공개(@Public).
+  최근 발행 버전 take개(기본 5, 최대 20) × 4개 직군을 flat 반환.
+  title = 해당 직군 성장기록의 첫 content title, projectIconUrl은 presigned.
+  에러: take가 1~20 범위 밖이거나 정수가 아니면 400.
+}

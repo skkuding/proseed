@@ -19,6 +19,7 @@ import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import {
   FeedbackTemplateDto,
   PublishVersionResponseDto,
+  RecentGrowthRecordDto,
   VersionDetailResponseDto,
 } from './dto/version-response.dto'
 
@@ -55,6 +56,62 @@ export class GrowthRecordService {
       category: template.category,
       questions: [...template.questions],
     }))
+  }
+
+  /**
+   * mainpage 최근 성장기록 — 최근 발행 버전 take개 × 4개 직군을 flat 반환.
+   * 발행은 4개 직군 전부 필수라 탭별 카드 수가 자동으로 균등하다.
+   */
+  async getRecentGrowthRecords(take: number): Promise<RecentGrowthRecordDto[]> {
+    const versions = await this.prisma.projectVersion.findMany({
+      where: { releasedAt: { not: null } },
+      orderBy: { releasedAt: 'desc' },
+      take,
+      select: {
+        id: true,
+        updateGoal: true,
+        releasedAt: true,
+        createdAt: true,
+        project: {
+          select: { id: true, title: true, iconUrl: true, category: true },
+        },
+        growthRecords: {
+          select: {
+            id: true,
+            category: true,
+            contents: {
+              orderBy: { id: 'asc' },
+              take: 1,
+              select: { title: true },
+            },
+          },
+        },
+      },
+    })
+
+    //프로젝트 아이콘 S3 key → presigned URL (중복 프로젝트는 1회만 변환)
+    const iconUrlByKey = new Map<string, string>()
+    await Promise.all(
+      [...new Set(versions.map((v) => v.project.iconUrl))].map(async (key) => {
+        iconUrlByKey.set(key, await this.storage.getSignedDownloadUrl(key))
+      }),
+    )
+
+    return versions.flatMap((version) =>
+      version.growthRecords.map((record) => ({
+        growthRecordId: record.id,
+        versionId: version.id,
+        projectId: version.project.id,
+        projectName: version.project.title,
+        projectIconUrl:
+          iconUrlByKey.get(version.project.iconUrl) ?? version.project.iconUrl,
+        projectCategories: version.project.category,
+        category: record.category,
+        title: record.contents[0]?.title ?? '',
+        updateGoal: version.updateGoal,
+        releasedAt: version.releasedAt ?? version.createdAt,
+      })),
+    )
   }
 
   /**

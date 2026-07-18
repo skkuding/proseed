@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { JobType, RecordCategory } from '@prisma/client'
+import { JobType, ProjectCategory, RecordCategory } from '@prisma/client'
 
 //발행/상세가 공유하는 피드백 질문 응답 shape
 export class VersionFeedbackQuestionDto {
@@ -127,4 +127,31 @@ export class VersionDetailResponseDto {
   updatedAt: Date
   growthRecords: VersionDetailGrowthRecordDto[]
   feedbackQuestions: VersionFeedbackQuestionDto[]
+}
+
+//mainpage 최근 성장기록 카드 — 발행 버전×직군 단위
+export class RecentGrowthRecordDto {
+  growthRecordId: number
+  versionId: number
+  projectId: number
+  projectName: string
+
+  /** presigned download URL */
+  projectIconUrl: string
+
+  @ApiProperty({
+    enum: ProjectCategory,
+    enumName: 'ProjectCategory',
+    isArray: true,
+  })
+  projectCategories: ProjectCategory[]
+
+  @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
+  category: RecordCategory
+
+  /** 해당 직군 성장기록의 첫 번째 content title */
+  title: string
+
+  updateGoal: string
+  releasedAt: Date
 }

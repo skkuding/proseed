@@ -521,6 +521,47 @@
         "tags": [
           "Feedback"
         ]
+      },
+      "get": {
+        "operationId": "FeedbackController_findFeedbacksForVersion",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
       }
     },
     "/project/{projectId}/versions/{versionId}/feedbackQuestions": {
@@ -566,6 +607,39 @@
         ]
       }
     },
+    "/feedbacks/recent": {
+      "get": {
+        "operationId": "MyFeedbackController_getRecentFeedbacks",
+        "parameters": [
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 30,
+              "default": 6,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecentFeedbacksResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
     "/feedbacks/my/projects": {
       "get": {
         "operationId": "MyFeedbackController_findMyFeedbackProjects",
@@ -577,6 +651,41 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MyFeedbackProjectsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/feedbacks/{submissionId}": {
+      "get": {
+        "operationId": "MyFeedbackController_findFeedbackSubmissionDetail",
+        "parameters": [
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackSubmissionDetailResponseDto"
                 }
               }
             }
@@ -963,6 +1072,43 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/FeedbackTemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "GrowthRecord"
+        ]
+      }
+    },
+    "/growth-records/recent": {
+      "get": {
+        "operationId": "GrowthRecordTemplateController_getRecentGrowthRecords",
+        "parameters": [
+          {
+            "name": "take",
+            "required": false,
+            "in": "query",
+            "description": "최근 발행 버전 수 (버전당 4개 직군 카드가 반환됨)",
+            "schema": {
+              "minimum": 1,
+              "maximum": 20,
+              "default": 5,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecentGrowthRecordDto"
                   }
                 }
               }
@@ -1728,6 +1874,7 @@
             "type": "string"
           },
           "feedbacks": {
+            "minItems": 1,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeedbackItemDto"
@@ -1871,6 +2018,208 @@
             "items": {
               "$ref": "#/components/schemas/FeedbackQuestionItemDto"
             }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "RecentFeedbackItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "submissionId": {
+            "type": "number"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          },
+          "oneLineReview": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "description": "채택된 직군 질문에 대한 첫 번째 답변 본문"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectIconUrl": {
+            "type": "string",
+            "description": "presigned download URL"
+          }
+        },
+        "required": [
+          "category",
+          "submissionId",
+          "nickname",
+          "profileImageUrl",
+          "oneLineReview",
+          "content",
+          "projectId",
+          "projectName",
+          "projectIconUrl"
+        ]
+      },
+      "RecentFeedbacksResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentFeedbackItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "FeedbackSubmissionAuthorDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "FeedbackSubmissionAnswerDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "questionId": {
+            "type": "number"
+          },
+          "questionTitle": {
+            "type": "string"
+          },
+          "questionContent": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "imageUrls",
+          "id",
+          "questionId",
+          "questionTitle",
+          "questionContent",
+          "content",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "FeedbackSubmissionDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "oneLineReview": {
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/FeedbackSubmissionAuthorDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "feedbacks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackSubmissionAnswerDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "projectId",
+          "versionId",
+          "oneLineReview",
+          "author",
+          "createdAt",
+          "updatedAt",
+          "feedbacks"
+        ]
+      },
+      "FeedbackSubmissionDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FeedbackSubmissionDetailDto"
           }
         },
         "required": [
@@ -3013,6 +3362,63 @@
         "required": [
           "category",
           "questions"
+        ]
+      },
+      "RecentGrowthRecordDto": {
+        "type": "object",
+        "properties": {
+          "projectCategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectCategory"
+            }
+          },
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "growthRecordId": {
+            "type": "number"
+          },
+          "versionId": {
+            "type": "number"
+          },
+          "projectId": {
+            "type": "number"
+          },
+          "projectName": {
+            "type": "string"
+          },
+          "projectIconUrl": {
+            "type": "string",
+            "description": "presigned download URL"
+          },
+          "title": {
+            "type": "string",
+            "description": "해당 직군 성장기록의 첫 번째 content title"
+          },
+          "updateGoal": {
+            "type": "string"
+          },
+          "releasedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectCategories",
+          "category",
+          "growthRecordId",
+          "versionId",
+          "projectId",
+          "projectName",
+          "projectIconUrl",
+          "title",
+          "updateGoal",
+          "releasedAt"
         ]
       },
       "DraftUpdatedByDto": {
