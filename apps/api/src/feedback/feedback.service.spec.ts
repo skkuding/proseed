@@ -296,5 +296,27 @@ describe('FeedbackService', () => {
       ).rejects.toThrow(UnprocessableDataException)
       expect(prisma.feedbackSubmission.create).not.toHaveBeenCalled()
     })
+
+    it('feedbacks가 없으면 서비스 레벨에서 예외를 던진다', async () => {
+      prisma.projectVersion.findFirst
+        .mockResolvedValueOnce({
+          feedbackQuestions: [
+            {
+              id: 2,
+              category: RecordCategory.DEVELOPMENT,
+              isRequired: true,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ id: 20 })
+
+      await expect(
+        service.createFeedback(10, 1, 20, {
+          oneLineReview: '좋았습니다.',
+          feedbacks: undefined,
+        } as never),
+      ).rejects.toThrow(UnprocessableDataException)
+      expect(prisma.feedbackSubmission.create).not.toHaveBeenCalled()
+    })
   })
 })

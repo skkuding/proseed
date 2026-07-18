@@ -232,12 +232,12 @@ export class FeedbackService {
       .filter((q) => q.isRequired)
       .map((q) => q.id)
 
-    const submittedQuestionIds = dto.feedbacks.map((f) => f.questionId)
-    const submittedQuestionSet = new Set(submittedQuestionIds)
-
-    if (submittedQuestionIds.length === 0) {
+    if (!Array.isArray(dto.feedbacks) || dto.feedbacks.length === 0) {
       throw new UnprocessableDataException('Feedback must include answers')
     }
+
+    const submittedQuestionIds = dto.feedbacks.map((f) => f.questionId)
+    const submittedQuestionSet = new Set(submittedQuestionIds)
 
     // 1. 모든 제출된 질문 ID가 해당 버전의 유효한 질문인지 확인
     if (!submittedQuestionIds.every((id) => validQuestionIds.has(id))) {
