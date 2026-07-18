@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -25,6 +26,7 @@ import {
 } from './dto/project-response.dto'
 import { GetProjectsDto } from './dto/get-projects.dto'
 import { InviteCollaboratorDto } from './dto/invite-collaborator.dto'
+import { UpdateProjectDto } from './dto/update-project.dto'
 import { ProjectService } from './project.service'
 
 @ApiTags('Project')
@@ -65,6 +67,17 @@ export class ProjectController {
     @Param('id', ParseIntPipe) projectId: number,
   ): Promise<ProjectDetailResponseDto> {
     return this.projectService.getProjectById(req.user?.id, projectId)
+  }
+
+  //프로젝트 편집 저장 — Lead만 (서비스에서 검증)
+  @ApiCookieAuth()
+  @Patch(':id')
+  async update(
+    @Req() req: RequestWithUser,
+    @Param('id', ParseIntPipe) projectId: number,
+    @Body() dto: UpdateProjectDto,
+  ): Promise<ProjectResponseDto> {
+    return this.projectService.update(req.user.id, projectId, dto)
   }
 
   @ApiCookieAuth()

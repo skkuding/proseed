@@ -1,0 +1,32 @@
+meta {
+  name: Patch Project
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/project/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "수정된 프로젝트 제목",
+    "status": "MVP",
+    "imageKeys": ["seed/image1.png", "seed/image2.png"]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  프로젝트 편집 저장 — Lead만 (인증 필수).
+  모든 필드 optional (CreateProjectDto의 partial, leaderJobType 제외).
+  iconKey/thumbnailKey는 S3 key로 전달 → iconUrl/thumbnailUrl 컬럼에 저장.
+  imageKeys를 보내면 기존 이미지 전체 삭제 후 순서대로 재생성 (전체 교체).
+  에러: 무세션 401, Lead 아님 403, 프로젝트 없음 404, 필드 형식 오류 400.
+}

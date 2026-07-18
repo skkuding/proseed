@@ -754,6 +754,49 @@
         "tags": [
           "Project"
         ]
+      },
+      "patch": {
+        "operationId": "ProjectController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
       }
     },
     "/project/{id}/invite": {
@@ -2271,6 +2314,75 @@
           "createdAt",
           "updatedAt"
         ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "APP",
+              "WEB"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "Available",
+              "MVP",
+              "Ongoing",
+              "Hiring"
+            ],
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "HEALTHCARE",
+                "FINANCE",
+                "PUBLIC",
+                "COMMERCE",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "MOBILITY",
+                "ENERGY",
+                "REALESTATE",
+                "LIFESTYLE",
+                "PRODUCTIVITY",
+                "COMMUNITY",
+                "AI"
+              ]
+            }
+          },
+          "contactPath": {
+            "type": "string"
+          },
+          "projectLink": {
+            "type": "string"
+          },
+          "iconKey": {
+            "type": "string"
+          },
+          "thumbnailKey": {
+            "type": "string"
+          },
+          "imageKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "InviteCollaboratorDto": {
         "type": "object",

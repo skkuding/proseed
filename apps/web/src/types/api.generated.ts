@@ -305,7 +305,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["ProjectController_update"];
         trace?: never;
     };
     "/project/{id}/invite": {
@@ -470,6 +470,22 @@ export interface components {
             joinedProjectCount: number;
             feedbackCount: number;
         };
+        MyProfileAccountDto: {
+            providerId: string;
+        };
+        MyProfileResponseDto: {
+            accounts: components["schemas"]["MyProfileAccountDto"][];
+            jobType: components["schemas"]["JobType"] | null;
+            bio: string | null;
+            name: string;
+            email: string;
+            profileImageUrl: string;
+            skills: string[];
+            links: string[];
+            ownedTicketCount: number;
+            joinedProjectCount: number;
+            feedbackCount: number;
+        };
         MypageUpdateDto: {
             name?: string;
             /** @enum {string} */
@@ -478,6 +494,24 @@ export interface components {
             skills?: string[];
             links?: string[];
             bio?: string;
+        };
+        MyProfileUpdateResponseDto: {
+            jobType: components["schemas"]["JobType"] | null;
+            bio: string | null;
+            name: string;
+            profileImageUrl: string;
+            skills: string[];
+            links: string[];
+        };
+        /** @enum {string} */
+        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
+        MypageJoinedProjectListDto: {
+            role: components["schemas"]["JobType"];
+            projectMemberRole: components["schemas"]["ProjectMemberRole"];
+            id: number;
+            title: string;
+            oneLineDescription: string;
+            iconUrl: string;
         };
         MyFeedbackProjectItemDto: {
             submissionId: number;
@@ -632,14 +666,27 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        UpdateProjectDto: {
+            title?: string;
+            /** @enum {string} */
+            type?: "APP" | "WEB";
+            /** @enum {string} */
+            status?: "Available" | "MVP" | "Ongoing" | "Hiring";
+            oneLineDescription?: string;
+            description?: string;
+            category?: ("HEALTHCARE" | "FINANCE" | "PUBLIC" | "COMMERCE" | "EDUCATION" | "ENTERTAINMENT" | "MOBILITY" | "ENERGY" | "REALESTATE" | "LIFESTYLE" | "PRODUCTIVITY" | "COMMUNITY" | "AI")[];
+            contactPath?: string;
+            projectLink?: string;
+            iconKey?: string;
+            thumbnailKey?: string;
+            imageKeys?: string[];
+        };
         InviteCollaboratorDto: {
             /** Format: email */
             email: string;
             /** @enum {string} */
             role: "Developer" | "Planner" | "Designer" | "Other";
         };
-        /** @enum {string} */
-        ProjectMemberRole: "Lead" | "TeamLeader" | "TeamMember";
         ProjectRoleResponseDto: {
             role: components["schemas"]["JobType"];
             projectMemberRole: components["schemas"]["ProjectMemberRole"];
@@ -1034,7 +1081,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MyProfileResponseDto"];
+                };
             };
         };
     };
@@ -1055,7 +1104,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MyProfileUpdateResponseDto"];
+                };
             };
         };
     };
@@ -1072,7 +1123,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MypageJoinedProjectListDto"][];
+                };
             };
         };
     };
@@ -1245,6 +1298,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectDetailResponseDto"];
+                };
+            };
+        };
+    };
+    ProjectController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProjectDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectResponseDto"];
                 };
             };
         };
