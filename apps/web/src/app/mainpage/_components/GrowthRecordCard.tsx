@@ -1,24 +1,30 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface GrowthRecordCardProps {
   projectId: number
   projectName: string
   projectIconUrl: string
-  versionTitle: string
+  title: string
   updateGoal: string
   projectCategories: string[]
-  createdAt: string
+  releasedAt: string
+}
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}. ${String(d.getMonth() + 1).padStart(2, '0')}. ${String(d.getDate()).padStart(2, '0')}`
 }
 
 export default function GrowthRecordCard({
   projectId,
   projectName,
   projectIconUrl,
-  versionTitle,
+  title,
   updateGoal,
   projectCategories,
-  createdAt,
+  releasedAt,
 }: GrowthRecordCardProps) {
   return (
     <Link href={`/projects/${projectId}`}>
@@ -29,13 +35,13 @@ export default function GrowthRecordCard({
 
         <div className="flex flex-col">
           <div className="flex items-center gap-[6px] flex-wrap pb-[6px]">
-            <h3 className="text-title3_sb_24 text-black">{versionTitle}</h3>
+            <h3 className="text-title3_sb_24 text-black">{title}</h3>
             {projectCategories.map((cat) => (
               <span
                 key={cat}
                 className="inline-flex items-center rounded-[4px] bg-neutral-99 px-2 py-1 text-body1_m_16 text-CoolNeutral-40"
               >
-                {cat}
+                {CATEGORY_LABELS[cat] ?? cat}
               </span>
             ))}
           </div>
@@ -49,7 +55,7 @@ export default function GrowthRecordCard({
             <span className="flex h-4 w-4 items-center justify-center">
               <span className="h-[6px] w-[6px] rounded-full bg-CoolNeutral-40" />
             </span>
-            <span className="text-body3_r_16 text-CoolNeutral-40">{createdAt}</span>
+            <span className="text-body3_r_16 text-CoolNeutral-40">{formatDate(releasedAt)}</span>
           </div>
         </div>
       </article>

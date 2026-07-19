@@ -1,15 +1,20 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import FeedbackCard from './FeedbackCard'
 import SectionTitle from './SectionTitle'
-import recentFeedbacks from '@/app/_mockdata/mainpage/recent-feedbacks.json'
+import { getRecentFeedbacks, type RecentFeedbackItemDto } from '@/lib/api'
 
 export default function FeedbackSection() {
   const trackRef = useRef<HTMLDivElement>(null)
   const [canLeft, setCanLeft] = useState(false)
   const [canRight, setCanRight] = useState(true)
+  const [recentFeedbacks, setRecentFeedbacks] = useState<RecentFeedbackItemDto[]>([])
+
+  useEffect(() => {
+    getRecentFeedbacks().then(setRecentFeedbacks, () => setRecentFeedbacks([]))
+  }, [])
 
   const updateButtons = () => {
     const el = trackRef.current
@@ -53,13 +58,13 @@ export default function FeedbackSection() {
         className="flex gap-4 overflow-x-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {recentFeedbacks.map((feedback) => (
-          <div key={feedback.feedbackId} className="shrink-0">
+          <div key={feedback.submissionId} className="shrink-0">
             <FeedbackCard
-              feedbackId={feedback.feedbackId}
+              submissionId={feedback.submissionId}
               nickname={feedback.nickname}
               profileImageUrl={feedback.profileImageUrl}
               category={feedback.category}
-              onelineReview={feedback.onelineReview}
+              onelineReview={feedback.oneLineReview}
               content={feedback.content}
               projectId={feedback.projectId}
               projectName={feedback.projectName}

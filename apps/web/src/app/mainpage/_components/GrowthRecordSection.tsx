@@ -1,25 +1,23 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import GrowthRecordCard from './GrowthRecordCard'
 import SectionTitle from './SectionTitle'
-import recentGrowthRecords from '@/app/_mockdata/mainpage/recent-growth-records.json'
-import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
-
-const TAB_TO_CATEGORY: Record<JobTab, string> = {
-  기획: 'PLAN',
-  디자인: 'DESIGN',
-  개발: 'DEVELOPMENT',
-  기타: 'GENERAL',
-}
+import { getRecentGrowthRecords, type RecentGrowthRecordDto } from '@/lib/api'
+import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 
 export default function GrowthRecordSection() {
   const [activeTab, setActiveTab] = useState<JobTab>('기획')
+  const [recentGrowthRecords, setRecentGrowthRecords] = useState<RecentGrowthRecordDto[]>([])
+
+  useEffect(() => {
+    getRecentGrowthRecords().then(setRecentGrowthRecords, () => setRecentGrowthRecords([]))
+  }, [])
 
   const filtered = useMemo(() => {
-    return recentGrowthRecords.filter((rg) => rg.category === TAB_TO_CATEGORY[activeTab])
-  }, [activeTab])
+    return recentGrowthRecords.filter((rg) => rg.category === RECORD_CATEGORY_TO_API[activeTab])
+  }, [activeTab, recentGrowthRecords])
 
   return (
     <section className="flex flex-col gap-7">
@@ -36,14 +34,14 @@ export default function GrowthRecordSection() {
       <div className="flex flex-col gap-4">
         {filtered.map((record) => (
           <GrowthRecordCard
-            key={record.versionId}
+            key={record.growthRecordId}
             projectId={record.projectId}
             projectName={record.projectName}
             projectIconUrl={record.projectIconUrl}
-            versionTitle={record.versionTitle}
+            title={record.title}
             updateGoal={record.updateGoal}
             projectCategories={record.projectCategories}
-            createdAt={record.createdAt}
+            releasedAt={String(record.releasedAt)}
           />
         ))}
       </div>

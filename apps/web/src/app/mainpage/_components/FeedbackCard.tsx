@@ -1,15 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-
-const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획',
-  design: '디자인',
-  dev: '개발',
-  general: '기타',
-}
+import { RECORD_CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface FeedbackCardProps {
-  feedbackId: number
+  submissionId: number
   nickname: string
   profileImageUrl: string
   category: string
@@ -21,7 +15,7 @@ interface FeedbackCardProps {
 }
 
 export default function FeedbackCard({
-  feedbackId,
+  submissionId,
   nickname,
   profileImageUrl,
   category,
@@ -43,7 +37,7 @@ export default function FeedbackCard({
             {nickname}
           </span>
           <span className="text-body1_m_16 text-CoolNeutral-50 transition-colors group-hover:text-CoolNeutral-60">
-            {CATEGORY_LABEL[category] ?? category}
+            {RECORD_CATEGORY_LABELS[category] ?? category}
           </span>
         </div>
       </div>
@@ -69,7 +63,7 @@ export default function FeedbackCard({
           </span>
         </div>
         <Link
-          href={`/projects/${projectId}/feedback#feedback-${feedbackId}`}
+          href={`/projects/${projectId}/feedback#feedback-${submissionId}`}
           className="rounded-[6px] bg-CoolNeutral-20 px-4 py-2 text-body1_m_16 text-white transition-colors group-hover:bg-white group-hover:text-CoolNeutral-20"
         >
           피드백 자세히 보기
