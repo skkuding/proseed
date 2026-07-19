@@ -21,7 +21,7 @@ export type CreateFeedbackDto = components['schemas']['CreateFeedbackDto']
 export type CreateFeedbackResponseDto = components['schemas']['CreateFeedbackResponseDto']
 export type RecordCategory = components['schemas']['RecordCategory']
 export type GrowthRecordDraftResponseDto = components['schemas']['GrowthRecordDraftResponseDto']
-export type UserProfileResponseDto = components['schemas']['UserProfileResponseDto']
+export type UserProfileResponseDto = components['schemas']['OtherUserProfileResponseDto']
 
 export type MyProfile = {
   name: string
