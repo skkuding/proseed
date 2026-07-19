@@ -2,16 +2,20 @@ import type { MetadataRoute } from 'next'
 import { getProjects } from '@/lib/api'
 import { SITE_URL } from '@/lib/site'
 
+/** 커서가 이상 동작해도 폭주하지 않도록 상한 (100페이지 × take 100 = 1만 프로젝트) */
+const MAX_PAGES = 100
+
 /** 목록 API를 커서 페이지네이션으로 끝까지 순회해 전체 프로젝트 id 수집 */
 async function getAllProjectIds(): Promise<number[]> {
   const ids: number[] = []
   let cursor: number | undefined
 
-  // 무한루프 방지: nextCursor 가 null 이 될 때까지만 순회
-  while (true) {
+  // 무한루프·OOM 방지: 페이지 상한 + 빈 데이터 + 동일 커서 반복 시 탈출
+  for (let page = 0; page < MAX_PAGES; page++) {
     const { data, nextCursor } = await getProjects({ take: 100, cursor })
+    if (data.length === 0) break
     ids.push(...data.map((p) => p.id))
-    if (nextCursor == null) break
+    if (nextCursor == null || nextCursor === cursor) break
     cursor = nextCursor
   }
 
