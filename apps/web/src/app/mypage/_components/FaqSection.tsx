@@ -118,8 +118,14 @@ export function FaqSection() {
             자주 묻는 질문에서 답을 찾지 못하셨다면 PROSEED에게 언제든지 문의해주세요
           </p>
         </div>
-        <Button size="md" className="shrink-0 w-[94px] text-sub3_sb_16">
-          문의하기
+        <Button asChild size="md" className="shrink-0 w-[94px] text-sub3_sb_16">
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLScv7wP4v3PDIl0uOTW6rfnbNgvBF64GtbIoFRF6sFbUIeldag/viewform"
+            target="_blank"
+            rel="noreferrer"
+          >
+            문의하기
+          </a>
         </Button>
       </div>
     </div>
