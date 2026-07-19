@@ -5,6 +5,10 @@ import { Injectable } from '@nestjs/common'
 import { generateRandomNickname } from '../user/utils/generateRandomNickname'
 import { ConfigService } from '@nestjs/config'
 import { selectRandomProfileImage } from 'src/user/utils/selectRandomProfileImage'
+import {
+  recordSignup,
+  recordUserWithdrawal,
+} from 'src/common/telemetry/business-metrics'
 
 @Injectable()
 export class BetterAuthService {
@@ -34,6 +38,10 @@ const createAuth = (
       },
       deleteUser: {
         enabled: true,
+        afterDelete: () => {
+          recordUserWithdrawal()
+          return Promise.resolve()
+        },
       },
     },
     //로컬 개발 전용: seed 유저로 email/password 로그인 (Bruno 등 API 테스트용).
@@ -56,6 +64,10 @@ const createAuth = (
                 image: randomProfileImage,
               },
             })
+          },
+          after: () => {
+            recordSignup()
+            return Promise.resolve()
           },
         },
       },

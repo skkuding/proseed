@@ -6,6 +6,10 @@ import {
 } from 'src/common/exceptions/business.exception'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
+import {
+  recordCollaboratorInvite,
+  recordProjectCreated,
+} from '../common/telemetry/business-metrics'
 import { CreateProjectDto } from './dto/create-project.dto'
 import type { GetProjectsDto } from './dto/get-projects.dto'
 import type { UpdateProjectDto } from './dto/update-project.dto'
@@ -270,7 +274,7 @@ export class ProjectService {
   }
 
   async create(userId: number, dto: CreateProjectDto) {
-    return this.prisma.project.create({
+    const project = await this.prisma.project.create({
       data: {
         title: dto.title,
         type: dto.type,
@@ -298,6 +302,8 @@ export class ProjectService {
         },
       },
     })
+    recordProjectCreated(dto.type)
+    return project
   }
 
   /** 프로젝트 편집 저장 — Lead만. imageKeys가 오면 이미지 전체 교체 */
@@ -385,7 +391,7 @@ export class ProjectService {
       throw new EntityNotExistException('User')
     }
 
-    return await this.prisma.projectRole.create({
+    const projectRoleCreated = await this.prisma.projectRole.create({
       data: {
         userId: targetUser.id,
         projectId,
@@ -393,6 +399,8 @@ export class ProjectService {
         role,
       },
     })
+    recordCollaboratorInvite(role)
+    return projectRoleCreated
   }
 
   async getProjectVersions(projectId: number) {

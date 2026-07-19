@@ -10,6 +10,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import {
+  recordFeedbacksAdopted,
+  recordGrowthRecordPublished,
+} from '../common/telemetry/business-metrics'
+import {
   MAX_TAGGED_FEEDBACKS_PER_CATEGORY,
   VERSION_PATTERN,
   type CreateVersionDto,
@@ -136,7 +140,9 @@ export class GrowthRecordService {
     //직군별 태그 병합 — 같은 직군이 여러 항목으로 쪼개져 와도 한도(3)를 우회하지 못하게
     const tagsByCategory = this.mergeTaggedFeedbacks(dto.taggedFeedbacks ?? [])
 
-    return this.prisma.$transaction(async (tx) => {
+    let adoptedCount = 0
+
+    const publishResult = await this.prisma.$transaction(async (tx) => {
       // 버전 중복·순서 검증은 트랜잭션 내에서 수행하여 경합을 방지
       await this.assertVersionIsAhead(tx, projectId, dto.version)
 
@@ -146,6 +152,7 @@ export class GrowthRecordService {
         projectId,
         tagsByCategory,
       )
+      adoptedCount = taggedSubmissions.size
 
       const version = await tx.projectVersion.create({
         data: {
@@ -228,6 +235,11 @@ export class GrowthRecordService {
         })),
       }
     })
+
+    recordGrowthRecordPublished()
+    recordFeedbacksAdopted(adoptedCount)
+
+    return publishResult
   }
 
   /** 새 버전은 중복이 아니어야 하고, 기존의 모든 (형식이 맞는) 버전보다 커야 한다 */

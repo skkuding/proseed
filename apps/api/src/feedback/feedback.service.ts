@@ -13,6 +13,7 @@ import {
 } from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
+import { recordFeedbackSubmitted } from '../common/telemetry/business-metrics'
 import {
   DuplicateFoundException,
   EntityNotExistException,
@@ -386,6 +387,8 @@ export class FeedbackService {
         },
       },
     })
+
+    recordFeedbackSubmitted()
 
     return {
       success: true,
