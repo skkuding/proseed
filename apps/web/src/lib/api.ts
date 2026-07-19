@@ -16,6 +16,12 @@ export type ProjectVersionListItemDto = components['schemas']['ProjectVersionLis
 export type VersionDetailResponseDto = components['schemas']['VersionDetailResponseDto']
 export type MyFeedbackProjectItemDto = components['schemas']['MyFeedbackProjectItemDto']
 export type MypageUpdateDto = components['schemas']['MypageUpdateDto']
+export type FeedbackQuestionItemDto = components['schemas']['FeedbackQuestionItemDto']
+export type CreateFeedbackDto = components['schemas']['CreateFeedbackDto']
+export type CreateFeedbackResponseDto = components['schemas']['CreateFeedbackResponseDto']
+export type RecordCategory = components['schemas']['RecordCategory']
+export type GrowthRecordDraftResponseDto = components['schemas']['GrowthRecordDraftResponseDto']
+export type UserProfileResponseDto = components['schemas']['UserProfileResponseDto']
 
 export type MyProfile = {
   name: string
@@ -68,7 +74,12 @@ export async function getProjects(
 
   const res = await fetch(`${BASE}/project?${qs}`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch projects')
-  return res.json()
+  const body: { data: (Project & { _count?: { versions: number } })[]; nextCursor: number | null } =
+    await res.json()
+  return {
+    ...body,
+    data: body.data.map((p) => ({ ...p, growthRecordCount: p._count?.versions ?? 0 })),
+  }
 }
 
 export async function getProjectById(id: string | number): Promise<ProjectDetailResponseDto> {
@@ -113,6 +124,12 @@ export async function getUploadUrl(
     body: JSON.stringify({ filename, contentType }),
   })
   if (!res.ok) throw new Error('Failed to get upload url')
+  return res.json()
+}
+
+export async function getDownloadUrl(key: string): Promise<{ url: string }> {
+  const res = await fetch(`${BASE}/storage/download-url/${key}`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to get download url')
   return res.json()
 }
 
@@ -206,4 +223,85 @@ export async function getMyJoinedProjects(): Promise<JoinedProject[]> {
   const res = await fetch(`${BASE}/me/profile/projects`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch joined projects')
   return res.json()
+}
+
+export async function getUserProfile(userId: string | number): Promise<UserProfileResponseDto> {
+  const res = await fetch(`${BASE}/user/${userId}/profile`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch user profile')
+  return res.json()
+}
+
+export async function getFeedbackQuestions(
+  projectId: string | number,
+  versionId: string | number
+): Promise<FeedbackQuestionItemDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions/${versionId}/feedbackQuestions`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch feedback questions')
+  const body = await res.json()
+  return body.data
+}
+
+export async function createFeedback(
+  projectId: string | number,
+  versionId: string | number,
+  dto: CreateFeedbackDto
+): Promise<CreateFeedbackResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions/${versionId}/feedbacks`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '피드백 제출에 실패했습니다')
+  }
+  return res.json()
+}
+
+export async function getDrafts(
+  projectId: string | number
+): Promise<GrowthRecordDraftResponseDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/drafts`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch drafts')
+  return res.json()
+}
+
+export async function getDraft(
+  projectId: string | number,
+  category: RecordCategory
+): Promise<GrowthRecordDraftResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/drafts/${category}`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch draft')
+  return res.json()
+}
+
+export async function upsertDraft(
+  projectId: string | number,
+  category: RecordCategory,
+  content: Record<string, unknown>
+): Promise<GrowthRecordDraftResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/drafts/${category}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  })
+  if (!res.ok) throw new Error('Failed to save draft')
+  return res.json()
+}
+
+export async function deleteDraft(
+  projectId: string | number,
+  category: RecordCategory
+): Promise<void> {
+  const res = await fetch(`${BASE}/project/${projectId}/drafts/${category}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok && res.status !== 204) throw new Error('Failed to delete draft')
 }
