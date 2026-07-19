@@ -22,6 +22,11 @@ export type CreateFeedbackResponseDto = components['schemas']['CreateFeedbackRes
 export type RecordCategory = components['schemas']['RecordCategory']
 export type GrowthRecordDraftResponseDto = components['schemas']['GrowthRecordDraftResponseDto']
 export type UserProfileResponseDto = components['schemas']['OtherUserProfileResponseDto']
+export type RecentFeedbackItemDto = components['schemas']['RecentFeedbackItemDto']
+export type RecentGrowthRecordDto = components['schemas']['RecentGrowthRecordDto']
+export type ProfilePreviewResponseDto = components['schemas']['ProfilePreviewResponseDto']
+export type MypageJoinedProjectListDto = components['schemas']['MypageJoinedProjectListDto']
+export type UpdateProjectDto = components['schemas']['UpdateProjectDto']
 
 export type MyProfile = {
   name: string
@@ -155,6 +160,23 @@ export async function createProject(dto: CreateProjectDto): Promise<ProjectRespo
   return res.json()
 }
 
+export async function updateProject(
+  id: string | number,
+  dto: UpdateProjectDto
+): Promise<ProjectResponseDto> {
+  const res = await fetch(`${BASE}/project/${id}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '프로젝트 수정에 실패했습니다')
+  }
+  return res.json()
+}
+
 export async function inviteCollaborator(
   projectId: string | number,
   dto: InviteCollaboratorDto
@@ -195,6 +217,21 @@ export async function getFeedbackTemplates(): Promise<FeedbackTemplate[]> {
   return res.json()
 }
 
+export async function getRecentFeedbacks(take?: number): Promise<RecentFeedbackItemDto[]> {
+  const qs = take ? `?take=${take}` : ''
+  const res = await fetch(`${BASE}/feedbacks/recent${qs}`)
+  if (!res.ok) throw new Error('Failed to fetch recent feedbacks')
+  const body: { success: boolean; data: RecentFeedbackItemDto[] } = await res.json()
+  return body.data
+}
+
+export async function getRecentGrowthRecords(take?: number): Promise<RecentGrowthRecordDto[]> {
+  const qs = take ? `?take=${take}` : ''
+  const res = await fetch(`${BASE}/growth-records/recent${qs}`)
+  if (!res.ok) throw new Error('Failed to fetch recent growth records')
+  return res.json()
+}
+
 export async function getMyFeedbacks(): Promise<MyFeedbackProjectItemDto[]> {
   const res = await fetch(`${BASE}/feedbacks/my/projects`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch my feedbacks')
@@ -228,6 +265,22 @@ export async function getMyJoinedProjects(): Promise<JoinedProject[]> {
 export async function getUserProfile(userId: string | number): Promise<UserProfileResponseDto> {
   const res = await fetch(`${BASE}/user/${userId}/profile`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch user profile')
+  return res.json()
+}
+
+export async function getUserJoinedProjects(
+  userId: string | number
+): Promise<MypageJoinedProjectListDto[]> {
+  const res = await fetch(`${BASE}/user/${userId}/profile/projects`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to fetch user joined projects')
+  return res.json()
+}
+
+export async function getProfilePreviewByEmail(email: string): Promise<ProfilePreviewResponseDto> {
+  const res = await fetch(`${BASE}/user/profile/preview?email=${encodeURIComponent(email)}`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch profile preview')
   return res.json()
 }
 
