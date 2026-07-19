@@ -30,13 +30,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: project.title,
     description: project.oneLineDescription,
     alternates: { canonical: url },
+    // Next 는 metadata 를 얕게 병합한다 — openGraph/twitter 를 여기서 정의하면
+    // 루트 값이 통째로 교체되므로, 유지할 필드(siteName·locale·card)를 다시 넣는다.
     openGraph: {
       type: 'article',
+      siteName: 'PROSEED',
+      locale: 'ko_KR',
       title: project.title,
       description: project.oneLineDescription,
       url,
     },
     twitter: {
+      card: 'summary_large_image',
       title: project.title,
       description: project.oneLineDescription,
     },
