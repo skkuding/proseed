@@ -1,3 +1,8 @@
 ### Notion MCP (proseed integration) ###
 # https://www.notion.so/profile/integrations
 export NOTION_PROSEED_TOKEN="ntn_YOUR_TOKEN_HERE"
+
+### Figma MCP (fe-qa 차원 H — 디자인 피델리티) ###
+# Figma → Settings → Security → Personal access tokens (scope: File content read)
+# ⚠️ 이 토큰 계정이 proseed Figma 파일 멤버여야 함 (권한 없으면 토큰 있어도 못 읽음)
+export FIGMA_PROSEED_TOKEN="figd_YOUR_TOKEN_HERE"
