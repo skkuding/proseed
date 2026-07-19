@@ -21,8 +21,10 @@ async function getProject(projectId: string) {
  * 이 엔드포인트가 매 요청 새 presigned 로 302 → presigned 만료로 이미지가 깨지지 않는다.
  */
 function thumbnailImageUrl(projectId: string): string {
-  const publicApi = process.env.NEXT_PUBLIC_API_URL || `${SITE_URL}/api`
-  return `${publicApi}/project/${projectId}/thumbnail`
+  const publicApi = process.env.NEXT_PUBLIC_API_URL || '/api'
+  // 상대 경로로 설정된 경우에도 SITE_URL 을 붙여 항상 절대 URL 로 만든다 (크롤러가 파싱 가능하도록).
+  const base = publicApi.startsWith('http') ? publicApi : `${SITE_URL}${publicApi}`
+  return `${base}/project/${projectId}/thumbnail`
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
