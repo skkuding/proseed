@@ -23,7 +23,7 @@ export function ProjectMember({ members }: ProjectMemberProps) {
         <div>
           {members.map((member) => {
             // TODO: 팀원 목록엔 userId가 안 내려와서(ProjectMemberDto) 이름으로만 본인 여부를 추정 중.
-            // 다른 사람 클릭 시 이동은 공개 프로필 조회 API/페이지가 생기면 연결할 것.
+            // 다른 사람 클릭 시 이동은 백엔드가 userId를 내려주면 /users/[userId]로 연결할 것 (페이지는 이미 있음).
             const isSelf = !!session && session.user.name === member.user.name
 
             return (

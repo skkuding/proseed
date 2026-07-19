@@ -10,6 +10,7 @@ interface TextInputProps {
   prefix?: ReactNode
   suffix?: ReactNode
   className?: string
+  disabled?: boolean
 }
 
 export function TextInput({
@@ -21,9 +22,10 @@ export function TextInput({
   prefix,
   suffix,
   className = '',
+  disabled = false,
 }: TextInputProps) {
   const isAtMax = maxLength !== undefined && value.length >= maxLength
-  const showCounter = maxLength !== undefined && !suffix
+  const showCounter = maxLength !== undefined && !suffix && !disabled
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
@@ -32,18 +34,20 @@ export function TextInput({
           isAtMax && showCounter
             ? 'border-[#FF754F]'
             : 'border-neutral-95 focus-within:border-neutral-50'
-        }`}
+        } ${disabled ? 'bg-neutral-99' : ''}`}
       >
         {prefix && <span className="mr-2 shrink-0 text-neutral-70">{prefix}</span>}
         <input
           type={type}
           value={value}
           maxLength={maxLength}
+          disabled={disabled}
+          readOnly={disabled}
           onChange={(e) =>
             onChange(maxLength ? e.target.value.slice(0, maxLength) : e.target.value)
           }
           placeholder={placeholder}
-          className={`min-w-0 flex-1 bg-transparent text-body1_m_16 text-CoolNeutral-20 outline-none placeholder:text-neutral-80 placeholder:text-ellipsis ${showCounter || suffix ? 'pr-12' : ''}`}
+          className={`min-w-0 flex-1 bg-transparent text-body1_m_16 text-CoolNeutral-20 outline-none placeholder:text-neutral-80 placeholder:text-ellipsis disabled:cursor-default ${showCounter || suffix ? 'pr-12' : ''}`}
         />
         {showCounter && (
           <span

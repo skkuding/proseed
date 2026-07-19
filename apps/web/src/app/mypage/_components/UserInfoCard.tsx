@@ -13,12 +13,14 @@ function ArrowRight() {
 
 interface UserInfoCardProps {
   name: string
-  email: string
+  email?: string
   job: string
-  loginProvider: string
+  loginProvider?: string
   profileImageUrl: string
   projectCount: number
   feedbackCount: number
+  /** 타인의 프로필 조회 — 이메일/이미지 변경 버튼 숨김, 참여/피드백 항목은 링크 없이 표시만 */
+  readOnly?: boolean
 }
 
 export function UserInfoCard({
@@ -29,6 +31,7 @@ export function UserInfoCard({
   profileImageUrl,
   projectCount,
   feedbackCount,
+  // readOnly = false,
 }: UserInfoCardProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const [localImage, setLocalImage] = useState<string | null>(null)
