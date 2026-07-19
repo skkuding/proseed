@@ -2,6 +2,8 @@
 
 import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
+import { useParams } from 'next/navigation'
+import { toast } from 'sonner'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import Image from 'next/image'
 import { ChevronRightIcon, ImageIcon } from 'lucide-react'
@@ -14,8 +16,32 @@ import { FeedbackTagModal, type Feedback } from '@/components/FeedbackTagModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
-import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
-import { getUploadUrl, uploadToS3 } from '@/lib/api'
+import {
+  JOB_TABS,
+  // JOB_API_TO_LABEL, // MVP 권한 미구현 — 되돌릴 때 주석 해제 (아래 관련 블록 참고)
+  RECORD_CATEGORY_TO_API,
+  RECORD_CATEGORY_LABELS,
+} from '@/app/_utils/projectConstants'
+import type { JobTab } from '@/app/_utils/projectConstants'
+import {
+  getUploadUrl,
+  uploadToS3,
+  getDownloadUrl,
+  getDrafts,
+  upsertDraft,
+  // getProjectById, // MVP 권한 미구현 — 되돌릴 때 주석 해제
+  type RecordCategory,
+} from '@/lib/api'
+// import { authClient } from '@/lib/auth-client' // MVP 권한 미구현 — 되돌릴 때 주석 해제
+
+const AUTOSAVE_DELAY_MS = 1000
+
+// content shape은 백엔드 seed.ts(growthRecordDraft.createMany)가 실제로 쓰는 형식을 그대로 따름 —
+// answers는 questionId가 아니라 questionTitle로 키(백엔드 성장기록엔 questionId 개념 자체가 없음)
+type DraftContent = {
+  answers: Record<string, string>
+  imageKeys: string[]
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   plan: '기획',
@@ -41,6 +67,15 @@ type ImageItem = {
 }
 
 export function GrowthRecordForm() {
+  const params = useParams()
+  const projectId = params.projectId as string
+  // const { data: session, isPending: sessionPending } = authClient.useSession() // MVP 권한 미구현 — 되돌릴 때 주석 해제
+  // MVP: 리드/직군 권한 구분 없음 확정 — 항상 전체 허용 (원래 기본값은 null/false, 아래 주석 처리된 이펙트로 채워짐)
+  // setAllowedTabs/setIsLead는 그 이펙트 복원 시 다시 쓰이므로 남겨둠
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>([...JOB_TABS])
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLead, setIsLead] = useState(true)
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [version, setVersion] = useState({ major: '', minor: '', patch: '' })
   const [imagesByTab, setImagesByTab] = useState<Record<TabLabel, ImageItem[]>>({
@@ -55,6 +90,7 @@ export function GrowthRecordForm() {
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
   const [detailTargetFeedback, setDetailTargetFeedback] = useState<Feedback | null>(null)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
+  const [draftsReady, setDraftsReady] = useState(false)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -69,16 +105,114 @@ export function GrowthRecordForm() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  // MVP: 리드/직군 권한 구분 없음 확정 (각 팀의 리드 없이 우선 전부 성장기록 작성 가능하게, 동시성 문제는 나중에 해결)
+  // 아래는 "본인이 참여한 직군만 작성 가능, Lead는 전 직군" 제한 로직 — 나중에 권한이 구체화되면 주석 해제
+  // useEffect(() => {
+  //   if (sessionPending) return
+  //
+  //   getProjectById(projectId)
+  //     .then((project) => {
+  //       const lead = !!session && Number(session.user.id) === project.createdById
+  //       const tabs = lead
+  //         ? [...JOB_TABS]
+  //         : project.myJobType
+  //           ? [JOB_API_TO_LABEL[project.myJobType]]
+  //           : []
+  //       setIsLead(lead)
+  //       setAllowedTabs(tabs)
+  //       if (tabs.length > 0) setActiveTab(tabs[0])
+  //     })
+  //     .catch(() => {
+  //       toast.error('프로젝트 정보를 불러오지 못했습니다')
+  //       setAllowedTabs([])
+  //     })
+  // }, [projectId, session, sessionPending])
+
+  // 직군별 공유 draft 불러오기 (리드는 전 직군, 팀원은 자기 직군만 응답에 포함됨)
+  useEffect(() => {
+    if (allowedTabs === null) return
+    let cancelled = false
+
+    getDrafts(projectId)
+      .then(async (drafts) => {
+        const loadedAnswers: Record<number, string> = {}
+        const loadedImagesByTab: Partial<Record<TabLabel, ImageItem[]>> = {}
+
+        await Promise.all(
+          drafts.map(async (draft) => {
+            const tab = RECORD_CATEGORY_LABELS[draft.category]
+            const mockCategory = TAB_TO_CATEGORY[tab]
+            const content = draft.content as Partial<DraftContent>
+            const answersByTitle = content.answers ?? {}
+
+            // questionTitle -> FE 로컬 questionId 역매핑 (같은 카테고리 안에서는 제목이 유일)
+            for (const q of growthRecordQuestions.questions[mockCategory]) {
+              if (answersByTitle[q.questionTitle] !== undefined) {
+                loadedAnswers[q.questionId] = answersByTitle[q.questionTitle]
+              }
+            }
+
+            const keys = content.imageKeys ?? []
+            loadedImagesByTab[tab] = await Promise.all(
+              keys.map(async (key) => {
+                const { url } = await getDownloadUrl(key)
+                return { id: crypto.randomUUID(), preview: url, uploading: false, key }
+              })
+            )
+          })
+        )
+
+        if (cancelled) return
+        setAnswers((prev) => ({ ...prev, ...loadedAnswers }))
+        setImagesByTab((prev) => ({ ...prev, ...loadedImagesByTab }))
+      })
+      .catch(() => {
+        toast.error('임시저장 내용을 불러오지 못했습니다')
+      })
+      .finally(() => {
+        if (!cancelled) setDraftsReady(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [projectId, allowedTabs])
+
   const category = TAB_TO_CATEGORY[activeTab]
   const questions = growthRecordQuestions.questions[category]
   const images = imagesByTab[activeTab]
 
-  const allRequiredQuestionIds = Object.values(growthRecordQuestions.questions)
-    .flat()
+  // Lead는 발행을 위해 4개 직군 전체가 필요하지만, 팀원은 자기 직군만 채우면 다음 단계로 진행 가능
+  const relevantQuestions = isLead
+    ? Object.values(growthRecordQuestions.questions).flat()
+    : (allowedTabs ?? []).flatMap((tab) => growthRecordQuestions.questions[TAB_TO_CATEGORY[tab]])
+  const allRequiredQuestionIds = relevantQuestions
     .filter((q) => q.isRequired)
     .map((q) => q.questionId)
 
   const isNextEnabled = allRequiredQuestionIds.every((id) => (answers[id] ?? '').trim().length > 0)
+
+  // 활성 직군 탭의 이미지/답변을 draft로 자동저장 (초기 로딩 완료 후에만)
+  useEffect(() => {
+    if (!draftsReady) return
+
+    const timer = setTimeout(() => {
+      const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
+      const content: DraftContent = {
+        imageKeys: images
+          .filter((img) => !img.uploading && img.key)
+          .map((img) => img.key as string),
+        answers: Object.fromEntries(
+          questions.map((q) => [q.questionTitle, answers[q.questionId] ?? ''])
+        ),
+      }
+      upsertDraft(projectId, categoryApi, content).catch(() => {
+        toast.error('임시저장에 실패했습니다')
+      })
+    }, AUTOSAVE_DELAY_MS)
+
+    return () => clearTimeout(timer)
+  }, [projectId, activeTab, images, answers, questions, draftsReady])
 
   const setImages = (updater: (prev: ImageItem[]) => ImageItem[]) => {
     setImagesByTab((prev) => ({ ...prev, [activeTab]: updater(prev[activeTab]) }))
@@ -124,6 +258,24 @@ export function GrowthRecordForm() {
     setImageModalIndex(null)
   }
 
+  if (allowedTabs === null) {
+    return (
+      <div className="flex items-center justify-center py-30">
+        <p className="text-body2_r_18 text-CoolNeutral-30">불러오는 중...</p>
+      </div>
+    )
+  }
+
+  if (allowedTabs.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-30">
+        <p className="text-body2_r_18 text-CoolNeutral-30">
+          이 프로젝트의 성장기록을 작성할 권한이 없습니다.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-8 mt-10">
       {/* Header */}
@@ -136,6 +288,7 @@ export function GrowthRecordForm() {
         </div>
         <RoleFilterTabs
           tabs={JOB_TABS}
+          disabledTabs={JOB_TABS.filter((t) => !allowedTabs.includes(t))}
           activeTab={activeTab}
           onTabChange={(tab) => {
             setActiveTab(tab as TabLabel)

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import projects from '@/app/_mockdata/project-list/recent-projects.json'
+import { getProjects, type Project } from '@/lib/api'
+import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface FeedbackSuccessModalProps {
   isOpen: boolean
@@ -25,6 +26,14 @@ export function FeedbackSuccessModal({
 }: FeedbackSuccessModalProps) {
   const router = useRouter()
   const [startIndex, setStartIndex] = useState(0)
+  const [projects, setProjects] = useState<Project[]>([])
+
+  useEffect(() => {
+    if (!isOpen) return
+    getProjects({ take: MAX_PROJECTS })
+      .then((res) => setProjects(res.data))
+      .catch(() => setProjects([]))
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -104,7 +113,7 @@ export function FeedbackSuccessModal({
                     <div className="flex items-center gap-2">
                       <span className="text-sub3_sb_16 text-CoolNeutral-20">{project.title}</span>
                       <span className="text-caption1_m_13 text-CoolNeutral-40 px-2 py-1 bg-neutral-99 rounded">
-                        {project.category[0]}
+                        {CATEGORY_LABELS[project.category[0]] ?? project.category[0]}
                       </span>
                     </div>
                     <p className="text-body2_m_14 text-CoolNeutral-40 line-clamp-2">

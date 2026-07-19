@@ -34,12 +34,13 @@ import {
 } from '@/components/ui/pagination'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import versionList from '@/app/_mockdata/project-detail/project-version.json'
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import { ImageLightbox } from './ImageLightbox'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useParams } from 'next/navigation'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { FeedbackRoleSelectModal } from '@/components/FeedbackRoleSelectModal'
+import { getProjectVersions, type ProjectVersionListItemDto } from '@/lib/api'
+import { RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
 
 const TABS = ['기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -110,8 +111,11 @@ type FilterMode = 'all' | 'closed'
 export function Feedbacks() {
   const pathname = usePathname()
   const router = useRouter()
+  const params = useParams()
+  const projectId = params.projectId as string
+  const [versionList, setVersionList] = useState<ProjectVersionListItemDto[]>([])
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
-  const [selectedVersion, setSelectedVersion] = useState(versionList[0].id.toString())
+  const [selectedVersion, setSelectedVersion] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [openFeedbackId, setOpenFeedbackId] = useState<string>('')
   const [selectedQuestions, setSelectedQuestions] = useState<Record<number, number>>({})
@@ -125,7 +129,7 @@ export function Feedbacks() {
 
   const handleRoleSelectConfirm = (selectedRoles: string[]) => {
     setShowRoleSelectModal(false)
-    const roles = selectedRoles.map((r) => TAB_TO_CATEGORY[r as TabLabel]).join(',')
+    const roles = selectedRoles.map((r) => RECORD_CATEGORY_TO_API[r as TabLabel]).join(',')
     router.push(`${pathname}/create?version=${selectedVersion}&roles=${roles}`)
   }
 
@@ -136,6 +140,13 @@ export function Feedbacks() {
   const pageSize = 5
   const totalPages = Math.ceil(allFeedbacks.length / pageSize)
   const feedbacks = allFeedbacks.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+  useEffect(() => {
+    getProjectVersions(projectId).then((versions) => {
+      setVersionList(versions)
+      setSelectedVersion((prev) => prev || (versions[0] ? versions[0].id.toString() : ''))
+    })
+  }, [projectId])
 
   useEffect(() => {
     const hash = window.location.hash
@@ -234,7 +245,7 @@ export function Feedbacks() {
           <Button
             size="md"
             onClick={() => setShowRoleSelectModal(true)}
-            disabled={selectedVersion !== versionList[0].id.toString()}
+            disabled={!versionList[0] || selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 w-[137px] text-sub3_sb_16"
           >
             피드백 작성하기
@@ -558,6 +569,8 @@ export function Feedbacks() {
         isOpen={showRoleSelectModal}
         onClose={() => setShowRoleSelectModal(false)}
         onConfirm={handleRoleSelectConfirm}
+        projectId={projectId}
+        versionId={selectedVersion}
       />
     </div>
   )

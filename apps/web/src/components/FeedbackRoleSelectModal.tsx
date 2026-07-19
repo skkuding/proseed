@@ -1,38 +1,47 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
+import { getFeedbackQuestions, type FeedbackQuestionItemDto } from '@/lib/api'
+import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 
-const TABS = ['기획', '디자인', '개발', '기타'] as const
-type TabLabel = (typeof TABS)[number]
-
-const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions> = {
-  기획: 'plan',
-  디자인: 'design',
-  개발: 'dev',
-  기타: 'general',
-}
+const TABS = JOB_TABS
+type TabLabel = JobTab
 
 interface FeedbackRoleSelectModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: (selectedRoles: TabLabel[]) => void
+  projectId: string
+  versionId: string
 }
 
 export function FeedbackRoleSelectModal({
   isOpen,
   onClose,
   onConfirm,
+  projectId,
+  versionId,
 }: FeedbackRoleSelectModalProps) {
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [selectedRoles, setSelectedRoles] = useState<Set<TabLabel>>(new Set(['기획']))
+  const [questions, setQuestions] = useState<FeedbackQuestionItemDto[]>([])
+
+  useEffect(() => {
+    if (!isOpen) return
+    getFeedbackQuestions(projectId, versionId)
+      .then(setQuestions)
+      .catch(() => setQuestions([]))
+  }, [isOpen, projectId, versionId])
 
   if (!isOpen) return null
 
-  const questions = feedbackQuestions.questions[TAB_TO_CATEGORY[activeTab]]
+  const activeCategory = RECORD_CATEGORY_TO_API[activeTab]
+  const tabQuestions = questions
+    .filter((q) => q.category === activeCategory)
+    .sort((a, b) => a.order - b.order)
 
   const toggleRole = (tab: TabLabel) => {
     setSelectedRoles((prev) => {
@@ -82,10 +91,10 @@ export function FeedbackRoleSelectModal({
         <div className="flex flex-col gap-3 bg-neutral-99 rounded-xl p-5">
           <p className="text-sub3_sb_16 text-CoolNeutral-20">{activeTab} 피드백 질문 미리보기</p>
           <div className="flex flex-col gap-1">
-            {questions.map((q) => (
-              <div key={q.questionId} className="flex items-start gap-1">
+            {tabQuestions.map((q) => (
+              <div key={q.id} className="flex items-start gap-1">
                 <Dot className="size-4 shrink-0 mt-0.5 text-CoolNeutral-40" />
-                <span className="text-body2_m_14 text-CoolNeutral-40">{q.questionTitle}</span>
+                <span className="text-body2_m_14 text-CoolNeutral-40">{q.title}</span>
               </div>
             ))}
           </div>

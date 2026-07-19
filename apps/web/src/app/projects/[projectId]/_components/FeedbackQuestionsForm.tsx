@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+// import { useRouter } from 'next/navigation' // MVP 권한 미구현 — 되돌릴 때 주석 해제
 import { ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
 import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
+// import { ConfirmModal } from '@/components/ConfirmModal' // MVP 권한 미구현 — 되돌릴 때 주석 해제
 import { toast } from 'sonner'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
 import { publishVersion, type CreateVersionDto } from '@/lib/api'
+// import { getProjectById } from '@/lib/api' // MVP 권한 미구현 — 되돌릴 때 주석 해제
 import { JOB_TABS, RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
+// import { authClient } from '@/lib/auth-client' // MVP 권한 미구현 — 되돌릴 때 주석 해제
 
 const FREE_COMMENT_CONTENT = '자유롭게 하고 싶은 말을 남겨주세요'
 
@@ -76,8 +80,14 @@ export function FeedbackQuestionsForm() {
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  // MVP: 리드/직군 권한 구분 없음 확정 — 항상 발행 가능 (원래는 리드만, 아래 주석 처리된 이펙트 참고)
+  const isLead = true
+  // const [isLead, setIsLead] = useState(false)
+  // const [showLeadOnlyModal, setShowLeadOnlyModal] = useState(false)
   const params = useParams()
+  // const router = useRouter() // MVP 권한 미구현 — 되돌릴 때 주석 해제
   const projectId = params.projectId as string
+  // const { data: session, isPending: sessionPending } = authClient.useSession() // MVP 권한 미구현 — 되돌릴 때 주석 해제
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
@@ -88,6 +98,20 @@ export function FeedbackQuestionsForm() {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  // 발행은 리드만 가능 — 팀원이 여기까지 넘어오면 안내 모달을 띄움 (작성 내용은 이미 자동저장됨)
+  // 나중에 권한이 구체화되면 주석 해제
+  // useEffect(() => {
+  //   if (sessionPending) return
+  //
+  //   getProjectById(projectId)
+  //     .then((project) => {
+  //       const lead = !!session && Number(session.user.id) === project.createdById
+  //       setIsLead(lead)
+  //       if (!lead) setShowLeadOnlyModal(true)
+  //     })
+  //     .catch(() => setIsLead(false))
+  // }, [projectId, session, sessionPending])
 
   const questions = questionsByTab[activeTab]
   const canAdd = questions.length < MAX_QUESTIONS
@@ -279,7 +303,7 @@ export function FeedbackQuestionsForm() {
                 setIsPublishing(false)
               }
             }}
-            disabled={isPublishing}
+            disabled={isPublishing || !isLead}
           >
             {isPublishing ? '업데이트 중...' : '프로젝트 업데이트'}
           </Button>
@@ -302,6 +326,18 @@ export function FeedbackQuestionsForm() {
         onCancel={() => setShowLeaveModal(false)}
         onConfirm={() => window.history.go(-2)}
       />
+
+      {/* MVP 권한 미구현 — 되돌릴 때 주석 해제
+      <ConfirmModal
+        isOpen={showLeadOnlyModal}
+        title="리드만 발행할 수 있어요"
+        description="지금까지 작성한 내용은 자동저장돼요."
+        cancelLabel="돌아갈래요"
+        confirmLabel="확인했어요"
+        onCancel={() => router.back()}
+        onConfirm={() => setShowLeadOnlyModal(false)}
+      />
+      */}
     </div>
   )
 }

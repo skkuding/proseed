@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Image from 'next/image'
 import { Dot, ImageIcon } from 'lucide-react'
-import versionList from '@/app/_mockdata/project-detail/project-version.json'
-import feedbackQuestions from '@/app/_mockdata/project-detail/project-feedbackQuestion.json'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
@@ -14,20 +13,21 @@ import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { ChevronRightIcon } from 'lucide-react'
-import { getUploadUrl, uploadToS3 } from '@/lib/api'
+import {
+  getUploadUrl,
+  uploadToS3,
+  getProjectVersions,
+  getFeedbackQuestions,
+  createFeedback,
+  type FeedbackQuestionItemDto,
+  type CreateFeedbackDto,
+} from '@/lib/api'
+import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 
-const latestVersionId = versionList[0].id.toString()
 const ONE_LINE_MAX = 200
 const MAX_IMAGES = 8
-const TABS = ['기획', '디자인', '개발', '기타'] as const
-type TabLabel = (typeof TABS)[number]
-
-const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof feedbackQuestions.questions> = {
-  기획: 'plan',
-  디자인: 'design',
-  개발: 'dev',
-  기타: 'general',
-}
+const TABS = JOB_TABS
+type TabLabel = JobTab
 
 type ImageItem = {
   id: string
@@ -42,15 +42,20 @@ export function CreateFeedbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const params = useParams()
+  const projectId = params.projectId as string
   const version = searchParams.get('version')
   const rolesParam = searchParams.get('roles')
   const allowedCategories = rolesParam ? rolesParam.split(',') : null
 
   const allowedTabs = allowedCategories
-    ? (TABS.filter((t) => allowedCategories.includes(TAB_TO_CATEGORY[t])) as TabLabel[])
+    ? (TABS.filter((t) => allowedCategories.includes(RECORD_CATEGORY_TO_API[t])) as TabLabel[])
     : ([...TABS] as TabLabel[])
 
-  const isLatestVersion = version === latestVersionId
+  const [latestVersionId, setLatestVersionId] = useState<string | null>(null)
+  const [versionChecked, setVersionChecked] = useState(false)
+  const [allQuestions, setAllQuestions] = useState<FeedbackQuestionItemDto[]>([])
+
+  const isLatestVersion = latestVersionId !== null && version === latestVersionId
 
   const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획')
   const [oneLineReview, setOneLineReview] = useState('')
@@ -59,18 +64,32 @@ export function CreateFeedbackContent() {
   const [imageModal, setImageModal] = useState<ImageModal>(null)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
-  const category = TAB_TO_CATEGORY[activeTab]
-  const questions = feedbackQuestions.questions[category]
+  const category = RECORD_CATEGORY_TO_API[activeTab]
+  const questions = allQuestions
+    .filter((q) => q.category === category)
+    .sort((a, b) => a.order - b.order)
 
   useEffect(() => {
-    if (!isLatestVersion) {
+    if (!version) return
+    getProjectVersions(projectId).then((versions) => {
+      setLatestVersionId(versions[0] ? versions[0].id.toString() : null)
+      setVersionChecked(true)
+    })
+    getFeedbackQuestions(projectId, version)
+      .then(setAllQuestions)
+      .catch(() => setAllQuestions([]))
+  }, [projectId, version])
+
+  useEffect(() => {
+    if (versionChecked && !isLatestVersion) {
       router.replace(`/projects/${params.projectId}/feedback`)
     }
-  }, [isLatestVersion, router, params.projectId])
+  }, [versionChecked, isLatestVersion, router, params.projectId])
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
@@ -82,10 +101,48 @@ export function CreateFeedbackContent() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  if (!isLatestVersion) return null
+  if (!versionChecked || !isLatestVersion) return null
 
   const handleLeaveConfirm = () => {
     window.history.go(-2)
+  }
+
+  const handleSubmit = async () => {
+    if (oneLineReview.trim().length === 0) {
+      toast.error('한 줄 평가를 입력해주세요')
+      return
+    }
+
+    const allowedApiCategories = new Set(allowedTabs.map((t) => RECORD_CATEGORY_TO_API[t]))
+    const visibleQuestions = allQuestions.filter((q) => allowedApiCategories.has(q.category))
+    const missingRequired = visibleQuestions.some(
+      (q) => q.required && (answers[q.id] ?? '').trim().length === 0
+    )
+    if (missingRequired) {
+      toast.error('모든 필수 질문에 답변해주세요')
+      return
+    }
+
+    const dto: CreateFeedbackDto = {
+      oneLineReview,
+      feedbacks: visibleQuestions.map((q) => ({
+        questionId: q.id,
+        content: answers[q.id] ?? '',
+        imageUrls: (questionImages[q.id] ?? [])
+          .filter((img) => !img.uploading && img.key)
+          .map((img) => img.key as string),
+      })),
+    }
+
+    setSubmitting(true)
+    try {
+      await createFeedback(projectId, version as string, dto)
+      setShowSuccessModal(true)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '피드백 제출에 실패했습니다')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const scrollToQuestion = (questionId: number) => {
@@ -194,47 +251,47 @@ export function CreateFeedbackContent() {
           {/* 질문별 답변 */}
           {questions.map((q) => (
             <div
-              key={q.questionId}
+              key={q.id}
               ref={(el) => {
-                questionRefs.current[q.questionId] = el
+                questionRefs.current[q.id] = el
               }}
               className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]"
             >
               <div className="flex items-center gap-2">
-                <h2 className="text-title1_sb_28">{q.questionTitle}</h2>
-                {q.isRequired && <FieldBadge type="필수" />}
+                <h2 className="text-title1_sb_28">{q.title}</h2>
+                {q.required && <FieldBadge type="필수" />}
                 <Button
                   size="sm"
-                  onClick={() => fileInputRefs.current[q.questionId]?.click()}
-                  disabled={(questionImages[q.questionId]?.length ?? 0) >= MAX_IMAGES}
+                  onClick={() => fileInputRefs.current[q.id]?.click()}
+                  disabled={(questionImages[q.id]?.length ?? 0) >= MAX_IMAGES}
                   className="ml-auto w-34.25 px-5 text-sub3_sb_16"
                 >
                   이미지 등록하기
                 </Button>
                 <input
                   ref={(el) => {
-                    fileInputRefs.current[q.questionId] = el
+                    fileInputRefs.current[q.id] = el
                   }}
                   type="file"
                   accept="image/*"
                   multiple
                   className="hidden"
-                  onChange={(e) => handleImageSelect(q.questionId, e.target.files)}
+                  onChange={(e) => handleImageSelect(q.id, e.target.files)}
                 />
               </div>
               <Editor
-                markdown={answers[q.questionId] ?? ''}
-                onChange={(val) => setAnswers((prev) => ({ ...prev, [q.questionId]: val }))}
+                markdown={answers[q.id] ?? ''}
+                onChange={(val) => setAnswers((prev) => ({ ...prev, [q.id]: val }))}
                 width="100%"
                 height={252}
               />
               {/* Image area */}
-              {(questionImages[q.questionId]?.length ?? 0) > 0 ? (
+              {(questionImages[q.id]?.length ?? 0) > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {questionImages[q.questionId].map((img, index) => (
+                  {questionImages[q.id].map((img, index) => (
                     <button
                       key={img.id}
-                      onClick={() => setImageModal({ questionId: q.questionId, index })}
+                      onClick={() => setImageModal({ questionId: q.id, index })}
                       className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
                     >
                       <Image src={img.preview} alt="" fill className="object-cover" />
@@ -248,7 +305,7 @@ export function CreateFeedbackContent() {
                 </div>
               ) : (
                 <button
-                  onClick={() => fileInputRefs.current[q.questionId]?.click()}
+                  onClick={() => fileInputRefs.current[q.id]?.click()}
                   className="flex flex-col items-center justify-center gap-2 w-56.25 h-31.75 rounded-xl border border-dashed border-neutral-200 text-CoolNeutral-50 bg-neutral-99 hover:bg-neutral-95 hover:cursor-pointer transition-colors"
                 >
                   <ImageIcon className="size-6" />
@@ -266,13 +323,13 @@ export function CreateFeedbackContent() {
             <div className="flex flex-col">
               {questions.map((q) => (
                 <button
-                  key={q.questionId}
-                  onClick={() => scrollToQuestion(q.questionId)}
+                  key={q.id}
+                  onClick={() => scrollToQuestion(q.id)}
                   className="flex items-center justify-between w-full px-1 py-2 rounded-lg text-body2_m_14 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
                 >
                   <div className="flex items-center gap-0.5 min-w-0">
                     <Dot className="size-4 shrink-0" />
-                    <span className="truncate text-body1_m_16">{q.questionTitle}</span>
+                    <span className="truncate text-body1_m_16">{q.title}</span>
                   </div>
                   <ChevronRightIcon className="size-5 shrink-0 text-CoolNeutral-40" />
                 </button>
@@ -281,10 +338,11 @@ export function CreateFeedbackContent() {
           </div>
           <Button
             size="sm"
-            onClick={() => setShowSuccessModal(true)}
+            onClick={handleSubmit}
+            disabled={submitting}
             className="w-full mt-4 text-sub3_sb_16"
           >
-            피드백 등록하기
+            {submitting ? '등록 중...' : '피드백 등록하기'}
           </Button>
         </div>
       </div>

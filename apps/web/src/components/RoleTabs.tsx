@@ -3,11 +3,13 @@ export function RoleFilterTabs({
   activeTab,
   onTabChange,
   textSize = 'text-body1_m_16',
+  disabledTabs = [],
 }: {
   tabs: readonly string[]
   activeTab?: string
   onTabChange: (tab: string) => void
   textSize?: string
+  disabledTabs?: readonly string[]
 }) {
   const activeIndex = activeTab ? tabs.indexOf(activeTab) : -1
 
@@ -24,12 +26,16 @@ export function RoleFilterTabs({
       )}
       {tabs.map((tab) => {
         const isActive = activeTab === tab
+        const isDisabled = disabledTabs.includes(tab)
         return (
           <button
             key={tab}
-            onClick={() => onTabChange(tab)}
-            className={`relative z-10 h-[50px] w-28 rounded-full px-4 py-3 transition-colors hover:cursor-pointer ${textSize} ${
-              isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'
+            onClick={() => !isDisabled && onTabChange(tab)}
+            disabled={isDisabled}
+            className={`relative z-10 h-[50px] w-28 rounded-full px-4 py-3 transition-colors ${textSize} ${
+              isDisabled
+                ? 'text-neutral-70 cursor-not-allowed'
+                : `hover:cursor-pointer ${isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'}`
             }`}
           >
             {tab}
