@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import localFont from 'next/font/local'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Header } from '@/app/_components/Header'
 import { Footer } from '@/app/_components/Footer'
 import { MobileBlocker } from '@/app/_components/MobileBlocker'
@@ -13,6 +14,9 @@ import {
   SITE_DESCRIPTION,
   SITE_URL,
 } from '@/lib/site'
+
+/** GA4 측정 ID. 빌드 시점에 값이 주입될 때만(=프로덕션) 태그가 렌더된다. */
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 /**
  * 발급된 코드가 있을 때만 verification 태그를 내보낸다.
@@ -78,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <Toaster position="top-center" />
         </AuthProvider>
+        {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
       </body>
     </html>
   )
