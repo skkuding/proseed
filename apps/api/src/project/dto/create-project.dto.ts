@@ -1,5 +1,11 @@
 import { JobType } from '@prisma/client'
-import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator'
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator'
 
 export enum ProjectType {
   APP = 'APP',
@@ -71,7 +77,9 @@ export class CreateProjectDto {
   @IsNotEmpty()
   thumbnailKey: string
 
+  // 프로젝트 이미지 최대 8장 (정책). Swagger CLI 플러그인이 maxItems로 뽑도록 리터럴 사용
   @IsArray()
+  @ArrayMaxSize(8)
   @IsString({ each: true })
   imageKeys: string[]
 }
