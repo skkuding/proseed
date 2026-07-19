@@ -94,4 +94,5 @@ export type Member = {
   ownRole: string
   profileImageUrl: string
 }
-export type ImageItem = { file: File; preview: string }
+// file이 없으면 기존에 업로드되어 있던(수정 화면에서 불러온) 이미지
+export type ImageItem = { file?: File; preview: string }

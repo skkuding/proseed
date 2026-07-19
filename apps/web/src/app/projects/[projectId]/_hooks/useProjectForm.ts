@@ -15,6 +15,8 @@ interface ProjectFormInit {
   iconPreview?: string | null
   thumbnailPreview?: string | null
   hasExistingImages?: boolean
+  projectImages?: ImageItem[]
+  members?: Member[]
 }
 
 export function useProjectForm(init: ProjectFormInit = {}) {
@@ -31,7 +33,7 @@ export function useProjectForm(init: ProjectFormInit = {}) {
   // 팀원
   const [memberTab, setMemberTab] = useState<JobTab>('기획')
   const [memberEmail, setMemberEmail] = useState('')
-  const [members, setMembers] = useState<Member[]>([])
+  const [members, setMembers] = useState<Member[]>(init.members ?? [])
 
   // 이미지
   const [iconFile, setIconFile] = useState<File | null>(null)
@@ -40,7 +42,7 @@ export function useProjectForm(init: ProjectFormInit = {}) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     init.thumbnailPreview ?? null
   )
-  const [projectImages, setProjectImages] = useState<ImageItem[]>([])
+  const [projectImages, setProjectImages] = useState<ImageItem[]>(init.projectImages ?? [])
 
   // 완성 여부
   const basicDone = {

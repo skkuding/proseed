@@ -6,16 +6,8 @@ import Image from 'next/image'
 import { toast } from 'sonner'
 import { JOB_TABS, type JobTab, type Member } from './constants'
 import { MemberDeleteModal } from '@/components/MemberDeleteModal'
-import projectBasicData from '@/app/_mockdata/project-detail/project-basicdata.json'
 
-type SearchResult = { name: string; email: string; ownRole: string; profileImageUrl: string }
-
-const MOCK_USERS: SearchResult[] = projectBasicData.mockProject.projectRoles.map((r) => ({
-  name: r.user.name,
-  email: r.user.email,
-  ownRole: r.user.ownRole,
-  profileImageUrl: r.user.profileImageUrl,
-}))
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface TeamMembersSectionProps {
   memberTab: JobTab
@@ -23,7 +15,11 @@ interface TeamMembersSectionProps {
   memberEmail: string
   onMemberEmailChange: (v: string) => void
   members: Member[]
-  onAddMember: (member: { name: string; ownRole: string; profileImageUrl: string }) => void
+  onAddMember: (member: {
+    name: string
+    ownRole: string
+    profileImageUrl: string
+  }) => void | Promise<void>
   onRemoveMember: (email: string) => void
 }
 
@@ -40,34 +36,34 @@ export function TeamMembersSection({
   onAddMember,
   onRemoveMember,
 }: TeamMembersSectionProps) {
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null)
   const tabMembers = members.filter((m) => m.role === memberTab)
 
-  const handleSearch = () => {
+  const handleAdd = async () => {
     const email = memberEmail.trim()
     if (!email) return
-    const found = MOCK_USERS.find((u) => u.email === email)
-    if (!found) {
-      toast.error('해당 이메일로 가입된 사용자를 찾을 수 없습니다.')
-      setSearchResult(null)
+    if (!EMAIL_RE.test(email)) {
+      toast.error('올바른 이메일 형식이 아닙니다.')
       return
     }
-    setSearchResult(found)
-  }
-
-  const handleAdd = () => {
-    if (!searchResult) return
-    if (members.some((m) => m.email === searchResult.email)) {
+    if (members.some((m) => m.email === email)) {
       toast.error('이미 추가된 팀원입니다.')
       return
     }
-    onAddMember({
-      name: searchResult.name,
-      ownRole: searchResult.ownRole,
-      profileImageUrl: searchResult.profileImageUrl,
-    })
-    setSearchResult(null)
+
+    setIsAdding(true)
+    try {
+      await onAddMember({
+        name: email,
+        ownRole: `${memberTab} 참여자`,
+        profileImageUrl: '',
+      })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '팀원 초대에 실패했습니다.')
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -80,7 +76,7 @@ export function TeamMembersSection({
           </div>
 
           <p className="text-body3_r_16 text-CoolNeutral-30">
-            프로젝트에 함께 참여한 팀원을 등록해주세요
+            프로젝트에 함께 참여한 팀원을 이메일로 초대해주세요
           </p>
         </div>
 
@@ -108,48 +104,22 @@ export function TeamMembersSection({
           <input
             type="email"
             value={memberEmail}
-            onChange={(e) => {
-              onMemberEmailChange(e.target.value)
-              setSearchResult(null)
-            }}
+            onChange={(e) => onMemberEmailChange(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleSearch()
+              if (e.key === 'Enter') handleAdd()
             }}
-            placeholder="이메일로 함께한 팀원을 찾아보세요"
+            placeholder="이메일로 함께한 팀원을 초대해보세요"
             className="flex-1 text-body3_r_16 text-CoolNeutral-20 placeholder:text-neutral-80 outline-none bg-transparent"
           />
-          <button type="button" onClick={handleSearch} className="hover:cursor-pointer">
-            <Image src="/search.svg" alt="search" width={24} height={24} />
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={isAdding || !memberEmail.trim()}
+            className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          >
+            {isAdding ? '초대 중...' : `${memberTab}로 초대하기`}
           </button>
         </div>
-
-        {searchResult && (
-          <div className="flex items-center justify-between px-4 py-3 rounded-[8px] border border-neutral-95">
-            <div className="flex items-center gap-3">
-              <div className="relative size-10 rounded-full overflow-hidden bg-neutral-90">
-                <Image
-                  src={searchResult.profileImageUrl}
-                  alt={searchResult.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-body2_m_14 text-CoolNeutral-20">{searchResult.name}</span>
-                <span className="text-caption1_m_13 text-CoolNeutral-50">
-                  {searchResult.ownRole}
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer"
-            >
-              {memberTab}로 추가하기
-            </button>
-          </div>
-        )}
       </div>
 
       {tabMembers.length > 0 && (
@@ -176,7 +146,7 @@ export function TeamMembersSection({
                   )}
                 </div>
                 <div className="flex flex-col flex-1 min-w-0">
-                  <span className="text-sub3_sb_16 text-CoolNeutral-20">
+                  <span className="text-sub3_sb_16 text-CoolNeutral-20 truncate">
                     {truncateName(m.name)}
                   </span>
                   <span className="text-caption1_m_13 text-CoolNeutral-50">{m.ownRole}</span>

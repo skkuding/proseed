@@ -19,14 +19,15 @@ import { IconSection } from './_components/IconSection'
 import { ThumbnailSection } from './_components/ThumbnailSection'
 import { ProjectImagesSection } from './_components/ProjectImagesSection'
 import { CATEGORY_TO_API, STATUS_TO_API, JOB_TO_API, type JobTab } from './_components/constants'
+import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
-import { useAuthStore } from '@/store/authStore'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 import {
   createProject,
   inviteCollaborator,
   getUploadUrl,
   uploadToS3,
+  getMyProfile,
   type CreateProjectDto,
   type InviteCollaboratorDto,
 } from '@/lib/api'
@@ -55,8 +56,18 @@ export default function RegisterProject() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const cachedJobType = useAuthStore((s) => s.jobType)
-  const leaderJobType: JobTab = cachedJobType ?? '기획'
+  // 리더(등록자) 본인의 직군 — 로그인 시 온보딩에서 설정된 실제 값을 사용 (하드코딩 금지)
+  const [profileJobType, setProfileJobType] = useState<JobTab | null>(null)
+  useEffect(() => {
+    getMyProfile()
+      .then((profile) => {
+        if (profile.jobType) setProfileJobType(JOB_API_TO_LABEL[profile.jobType])
+      })
+      .catch(() => {
+        toast.error('내 직군 정보를 불러오지 못했습니다.')
+      })
+  }, [])
+  const leaderJobType: JobTab = profileJobType ?? '기획'
 
   const {
     selectedCategories,
@@ -99,12 +110,16 @@ export default function RegisterProject() {
 
   async function handleSubmit() {
     if (!canSubmit || submitting) return
+    if (!profileJobType) {
+      toast.error('내 직군 정보를 아직 불러오는 중입니다. 잠시 후 다시 시도해주세요.')
+      return
+    }
     setSubmitting(true)
     try {
       const [iconKey, thumbnailKey, ...imageKeys] = await Promise.all([
         uploadImage(iconFile!),
         uploadImage(thumbnailFile!),
-        ...projectImages.map((img) => uploadImage(img.file)),
+        ...projectImages.map((img) => uploadImage(img.file!)),
       ])
 
       const project = await createProject({

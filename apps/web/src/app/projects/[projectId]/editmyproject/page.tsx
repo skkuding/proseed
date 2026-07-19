@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { ConfirmModal } from '@/components/ConfirmModal'
@@ -19,19 +19,51 @@ import { IconSection } from '../register/_components/IconSection'
 import { ThumbnailSection } from '../register/_components/ThumbnailSection'
 import { ProjectImagesSection } from '../register/_components/ProjectImagesSection'
 import { CATEGORY_LABELS, STATUS_TO_API } from '../register/_components/constants'
+import { JOB_TO_API, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthGuard } from '@/lib/useAuthGuard'
-import mockData from '@/app/_mockdata/project-detail/project-basicdata.json'
+import { authClient } from '@/lib/auth-client'
+import {
+  getProjectById,
+  inviteCollaborator,
+  type ProjectDetailResponseDto,
+  type InviteCollaboratorDto,
+} from '@/lib/api'
 
 const API_TO_STATUS = Object.fromEntries(
   Object.entries(STATUS_TO_API).map(([label, api]) => [api, label])
 )
 
-const { mockProject } = mockData
-
 export default function EditMyProject() {
   useAuthGuard()
-  const router = useRouter()
+  const { projectId } = useParams<{ projectId: string }>()
+  const { data: session, isPending: sessionPending } = authClient.useSession()
+  const [project, setProject] = useState<ProjectDetailResponseDto | null>(null)
+
+  useEffect(() => {
+    getProjectById(projectId).then(setProject, () => {
+      toast.error('프로젝트 정보를 불러오지 못했습니다.')
+    })
+  }, [projectId])
+
+  if (!project || sessionPending) {
+    return (
+      <main className="min-h-screen bg-neutral-99 flex items-center justify-center">
+        <p className="text-body2_r_18 text-CoolNeutral-30">불러오는 중...</p>
+      </main>
+    )
+  }
+
+  return <EditMyProjectForm project={project} session={session} />
+}
+
+function EditMyProjectForm({
+  project,
+  session,
+}: {
+  project: ProjectDetailResponseDto
+  session: ReturnType<typeof authClient.useSession>['data']
+}) {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
@@ -83,33 +115,53 @@ export default function EditMyProject() {
     handleThumbnailSelect,
     handleAddProjectImages,
   } = useProjectForm({
-    categories: mockProject.category.map((c) => CATEGORY_LABELS[c] ?? c),
-    type: mockProject.type as 'APP' | 'WEB',
-    title: mockProject.title,
-    projectLink: mockProject.projectLink,
-    oneLineDescription: mockProject.oneLineDescription,
-    description: mockProject.description,
-    status: API_TO_STATUS[mockProject.status] ?? null,
-    contactPath: mockProject.contactPath,
-    iconPreview: mockProject.iconUrl,
-    thumbnailPreview: mockProject.thumbnailUrl,
-    hasExistingImages: mockProject.images.length > 0,
+    categories: project.category.map((c) => CATEGORY_LABELS[c] ?? c),
+    type: project.type as 'APP' | 'WEB',
+    title: project.title,
+    projectLink: project.projectLink,
+    oneLineDescription: project.oneLineDescription,
+    description: project.description,
+    status: API_TO_STATUS[project.status] ?? null,
+    contactPath: project.contactPath,
+    iconPreview: project.iconUrl,
+    thumbnailPreview: project.thumbnailUrl,
+    hasExistingImages: project.images.length > 0,
+    projectImages: [...project.images]
+      .sort((a, b) => a.order - b.order)
+      .map((img) => ({ preview: img.url })),
+    // TODO: ProjectMemberDto에 userId가 없어서 이름으로 본인 여부를 추정 중 (백엔드가 userId를 내려주면 정확히 비교)
+    members: project.projectRoles
+      .filter((m) => !session || session.user.name !== m.user.name)
+      .map((m) => ({
+        email: `member-${m.id}`,
+        role: JOB_API_TO_LABEL[m.role] ?? '기획',
+        name: m.user.name,
+        ownRole: `${JOB_API_TO_LABEL[m.role] ?? m.role} 참여자`,
+        profileImageUrl: m.user.profileImageUrl,
+      })),
   })
+
+  // 팀원 초대는 추가 즉시 실제 API를 호출 (기본정보/이미지 수정 저장은 백엔드에 PATCH 라우트가 아직 없음)
+  async function handleAddMember(member: {
+    name: string
+    ownRole: string
+    profileImageUrl: string
+  }) {
+    await inviteCollaborator(project.id, {
+      email: memberEmail.trim(),
+      role: JOB_TO_API[memberTab] as InviteCollaboratorDto['role'],
+    })
+    addMember(member)
+  }
 
   async function handleSave() {
     if (!canSubmit || submitting) return
     setSubmitting(true)
     try {
-      // TODO: 백엔드 연결 시 아래 주석 해제
-      // const projectId = mockProject.id
-      // await fetch(`${API}/project/${projectId}`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   credentials: 'include',
-      //   body: JSON.stringify({ title, type: projectType, status: STATUS_TO_API[status!], ... }),
-      // })
-      toast.success('프로젝트가 수정되었습니다.')
-      router.push('/myproject')
+      // TODO: PATCH /project/:id 라우트가 백엔드에 생기면 기본정보/이미지 저장 연결
+      toast.error(
+        '기본 정보·이미지 수정 저장 기능은 아직 준비 중입니다. (팀원 초대는 이미 반영되었습니다)'
+      )
     } catch {
       toast.error('수정 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
@@ -155,7 +207,7 @@ export default function EditMyProject() {
                   memberEmail={memberEmail}
                   onMemberEmailChange={setMemberEmail}
                   members={members}
-                  onAddMember={addMember}
+                  onAddMember={handleAddMember}
                   onRemoveMember={(email) =>
                     setMembers((prev) => prev.filter((m) => m.email !== email))
                   }
