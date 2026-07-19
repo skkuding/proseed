@@ -22,8 +22,8 @@ spec:
             httpGet:
               path: /api/health
               port: 4000
-            periodSeconds: 5
-            failureThreshold: 30
+            periodSeconds: 2
+            failureThreshold: 75
           livenessProbe:
             httpGet:
               path: /api/health
