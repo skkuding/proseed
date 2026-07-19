@@ -173,6 +173,21 @@ export class ProjectService {
     )
   }
 
+  /**
+   * 공유 카드(og:image)용 썸네일 presigned download URL.
+   * presigned 는 만료되므로 컨트롤러의 리다이렉트 엔드포인트가 매 요청 새로 발급한다.
+   */
+  async getThumbnailPresignedUrl(projectId: number): Promise<string> {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { thumbnailUrl: true },
+    })
+    if (!project) {
+      throw new EntityNotExistException('Project')
+    }
+    return this.storage.getSignedDownloadUrl(project.thumbnailUrl)
+  }
+
   /** 목록용: thumbnailUrl (S3 key) → presigned download URL 일괄 변환 */
   private async resolveThumbnailUrls<T extends { thumbnailUrl: string }>(
     projects: T[],
