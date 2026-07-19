@@ -2,6 +2,13 @@ import type { MetadataRoute } from 'next'
 import { getProjects } from '@/lib/api'
 import { SITE_URL } from '@/lib/site'
 
+/**
+ * sitemap 은 기본적으로 빌드 시점에 한 번 생성·캐시된다.
+ * 그러면 새로 등록/삭제된 프로젝트가 재배포 전까지 반영되지 않으므로,
+ * 1시간마다 재생성(ISR)해 프로젝트 목록을 최신으로 유지한다.
+ */
+export const revalidate = 3600
+
 /** 커서가 이상 동작해도 폭주하지 않도록 상한 (100페이지 × take 100 = 1만 프로젝트) */
 const MAX_PAGES = 100
 
