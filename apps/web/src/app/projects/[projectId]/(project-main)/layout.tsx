@@ -1,33 +1,26 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { getProjectById, type ProjectDetailResponseDto } from '@/lib/api'
+import { notFound } from 'next/navigation'
+import { getProjectById } from '@/lib/api'
 import { ProjectImageCarousel } from '../_components/ProjectImageCarousel'
 import { ProjectMember } from '../_components/ProjectMember'
 import { ProjectDescription } from '../_components/ProjectDescription'
 import ProjectTabs from '../_components/ProjectTabs'
 
-export default function ProjectDetailLayout({ children }: { children: React.ReactNode }) {
-  const { projectId } = useParams<{ projectId: string }>()
-  const [project, setProject] = useState<ProjectDetailResponseDto | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+type LayoutProps = {
+  children: React.ReactNode
+  params: Promise<{ projectId: string }>
+}
 
-  useEffect(() => {
-    getProjectById(projectId)
-      .then(setProject)
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
-  }, [projectId])
+export default async function ProjectDetailLayout({ children, params }: LayoutProps) {
+  const { projectId } = await params
 
-  if (isLoading) return null
+  const project = await getProjectById(projectId).catch((error) => {
+    console.error('Failed to fetch project:', error)
+    return null
+  })
 
+  // 없는 프로젝트는 200 + 안내 UI(soft 404) 대신 실제 404 를 반환해 색인되지 않게 한다.
   if (!project) {
-    return (
-      <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
-        프로젝트를 찾을 수 없습니다.
-      </div>
-    )
+    notFound()
   }
 
   const sortedImages = [...project.images].sort((a, b) => a.order - b.order)

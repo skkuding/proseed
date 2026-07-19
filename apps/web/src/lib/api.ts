@@ -1,6 +1,14 @@
 import type { components } from '@/types/api.generated'
 
-export const BASE = process.env.NEXT_PUBLIC_API_URL || '/api'
+const PUBLIC_BASE = process.env.NEXT_PUBLIC_API_URL || '/api'
+
+// 서버사이드(SSR·generateMetadata·sitemap)는 클러스터 내부 주소로 API 를 직접 호출한다.
+// 공개 URL 은 Pod 안에서 인그레스로 되돌아가는 경로(hairpin)가 막혀 서버 fetch 가 실패하므로,
+// 서버에서는 INTERNAL_API_URL(클러스터 서비스 DNS)을, 브라우저에서는 공개 URL 을 쓴다.
+export const BASE =
+  typeof window === 'undefined' && process.env.INTERNAL_API_URL
+    ? process.env.INTERNAL_API_URL
+    : PUBLIC_BASE
 
 export type CreateVersionDto = components['schemas']['CreateVersionDto']
 export type PublishVersionResponseDto = components['schemas']['PublishVersionResponseDto']
