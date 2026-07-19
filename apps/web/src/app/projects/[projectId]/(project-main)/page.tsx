@@ -1,4 +1,3 @@
-import { cache } from 'react'
 import type { Metadata } from 'next'
 import { getProjectById } from '@/lib/api'
 import { SITE_URL } from '@/lib/site'
@@ -7,18 +6,14 @@ import { GrowthRecord } from '../_components/GrowthRecord'
 
 type PageProps = { params: Promise<{ projectId: string }> }
 
-/**
- * generateMetadata 와 페이지 컴포넌트가 같은 요청에서 각각 프로젝트를 조회한다.
- * React cache 로 요청당 한 번만 실제 호출되도록 메모이즈.
- * 조회 실패(미존재·API 장애) 시 null → 루트 메타데이터로 폴백.
- */
-const getProject = cache(async (projectId: string) => {
+/** 조회 실패(미존재·API 장애) 시 null 을 반환해 루트 메타데이터로 폴백시킨다. */
+async function getProject(projectId: string) {
   try {
     return await getProjectById(projectId)
   } catch {
     return null
   }
-})
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { projectId } = await params
