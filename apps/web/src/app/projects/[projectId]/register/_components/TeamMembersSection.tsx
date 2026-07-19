@@ -1,11 +1,14 @@
 'use client'
 
 import { FieldBadge } from '@/components/FieldBadge'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { SearchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { JOB_TABS, type JobTab, type Member } from './constants'
 import { MemberDeleteModal } from '@/components/MemberDeleteModal'
+import { getProfilePreviewByEmail, type ProfilePreviewResponseDto } from '@/lib/api'
+import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -38,7 +41,26 @@ export function TeamMembersSection({
 }: TeamMembersSectionProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null)
+  const [preview, setPreview] = useState<ProfilePreviewResponseDto | null>(null)
+  const [previewStatus, setPreviewStatus] = useState<'idle' | 'loading' | 'not-found'>('idle')
   const tabMembers = members.filter((m) => m.role === memberTab)
+
+  useEffect(() => {
+    const email = memberEmail.trim()
+    setPreview(null)
+    if (!EMAIL_RE.test(email)) {
+      setPreviewStatus('idle')
+      return
+    }
+    setPreviewStatus('loading')
+    const timer = setTimeout(() => {
+      getProfilePreviewByEmail(email)
+        .then(setPreview)
+        .catch(() => setPreviewStatus('not-found'))
+        .then(() => setPreviewStatus((s) => (s === 'loading' ? 'idle' : s)))
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [memberEmail])
 
   const handleAdd = async () => {
     const email = memberEmail.trim()
@@ -55,7 +77,7 @@ export function TeamMembersSection({
     setIsAdding(true)
     try {
       await onAddMember({
-        name: email,
+        name: preview?.name ?? email,
         ownRole: `${memberTab} 참여자`,
         profileImageUrl: '',
       })
@@ -111,15 +133,37 @@ export function TeamMembersSection({
             placeholder="이메일로 함께한 팀원을 초대해보세요"
             className="flex-1 text-body3_r_16 text-CoolNeutral-20 placeholder:text-neutral-80 outline-none bg-transparent"
           />
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={isAdding || !memberEmail.trim()}
-            className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-          >
-            {isAdding ? '초대 중...' : `${memberTab}로 초대하기`}
-          </button>
+          <SearchIcon
+            className={`size-5 shrink-0 ${previewStatus === 'loading' ? 'text-CoolNeutral-40 animate-pulse' : 'text-neutral-70'}`}
+          />
         </div>
+
+        {preview && (
+          <div className="flex items-center w-full px-4 py-3 gap-3 rounded-[12px] border border-neutral-95 bg-neutral-99">
+            <div className="flex items-center justify-center size-[42px] shrink-0 rounded-full bg-neutral-90 text-sub3_sb_16 text-CoolNeutral-40">
+              {preview.name[0]}
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-sub3_sb_16 text-CoolNeutral-20 truncate">{preview.name}</span>
+              <span className="text-caption1_m_13 text-CoolNeutral-50">
+                {preview.jobType ? JOB_API_TO_LABEL[preview.jobType] : '직군 미입력'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleAdd}
+              disabled={isAdding}
+              className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            >
+              {isAdding ? '추가 중...' : `${memberTab}로 추가하기`}
+            </button>
+          </div>
+        )}
+        {previewStatus === 'not-found' && (
+          <p className="text-caption1_m_13 text-[#FF754F] pl-1">
+            아직 PROSEED에 가입하지 않은 이메일이에요
+          </p>
+        )}
       </div>
 
       {tabMembers.length > 0 && (

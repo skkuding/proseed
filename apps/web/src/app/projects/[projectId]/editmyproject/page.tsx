@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { ConfirmModal } from '@/components/ConfirmModal'
@@ -18,17 +18,26 @@ import { ProjectSummary } from '../register/_components/ProjectSummary'
 import { IconSection } from '../register/_components/IconSection'
 import { ThumbnailSection } from '../register/_components/ThumbnailSection'
 import { ProjectImagesSection } from '../register/_components/ProjectImagesSection'
-import { CATEGORY_LABELS, STATUS_TO_API } from '../register/_components/constants'
+import { CATEGORY_LABELS, CATEGORY_TO_API, STATUS_TO_API } from '../register/_components/constants'
 import { JOB_TO_API, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthGuard } from '@/lib/useAuthGuard'
-import { authClient } from '@/lib/auth-client'
 import {
   getProjectById,
   inviteCollaborator,
+  updateProject,
+  getUploadUrl,
+  uploadToS3,
   type ProjectDetailResponseDto,
   type InviteCollaboratorDto,
+  type UpdateProjectDto,
 } from '@/lib/api'
+
+async function uploadImage(file: File): Promise<string> {
+  const { url, key } = await getUploadUrl(file.name, file.type)
+  await uploadToS3(url, file)
+  return key
+}
 
 const API_TO_STATUS = Object.fromEntries(
   Object.entries(STATUS_TO_API).map(([label, api]) => [api, label])
@@ -37,7 +46,6 @@ const API_TO_STATUS = Object.fromEntries(
 export default function EditMyProject() {
   useAuthGuard()
   const { projectId } = useParams<{ projectId: string }>()
-  const { data: session, isPending: sessionPending } = authClient.useSession()
   const [project, setProject] = useState<ProjectDetailResponseDto | null>(null)
 
   useEffect(() => {
@@ -46,7 +54,7 @@ export default function EditMyProject() {
     })
   }, [projectId])
 
-  if (!project || sessionPending) {
+  if (!project) {
     return (
       <main className="min-h-screen bg-neutral-99 flex items-center justify-center">
         <p className="text-body2_r_18 text-CoolNeutral-30">불러오는 중...</p>
@@ -54,16 +62,11 @@ export default function EditMyProject() {
     )
   }
 
-  return <EditMyProjectForm project={project} session={session} />
+  return <EditMyProjectForm project={project} />
 }
 
-function EditMyProjectForm({
-  project,
-  session,
-}: {
-  project: ProjectDetailResponseDto
-  session: ReturnType<typeof authClient.useSession>['data']
-}) {
+function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
+  const router = useRouter()
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
@@ -101,6 +104,8 @@ function EditMyProjectForm({
     setMemberEmail,
     members,
     setMembers,
+    iconFile,
+    thumbnailFile,
     iconPreview,
     thumbnailPreview,
     projectImages,
@@ -129,19 +134,16 @@ function EditMyProjectForm({
     projectImages: [...project.images]
       .sort((a, b) => a.order - b.order)
       .map((img) => ({ preview: img.url })),
-    // TODO: ProjectMemberDto에 userId가 없어서 이름으로 본인 여부를 추정 중 (백엔드가 userId를 내려주면 정확히 비교)
-    members: project.projectRoles
-      .filter((m) => !session || session.user.name !== m.user.name)
-      .map((m) => ({
-        email: `member-${m.id}`,
-        role: JOB_API_TO_LABEL[m.role] ?? '기획',
-        name: m.user.name,
-        ownRole: `${JOB_API_TO_LABEL[m.role] ?? m.role} 참여자`,
-        profileImageUrl: m.user.profileImageUrl,
-      })),
+    members: project.projectRoles.map((m) => ({
+      email: `member-${m.id}`,
+      role: JOB_API_TO_LABEL[m.role] ?? '기획',
+      name: m.user.name,
+      ownRole: `${JOB_API_TO_LABEL[m.role] ?? m.role} 참여자`,
+      profileImageUrl: m.user.profileImageUrl,
+    })),
   })
 
-  // 팀원 초대는 추가 즉시 실제 API를 호출 (기본정보/이미지 수정 저장은 백엔드에 PATCH 라우트가 아직 없음)
+  // 팀원 초대는 추가 즉시 실제 API를 호출 (기본정보/이미지 수정은 "적용하기" 클릭 시 handleSave에서 한 번에 저장)
   async function handleAddMember(member: {
     name: string
     ownRole: string
@@ -154,16 +156,48 @@ function EditMyProjectForm({
     addMember(member)
   }
 
+  // 기존 이미지는 presigned 조회 URL만 갖고 있어(raw S3 key 없음) 그대로 유지할 땐 imageKeys를 아예 보내지 않음.
+  // 목록이 바뀐 경우(추가/삭제) 기존 이미지의 key를 복원할 방법이 없어 전체 재업로드를 요구함.
+  const initialImages = [...project.images].sort((a, b) => a.order - b.order)
+  const imagesUnchanged =
+    projectImages.length === initialImages.length &&
+    projectImages.every((img, i) => !img.file && img.preview === initialImages[i].url)
+
   async function handleSave() {
     if (!canSubmit || submitting) return
+
+    if (!imagesUnchanged && projectImages.some((img) => !img.file)) {
+      toast.error(
+        '이미지 목록을 변경하려면 전체 이미지를 다시 등록해주세요. (일부만 바꾸는 건 아직 지원하지 않아요)'
+      )
+      return
+    }
+
     setSubmitting(true)
     try {
-      // TODO: PATCH /project/:id 라우트가 백엔드에 생기면 기본정보/이미지 저장 연결
+      const dto: UpdateProjectDto = {
+        title,
+        type: projectType as UpdateProjectDto['type'],
+        status: STATUS_TO_API[status!] as UpdateProjectDto['status'],
+        oneLineDescription,
+        description,
+        category: selectedCategories.map((c) => CATEGORY_TO_API[c]) as UpdateProjectDto['category'],
+        contactPath,
+        projectLink,
+      }
+      if (iconFile) dto.iconKey = await uploadImage(iconFile)
+      if (thumbnailFile) dto.thumbnailKey = await uploadImage(thumbnailFile)
+      if (!imagesUnchanged) {
+        dto.imageKeys = await Promise.all(projectImages.map((img) => uploadImage(img.file!)))
+      }
+
+      await updateProject(project.id, dto)
+      toast.success('프로젝트가 수정되었습니다.')
+      router.push(`/projects/${project.id}`)
+    } catch (err) {
       toast.error(
-        '기본 정보·이미지 수정 저장 기능은 아직 준비 중입니다. (팀원 초대는 이미 반영되었습니다)'
+        err instanceof Error ? err.message : '수정 중 오류가 발생했습니다. 다시 시도해주세요.'
       )
-    } catch {
-      toast.error('수정 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       setSubmitting(false)
     }
