@@ -18,6 +18,12 @@ spec:
           image: ghcr.io/skkuding/proseed/web:main
           ports:
             - containerPort: 3000
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            periodSeconds: 2
+            failureThreshold: 75
           livenessProbe:
             httpGet:
               path: /api/health
