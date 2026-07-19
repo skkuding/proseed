@@ -22,6 +22,7 @@ import { CATEGORY_TO_API, STATUS_TO_API, JOB_TO_API, type JobTab } from './_comp
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthGuard } from '@/lib/useAuthGuard'
+import { trackEvent } from '@/lib/analytics'
 import {
   createProject,
   inviteCollaborator,
@@ -136,6 +137,8 @@ export default function RegisterProject() {
         thumbnailKey,
         imageKeys,
       })
+
+      trackEvent('project_created', { project_type: projectType ?? undefined })
 
       await Promise.allSettled(
         members.map((m) =>

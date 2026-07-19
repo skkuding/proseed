@@ -38,6 +38,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   if (!isOpen) return null
 
   const handleLogin = async (provider: 'google' | 'kakao' | 'naver') => {
+    sessionStorage.setItem('proseed:signup_method', provider)
     await authClient.signIn.social({
       provider,
       callbackURL: typeof window !== 'undefined' ? window.location.origin : '/',

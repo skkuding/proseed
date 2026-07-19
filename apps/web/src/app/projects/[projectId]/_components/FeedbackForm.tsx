@@ -23,6 +23,7 @@ import {
   type CreateFeedbackDto,
 } from '@/lib/api'
 import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import { trackEvent } from '@/lib/analytics'
 
 const ONE_LINE_MAX = 200
 const MAX_IMAGES = 8
@@ -137,6 +138,7 @@ export function CreateFeedbackContent() {
     setSubmitting(true)
     try {
       await createFeedback(projectId, version as string, dto)
+      trackEvent('feedback_submitted', { question_count: visibleQuestions.length })
       setShowSuccessModal(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '피드백 제출에 실패했습니다')
