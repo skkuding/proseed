@@ -70,6 +70,13 @@ export function CreateFeedbackContent() {
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
+  const startTracked = useRef(false)
+  useEffect(() => {
+    if (startTracked.current) return
+    startTracked.current = true
+    trackEvent('feedback_started', {})
+  }, [])
+
   const category = RECORD_CATEGORY_TO_API[activeTab]
   const questions = allQuestions
     .filter((q) => q.category === category)

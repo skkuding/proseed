@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter, useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
@@ -13,11 +13,13 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import {
+  getProjectById,
   getProjectVersions,
   getVersionDetail,
   type ProjectVersionListItemDto,
   type VersionDetailResponseDto,
 } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import { RECORD_CATEGORY_LABELS, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { formatDate } from '@/lib/utils'
 import { ImageLightbox } from './ImageLightbox'
@@ -38,6 +40,20 @@ export function GrowthRecord() {
   const [versionsLoaded, setVersionsLoaded] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState('')
   const [versionDetail, setVersionDetail] = useState<VersionDetailResponseDto | null>(null)
+
+  const viewTracked = useRef(false)
+  useEffect(() => {
+    if (viewTracked.current) return
+    viewTracked.current = true
+    getProjectById(projectId)
+      .then((p) =>
+        trackEvent('project_viewed', {
+          is_own: p.isMyProject,
+          project_type: p.type,
+        })
+      )
+      .catch(() => {})
+  }, [projectId])
 
   useEffect(() => {
     getProjectVersions(projectId)

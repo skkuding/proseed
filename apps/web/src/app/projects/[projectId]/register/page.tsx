@@ -57,6 +57,10 @@ export default function RegisterProject() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  useEffect(() => {
+    trackEvent('project_registration_started', {})
+  }, [])
+
   // 리더(등록자) 본인의 직군 — 로그인 시 온보딩에서 설정된 실제 값을 사용 (하드코딩 금지)
   const [profileJobType, setProfileJobType] = useState<JobTab | null>(null)
   useEffect(() => {
@@ -138,7 +142,10 @@ export default function RegisterProject() {
         imageKeys,
       })
 
-      trackEvent('project_created', { project_type: projectType ?? undefined })
+      trackEvent('project_created', {
+        project_type: projectType ?? undefined,
+        category: selectedCategories.join(','),
+      })
 
       await Promise.allSettled(
         members.map((m) =>

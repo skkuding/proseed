@@ -12,6 +12,7 @@ import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
 import { publishVersion, getProjectById, type CreateVersionDto } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import { JOB_TABS, RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import { authClient } from '@/lib/auth-client'
@@ -291,6 +292,7 @@ export function FeedbackQuestionsForm() {
               setIsPublishing(true)
               try {
                 await publishVersion(projectId, payload)
+                trackEvent('growth_record_published', { version: payload.version })
                 setShowSuccessModal(true)
               } catch (err) {
                 toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')

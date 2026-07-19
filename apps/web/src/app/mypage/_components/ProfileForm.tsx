@@ -9,6 +9,7 @@ import { authClient } from '@/lib/auth-client'
 import { JOB_TABS, JOB_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 import { useAuthStore } from '@/store/authStore'
 import { BASE as API_URL, updateMyProfile } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 
 const JOB_OPTIONS = JOB_TABS
 
@@ -115,6 +116,7 @@ export function ProfileForm({
         links: links.map((l) => l.trim()).filter(Boolean),
         bio,
       })
+      trackEvent('profile_updated', {})
       onJobChange?.(job)
       setSavedOk(true)
       setTimeout(() => setSavedOk(false), 2000)

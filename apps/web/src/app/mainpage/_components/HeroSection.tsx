@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
+import { trackEvent } from '@/lib/analytics'
 
 export default function HeroSection() {
   const { data: session } = authClient.useSession()
@@ -11,6 +12,7 @@ export default function HeroSection() {
   const router = useRouter()
 
   const handleStartClick = () => {
+    trackEvent('cta_clicked', { location: 'hero' })
     if (!session) {
       openLoginModal()
       return
