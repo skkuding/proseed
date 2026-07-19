@@ -36,7 +36,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const image = thumbnailImageUrl(projectId)
   // 검색 스니펫(meta description)은 더 긴 소개 본문을 써 CTR 을 높이고,
   // 공유 카드(og/twitter)는 짧고 강한 한 줄 소개를 유지한다.
-  const metaDescription = project.description || project.oneLineDescription
+  // 소개 본문의 줄바꿈·연속 공백은 단일 공백으로 정리해 meta 태그가 깔끔하게 렌더되도록 한다.
+  const metaDescription = (project.description || project.oneLineDescription)
+    .replace(/\s+/g, ' ')
+    .trim()
   return {
     title: project.title,
     description: metaDescription,
