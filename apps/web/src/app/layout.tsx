@@ -14,16 +14,17 @@ import {
   SITE_URL,
 } from '@/lib/site'
 
-/** 발급된 코드가 있을 때만 verification 태그를 내보낸다 (빈 값이면 undefined → 태그 없음). */
+/**
+ * 발급된 코드가 있을 때만 verification 태그를 내보낸다.
+ * Next 메타데이터 엔진은 필드가 없으면 태그를 만들지 않으므로 빈 객체도 무해.
+ */
 function buildVerification(): Metadata['verification'] {
-  const verification: NonNullable<Metadata['verification']> = {}
-  if (GOOGLE_SITE_VERIFICATION) {
-    verification.google = GOOGLE_SITE_VERIFICATION
+  return {
+    ...(GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : {}),
+    ...(NAVER_SITE_VERIFICATION
+      ? { other: { 'naver-site-verification': NAVER_SITE_VERIFICATION } }
+      : {}),
   }
-  if (NAVER_SITE_VERIFICATION) {
-    verification.other = { 'naver-site-verification': NAVER_SITE_VERIFICATION }
-  }
-  return Object.keys(verification).length > 0 ? verification : undefined
 }
 
 const organizationJsonLd = {
