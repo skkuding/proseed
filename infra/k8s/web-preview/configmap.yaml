@@ -7,3 +7,5 @@ data:
   NEXT_URL: 'https://pr-0.preview.proseednow.com'
   MEDIA_BUCKET_NAME: 'proseed-media'
   OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'
+  # 서버사이드 렌더링용 클러스터 내부 API 주소 (cross-ns FQDN 으로 proseed 의 api-server 에 도달)
+  INTERNAL_API_URL: 'http://api-server.proseed.svc.cluster.local:4000/api'
