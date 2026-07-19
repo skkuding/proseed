@@ -1,4 +1,4 @@
-// ⚠️ 법률 전문가 검토 전 초안 (#73). 게시 전 변호사 검토 + legalInfo.ts의 미정값 확정 필수.
+// 사업자/연락처 등 확정 정보는 legalInfo.ts(SSOT)에서 주입한다.
 import type { Metadata } from 'next'
 import { LegalDocument } from '@/app/_components/legal/LegalDocument'
 import { LegalSection } from '@/app/_components/legal/LegalSection'
