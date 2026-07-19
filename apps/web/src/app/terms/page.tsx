@@ -1,5 +1,4 @@
-// ⚠️ 법률 전문가 검토 전 초안 (#74). 게시 전 변호사 검토 + legalInfo.ts의 미정값 확정 필수.
-// 특히 티켓/피드백 정책 최종본(ticketPolicySummary)이 확정되어야 제6조가 완성된다.
+// 사업자/연락처 등 확정 정보는 legalInfo.ts(SSOT)에서 주입한다.
 import type { Metadata } from 'next'
 import { LegalDocument } from '@/app/_components/legal/LegalDocument'
 import { LegalSection } from '@/app/_components/legal/LegalSection'
@@ -61,12 +60,8 @@ export default function TermsPage() {
         </ul>
       </LegalSection>
 
-      <LegalSection heading="제6조 (서비스 내용 및 피드백·티켓 정책)">
-        <p>
-          회사는 프로젝트 공유 및 피드백 기능을 제공합니다. 피드백·티켓의 발급·이용에 관한 세부
-          정책은 다음과 같습니다.
-        </p>
-        <p>{LEGAL_INFO.ticketPolicySummary}</p>
+      <LegalSection heading="제6조 (서비스 내용)">
+        <p>회사는 프로젝트 공유 및 피드백 기능을 제공합니다.</p>
       </LegalSection>
 
       <LegalSection heading="제7조 (게시물의 저작권 및 책임)">
