@@ -4,6 +4,8 @@ namespace: proseed-postgres
 
 resources:
   - db-credentials.yaml
+  - backup/s3-credentials.yaml
+  - backup/cronjob.yaml
   - deployment.yaml
   - namespace.yaml
   - service.yaml

@@ -1,0 +1,132 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: proseed-postgres
+  annotations:
+    argocd.argoproj.io/sync-wave: '1'
+spec:
+  schedule: '0 4 * * *'
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: postgres-backup
+        spec:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 70
+            runAsGroup: 70
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: ghcr.io/skkuding/proseed/postgres-backup:main
+              imagePullPolicy: Always
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  set -o pipefail
+
+                  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] Checking database connectivity..."
+                  pg_isready \
+                    --host="${POSTGRES_HOST}" \
+                    --port="${POSTGRES_PORT}" \
+                    --username="${POSTGRES_USER}" \
+                    --timeout=10
+
+                  backup_key="postgres/skkuding-$(date -u +%Y%m%dT%H%M%SZ).dump"
+                  backup_uri="s3://${S3_BUCKET}/${backup_key}"
+
+                  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] PostgreSQL backup started: ${backup_uri}"
+
+                  if pg_dump \
+                    --host="${POSTGRES_HOST}" \
+                    --port="${POSTGRES_PORT}" \
+                    --username="${POSTGRES_USER}" \
+                    --dbname="${POSTGRES_DB}" \
+                    --format=custom \
+                    --no-owner \
+                    --no-privileges \
+                    | aws s3 cp - "${backup_uri}" \
+                      --sse AES256 \
+                      --only-show-errors; then
+                    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] PostgreSQL backup completed: ${backup_uri}"
+                  else
+                    status=$?
+                    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] PostgreSQL backup failed with exit code ${status}: ${backup_uri}" >&2
+                    exit "${status}"
+                  fi
+              env:
+                - name: POSTGRES_HOST
+                  value: postgres-svc.proseed-postgres.svc.cluster.local
+                - name: POSTGRES_PORT
+                  value: '5432'
+                - name: POSTGRES_DB
+                  value: skkuding
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: database-credentials
+                      key: username
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: database-credentials
+                      key: password
+                - name: PGCONNECT_TIMEOUT
+                  value: '10'
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3-credentials
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3-credentials
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: AWS_DEFAULT_REGION
+                  value: ap-northeast-2
+                - name: AWS_EC2_METADATA_DISABLED
+                  value: 'true'
+                - name: AWS_PAGER
+                  value: ''
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: '1'
+                - name: S3_BUCKET
+                  value: proseed-db-backups
+                - name: HOME
+                  value: /tmp
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: '1'
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 64Mi
