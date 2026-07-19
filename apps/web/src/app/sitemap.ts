@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next'
+import { unstable_cache } from 'next/cache'
 import { getProjects } from '@/lib/api'
 import { SITE_URL } from '@/lib/site'
 
 /**
- * 매 요청마다 런타임에 생성한다.
- * 빌드 시점엔 API(클러스터 내부 주소)에 닿을 수 없어 빈 sitemap 이 캐시되고,
- * 정적/ISR 캐시로는 새 프로젝트가 재배포·revalidate 전까지 반영되지 않기 때문.
+ * 빌드 시점엔 API(클러스터 내부 주소)에 닿을 수 없어 빈 sitemap 이 구워지므로,
+ * 정적 프리렌더를 끄고 런타임에 생성한다.
  */
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +29,14 @@ async function getAllProjectIds(): Promise<number[]> {
   return ids
 }
 
+/**
+ * 매 요청마다 목록 API 를 순회하면 부하가 크므로, 결과를 런타임에 1시간 캐시한다.
+ * (force-dynamic 이라 빌드 시점엔 실행되지 않고, 첫 런타임 요청이 내부 API 로 채운다.)
+ */
+const getCachedProjectIds = unstable_cache(getAllProjectIds, ['sitemap-project-ids'], {
+  revalidate: 3600,
+})
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     {
@@ -40,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let projectEntries: MetadataRoute.Sitemap = []
   try {
-    const ids = await getAllProjectIds()
+    const ids = await getCachedProjectIds()
     projectEntries = ids.map((id) => ({
       url: `${SITE_URL}/projects/${id}`,
       changeFrequency: 'weekly',
