@@ -1,26 +1,18 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { getProjectById, type ProjectDetailResponseDto } from '@/lib/api'
+import { getProjectById } from '@/lib/api'
 import { ProjectImageCarousel } from '../_components/ProjectImageCarousel'
 import { ProjectMember } from '../_components/ProjectMember'
 import { ProjectDescription } from '../_components/ProjectDescription'
 import ProjectTabs from '../_components/ProjectTabs'
 
-export default function ProjectDetailLayout({ children }: { children: React.ReactNode }) {
-  const { projectId } = useParams<{ projectId: string }>()
-  const [project, setProject] = useState<ProjectDetailResponseDto | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+type LayoutProps = {
+  children: React.ReactNode
+  params: Promise<{ projectId: string }>
+}
 
-  useEffect(() => {
-    getProjectById(projectId)
-      .then(setProject)
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
-  }, [projectId])
+export default async function ProjectDetailLayout({ children, params }: LayoutProps) {
+  const { projectId } = await params
 
-  if (isLoading) return null
+  const project = await getProjectById(projectId).catch(() => null)
 
   if (!project) {
     return (
