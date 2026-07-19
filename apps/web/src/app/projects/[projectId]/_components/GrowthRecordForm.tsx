@@ -18,7 +18,7 @@ import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growth
 import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import {
   JOB_TABS,
-  // JOB_API_TO_LABEL, // MVP 권한 미구현 — 되돌릴 때 주석 해제 (아래 관련 블록 참고)
+  JOB_API_TO_LABEL,
   RECORD_CATEGORY_TO_API,
   RECORD_CATEGORY_LABELS,
 } from '@/app/_utils/projectConstants'
@@ -29,10 +29,10 @@ import {
   getDownloadUrl,
   getDrafts,
   upsertDraft,
-  // getProjectById, // MVP 권한 미구현 — 되돌릴 때 주석 해제
+  getProjectById,
   type RecordCategory,
 } from '@/lib/api'
-// import { authClient } from '@/lib/auth-client' // MVP 권한 미구현 — 되돌릴 때 주석 해제
+import { authClient } from '@/lib/auth-client'
 
 const AUTOSAVE_DELAY_MS = 1000
 
@@ -69,13 +69,9 @@ type ImageItem = {
 export function GrowthRecordForm() {
   const params = useParams()
   const projectId = params.projectId as string
-  // const { data: session, isPending: sessionPending } = authClient.useSession() // MVP 권한 미구현 — 되돌릴 때 주석 해제
-  // MVP: 리드/직군 권한 구분 없음 확정 — 항상 전체 허용 (원래 기본값은 null/false, 아래 주석 처리된 이펙트로 채워짐)
-  // setAllowedTabs/setIsLead는 그 이펙트 복원 시 다시 쓰이므로 남겨둠
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>([...JOB_TABS])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isLead, setIsLead] = useState(true)
+  const { data: session, isPending: sessionPending } = authClient.useSession()
+  const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>(null)
+  const [isLead, setIsLead] = useState(false)
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [version, setVersion] = useState({ major: '', minor: '', patch: '' })
   const [imagesByTab, setImagesByTab] = useState<Record<TabLabel, ImageItem[]>>({
@@ -105,28 +101,27 @@ export function GrowthRecordForm() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  // MVP: 리드/직군 권한 구분 없음 확정 (각 팀의 리드 없이 우선 전부 성장기록 작성 가능하게, 동시성 문제는 나중에 해결)
-  // 아래는 "본인이 참여한 직군만 작성 가능, Lead는 전 직군" 제한 로직 — 나중에 권한이 구체화되면 주석 해제
-  // useEffect(() => {
-  //   if (sessionPending) return
-  //
-  //   getProjectById(projectId)
-  //     .then((project) => {
-  //       const lead = !!session && Number(session.user.id) === project.createdById
-  //       const tabs = lead
-  //         ? [...JOB_TABS]
-  //         : project.myJobType
-  //           ? [JOB_API_TO_LABEL[project.myJobType]]
-  //           : []
-  //       setIsLead(lead)
-  //       setAllowedTabs(tabs)
-  //       if (tabs.length > 0) setActiveTab(tabs[0])
-  //     })
-  //     .catch(() => {
-  //       toast.error('프로젝트 정보를 불러오지 못했습니다')
-  //       setAllowedTabs([])
-  //     })
-  // }, [projectId, session, sessionPending])
+  // 본인이 초대된 직군만 작성 가능, 프로젝트 등록자(Lead)는 전 직군 작성 가능
+  useEffect(() => {
+    if (sessionPending) return
+
+    getProjectById(projectId)
+      .then((project) => {
+        const lead = !!session && Number(session.user.id) === project.createdById
+        const tabs = lead
+          ? [...JOB_TABS]
+          : project.myJobType
+            ? [JOB_API_TO_LABEL[project.myJobType]]
+            : []
+        setIsLead(lead)
+        setAllowedTabs(tabs)
+        if (tabs.length > 0) setActiveTab(tabs[0])
+      })
+      .catch(() => {
+        toast.error('프로젝트 정보를 불러오지 못했습니다')
+        setAllowedTabs([])
+      })
+  }, [projectId, session, sessionPending])
 
   // 직군별 공유 draft 불러오기 (리드는 전 직군, 팀원은 자기 직군만 응답에 포함됨)
   useEffect(() => {
