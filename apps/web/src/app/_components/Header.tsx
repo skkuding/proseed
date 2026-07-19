@@ -23,10 +23,10 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
 
-  const activeTab =
-    NAV_TABS.find(({ href }) =>
-      href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
-    )?.label ?? '메인 페이지'
+  // nav에 없는 라우트(/privacy 등)에서는 어떤 탭도 활성화하지 않는다 (undefined).
+  const activeTab = NAV_TABS.find(({ href }) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  )?.label
 
   const handleSignOut = async () => {
     setIsDropdownOpen(false)

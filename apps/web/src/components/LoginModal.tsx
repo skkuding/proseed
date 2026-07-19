@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 
@@ -95,8 +96,24 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             <p className="text-center text-label4_m_12 text-neutral-80">
               본인은 만 14세 이상이며,{' '}
-              <span className="underline underline-offset-2">서비스 이용약관</span> 및{' '}
-              <span className="underline underline-offset-2">개인정보 처리방침</span>에 동의하고,
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-neutral-99"
+              >
+                서비스 이용약관
+              </Link>{' '}
+              및{' '}
+              <Link
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-neutral-99"
+              >
+                개인정보 처리방침
+              </Link>
+              에 동의하고,
               <br />
               서비스 제공을 위한 이름과 이메일 수집에 동의합니다.
             </p>
