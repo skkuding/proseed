@@ -2298,6 +2298,7 @@
             "type": "string"
           },
           "imageKeys": {
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "string"
@@ -2726,6 +2727,7 @@
             "type": "string"
           },
           "imageKeys": {
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "string"
