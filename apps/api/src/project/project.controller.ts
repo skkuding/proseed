@@ -2,11 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  Redirect,
   Req,
 } from '@nestjs/common'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
@@ -93,6 +95,19 @@ export class ProjectController {
       dto.email,
       dto.role,
     )
+  }
+
+  // 공유 카드(og:image)용 안정 URL. presigned 는 만료되므로 이 고정 엔드포인트가
+  // 매 요청 새 presigned 로 302 리다이렉트한다 → 크롤러가 이 URL 을 캐시해도 이미지가 안 깨진다.
+  @Public()
+  @Get(':id/thumbnail')
+  @Header('Cache-Control', 'no-store')
+  @Redirect()
+  async getThumbnail(
+    @Param('id', ParseIntPipe) projectId: number,
+  ): Promise<{ url: string; statusCode: number }> {
+    const url = await this.projectService.getThumbnailPresignedUrl(projectId)
+    return { url, statusCode: 302 }
   }
 
   @Public()
