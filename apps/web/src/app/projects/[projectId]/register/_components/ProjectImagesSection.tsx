@@ -45,7 +45,7 @@ export function ProjectImagesSection({ images, onAdd, onRemove }: ProjectImagesS
           type="button"
           size="xs"
           onClick={() => inputRef.current?.click()}
-          disabled={images.length >= 10}
+          disabled={images.length >= 8}
           className="shrink-0 px-4 text-sub3_sb_16"
         >
           이미지 등록하기
@@ -90,7 +90,7 @@ export function ProjectImagesSection({ images, onAdd, onRemove }: ProjectImagesS
 
       <ul className="rounded-[12px] bg-neutral-99 border-neutral-95 border-[1.4px] p-5 gap-0.5 flex flex-col text-body1_m_16 text-CoolNeutral-20">
         <li>• 1920×1080 사이즈의 이미지를 업로드 해주세요. (개당 최대 용량 20mb)</li>
-        <li>• 최대 10장까지 업로드 가능합니다.</li>
+        <li>• 최대 8장까지 업로드 가능합니다.</li>
         <li>• PNG와 JPEG 형식의 이미지만 업로드 가능합니다.</li>
       </ul>
 

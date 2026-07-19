@@ -50,17 +50,21 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
         </div>
         <p className="mt-4 text-CoolNeutral-40 text-sub2_m_18">{project.oneLineDescription}</p>
         <div className="mt-6 flex gap-3">
-          <div className="w-full max-w-[384px] rounded-xl flex justify-between bg-neutral-99 p-3 pr-4">
-            <div className="flex gap-[11.5px] pl-[7.5px]">
+          <div className="w-full max-w-[384px] rounded-xl flex items-center justify-between bg-neutral-99 p-3 pr-4 gap-2">
+            <div className="flex items-center gap-[11.5px] pl-[7.5px]">
               <Image src={bullet} alt="bullet" width={5} height={5} />
               <p className="text-body1_m_16 text-CoolNeutral-30">연락 가능한 경로</p>
             </div>
-            <Link href={project.contactPath} target="_blank" className="text-body1_m_16 underline">
+            <Link
+              href={project.contactPath}
+              target="_blank"
+              className="text-body1_m_16 underline text-right"
+            >
               {project.contactPath}
             </Link>
           </div>
-          <div className="w-full max-w-[384px] rounded-xl flex justify-between bg-neutral-99 p-3 pr-4">
-            <div className="flex gap-[11.5px] pl-[7.5px]">
+          <div className="w-full max-w-[384px] rounded-xl flex items-center justify-between bg-neutral-99 p-3 pr-4 gap-2">
+            <div className="flex items-center gap-[11.5px] pl-[7.5px]">
               <Image src={bullet} alt="bullet" width={5} height={5} />
               <p className="text-body1_m_16 text-CoolNeutral-30">프로젝트 진행 상황</p>
             </div>

@@ -89,7 +89,7 @@ export function useProjectForm(init: ProjectFormInit = {}) {
   }
 
   function handleAddProjectImages(files: FileList) {
-    const remaining = 10 - projectImages.length
+    const remaining = 8 - projectImages.length
     const toAdd = Array.from(files)
       .slice(0, remaining)
       .map((file) => ({ file, preview: URL.createObjectURL(file) }))
