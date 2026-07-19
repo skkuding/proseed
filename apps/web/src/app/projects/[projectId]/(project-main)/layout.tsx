@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { getProjectById } from '@/lib/api'
 import { ProjectImageCarousel } from '../_components/ProjectImageCarousel'
 import { ProjectMember } from '../_components/ProjectMember'
@@ -12,14 +13,14 @@ type LayoutProps = {
 export default async function ProjectDetailLayout({ children, params }: LayoutProps) {
   const { projectId } = await params
 
-  const project = await getProjectById(projectId).catch(() => null)
+  const project = await getProjectById(projectId).catch((error) => {
+    console.error('Failed to fetch project:', error)
+    return null
+  })
 
+  // 없는 프로젝트는 200 + 안내 UI(soft 404) 대신 실제 404 를 반환해 색인되지 않게 한다.
   if (!project) {
-    return (
-      <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
-        프로젝트를 찾을 수 없습니다.
-      </div>
-    )
+    notFound()
   }
 
   const sortedImages = [...project.images].sort((a, b) => a.order - b.order)
