@@ -6,7 +6,17 @@ import { Footer } from '@/app/_components/Footer'
 import { MobileBlocker } from '@/app/_components/MobileBlocker'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/AuthProvider'
+import { JsonLd } from '@/components/JsonLd'
 import { SITE_DESCRIPTION, SITE_URL } from '@/lib/site'
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'PROSEED',
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo_black.svg`,
+  description: SITE_DESCRIPTION,
+}
 
 const pretendard = localFont({
   src: '../font/PretendardVariable.woff2',
@@ -41,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={pretendard.variable}>
       <body className={`${pretendard.className} bg-background-normal`}>
+        <JsonLd data={organizationJsonLd} />
         <AuthProvider>
           <MobileBlocker />
           <Header />
