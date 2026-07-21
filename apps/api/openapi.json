@@ -548,7 +548,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                  "$ref": "#/components/schemas/FeedbackListResponseDto"
                 }
               }
             }
@@ -948,6 +948,29 @@
             "cookie": []
           }
         ],
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/{id}/thumbnail": {
+      "get": {
+        "operationId": "ProjectController_getThumbnail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
         "tags": [
           "Project"
         ]
@@ -1795,13 +1818,16 @@
           "submissionId": {
             "type": "number"
           },
+          "versionId": {
+            "type": "number"
+          },
           "projectId": {
             "type": "number"
           },
           "projectTitle": {
             "type": "string"
           },
-          "projectThumbnailUrl": {
+          "projectIconUrl": {
             "type": "string"
           },
           "oneLineDescription": {
@@ -1817,9 +1843,10 @@
         },
         "required": [
           "submissionId",
+          "versionId",
           "projectId",
           "projectTitle",
-          "projectThumbnailUrl",
+          "projectIconUrl",
           "oneLineDescription",
           "isAdopted",
           "createdAt"
@@ -2025,6 +2052,121 @@
           "data"
         ]
       },
+      "FeedbackSubmissionAuthorDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "profileImageUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "profileImageUrl"
+        ]
+      },
+      "FeedbackListItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "submissionId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "author": {
+            "$ref": "#/components/schemas/FeedbackSubmissionAuthorDto"
+          },
+          "oneLineReview": {
+            "type": "string"
+          },
+          "isAdopted": {
+            "type": "boolean",
+            "description": "이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용"
+          },
+          "id": {
+            "type": "number"
+          },
+          "questionId": {
+            "type": "number"
+          },
+          "questionTitle": {
+            "type": "string"
+          },
+          "questionContent": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "imageUrls",
+          "submissionId",
+          "userId",
+          "author",
+          "oneLineReview",
+          "isAdopted",
+          "id",
+          "questionId",
+          "questionTitle",
+          "questionContent",
+          "content",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "FeedbackListResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackListItemDto"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
       "RecentFeedbackItemDto": {
         "type": "object",
         "properties": {
@@ -2036,6 +2178,9 @@
             ]
           },
           "submissionId": {
+            "type": "number"
+          },
+          "versionId": {
             "type": "number"
           },
           "nickname": {
@@ -2065,6 +2210,7 @@
         "required": [
           "category",
           "submissionId",
+          "versionId",
           "nickname",
           "profileImageUrl",
           "oneLineReview",
@@ -2090,30 +2236,6 @@
         "required": [
           "success",
           "data"
-        ]
-      },
-      "FeedbackSubmissionAuthorDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/JobType"
-              }
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "profileImageUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "role",
-          "name",
-          "profileImageUrl"
         ]
       },
       "FeedbackSubmissionAnswerDto": {
@@ -2889,6 +3011,21 @@
           "content"
         ]
       },
+      "TaggedSubmissionRefDto": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "versionId",
+          "userId"
+        ]
+      },
       "TaggedFeedbacksDto": {
         "type": "object",
         "properties": {
@@ -2901,17 +3038,17 @@
               "GENERAL"
             ]
           },
-          "submissionIds": {
+          "submissions": {
             "minItems": 1,
             "type": "array",
             "items": {
-              "type": "number"
+              "$ref": "#/components/schemas/TaggedSubmissionRefDto"
             }
           }
         },
         "required": [
           "category",
-          "submissionIds"
+          "submissions"
         ]
       },
       "CreateVersionDto": {
