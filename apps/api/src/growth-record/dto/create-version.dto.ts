@@ -113,6 +113,16 @@ export class CreateFeedbackQuestionDto {
   isRequired?: boolean = false
 }
 
+// 태그(=채택)할 피드백 제출 참조 — FeedbackSubmission의 @@unique([versionId, userId])로
+// 제출을 특정. FE는 submissionId를 알 방법이 없어 (버전 id, 작성자 id) 쌍으로 대신 지정
+export class TaggedSubmissionRefDto {
+  @IsInt()
+  versionId: number
+
+  @IsInt()
+  userId: number
+}
+
 // 태그(=채택)할 이전 버전 피드백 제출 — 직군별 최대 3개
 export class TaggedFeedbacksDto {
   @IsEnum(RecordCategory)
@@ -121,8 +131,9 @@ export class TaggedFeedbacksDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(MAX_TAGGED_FEEDBACKS_PER_CATEGORY)
-  @IsInt({ each: true })
-  submissionIds: number[]
+  @ValidateNested({ each: true })
+  @Type(() => TaggedSubmissionRefDto)
+  submissions: TaggedSubmissionRefDto[]
 }
 
 export class CreateVersionDto {

@@ -13,6 +13,7 @@ import { GrowthRecordService } from './growth-record.service'
 
 const LEAD_ID = 1
 const PROJECT_ID = 10
+const PREV_VERSION_ID = 5
 const ALL_CATEGORIES = Object.values(RecordCategory)
 
 //tx.projectVersion.create mock이 반환하는 성장기록 id: PLAN=200, DESIGN=201, DEVELOPMENT=202, GENERAL=203
@@ -42,9 +43,10 @@ const buildSubmission = (
   id: number,
   userId: number,
   categories: RecordCategory[],
-  options: { adopted?: boolean; projectId?: number } = {},
+  options: { adopted?: boolean; projectId?: number; versionId?: number } = {},
 ) => ({
   id,
+  versionId: options.versionId ?? PREV_VERSION_ID,
   projectId: options.projectId ?? PROJECT_ID,
   userId,
   adoptions: options.adopted ? [{ id: 999 }] : [],
@@ -223,7 +225,10 @@ describe('GrowthRecordService', () => {
         PROJECT_ID,
         buildDto({
           taggedFeedbacks: [
-            { category: RecordCategory.PLAN, submissionIds: [50] },
+            {
+              category: RecordCategory.PLAN,
+              submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+            },
           ],
         }),
       )
@@ -253,8 +258,14 @@ describe('GrowthRecordService', () => {
         PROJECT_ID,
         buildDto({
           taggedFeedbacks: [
-            { category: RecordCategory.PLAN, submissionIds: [50] },
-            { category: RecordCategory.DESIGN, submissionIds: [50] },
+            {
+              category: RecordCategory.PLAN,
+              submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+            },
+            {
+              category: RecordCategory.DESIGN,
+              submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+            },
           ],
         }),
       )
@@ -279,9 +290,10 @@ describe('GrowthRecordService', () => {
     })
 
     it('한 작성자의 서로 다른 제출 2건이 각각 채택되면 합산 +6을 받는다 (상한 없음)', async () => {
+      //같은 유저라도 버전이 다르면(@@unique([versionId, userId])) 서로 다른 제출이 된다
       tx.feedbackSubmission.findMany.mockResolvedValue([
-        buildSubmission(50, 7, [RecordCategory.PLAN]),
-        buildSubmission(51, 7, [RecordCategory.DESIGN]),
+        buildSubmission(50, 7, [RecordCategory.PLAN], { versionId: 5 }),
+        buildSubmission(51, 7, [RecordCategory.DESIGN], { versionId: 6 }),
       ])
 
       await service.createVersion(
@@ -289,8 +301,14 @@ describe('GrowthRecordService', () => {
         PROJECT_ID,
         buildDto({
           taggedFeedbacks: [
-            { category: RecordCategory.PLAN, submissionIds: [50] },
-            { category: RecordCategory.DESIGN, submissionIds: [51] },
+            {
+              category: RecordCategory.PLAN,
+              submissions: [{ versionId: 5, userId: 7 }],
+            },
+            {
+              category: RecordCategory.DESIGN,
+              submissions: [{ versionId: 6, userId: 7 }],
+            },
           ],
         }),
       )
@@ -313,7 +331,10 @@ describe('GrowthRecordService', () => {
           PROJECT_ID,
           buildDto({
             taggedFeedbacks: [
-              { category: RecordCategory.PLAN, submissionIds: [50] },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+              },
             ],
           }),
         ),
@@ -332,7 +353,10 @@ describe('GrowthRecordService', () => {
           PROJECT_ID,
           buildDto({
             taggedFeedbacks: [
-              { category: RecordCategory.PLAN, submissionIds: [50] },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+              },
             ],
           }),
         ),
@@ -348,7 +372,10 @@ describe('GrowthRecordService', () => {
           PROJECT_ID,
           buildDto({
             taggedFeedbacks: [
-              { category: RecordCategory.PLAN, submissionIds: [50] },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 999 }],
+              },
             ],
           }),
         ),
@@ -366,7 +393,10 @@ describe('GrowthRecordService', () => {
           PROJECT_ID,
           buildDto({
             taggedFeedbacks: [
-              { category: RecordCategory.PLAN, submissionIds: [50] },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+              },
             ],
           }),
         ),
@@ -380,8 +410,18 @@ describe('GrowthRecordService', () => {
           PROJECT_ID,
           buildDto({
             taggedFeedbacks: [
-              { category: RecordCategory.PLAN, submissionIds: [1, 2, 3] },
-              { category: RecordCategory.PLAN, submissionIds: [4] },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [
+                  { versionId: PREV_VERSION_ID, userId: 1 },
+                  { versionId: PREV_VERSION_ID, userId: 2 },
+                  { versionId: PREV_VERSION_ID, userId: 3 },
+                ],
+              },
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 4 }],
+              },
             ],
           }),
         ),

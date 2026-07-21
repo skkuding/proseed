@@ -8,6 +8,7 @@ import {
   CreateFeedbackResponseDto,
   FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
+  FeedbackListResponseDto,
   MyFeedbackProjectsResponseDto,
   RecentFeedbacksResponseDto,
 } from './dto/feedback-response.dto'
@@ -47,6 +48,7 @@ export class FeedbackService {
         growthRecord: { select: { category: true } },
         submission: {
           select: {
+            versionId: true,
             oneLineReview: true,
             user: { select: { name: true, profileImageUrl: true } },
             project: { select: { id: true, title: true, iconUrl: true } },
@@ -95,6 +97,7 @@ export class FeedbackService {
 
     const data = adoptions.map((adoption) => ({
       submissionId: adoption.submissionId,
+      versionId: adoption.submission.versionId,
       category: adoption.growthRecord.category,
       nickname: adoption.submission.user.name,
       profileImageUrl: adoption.submission.user.profileImageUrl,
@@ -225,6 +228,7 @@ export class FeedbackService {
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
+        versionId: true,
         createdAt: true,
         adoptions: {
           select: { id: true },
@@ -234,20 +238,33 @@ export class FeedbackService {
           select: {
             id: true,
             title: true,
-            thumbnailUrl: true,
+            iconUrl: true,
             oneLineDescription: true,
           },
         },
       },
     })
 
+    //프로젝트 아이콘 S3 key → presigned URL (중복 프로젝트는 1회만 변환)
+    const iconUrlByKey = new Map<string, string>()
+    await Promise.all(
+      [...new Set(submissions.map((s) => s.project.iconUrl))].map(
+        async (key) => {
+          iconUrlByKey.set(key, await this.storage.getSignedDownloadUrl(key))
+        },
+      ),
+    )
+
     return {
       success: true,
       data: submissions.map((submission) => ({
         submissionId: submission.id,
+        versionId: submission.versionId,
         projectId: submission.project.id,
         projectTitle: submission.project.title,
-        projectThumbnailUrl: submission.project.thumbnailUrl,
+        projectIconUrl:
+          iconUrlByKey.get(submission.project.iconUrl) ??
+          submission.project.iconUrl,
         oneLineDescription: submission.project.oneLineDescription,
         isAdopted: submission.adoptions.length > 0,
         createdAt: submission.createdAt,
@@ -405,38 +422,82 @@ export class FeedbackService {
     }
   }
 
+  //제출(submission) 단위 그룹핑에 필요한 submissionId/작성자/한줄평을 답변마다 함께 내려줌
   async findFeedbacksForVersion(
     projectId: number,
     versionId: number,
-  ): Promise<CreateFeedbackResponseDto> {
+  ): Promise<FeedbackListResponseDto> {
     const submissions = await this.prisma.feedbackSubmission.findMany({
       where: { projectId, versionId },
       orderBy: { createdAt: 'desc' },
-      include: {
-        feedbacks: { include: { images: { orderBy: { order: 'asc' } } } },
+      select: {
+        id: true,
+        userId: true,
+        oneLineReview: true,
+        adoptions: { select: { id: true }, take: 1 },
+        user: {
+          select: {
+            name: true,
+            profileImageUrl: true,
+            jobType: true,
+          },
+        },
+        feedbacks: {
+          select: {
+            id: true,
+            questionId: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+            question: {
+              select: {
+                category: true,
+                title: true,
+                description: true,
+                order: true,
+              },
+            },
+            images: {
+              select: { url: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
       },
     })
 
-    const feedbacks = submissions.flatMap((submission) =>
-      submission.feedbacks.map((f) => ({
-        id: f.id,
-        questionId: f.questionId,
-        versionId: submission.versionId,
-        userId: submission.userId,
-        content: f.content,
-        imageUrl: f.images[0]?.url || null,
-        imageUrls: f.images.map((i) => i.url),
-        createdAt: f.createdAt,
-      })),
+    const data = await Promise.all(
+      submissions.flatMap((submission) =>
+        submission.feedbacks
+          .sort((a, b) => a.question.order - b.question.order)
+          .map(async (feedback) => ({
+            id: feedback.id,
+            submissionId: submission.id,
+            userId: submission.userId,
+            questionId: feedback.questionId,
+            category: feedback.question.category,
+            questionTitle: feedback.question.title,
+            questionContent: feedback.question.description,
+            author: {
+              name: submission.user.name,
+              profileImageUrl: submission.user.profileImageUrl,
+              role: submission.user.jobType,
+            },
+            oneLineReview: submission.oneLineReview,
+            isAdopted: submission.adoptions.length > 0,
+            content: feedback.content,
+            imageUrls: await Promise.all(
+              feedback.images.map((image) =>
+                this.storage.getSignedDownloadUrl(image.url),
+              ),
+            ),
+            createdAt: feedback.createdAt,
+            updatedAt: feedback.updatedAt,
+          })),
+      ),
     )
 
-    return {
-      success: true,
-      data: {
-        submittedCount: feedbacks.length,
-        feedbacks,
-      },
-    }
+    return { success: true, data }
   }
 
   async findAllQuestions(

@@ -14,6 +14,7 @@ import {
   VERSION_PATTERN,
   type CreateVersionDto,
   type TaggedFeedbacksDto,
+  type TaggedSubmissionRefDto,
 } from './dto/create-version.dto'
 import { FEEDBACK_TEMPLATES } from './feedback-template.constant'
 import {
@@ -29,7 +30,8 @@ const VERSION_PUBLISH_REWARD = 1
 const ADOPTION_REWARD_SINGLE_CATEGORY = 3
 const ADOPTION_REWARD_MULTI_CATEGORY = 5
 
-type TaggedSubmissionMap = Map<number, { userId: number }>
+//(versionId, userId) 합성 키(`${versionId}:${userId}`) → 실제 조회된 제출
+type TaggedSubmissionMap = Map<string, { submissionId: number; userId: number }>
 
 type ParsedVersion = [major: number, minor: number, patch: number]
 
@@ -347,18 +349,24 @@ export class GrowthRecordService {
 
   private mergeTaggedFeedbacks(
     tags: TaggedFeedbacksDto[],
-  ): Map<RecordCategory, Set<number>> {
-    const merged = new Map<RecordCategory, Set<number>>()
+  ): Map<RecordCategory, Map<string, TaggedSubmissionRefDto>> {
+    const merged = new Map<
+      RecordCategory,
+      Map<string, TaggedSubmissionRefDto>
+    >()
     for (const tag of tags) {
-      const ids = merged.get(tag.category) ?? new Set<number>()
-      tag.submissionIds.forEach((id) => ids.add(id))
-      merged.set(tag.category, ids)
+      const refs =
+        merged.get(tag.category) ?? new Map<string, TaggedSubmissionRefDto>()
+      for (const ref of tag.submissions) {
+        refs.set(`${ref.versionId}:${ref.userId}`, ref)
+      }
+      merged.set(tag.category, refs)
     }
 
-    for (const [category, ids] of merged) {
-      if (ids.size > MAX_TAGGED_FEEDBACKS_PER_CATEGORY) {
+    for (const [category, refs] of merged) {
+      if (refs.size > MAX_TAGGED_FEEDBACKS_PER_CATEGORY) {
         throw new UnprocessableDataException(
-          `Category '${category}' has ${ids.size} tagged feedbacks (max ${MAX_TAGGED_FEEDBACKS_PER_CATEGORY})`,
+          `Category '${category}' has ${refs.size} tagged feedbacks (max ${MAX_TAGGED_FEEDBACKS_PER_CATEGORY})`,
         )
       }
     }
@@ -368,38 +376,47 @@ export class GrowthRecordService {
   private async assertTaggable(
     tx: Prisma.TransactionClient,
     projectId: number,
-    tagsByCategory: Map<RecordCategory, Set<number>>,
+    tagsByCategory: Map<RecordCategory, Map<string, TaggedSubmissionRefDto>>,
   ): Promise<TaggedSubmissionMap> {
-    const submissionIds = [
-      ...new Set([...tagsByCategory.values()].flatMap((ids) => [...ids])),
-    ]
-    if (submissionIds.length === 0) {
+    const allRefs = [...tagsByCategory.values()].flatMap((refs) => [
+      ...refs.values(),
+    ])
+    if (allRefs.length === 0) {
       return new Map()
     }
 
+    //(versionId, userId)는 @@unique([versionId, userId])로 제출 하나를 정확히 특정
     const submissions = await tx.feedbackSubmission.findMany({
-      where: { id: { in: submissionIds } },
+      where: {
+        OR: allRefs.map((ref) => ({
+          versionId: ref.versionId,
+          userId: ref.userId,
+        })),
+      },
       select: {
         id: true,
+        versionId: true,
         projectId: true,
         userId: true,
         adoptions: { select: { id: true }, take: 1 },
         feedbacks: { select: { question: { select: { category: true } } } },
       },
     })
-    const submissionById = new Map(submissions.map((s) => [s.id, s]))
+    const submissionByKey = new Map(
+      submissions.map((s) => [`${s.versionId}:${s.userId}`, s]),
+    )
 
-    for (const [category, ids] of tagsByCategory) {
-      for (const id of ids) {
-        const submission = submissionById.get(id)
+    for (const [category, refs] of tagsByCategory) {
+      for (const key of refs.keys()) {
+        const submission = submissionByKey.get(key)
         //다른 프로젝트의 제출은 존재를 노출하지 않도록 404로 통일
         if (!submission || submission.projectId !== projectId) {
-          throw new EntityNotExistException(`FeedbackSubmission(${id})`)
+          throw new EntityNotExistException(`FeedbackSubmission(${key})`)
         }
         //기채택 제출은 재태그 불가 (같은 발행 내 다직군 동시 태그만 허용)
         if (submission.adoptions.length > 0) {
           throw new ConflictFoundException(
-            `Feedback submission ${id} is already adopted and cannot be tagged again.`,
+            `Feedback submission for ${key} is already adopted and cannot be tagged again.`,
           )
         }
         //해당 직군 답변이 있는 제출만 그 직군에 태그 가능
@@ -408,19 +425,24 @@ export class GrowthRecordService {
         )
         if (!hasCategoryAnswer) {
           throw new UnprocessableDataException(
-            `Feedback submission ${id} has no answers for category '${category}'`,
+            `Feedback submission for ${key} has no answers for category '${category}'`,
           )
         }
       }
     }
 
-    return new Map(submissions.map((s) => [s.id, { userId: s.userId }]))
+    return new Map(
+      submissions.map((s) => [
+        `${s.versionId}:${s.userId}`,
+        { submissionId: s.id, userId: s.userId },
+      ]),
+    )
   }
 
   private async adoptTaggedFeedbacks(
     tx: Prisma.TransactionClient,
     growthRecords: { id: number; category: RecordCategory }[],
-    tagsByCategory: Map<RecordCategory, Set<number>>,
+    tagsByCategory: Map<RecordCategory, Map<string, TaggedSubmissionRefDto>>,
     taggedSubmissions: TaggedSubmissionMap,
   ) {
     if (taggedSubmissions.size === 0) return
@@ -431,32 +453,37 @@ export class GrowthRecordService {
 
     const adoptionRows: { growthRecordId: number; submissionId: number }[] = []
     const categoryCountBySubmission = new Map<number, number>()
-    for (const [category, ids] of tagsByCategory) {
+    for (const [category, refs] of tagsByCategory) {
       const growthRecordId = recordIdByCategory.get(category)
       if (!growthRecordId) continue //카테고리 커버리지 검증상 도달 불가 — 방어
-      for (const id of ids) {
-        adoptionRows.push({ growthRecordId, submissionId: id })
+      for (const key of refs.keys()) {
+        const tagged = taggedSubmissions.get(key)
+        if (!tagged) continue //assertTaggable에서 검증됨 — 방어
+        adoptionRows.push({
+          growthRecordId,
+          submissionId: tagged.submissionId,
+        })
         categoryCountBySubmission.set(
-          id,
-          (categoryCountBySubmission.get(id) ?? 0) + 1,
+          tagged.submissionId,
+          (categoryCountBySubmission.get(tagged.submissionId) ?? 0) + 1,
         )
       }
     }
     await tx.feedbackAdoption.createMany({ data: adoptionRows })
 
     //보상: 제출별 단일 직군 +3 / 2개 직군 이상 총 +5, 작성자별 합산(상한 없음)
+    const userIdBySubmissionId = new Map(
+      [...taggedSubmissions.values()].map((t) => [t.submissionId, t.userId]),
+    )
     const rewardByAuthor = new Map<number, number>()
     for (const [submissionId, categoryCount] of categoryCountBySubmission) {
-      const submission = taggedSubmissions.get(submissionId)
-      if (!submission) continue //assertTaggable에서 검증됨 — 방어
+      const authorId = userIdBySubmissionId.get(submissionId)
+      if (authorId === undefined) continue //assertTaggable에서 검증됨 — 방어
       const reward =
         categoryCount >= 2
           ? ADOPTION_REWARD_MULTI_CATEGORY
           : ADOPTION_REWARD_SINGLE_CATEGORY
-      rewardByAuthor.set(
-        submission.userId,
-        (rewardByAuthor.get(submission.userId) ?? 0) + reward,
-      )
+      rewardByAuthor.set(authorId, (rewardByAuthor.get(authorId) ?? 0) + reward)
     }
 
     for (const [authorId, amount] of rewardByAuthor) {
