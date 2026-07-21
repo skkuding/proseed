@@ -8,7 +8,6 @@ import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/proj
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -59,12 +58,7 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
     setTimeout(() => setCopiedIndex(null), 2000)
   }
 
-  const getPageNumbers = () => {
-    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1)
-    if (currentPage <= 3) return [1, 2, 3, '...', totalPages]
-    if (currentPage >= totalPages - 2) return [1, '...', totalPages - 2, totalPages - 1, totalPages]
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages]
-  }
+  const getPageNumbers = () => Array.from({ length: totalPages }, (_, i) => i + 1)
 
   return (
     <div
@@ -145,27 +139,21 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
                   />
                 </PaginationItem>
 
-                {getPageNumbers().map((page, i) =>
-                  page === '...' ? (
-                    <PaginationItem key={`ellipsis-${i}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href="#"
-                        isActive={currentPage === page}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage(page as number)
-                        }}
-                        className="hover:cursor-pointer"
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )
-                )}
+                {getPageNumbers().map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === page}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCurrentPage(page)
+                      }}
+                      className="hover:cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
 
                 <PaginationItem>
                   <PaginationNext
