@@ -8,7 +8,7 @@ export function FieldBadge({ type }: { type: '필수' | '선택' | '채택됨' }
 
   return (
     <span
-      className={`${textSize} inline-flex items-center justify-center rounded-[4px] px-2 ${heightClass} ${styles}`}
+      className={`${textSize} inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-[4px] px-2 ${heightClass} ${styles}`}
     >
       {type}
     </span>

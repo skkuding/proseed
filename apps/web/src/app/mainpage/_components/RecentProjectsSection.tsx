@@ -16,7 +16,7 @@ export default function RecentProjectsSection() {
 
   useEffect(() => {
     const apiCategory = category === '전체' ? undefined : CATEGORY_TO_API[category]
-    getProjects({ category: apiCategory, take: 9 })
+    getProjects({ category: apiCategory, take: 6 })
       .then((res) => setProjects(res.data))
       .catch(console.error)
   }, [category])

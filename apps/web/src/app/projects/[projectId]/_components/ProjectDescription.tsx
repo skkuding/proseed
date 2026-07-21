@@ -32,7 +32,7 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
         <div className="flex justify-between">
           <div className="flex gap-2">
             <h1 className="text-head3_sb_36">{project.title}</h1>
-            <div className="h-[33px] px-2 py-1 self-center rounded-sm bg-neutral-99 text-CoolNeutral-50 text-sub2_m_18">
+            <div className="h-[33px] px-2 py-1 self-center rounded-[4px] bg-neutral-99 text-CoolNeutral-50 text-sub2_m_18">
               {project.type}
             </div>
           </div>

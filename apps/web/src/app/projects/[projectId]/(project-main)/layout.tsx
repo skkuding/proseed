@@ -26,11 +26,11 @@ export default async function ProjectDetailLayout({ children, params }: LayoutPr
   const sortedImages = [...project.images].sort((a, b) => a.order - b.order)
 
   return (
-    <div className="w-full mt-5 px-1">
+    <div className="w-full mt-5">
       {/* 이미지 영역 */}
       <ProjectImageCarousel images={[project.thumbnailUrl, ...sortedImages.map((i) => i.url)]} />
       {/* 본문 */}
-      <section className="mt-5 flex flex-col gap-6">
+      <section className="mt-5 flex flex-col gap-5">
         <div className="flex justify-between gap-4">
           {/* 왼쪽 */}
           <ProjectDescription project={project} />
@@ -38,7 +38,7 @@ export default async function ProjectDetailLayout({ children, params }: LayoutPr
           <ProjectMember members={project.projectRoles} />
         </div>
       </section>
-      <div className="flex flex-col bg-white w-full px-8 py-7 rounded-xl mt-6 mb-30">
+      <div className="flex flex-col bg-white w-full px-8 py-7 rounded-[16px] mt-6">
         <ProjectTabs />
         {children}
       </div>
