@@ -35,6 +35,8 @@ export type RecentGrowthRecordDto = components['schemas']['RecentGrowthRecordDto
 export type ProfilePreviewResponseDto = components['schemas']['ProfilePreviewResponseDto']
 export type MypageJoinedProjectListDto = components['schemas']['MypageJoinedProjectListDto']
 export type UpdateProjectDto = components['schemas']['UpdateProjectDto']
+export type FeedbackListItemDto = components['schemas']['FeedbackListItemDto']
+export type TaggedSubmissionRefDto = components['schemas']['TaggedSubmissionRefDto']
 
 export type MyProfile = {
   name: string
@@ -320,6 +322,18 @@ export async function createFeedback(
     throw new Error(body?.message ?? '피드백 제출에 실패했습니다')
   }
   return res.json()
+}
+
+export async function getFeedbacksForVersion(
+  projectId: string | number,
+  versionId: string | number
+): Promise<FeedbackListItemDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions/${versionId}/feedbacks`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch feedbacks')
+  const body: { success: boolean; data: FeedbackListItemDto[] } = await res.json()
+  return body.data
 }
 
 export async function getDrafts(

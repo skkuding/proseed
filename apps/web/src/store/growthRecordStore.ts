@@ -1,16 +1,18 @@
 import { create } from 'zustand'
+import type { TaggedFeedbackEntry } from './feedbackTagStore'
+import type { RecordCategory } from '@/lib/api'
 
 interface GrowthRecordState {
   version: { major: string; minor: string; patch: string }
   imagesByTab: Record<string, string[]> // tab -> uploaded image keys/urls
   answers: Record<number, string> // questionId -> answer
-  taggedFeedbacks: Record<string, number[]>
+  taggedFeedbacks: Record<RecordCategory, TaggedFeedbackEntry[]>
   updateGoal: string
   updateResult: string
   setVersion: (version: { major: string; minor: string; patch: string }) => void
   setImagesByTab: (imagesByTab: Record<string, string[]>) => void
   setAnswers: (answers: Record<number, string>) => void
-  setTaggedFeedbacks: (taggedFeedbacks: Record<string, number[]>) => void
+  setTaggedFeedbacks: (taggedFeedbacks: Record<RecordCategory, TaggedFeedbackEntry[]>) => void
   setUpdateGoal: (goal: string) => void
   setUpdateResult: (result: string) => void
 }
@@ -19,7 +21,7 @@ export const useGrowthRecordStore = create<GrowthRecordState>((set) => ({
   version: { major: '', minor: '', patch: '' },
   imagesByTab: {},
   answers: {},
-  taggedFeedbacks: {},
+  taggedFeedbacks: { PLAN: [], DESIGN: [], DEVELOPMENT: [], GENERAL: [] },
   updateGoal: '',
   updateResult: '',
   setVersion: (version) => set({ version }),

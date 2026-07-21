@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
+import type { TaggedFeedbackEntry } from '@/store/feedbackTagStore'
+import type { RecordCategory } from '@/lib/api'
 
 const MAX_LENGTH = 600
 
@@ -15,7 +17,7 @@ interface GrowthRecordSubmitModalProps {
     version: { major: string; minor: string; patch: string }
     imagesByTab: Record<string, string[]>
     answers: Record<number, string>
-    taggedFeedbacks: Record<string, number[]>
+    taggedFeedbacks: Record<RecordCategory, TaggedFeedbackEntry[]>
   }
 }
 

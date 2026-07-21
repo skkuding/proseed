@@ -11,6 +11,7 @@ import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
+import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import { publishVersion, getProjectById, type CreateVersionDto } from '@/lib/api'
 import { JOB_TABS, RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
@@ -253,7 +254,7 @@ export function FeedbackQuestionsForm() {
                 return
               }
 
-              const { version, imagesByTab, answers, updateGoal, updateResult } =
+              const { version, imagesByTab, answers, updateGoal, updateResult, taggedFeedbacks } =
                 useGrowthRecordStore.getState()
 
               const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
@@ -279,18 +280,31 @@ export function FeedbackQuestionsForm() {
                   }))
               )
 
+              const taggedFeedbacksPayload: CreateVersionDto['taggedFeedbacks'] = Object.entries(
+                taggedFeedbacks
+              )
+                .filter(([, entries]) => entries.length > 0)
+                .map(([category, entries]) => ({
+                  category: category as CreateVersionDto['feedbackQuestions'][number]['category'],
+                  submissions: entries.map((entry) => ({
+                    versionId: entry.versionId,
+                    userId: entry.userId,
+                  })),
+                }))
+
               const payload: CreateVersionDto = {
                 version: `${version.major}.${version.minor}.${version.patch}`,
                 updateGoal,
                 updateResults: [updateResult],
                 growthRecords,
                 feedbackQuestions,
-                taggedFeedbacks: [],
+                taggedFeedbacks: taggedFeedbacksPayload,
               }
 
               setIsPublishing(true)
               try {
                 await publishVersion(projectId, payload)
+                useFeedbackTagStore.getState().resetTaggedFeedbacks()
                 setShowSuccessModal(true)
               } catch (err) {
                 toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')

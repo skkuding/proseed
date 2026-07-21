@@ -12,10 +12,9 @@ import { RoleFilterTabs } from '@/components/RoleTabs'
 import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
-import { FeedbackTagModal, type Feedback } from '@/components/FeedbackTagModal'
+import { FeedbackTagModal } from '@/components/FeedbackTagModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
-import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import {
   JOB_TABS,
   JOB_API_TO_LABEL,
@@ -30,6 +29,7 @@ import {
   getDrafts,
   upsertDraft,
   getProjectById,
+  getProjectVersions,
   type RecordCategory,
 } from '@/lib/api'
 import { authClient } from '@/lib/auth-client'
@@ -41,13 +41,6 @@ const AUTOSAVE_DELAY_MS = 1000
 type DraftContent = {
   answers: Record<string, string>
   imageKeys: string[]
-}
-
-const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획',
-  design: '디자인',
-  dev: '개발',
-  general: '기타',
 }
 
 type TabLabel = JobTab
@@ -84,12 +77,19 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
-  const [detailTargetFeedback, setDetailTargetFeedback] = useState<Feedback | null>(null)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
+  const [previousVersionId, setPreviousVersionId] = useState<number | null>(null)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
   const imageInputRef = useRef<HTMLInputElement>(null)
+
+  //피드백 태그하기는 이전에 발행된 버전(지금 작성 중인 버전은 아직 존재하지 않음)의 피드백을 대상으로 함
+  useEffect(() => {
+    getProjectVersions(projectId).then((versions) => {
+      setPreviousVersionId(versions[0]?.id ?? null)
+    })
+  }, [projectId])
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
@@ -174,6 +174,7 @@ export function GrowthRecordForm() {
   }, [projectId, allowedTabs])
 
   const category = TAB_TO_CATEGORY[activeTab]
+  const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
   const questions = growthRecordQuestions.questions[category]
   const images = imagesByTab[activeTab]
 
@@ -427,40 +428,31 @@ export function GrowthRecordForm() {
               </div>
               <Button
                 size="sm"
-                onClick={() => {
-                  setDetailTargetFeedback(null)
-                  setShowFeedbackTagModal(true)
-                }}
-                disabled={(taggedFeedbacks[category] ?? []).length >= 3}
+                onClick={() => setShowFeedbackTagModal(true)}
+                disabled={(taggedFeedbacks[categoryApi] ?? []).length >= 3}
                 className="shrink-0 px-5 text-sub3_sb_16"
               >
                 피드백 태그하기
               </Button>
             </div>
             {(() => {
-              const taggedIds = taggedFeedbacks[category] ?? []
-              const taggedItems = feedbackData.feedbacks[category].filter((f) =>
-                taggedIds.includes(f.feedbackId)
-              )
+              const taggedItems = taggedFeedbacks[categoryApi] ?? []
               if (taggedItems.length === 0) return null
               return (
                 <div className="grid grid-cols-3 gap-3">
-                  {taggedItems.map((feedback) => (
+                  {taggedItems.map((entry) => (
                     <div
-                      key={feedback.feedbackId}
-                      onClick={() => {
-                        setDetailTargetFeedback(feedback)
-                        setShowFeedbackTagModal(true)
-                      }}
+                      key={`${entry.versionId}:${entry.userId}`}
+                      onClick={() => setShowFeedbackTagModal(true)}
                       className="flex flex-col gap-2 rounded-xl border border-neutral-200 px-5 py-4 hover:cursor-pointer"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col">
                           <span className="text-caption1_m_13 text-primary-strong">
-                            {CATEGORY_LABEL[feedback.category]}
+                            {activeTab}
                           </span>
                           <span className="text-title5_sb_20 leading-tight">
-                            {feedback.nickname}
+                            {entry.author.name}
                           </span>
                         </div>
                         <Button
@@ -468,7 +460,7 @@ export function GrowthRecordForm() {
                           size="xs"
                           onClick={(e) => {
                             e.stopPropagation()
-                            removeTaggedFeedback(category, feedback.feedbackId)
+                            removeTaggedFeedback(categoryApi, entry.versionId, entry.userId)
                           }}
                           className="w-15 shrink-0 text-sub4_sb_14"
                         >
@@ -476,7 +468,7 @@ export function GrowthRecordForm() {
                         </Button>
                       </div>
                       <p className="text-body2_m_14 text-neutral-30 line-clamp-2">
-                        {feedback.onelineReview}
+                        {entry.oneLineReview}
                       </p>
                     </div>
                   ))}
@@ -489,10 +481,7 @@ export function GrowthRecordForm() {
         {/* Sidebar */}
         <div className="sticky top-6">
           <button
-            onClick={() => {
-              setDetailTargetFeedback(null)
-              setShowFeedbackTagModal(true)
-            }}
+            onClick={() => setShowFeedbackTagModal(true)}
             className="w-90 shrink-0 flex flex-col gap-3 bg-white rounded-xl p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
           >
             <div className="flex items-center justify-between">
@@ -524,11 +513,10 @@ export function GrowthRecordForm() {
       <FeedbackTagModal
         key={String(showFeedbackTagModal)}
         isOpen={showFeedbackTagModal}
-        initialDetailFeedback={detailTargetFeedback}
-        onClose={() => {
-          setShowFeedbackTagModal(false)
-          setDetailTargetFeedback(null)
-        }}
+        projectId={projectId}
+        previousVersionId={previousVersionId}
+        initialCategory={categoryApi}
+        onClose={() => setShowFeedbackTagModal(false)}
       />
 
       <GrowthRecordSubmitModal
