@@ -79,6 +79,11 @@ export class ProjectService {
     }
   }
 
+  /**
+   * 프로젝트별 피드백 개수 = (제출, 직군) distinct 조합 수.
+   * 한 제출이 여러 직군 질문에 답했다면 직군마다 별개의 피드백으로 센다
+   * (FE 피드백 탭의 buildSubmissionCards와 동일한 기준 — 질문 답변 행 개수를 그대로 합산하지 않음).
+   */
   private async getFeedbackCountsByProjectIds(
     projectIds: number[],
   ): Promise<Map<number, number>> {
@@ -86,25 +91,26 @@ export class ProjectService {
       return new Map()
     }
 
-    const submissionsWithCounts = await this.prisma.feedbackSubmission.findMany(
-      {
-        where: {
-          projectId: { in: projectIds },
-        },
-        select: {
-          projectId: true,
-          _count: {
-            select: { feedbacks: true },
-          },
-        },
+    const feedbacks = await this.prisma.feedback.findMany({
+      where: {
+        submission: { projectId: { in: projectIds } },
       },
-    )
+      select: {
+        submissionId: true,
+        submission: { select: { projectId: true } },
+        question: { select: { category: true } },
+      },
+    })
 
+    const seen = new Set<string>()
     const result = new Map<number, number>()
-    for (const sub of submissionsWithCounts) {
+    for (const { submissionId, submission, question } of feedbacks) {
+      const key = `${submissionId}:${question.category}`
+      if (seen.has(key)) continue
+      seen.add(key)
       result.set(
-        sub.projectId,
-        (result.get(sub.projectId) ?? 0) + sub._count.feedbacks,
+        submission.projectId,
+        (result.get(submission.projectId) ?? 0) + 1,
       )
     }
 
