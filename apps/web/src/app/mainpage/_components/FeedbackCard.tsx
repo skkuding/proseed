@@ -4,6 +4,7 @@ import { RECORD_CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 
 interface FeedbackCardProps {
   submissionId: number
+  versionId: number
   nickname: string
   profileImageUrl: string
   category: string
@@ -16,6 +17,7 @@ interface FeedbackCardProps {
 
 export default function FeedbackCard({
   submissionId,
+  versionId,
   nickname,
   profileImageUrl,
   category,
@@ -33,7 +35,7 @@ export default function FeedbackCard({
           <Image src={profileImageUrl} alt={nickname} height={40} width={40} />
         </div>
         <div className="flex flex-col">
-          <span className="text-title5_sb_20 text-CoolNeutral-20 transition-colors group-hover:text-white">
+          <span className="text-title5_sb_20 transition-colors group-hover:text-white">
             {nickname}
           </span>
           <span className="text-body1_m_16 text-CoolNeutral-50 transition-colors group-hover:text-CoolNeutral-60">
@@ -44,10 +46,10 @@ export default function FeedbackCard({
 
       {/* 피드백 내용 */}
       <div className="flex flex-col gap-3">
-        <p className="line-clamp-2 text-title3_sb_24 text-CoolNeutral-20 transition-colors group-hover:text-white">
+        <p className="min-h-17 line-clamp-2 text-title3_sb_24 text-CoolNeutral-20 transition-colors group-hover:text-white">
           {onelineReview}
         </p>
-        <p className="line-clamp-2 text-body3_r_16 text-CoolNeutral-40 transition-colors group-hover:text-color-CoolNeutral-80">
+        <p className="min-h-13 line-clamp-2 text-body3_r_16 text-CoolNeutral-40 transition-colors group-hover:text-color-CoolNeutral-80">
           {content}
         </p>
       </div>
@@ -63,7 +65,7 @@ export default function FeedbackCard({
           </span>
         </div>
         <Link
-          href={`/projects/${projectId}/feedback#feedback-${submissionId}`}
+          href={`/projects/${projectId}/feedback?version=${versionId}#feedback-${submissionId}`}
           className="rounded-[6px] bg-CoolNeutral-20 px-4 py-2 text-body1_m_16 text-white transition-colors group-hover:bg-white group-hover:text-CoolNeutral-20"
         >
           피드백 자세히 보기

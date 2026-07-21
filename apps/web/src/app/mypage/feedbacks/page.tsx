@@ -46,12 +46,13 @@ export default function MyFeedbacks() {
             <MyFeedbackCard
               key={feedback.submissionId}
               feedbackId={feedback.submissionId}
+              versionId={feedback.versionId}
               createdAt={feedback.createdAt}
               isAdopted={feedback.isAdopted}
               oneLineDescription={feedback.oneLineDescription}
               projectId={feedback.projectId}
               projectName={feedback.projectTitle}
-              projectIconUrl={feedback.projectThumbnailUrl}
+              projectIconUrl={feedback.projectIconUrl}
             />
           ))}
         </div>

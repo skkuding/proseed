@@ -58,9 +58,10 @@ export default function FeedbackSection() {
         className="flex gap-4 overflow-x-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {recentFeedbacks.map((feedback) => (
-          <div key={feedback.submissionId} className="shrink-0">
+          <div key={`${feedback.submissionId}-${feedback.category}`} className="shrink-0">
             <FeedbackCard
               submissionId={feedback.submissionId}
+              versionId={feedback.versionId}
               nickname={feedback.nickname}
               profileImageUrl={feedback.profileImageUrl}
               category={feedback.category}

@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils'
 
 interface MyFeedbackCardProps {
   feedbackId: number
+  versionId: number
   createdAt: string
   isAdopted: boolean
   oneLineDescription: string
@@ -16,6 +17,7 @@ interface MyFeedbackCardProps {
 
 export function MyFeedbackCard({
   feedbackId,
+  versionId,
   createdAt,
   isAdopted,
   oneLineDescription,
@@ -44,7 +46,11 @@ export function MyFeedbackCard({
 
       <div className="flex items-center justify-center">
         <Button asChild size="md" className="text-sub3_sb_16">
-          <Link href={`/projects/${projectId}/feedback#feedback-${feedbackId}`}>자세히 보기</Link>
+          <Link
+            href={`/projects/${projectId}/feedback?version=${versionId}#feedback-${feedbackId}`}
+          >
+            자세히 보기
+          </Link>
         </Button>
       </div>
     </div>
