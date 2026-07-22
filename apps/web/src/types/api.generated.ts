@@ -810,6 +810,17 @@ export interface components {
             data: components["schemas"]["ProjectListItemDto"][];
             hasNextPage: boolean;
         };
+        MyProjectListItemDto: {
+            category: components["schemas"]["ProjectCategory"][];
+            id: number;
+            title: string;
+            oneLineDescription: string;
+            /** @description raw S3 key (presigned 변환은 P0-5 미해결) */
+            thumbnailUrl: string;
+            _count: components["schemas"]["ProjectVersionCountDto"];
+            feedbackCount: number;
+            isOwner: boolean;
+        };
         ProjectImageDto: {
             order: number;
             url: string;
@@ -1584,7 +1595,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProjectListItemDto"][];
+                    "application/json": components["schemas"]["MyProjectListItemDto"][];
                 };
             };
         };

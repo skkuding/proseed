@@ -27,6 +27,7 @@ type Project = {
   thumbnailUrl: string
   feedbackCount: number
   growthRecordCount: number
+  isOwner: boolean
 }
 
 function getVisiblePages(total: number): number[] {

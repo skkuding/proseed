@@ -19,6 +19,7 @@ export type ProjectResponseDto = components['schemas']['ProjectResponseDto']
 export type InviteCollaboratorDto = components['schemas']['InviteCollaboratorDto']
 export type ProjectRoleResponseDto = components['schemas']['ProjectRoleResponseDto']
 export type ProjectListItemDto = components['schemas']['ProjectListItemDto']
+export type MyProjectListItemDto = components['schemas']['MyProjectListItemDto']
 export type ProjectDetailResponseDto = components['schemas']['ProjectDetailResponseDto']
 export type ProjectVersionListItemDto = components['schemas']['ProjectVersionListItemDto']
 export type VersionDetailResponseDto = components['schemas']['VersionDetailResponseDto']
@@ -103,7 +104,7 @@ export async function getProjectById(id: string | number): Promise<ProjectDetail
   return res.json()
 }
 
-export async function getMyProjects(): Promise<ProjectListItemDto[]> {
+export async function getMyProjects(): Promise<MyProjectListItemDto[]> {
   const res = await fetch(`${BASE}/project/my`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch my projects')
   return res.json()

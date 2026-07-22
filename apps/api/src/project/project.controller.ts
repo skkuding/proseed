@@ -20,7 +20,7 @@ import type {
 import { CreateProjectDto } from './dto/create-project.dto'
 import {
   ProjectDetailResponseDto,
-  ProjectListItemDto,
+  MyProjectListItemDto,
   ProjectListResponseDto,
   ProjectResponseDto,
   ProjectRoleResponseDto,
@@ -57,7 +57,7 @@ export class ProjectController {
   @Get('my')
   async getMyProjects(
     @Req() req: RequestWithUser,
-  ): Promise<ProjectListItemDto[]> {
+  ): Promise<MyProjectListItemDto[]> {
     return this.projectService.getMyProjects(req.user.id)
   }
 

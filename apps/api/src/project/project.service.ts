@@ -117,10 +117,11 @@ export class ProjectService {
     return result
   }
 
+  //등록자(Lead)로 참여한 프로젝트뿐 아니라 팀원으로 초대된 프로젝트도 포함
   async getMyProjects(userId: number) {
     const projects = await this.prisma.project.findMany({
       where: {
-        createdById: userId,
+        OR: [{ createdById: userId }, { projectRoles: { some: { userId } } }],
       },
       select: {
         id: true,
@@ -128,6 +129,7 @@ export class ProjectService {
         oneLineDescription: true,
         category: true,
         thumbnailUrl: true,
+        createdById: true,
         _count: {
           select: {
             versions: true,
@@ -142,8 +144,10 @@ export class ProjectService {
       this.resolveThumbnailUrls(projects),
     ])
 
-    return resolved.map((project) => ({
+    return resolved.map(({ createdById, ...project }) => ({
       ...project,
+      //편집(PATCH /project/:id)은 Lead(=등록자)만 가능 — FE 버튼 노출 분기용
+      isOwner: createdById === userId,
       feedbackCount: feedbackCounts.get(project.id) ?? 0,
     }))
   }

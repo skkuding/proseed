@@ -818,7 +818,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ProjectListItemDto"
+                    "$ref": "#/components/schemas/MyProjectListItemDto"
                   }
                 }
               }
@@ -2623,6 +2623,49 @@
           "nextCursor",
           "data",
           "hasNextPage"
+        ]
+      },
+      "MyProjectListItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectCategory"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "oneLineDescription": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "description": "raw S3 key (presigned 변환은 P0-5 미해결)"
+          },
+          "_count": {
+            "$ref": "#/components/schemas/ProjectVersionCountDto"
+          },
+          "feedbackCount": {
+            "type": "number"
+          },
+          "isOwner": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "category",
+          "id",
+          "title",
+          "oneLineDescription",
+          "thumbnailUrl",
+          "_count",
+          "feedbackCount",
+          "isOwner"
         ]
       },
       "ProjectImageDto": {

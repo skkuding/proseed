@@ -12,6 +12,7 @@ interface MyProjectCardProps {
     thumbnailUrl: string
     feedbackCount: number
     growthRecordCount: number
+    isOwner: boolean
   }
 }
 
@@ -62,15 +63,21 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
         </Link>
 
         <div className="flex gap-2">
+          {project.isOwner && (
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="min-w-0 flex-1 truncate text-sub3_sb_16"
+            >
+              <Link href={`/projects/${project.id}/editmyproject`}>편집하기</Link>
+            </Button>
+          )}
           <Button
             asChild
-            variant="outline"
             size="lg"
-            className="min-w-0 flex-1 truncate text-sub3_sb_16"
+            className={`min-w-0 truncate text-sub3_sb_16 ${project.isOwner ? 'flex-1' : 'w-full'}`}
           >
-            <Link href={`/projects/${project.id}/editmyproject`}>편집하기</Link>
-          </Button>
-          <Button asChild size="lg" className="min-w-0 flex-1 truncate text-sub3_sb_16">
             <Link href={`/projects/${project.id}/growthrecord/create`}>성장기록 작성하기</Link>
           </Button>
         </div>
