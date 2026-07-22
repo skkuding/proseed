@@ -1,12 +1,5 @@
 'use client'
 
-import {
-  CircleCheckIcon,
-  InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon,
-} from 'lucide-react'
 import { Toaster as Sonner, type ToasterProps } from 'sonner'
 
 const Toaster = ({ ...props }: ToasterProps) => {
@@ -15,11 +8,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       position="top-center"
       duration={2000}
       icons={{
-        success: <CircleCheckIcon className="size-[18px] text-[#16A34A]" />,
-        info: <InfoIcon className="size-[18px] text-[#2563EB]" />,
-        warning: <TriangleAlertIcon className="size-[18px] text-[#D97706]" />,
-        error: <OctagonXIcon className="size-[18px] text-[#DC2626]" />,
-        loading: <Loader2Icon className="size-[18px] animate-spin" />,
+        success: null,
+        info: null,
+        warning: null,
+        error: null,
+        loading: null,
       }}
       toastOptions={{
         classNames: {
