@@ -15,19 +15,26 @@ interface GrowthRecordState {
   setTaggedFeedbacks: (taggedFeedbacks: Record<RecordCategory, TaggedFeedbackEntry[]>) => void
   setUpdateGoal: (goal: string) => void
   setUpdateResult: (result: string) => void
+  // 발행 성공 후 다음 성장기록 작성이 이전 값으로 채워지지 않도록 초기화
+  reset: () => void
 }
 
-export const useGrowthRecordStore = create<GrowthRecordState>((set) => ({
+const initialState = {
   version: { major: '', minor: '', patch: '' },
   imagesByTab: {},
   answers: {},
   taggedFeedbacks: { PLAN: [], DESIGN: [], DEVELOPMENT: [], GENERAL: [] },
   updateGoal: '',
   updateResult: '',
+} satisfies Partial<GrowthRecordState>
+
+export const useGrowthRecordStore = create<GrowthRecordState>((set) => ({
+  ...initialState,
   setVersion: (version) => set({ version }),
   setImagesByTab: (imagesByTab) => set({ imagesByTab }),
   setAnswers: (answers) => set({ answers }),
   setTaggedFeedbacks: (taggedFeedbacks) => set({ taggedFeedbacks }),
   setUpdateGoal: (updateGoal) => set({ updateGoal }),
   setUpdateResult: (updateResult) => set({ updateResult }),
+  reset: () => set(initialState),
 }))
