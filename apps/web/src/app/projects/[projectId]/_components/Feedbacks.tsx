@@ -18,6 +18,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { Button } from '@/components/ui/button'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import { ImageLightbox } from './ImageLightbox'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import { RoleFilterTabs } from '@/components/RoleTabs'
@@ -28,6 +29,7 @@ import {
 } from '@/components/FeedbackAdoptionFilterButton'
 import { FeedbackSubmissionCard, buildSubmissionCards } from './FeedbackSubmissionCard'
 import {
+  getProjectById,
   getProjectVersions,
   getFeedbacksForVersion,
   type ProjectVersionListItemDto,
@@ -59,6 +61,22 @@ export function Feedbacks() {
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null)
   const [highlightId, setHighlightId] = useState<number | null>(null)
   const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
+  const [isMyProject, setIsMyProject] = useState(false)
+  const [showSelfFeedbackModal, setShowSelfFeedbackModal] = useState(false)
+
+  useEffect(() => {
+    getProjectById(projectId)
+      .then((project) => setIsMyProject(project.isMyProject))
+      .catch(() => setIsMyProject(false))
+  }, [projectId])
+
+  const handleWriteFeedbackClick = () => {
+    if (isMyProject) {
+      setShowSelfFeedbackModal(true)
+      return
+    }
+    setShowRoleSelectModal(true)
+  }
 
   const handleRoleSelectConfirm = (selectedRoles: string[]) => {
     setShowRoleSelectModal(false)
@@ -205,7 +223,7 @@ export function Feedbacks() {
           </div>
           <Button
             size="md"
-            onClick={() => setShowRoleSelectModal(true)}
+            onClick={handleWriteFeedbackClick}
             disabled={!versionList[0] || selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 w-[137px] text-sub3_sb_16"
           >
@@ -342,6 +360,17 @@ export function Feedbacks() {
         onConfirm={handleRoleSelectConfirm}
         projectId={projectId}
         versionId={selectedVersion}
+      />
+
+      <ConfirmModal
+        isOpen={showSelfFeedbackModal}
+        title="본인 프로젝트에는 피드백을 작성할 수 없어요"
+        description="다른 프로젝트를 구경하고 피드백을 작성해보세요"
+        cancelLabel="취소"
+        confirmLabel="피드백 작성하기"
+        confirmButtonClassName="w-auto px-5"
+        onCancel={() => setShowSelfFeedbackModal(false)}
+        onConfirm={() => router.push('/navigate')}
       />
     </div>
   )
