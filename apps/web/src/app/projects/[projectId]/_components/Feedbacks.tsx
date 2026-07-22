@@ -178,7 +178,7 @@ export function Feedbacks() {
         <div>
           <h1 className="text-head3_sb_36">프로젝트 피드백</h1>
           <p className="text-body3_r_16 text-CoolNeutral-40 mt-2">
-            피드백을 작성하고 프로젝트 리뷰 티켓을 받아보세요!
+            다른 팀의 프로젝트에 피드백을 남겨보세요!
           </p>
         </div>
         <div className="flex items-center">

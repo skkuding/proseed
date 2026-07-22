@@ -11,19 +11,13 @@ import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 interface FeedbackSuccessModalProps {
   isOpen: boolean
   onClose: () => void
-  ticketCount?: number
   projectId: string | string[]
 }
 
 const VISIBLE_COUNT = 3
 const MAX_PROJECTS = 5
 
-export function FeedbackSuccessModal({
-  isOpen,
-  onClose,
-  ticketCount = 2,
-  projectId,
-}: FeedbackSuccessModalProps) {
+export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuccessModalProps) {
   const router = useRouter()
   const [startIndex, setStartIndex] = useState(0)
   const [projects, setProjects] = useState<Project[]>([])
@@ -57,7 +51,7 @@ export function FeedbackSuccessModal({
       >
         {/* Header */}
         <div className="flex items-start justify-between">
-          <h2 className="text-head3_sb_36">피드백을 등록하고 티켓 {ticketCount}장을 받았어요!</h2>
+          <h2 className="text-head3_sb_36">피드백을 등록했어요!</h2>
           <Button variant="iconMuted" size="bare" onClick={onClose}>
             <X className="size-9 text-neutral-30" />
           </Button>
