@@ -405,6 +405,38 @@ export class ProjectService {
     })
   }
 
+  async removeCollaborator(
+    userId: number,
+    projectId: number,
+    memberId: number,
+  ): Promise<void> {
+    const projectRole = await this.prisma.projectRole.findFirst({
+      where: {
+        userId,
+        projectId,
+        projectMemberRole: ProjectMemberRole.Lead,
+      },
+    })
+
+    if (!projectRole) {
+      throw new ForbiddenAccessException('Only Lead can remove collaborators.')
+    }
+
+    const target = await this.prisma.projectRole.findFirst({
+      where: { id: memberId, projectId },
+    })
+
+    if (!target) {
+      throw new EntityNotExistException('ProjectRole')
+    }
+
+    if (target.projectMemberRole === ProjectMemberRole.Lead) {
+      throw new ForbiddenAccessException('Cannot remove the project Lead.')
+    }
+
+    await this.prisma.projectRole.delete({ where: { id: memberId } })
+  }
+
   async getProjectVersions(projectId: number) {
     return this.prisma.projectVersion.findMany({
       where: { projectId },

@@ -205,6 +205,20 @@ export async function inviteCollaborator(
   return res.json()
 }
 
+export async function removeCollaborator(
+  projectId: string | number,
+  memberId: string | number
+): Promise<void> {
+  const res = await fetch(`${BASE}/project/${projectId}/members/${memberId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '팀원 삭제에 실패했습니다')
+  }
+}
+
 export async function publishVersion(
   projectId: string | number,
   dto: CreateVersionDto

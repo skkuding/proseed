@@ -24,6 +24,8 @@ interface TeamMembersSectionProps {
     profileImageUrl: string
   }) => void | Promise<void>
   onRemoveMember: (email: string) => void
+  // 리드 본인의 팀원 카드 email — 삭제 시도 시 삭제 대신 안내만 노출
+  leadMemberEmail?: string
 }
 
 function truncateName(name: string) {
@@ -38,6 +40,7 @@ export function TeamMembersSection({
   members,
   onAddMember,
   onRemoveMember,
+  leadMemberEmail,
 }: TeamMembersSectionProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null)
@@ -211,6 +214,7 @@ export function TeamMembersSection({
       <MemberDeleteModal
         isOpen={!!deleteTarget}
         name={deleteTarget?.name ?? ''}
+        isLead={!!deleteTarget && deleteTarget.email === leadMemberEmail}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={() => {
           if (deleteTarget) onRemoveMember(deleteTarget.email)
