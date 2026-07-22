@@ -20,7 +20,7 @@ function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) 
   return (
     <ul
       data-slot="pagination-content"
-      className={cn('flex flex-row items-center gap-15', className)}
+      className={cn('flex flex-row items-center gap-2', className)}
       {...props}
     />
   )
@@ -61,7 +61,7 @@ function PaginationPrevious({ className, ...props }: Omit<React.ComponentProps<'
       data-slot="pagination-link"
       className={cn(
         buttonVariants({ variant: 'iconCircle', size: 'icon-sm' }),
-        'bg-neutral-95',
+        'bg-neutral-95 mr-13',
         className
       )}
       {...props}
@@ -78,7 +78,7 @@ function PaginationNext({ className, ...props }: Omit<React.ComponentProps<'a'>,
       data-slot="pagination-link"
       className={cn(
         buttonVariants({ variant: 'iconCircle', size: 'icon-sm' }),
-        'bg-neutral-95',
+        'bg-neutral-95 ml-13',
         className
       )}
       {...props}

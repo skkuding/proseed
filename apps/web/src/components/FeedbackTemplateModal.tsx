@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { XIcon, Dot } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Dot } from 'lucide-react'
+import { XIcon } from 'lucide-react'
 import { getFeedbackTemplates, type FeedbackTemplate } from '@/lib/api'
 import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
 import {
@@ -66,39 +66,53 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-270 bg-background-normal rounded-2xl flex flex-col overflow-hidden"
+        className="w-270 bg-background-normal rounded-[20px] flex flex-col overflow-hidden px-7 pt-10 pb-13 gap-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 shrink-0">
-          <h2 className="text-title1_sb_28 text-CoolNeutral-20">프로젝트 피드백 질문 템플릿</h2>
-          <Button variant="iconMuted" size="bare" onClick={onClose}>
-            <XIcon className="size-6" />
-          </Button>
-        </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between shrink-0">
+            <h2 className="text-head3_sb_36">프로젝트 피드백 질문 템플릿</h2>
+            <button
+              onClick={onClose}
+              className="flex items-center justify-center hover:cursor-pointer"
+              aria-label="닫기"
+            >
+              <XIcon className="size-9 text-neutral-30" />
+            </button>
 
-        {/* Tabs */}
-        <div className="px-8 shrink-0">
-          <div className="flex">
-            {TABS.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => handleTabChange(tab)}
-                className={`pb-3 text-body2_m_14 w-21 h-[38px] px-auto py-2 hover:cursor-pointer transition-colors relative ${
-                  activeTab === tab ? 'text-black' : 'text-neutral-40'
-                }`}
-              >
-                <span className="flex items-center justify-center gap-1">
-                  {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
-                  {tab}
-                </span>
-              </button>
-            ))}
+            {/* <div className="flex gap-2">
+              <Button variant="outline" size="md" className="text-sub3_sb_16" onClick={onClose}>
+                취소하기
+              </Button>
+              <Button size="md" className="text-sub3_sb_16" onClick={onClose}>
+                선택한 템플릿 사용하기
+              </Button>
+            </div> */}
+          </div>
+          {/* Tabs */}
+          <div className="shrink-0">
+            <div className="flex">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => handleTabChange(tab)}
+                  className={`text-body2_m_14 w-21 h-[38px] px-4 py-2 hover:cursor-pointer transition-colors relative ${
+                    activeTab === tab ? 'text-black' : 'text-neutral-40'
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
+                    {tab}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Question list */}
-        <div className="px-8 py-4 flex flex-col gap-3 min-h-[300px]">
+        <div className="flex flex-col gap-2 min-h-[388px]">
           {pagedQuestions.map((question, index) => {
             const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + index
             const isCopied = copiedIndex === globalIndex
@@ -107,12 +121,12 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
               <button
                 key={globalIndex}
                 onClick={() => handleCopy(question, globalIndex)}
-                className="flex w-full h-[91px] items-center gap-3 bg-white rounded-xl px-5 py-4 text-left hover:bg-neutral-99 hover:cursor-pointer transition-colors border border-transparent hover:border-neutral-200 relative"
+                className="flex w-full h-[91px] items-center bg-white rounded-[12px] pl-3 pr-4 py-5 text-left hover:bg-neutral-95 hover:cursor-pointer transition-colors relative"
               >
-                <Dot className="size-6 text-primary-strong shrink-0 m-[-6px]" />
+                <Dot className="size-6 text-primary-strong shrink-0" />
                 <span className="text-sub1_sb_18 flex-1">{question}</span>
                 {isCopied && (
-                  <span className="shrink-0 text-caption1_m_13 text-primary-strong bg-primary-strong/10 px-2 py-1 rounded-md">
+                  <span className="shrink-0 text-caption1_m_13 text-primary-strong bg-primary-strong/10 px-2 py-1 rounded-[4px]">
                     복사되었습니다
                   </span>
                 )}
@@ -123,7 +137,7 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-8 py-5 shrink-0">
+          <div className="mt-2 items-center shrink-0">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
