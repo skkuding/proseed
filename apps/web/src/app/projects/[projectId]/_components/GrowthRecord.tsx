@@ -156,14 +156,10 @@ function SummarySection({ versionDetail }: { versionDetail: VersionDetailRespons
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-title3_sb_24">이번 업데이트 결과물</h2>
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2 list-none">
           {versionDetail.updateResults.map((result, idx) => (
-            <li
-              key={idx}
-              className="flex items-start gap-2 text-body3_r_16 text-CoolNeutral-30 leading-relaxed"
-            >
-              <span>•</span>
-              <span>{result}</span>
+            <li key={idx} className="text-body3_r_16 text-CoolNeutral-30 leading-relaxed">
+              {result}
             </li>
           ))}
         </ul>
