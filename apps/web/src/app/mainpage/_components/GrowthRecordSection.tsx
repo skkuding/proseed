@@ -1,38 +1,39 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { RoleFilterTabs } from '@/components/RoleTabs'
 import GrowthRecordCard from './GrowthRecordCard'
 import SectionTitle from './SectionTitle'
 import { getRecentGrowthRecords, type RecentGrowthRecordDto } from '@/lib/api'
-import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+
+const RECENT_COUNT = 3
 
 export default function GrowthRecordSection() {
-  const [activeTab, setActiveTab] = useState<JobTab>('기획')
   const [recentGrowthRecords, setRecentGrowthRecords] = useState<RecentGrowthRecordDto[]>([])
 
   useEffect(() => {
-    getRecentGrowthRecords().then(setRecentGrowthRecords, () => setRecentGrowthRecords([]))
+    getRecentGrowthRecords(RECENT_COUNT).then(setRecentGrowthRecords, () =>
+      setRecentGrowthRecords([])
+    )
   }, [])
 
-  const filtered = useMemo(() => {
-    return recentGrowthRecords.filter((rg) => rg.category === RECORD_CATEGORY_TO_API[activeTab])
-  }, [activeTab, recentGrowthRecords])
+  // 발행 버전 하나당 4개 직군 레코드가 flat하게 오므로 버전당 1장만 남긴다
+  const recent = useMemo(() => {
+    const seenVersionIds = new Set<number>()
+    const deduped: RecentGrowthRecordDto[] = []
+    for (const record of recentGrowthRecords) {
+      if (seenVersionIds.has(record.versionId)) continue
+      seenVersionIds.add(record.versionId)
+      deduped.push(record)
+    }
+    return deduped.slice(0, RECENT_COUNT)
+  }, [recentGrowthRecords])
 
   return (
     <section className="flex flex-col gap-7">
-      <div className="flex justify-between">
-        <SectionTitle title="최근 업데이트 된 성장기록" />
-
-        <RoleFilterTabs
-          tabs={JOB_TABS}
-          activeTab={activeTab}
-          onTabChange={(tab) => setActiveTab(tab as JobTab)}
-        />
-      </div>
+      <SectionTitle title="최근 업데이트 된 성장기록" />
 
       <div className="flex flex-col gap-4">
-        {filtered.map((record) => (
+        {recent.map((record) => (
           <GrowthRecordCard
             key={record.growthRecordId}
             projectId={record.projectId}
