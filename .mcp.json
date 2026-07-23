@@ -1,18 +1,24 @@
 {
   "mcpServers": {
     "notion-proseed": {
-      "command": "npx",
-      "args": ["-y", "@notionhq/notion-mcp-server"],
-      "env": {
-        "NOTION_TOKEN": "${NOTION_PROSEED_TOKEN}"
-      }
+      "command": "direnv",
+      "args": [
+        "exec",
+        ".",
+        "sh",
+        "-c",
+        "NOTION_TOKEN=\"$NOTION_PROSEED_TOKEN\" exec npx -y @notionhq/notion-mcp-server"
+      ]
     },
     "figma-proseed": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--stdio"],
-      "env": {
-        "FIGMA_API_KEY": "${FIGMA_PROSEED_TOKEN}"
-      }
+      "command": "direnv",
+      "args": [
+        "exec",
+        ".",
+        "sh",
+        "-c",
+        "FIGMA_API_KEY=\"$FIGMA_PROSEED_TOKEN\" exec npx -y figma-developer-mcp --stdio"
+      ]
     }
   }
 }
