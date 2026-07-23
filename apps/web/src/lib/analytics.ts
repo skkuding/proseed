@@ -44,8 +44,19 @@ type EventParams = {
   account_deletion: { reason?: string }
 }
 
+/**
+ * gtag 스크립트(afterInteractive)보다 먼저 실행되는 mount 시점 이벤트가 유실되지 않도록
+ * dataLayer 를 미리 만들어 둔다. gtag 는 로드 시 큐에 쌓인 항목을 소급 처리한다.
+ */
+function ensureDataLayer(): void {
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer ?? []
+  }
+}
+
 /** GA4 커스텀 이벤트를 전송한다. */
 export function trackEvent<K extends keyof EventParams>(name: K, params: EventParams[K]): void {
+  ensureDataLayer()
   sendGAEvent('event', name, params)
 }
 
@@ -56,6 +67,7 @@ export function trackEvent<K extends keyof EventParams>(name: K, params: EventPa
 export async function setAnalyticsUserId(rawUserId: string): Promise<void> {
   const hashed = await sha256Hex(rawUserId)
   if (hashed === null) return
+  ensureDataLayer()
   sendGAEvent('set', { user_id: hashed })
 }
 
