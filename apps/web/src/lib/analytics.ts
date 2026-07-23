@@ -55,12 +55,20 @@ export function trackEvent<K extends keyof EventParams>(name: K, params: EventPa
  */
 export async function setAnalyticsUserId(rawUserId: string): Promise<void> {
   const hashed = await sha256Hex(rawUserId)
+  if (hashed === null) return
   sendGAEvent('set', { user_id: hashed })
 }
 
-async function sha256Hex(input: string): Promise<string> {
+/**
+ * Web Crypto 의 subtle 은 보안 컨텍스트(HTTPS·localhost)에서만 제공된다.
+ * HTTP 나 LAN IP 접속처럼 지원되지 않는 환경에서는 null 을 반환해 연결을 건너뛴다.
+ */
+async function sha256Hex(input: string): Promise<string | null> {
+  if (typeof window === 'undefined' || !window.crypto?.subtle) {
+    return null
+  }
   const data = new TextEncoder().encode(input)
-  const digest = await crypto.subtle.digest('SHA-256', data)
+  const digest = await window.crypto.subtle.digest('SHA-256', data)
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
