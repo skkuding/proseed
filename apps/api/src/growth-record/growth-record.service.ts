@@ -399,6 +399,7 @@ export class GrowthRecordService {
         projectId: true,
         userId: true,
         adoptions: { select: { id: true }, take: 1 },
+        unlocks: { select: { id: true }, take: 1 },
         feedbacks: { select: { question: { select: { category: true } } } },
       },
     })
@@ -412,6 +413,12 @@ export class GrowthRecordService {
         //다른 프로젝트의 제출은 존재를 노출하지 않도록 404로 통일
         if (!submission || submission.projectId !== projectId) {
           throw new EntityNotExistException(`FeedbackSubmission(${key})`)
+        }
+        //열람(unlock)된 제출만 채택 가능 — 먼저 티켓으로 열어봐야 태그 가능
+        if (submission.unlocks.length === 0) {
+          throw new UnprocessableDataException(
+            `Feedback submission for ${key} must be unlocked before it can be tagged.`,
+          )
         }
         //기채택 제출은 재태그 불가 (같은 발행 내 다직군 동시 태그만 허용)
         if (submission.adoptions.length > 0) {

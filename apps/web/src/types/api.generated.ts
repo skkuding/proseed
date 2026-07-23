@@ -279,6 +279,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/project/{projectId}/versions/{versionId}/feedbacks/{submissionId}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["FeedbackController_unlockFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/feedbacks/recent": {
         parameters: {
             query?: never;
@@ -386,6 +402,22 @@ export interface paths {
         put?: never;
         post: operations["ProjectController_inviteCollaborator"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/project/{id}/members/{memberId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["ProjectController_removeCollaborator"];
         options?: never;
         head?: never;
         patch?: never;
@@ -690,6 +722,8 @@ export interface components {
             oneLineReview: string;
             /** @description 이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용 */
             isAdopted: boolean;
+            /** @description 이 제출이 열람(unlock)됐는지. false면 content/imageUrls는 서버에서 비워서 내려감 */
+            isUnlocked: boolean;
             id: number;
             questionId: number;
             questionTitle: string;
@@ -703,6 +737,16 @@ export interface components {
         FeedbackListResponseDto: {
             success: boolean;
             data: components["schemas"]["FeedbackListItemDto"][];
+        };
+        UnlockFeedbackDataDto: {
+            submissionId: number;
+            isUnlocked: boolean;
+            /** @description 차감 후 남은 티켓 수 */
+            remainingTickets: number;
+        };
+        UnlockFeedbackResponseDto: {
+            success: boolean;
+            data: components["schemas"]["UnlockFeedbackDataDto"];
         };
         RecentFeedbackItemDto: {
             category: components["schemas"]["RecordCategory"];
@@ -1162,9 +1206,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                key: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1183,9 +1225,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                key: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1473,6 +1513,29 @@ export interface operations {
             };
         };
     };
+    FeedbackController_unlockFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                versionId: number;
+                submissionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnlockFeedbackResponseDto"];
+                };
+            };
+        };
+    };
     MyFeedbackController_getRecentFeedbacks: {
         parameters: {
             query?: {
@@ -1668,6 +1731,26 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProjectRoleResponseDto"];
                 };
+            };
+        };
+    };
+    ProjectController_removeCollaborator: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                memberId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

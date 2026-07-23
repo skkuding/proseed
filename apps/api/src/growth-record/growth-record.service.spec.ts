@@ -43,13 +43,20 @@ const buildSubmission = (
   id: number,
   userId: number,
   categories: RecordCategory[],
-  options: { adopted?: boolean; projectId?: number; versionId?: number } = {},
+  options: {
+    adopted?: boolean
+    projectId?: number
+    versionId?: number
+    unlocked?: boolean
+  } = {},
 ) => ({
   id,
   versionId: options.versionId ?? PREV_VERSION_ID,
   projectId: options.projectId ?? PROJECT_ID,
   userId,
   adoptions: options.adopted ? [{ id: 999 }] : [],
+  //채택은 unlock 선행 필수 — 기본은 열린 상태로 두고, 미열람 케이스만 unlocked:false로 지정
+  unlocks: options.unlocked === false ? [] : [{ id: 888 }],
   feedbacks: categories.map((category) => ({ question: { category } })),
 })
 
@@ -339,6 +346,28 @@ describe('GrowthRecordService', () => {
           }),
         ),
       ).rejects.toThrow(ConflictFoundException)
+      expect(tx.projectVersion.create).not.toHaveBeenCalled()
+    })
+
+    it('열람(unlock)되지 않은 제출은 채택(태그)할 수 없다', async () => {
+      tx.feedbackSubmission.findMany.mockResolvedValue([
+        buildSubmission(50, 7, [RecordCategory.PLAN], { unlocked: false }),
+      ])
+
+      await expect(
+        service.createVersion(
+          LEAD_ID,
+          PROJECT_ID,
+          buildDto({
+            taggedFeedbacks: [
+              {
+                category: RecordCategory.PLAN,
+                submissions: [{ versionId: PREV_VERSION_ID, userId: 7 }],
+              },
+            ],
+          }),
+        ),
+      ).rejects.toThrow(UnprocessableDataException)
       expect(tx.projectVersion.create).not.toHaveBeenCalled()
     })
 
