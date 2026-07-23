@@ -16,7 +16,6 @@ import {
   getProjectById,
   getProjectVersions,
   getVersionDetail,
-  getProjectById,
   type ProjectVersionListItemDto,
   type VersionDetailResponseDto,
 } from '@/lib/api'

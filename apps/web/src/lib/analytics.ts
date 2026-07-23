@@ -28,6 +28,8 @@ type EventParams = {
   feedback_started: Record<string, never>
   /** 피드백 제출 완료. 핵심 참여 행동. */
   feedback_submitted: { question_count: number }
+  /** 발행 시 피드백 채택. 받은 피드백이 성장으로 이어지는 가치 실현. */
+  feedback_adopted: { adopted_count: number }
 
   // Stage 3 — 포트폴리오·팀·유지
   /** 유저 포트폴리오 조회. is_own 은 본인 여부. */
