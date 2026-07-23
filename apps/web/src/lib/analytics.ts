@@ -44,9 +44,27 @@ type EventParams = {
   account_deletion: { reason?: string }
 }
 
+const READY_RETRY_MS = 250
+const READY_MAX_ATTEMPTS = 20
+
+/**
+ * GoogleAnalytics 스크립트가 dataLayer 를 만들기 전에 밀어 넣은 이벤트는 경고만 남기고
+ * 버려진다. 화면 진입 직후 발화하는 이벤트가 여기 걸리므로, 준비될 때까지 짧게 재시도한다.
+ * 제한 횟수를 넘기면(측정 ID가 없는 환경 등) 조용히 포기한다.
+ */
+function sendWhenReady(send: () => void, attempt = 0): void {
+  if (typeof window === 'undefined') return
+  if (window.dataLayer) {
+    send()
+    return
+  }
+  if (attempt >= READY_MAX_ATTEMPTS) return
+  setTimeout(() => sendWhenReady(send, attempt + 1), READY_RETRY_MS)
+}
+
 /** GA4 커스텀 이벤트를 전송한다. */
 export function trackEvent<K extends keyof EventParams>(name: K, params: EventParams[K]): void {
-  sendGAEvent('event', name, params)
+  sendWhenReady(() => sendGAEvent('event', name, params))
 }
 
 /**
@@ -56,7 +74,7 @@ export function trackEvent<K extends keyof EventParams>(name: K, params: EventPa
 export async function setAnalyticsUserId(rawUserId: string): Promise<void> {
   const hashed = await sha256Hex(rawUserId)
   if (hashed === null) return
-  sendGAEvent('set', { user_id: hashed })
+  sendWhenReady(() => sendGAEvent('set', { user_id: hashed }))
 }
 
 /**
