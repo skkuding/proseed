@@ -34,9 +34,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const url = `${SITE_URL}/projects/${projectId}`
   const image = thumbnailImageUrl(projectId)
+  const metaDescription = (project.description || project.oneLineDescription)
+    .replace(/\s+/g, ' ')
+    .trim()
   return {
     title: project.title,
-    description: project.oneLineDescription,
+    description: metaDescription,
     alternates: { canonical: url },
     // Next 는 metadata 를 얕게 병합한다 — openGraph/twitter 를 여기서 정의하면
     // 루트 값이 통째로 교체되므로, 유지할 필드(siteName·locale·card)를 다시 넣는다.

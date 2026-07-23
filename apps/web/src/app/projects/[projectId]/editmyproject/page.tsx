@@ -25,6 +25,7 @@ import { useAuthGuard } from '@/lib/useAuthGuard'
 import {
   getProjectById,
   inviteCollaborator,
+  removeCollaborator,
   updateProject,
   getUploadUrl,
   uploadToS3,
@@ -144,6 +145,9 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
     })),
   })
 
+  const leadRole = project.projectRoles.find((m) => m.userId === project.createdById)
+  const leadMemberEmail = leadRole ? `member-${leadRole.id}` : undefined
+
   // 팀원 초대는 추가 즉시 실제 API를 호출 (기본정보/이미지 수정은 "적용하기" 클릭 시 handleSave에서 한 번에 저장)
   async function handleAddMember(member: {
     name: string
@@ -156,6 +160,17 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
     })
     trackEvent('collaborator_invited', { role: JOB_TO_API[memberTab] })
     addMember(member)
+  }
+
+  // 팀원 삭제도 초대와 동일하게 즉시 실제 API를 호출
+  async function handleRemoveMember(email: string) {
+    const memberId = email.replace(/^member-/, '')
+    try {
+      await removeCollaborator(project.id, memberId)
+      setMembers((prev) => prev.filter((m) => m.email !== email))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '팀원 삭제에 실패했습니다.')
+    }
   }
 
   // 기존 이미지는 presigned 조회 URL만 갖고 있어(raw S3 key 없음) 그대로 유지할 땐 imageKeys를 아예 보내지 않음.
@@ -244,9 +259,8 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
                   onMemberEmailChange={setMemberEmail}
                   members={members}
                   onAddMember={handleAddMember}
-                  onRemoveMember={(email) =>
-                    setMembers((prev) => prev.filter((m) => m.email !== email))
-                  }
+                  onRemoveMember={handleRemoveMember}
+                  leadMemberEmail={leadMemberEmail}
                 />
               </>
             ) : (

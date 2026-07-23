@@ -12,10 +12,9 @@ import { RoleFilterTabs } from '@/components/RoleTabs'
 import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
-import { FeedbackTagModal, type Feedback } from '@/components/FeedbackTagModal'
+import { FeedbackTagModal } from '@/components/FeedbackTagModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
-import feedbackData from '@/app/_mockdata/project-detail/project-feedback.json'
 import {
   JOB_TABS,
   JOB_API_TO_LABEL,
@@ -30,6 +29,7 @@ import {
   getDrafts,
   upsertDraft,
   getProjectById,
+  getProjectVersions,
   type RecordCategory,
 } from '@/lib/api'
 import { authClient } from '@/lib/auth-client'
@@ -38,16 +38,13 @@ const AUTOSAVE_DELAY_MS = 1000
 
 // content shape은 백엔드 seed.ts(growthRecordDraft.createMany)가 실제로 쓰는 형식을 그대로 따름 —
 // answers는 questionId가 아니라 questionTitle로 키(백엔드 성장기록엔 questionId 개념 자체가 없음)
+// feedbackQuestions는 FeedbackQuestionsForm이 같은 직군 draft에 함께 저장하는 필드 — 이 컴포넌트는
+// 그 값을 모르지만 저장할 때 덮어쓰지 않도록 불러온 그대로 보존한다
 type DraftContent = {
   answers: Record<string, string>
   imageKeys: string[]
-}
-
-const CATEGORY_LABEL: Record<string, string> = {
-  plan: '기획',
-  design: '디자인',
-  dev: '개발',
-  general: '기타',
+  version?: { major: string; minor: string; patch: string }
+  feedbackQuestions?: unknown
 }
 
 type TabLabel = JobTab
@@ -84,16 +81,30 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
-  const [detailTargetFeedback, setDetailTargetFeedback] = useState<Feedback | null>(null)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
+  const [previousVersionId, setPreviousVersionId] = useState<number | null>(null)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
 
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
+  // "다음 단계로"로 의도적으로 이동할 때는 popstate 핸들러가 이탈 확인 모달을 띄우지 않도록 막는 플래그
+  const isNavigatingForwardRef = useRef(false)
+
+  //피드백 태그하기는 이전에 발행된 버전(지금 작성 중인 버전은 아직 존재하지 않음)의 피드백을 대상으로 함
+  useEffect(() => {
+    getProjectVersions(projectId).then((versions) => {
+      setPreviousVersionId(versions[0]?.id ?? null)
+    })
+  }, [projectId])
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
     const handlePopState = () => {
+      if (isNavigatingForwardRef.current) {
+        isNavigatingForwardRef.current = false
+        return
+      }
       window.history.pushState(null, '', window.location.href)
       setShowLeaveModal(true)
     }
@@ -132,13 +143,20 @@ export function GrowthRecordForm() {
       .then(async (drafts) => {
         const loadedAnswers: Record<number, string> = {}
         const loadedImagesByTab: Partial<Record<TabLabel, ImageItem[]>> = {}
+        let loadedVersion: DraftContent['version'] | null = null
 
         await Promise.all(
           drafts.map(async (draft) => {
             const tab = RECORD_CATEGORY_LABELS[draft.category]
             const mockCategory = TAB_TO_CATEGORY[tab]
             const content = draft.content as Partial<DraftContent>
+            preservedFeedbackQuestionsByTab.current[tab] = content.feedbackQuestions
             const answersByTitle = content.answers ?? {}
+
+            // 버전은 프로젝트 전체 단위라 직군 draft마다 같은 값을 들고 있음 — 처음 찾은 값을 사용
+            if (!loadedVersion && content.version) {
+              loadedVersion = content.version
+            }
 
             // questionTitle -> FE 로컬 questionId 역매핑 (같은 카테고리 안에서는 제목이 유일)
             for (const q of growthRecordQuestions.questions[mockCategory]) {
@@ -160,6 +178,7 @@ export function GrowthRecordForm() {
         if (cancelled) return
         setAnswers((prev) => ({ ...prev, ...loadedAnswers }))
         setImagesByTab((prev) => ({ ...prev, ...loadedImagesByTab }))
+        if (loadedVersion) setVersion(loadedVersion)
       })
       .catch(() => {
         toast.error('임시저장 내용을 불러오지 못했습니다')
@@ -174,6 +193,7 @@ export function GrowthRecordForm() {
   }, [projectId, allowedTabs])
 
   const category = TAB_TO_CATEGORY[activeTab]
+  const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
   const questions = growthRecordQuestions.questions[category]
   const images = imagesByTab[activeTab]
 
@@ -185,7 +205,13 @@ export function GrowthRecordForm() {
     .filter((q) => q.isRequired)
     .map((q) => q.questionId)
 
-  const isNextEnabled = allRequiredQuestionIds.every((id) => (answers[id] ?? '').trim().length > 0)
+  const isVersionFilled =
+    version.major.trim().length > 0 &&
+    version.minor.trim().length > 0 &&
+    version.patch.trim().length > 0
+
+  const isNextEnabled =
+    isVersionFilled && allRequiredQuestionIds.every((id) => (answers[id] ?? '').trim().length > 0)
 
   // 활성 직군 탭의 이미지/답변을 draft로 자동저장 (초기 로딩 완료 후에만)
   useEffect(() => {
@@ -200,6 +226,8 @@ export function GrowthRecordForm() {
         answers: Object.fromEntries(
           questions.map((q) => [q.questionTitle, answers[q.questionId] ?? ''])
         ),
+        version,
+        feedbackQuestions: preservedFeedbackQuestionsByTab.current[activeTab],
       }
       upsertDraft(projectId, categoryApi, content).catch(() => {
         toast.error('임시저장에 실패했습니다')
@@ -207,7 +235,7 @@ export function GrowthRecordForm() {
     }, AUTOSAVE_DELAY_MS)
 
     return () => clearTimeout(timer)
-  }, [projectId, activeTab, images, answers, questions, draftsReady])
+  }, [projectId, activeTab, images, answers, questions, version, draftsReady])
 
   const setImages = (updater: (prev: ImageItem[]) => ImageItem[]) => {
     setImagesByTab((prev) => ({ ...prev, [activeTab]: updater(prev[activeTab]) }))
@@ -347,6 +375,7 @@ export function GrowthRecordForm() {
                 <h2 className="text-title1_sb_28">이미지 등록하기</h2>
                 <FieldBadge type="필수" />
               </div>
+
               <Button
                 size="sm"
                 onClick={() => imageInputRef.current?.click()}
@@ -365,8 +394,8 @@ export function GrowthRecordForm() {
               />
             </div>
             <p className="text-body3_r_16 text-CoolNeutral-40">
-              해당 카테고리의 프로젝트 성장기록을 쉽게 이해할 수 있도록 최소 한 장의 이미지를
-              등록해주세요
+              해당 카테고리의 프로젝트 성장기록을 쉽게 이해할 수 있도록 이미지를 등록해주세요
+              (직군당 최대 8장)
             </p>
             {images.length > 0 ? (
               <div className="flex flex-wrap gap-2 mt-1">
@@ -427,40 +456,31 @@ export function GrowthRecordForm() {
               </div>
               <Button
                 size="sm"
-                onClick={() => {
-                  setDetailTargetFeedback(null)
-                  setShowFeedbackTagModal(true)
-                }}
-                disabled={(taggedFeedbacks[category] ?? []).length >= 3}
+                onClick={() => setShowFeedbackTagModal(true)}
+                disabled={(taggedFeedbacks[categoryApi] ?? []).length >= 3}
                 className="shrink-0 px-5 text-sub3_sb_16"
               >
                 피드백 태그하기
               </Button>
             </div>
             {(() => {
-              const taggedIds = taggedFeedbacks[category] ?? []
-              const taggedItems = feedbackData.feedbacks[category].filter((f) =>
-                taggedIds.includes(f.feedbackId)
-              )
+              const taggedItems = taggedFeedbacks[categoryApi] ?? []
               if (taggedItems.length === 0) return null
               return (
                 <div className="grid grid-cols-3 gap-3">
-                  {taggedItems.map((feedback) => (
+                  {taggedItems.map((entry) => (
                     <div
-                      key={feedback.feedbackId}
-                      onClick={() => {
-                        setDetailTargetFeedback(feedback)
-                        setShowFeedbackTagModal(true)
-                      }}
+                      key={`${entry.versionId}:${entry.userId}`}
+                      onClick={() => setShowFeedbackTagModal(true)}
                       className="flex flex-col gap-2 rounded-xl border border-neutral-200 px-5 py-4 hover:cursor-pointer"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex flex-col">
                           <span className="text-caption1_m_13 text-primary-strong">
-                            {CATEGORY_LABEL[feedback.category]}
+                            {activeTab}
                           </span>
                           <span className="text-title5_sb_20 leading-tight">
-                            {feedback.nickname}
+                            {entry.author.name}
                           </span>
                         </div>
                         <Button
@@ -468,7 +488,7 @@ export function GrowthRecordForm() {
                           size="xs"
                           onClick={(e) => {
                             e.stopPropagation()
-                            removeTaggedFeedback(category, feedback.feedbackId)
+                            removeTaggedFeedback(categoryApi, entry.versionId, entry.userId)
                           }}
                           className="w-15 shrink-0 text-sub4_sb_14"
                         >
@@ -476,7 +496,7 @@ export function GrowthRecordForm() {
                         </Button>
                       </div>
                       <p className="text-body2_m_14 text-neutral-30 line-clamp-2">
-                        {feedback.onelineReview}
+                        {entry.oneLineReview}
                       </p>
                     </div>
                   ))}
@@ -489,10 +509,7 @@ export function GrowthRecordForm() {
         {/* Sidebar */}
         <div className="sticky top-6">
           <button
-            onClick={() => {
-              setDetailTargetFeedback(null)
-              setShowFeedbackTagModal(true)
-            }}
+            onClick={() => setShowFeedbackTagModal(true)}
             className="w-90 shrink-0 flex flex-col gap-3 bg-white rounded-xl p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
           >
             <div className="flex items-center justify-between">
@@ -524,17 +541,19 @@ export function GrowthRecordForm() {
       <FeedbackTagModal
         key={String(showFeedbackTagModal)}
         isOpen={showFeedbackTagModal}
-        initialDetailFeedback={detailTargetFeedback}
-        onClose={() => {
-          setShowFeedbackTagModal(false)
-          setDetailTargetFeedback(null)
-        }}
+        projectId={projectId}
+        previousVersionId={previousVersionId}
+        initialCategory={categoryApi}
+        onClose={() => setShowFeedbackTagModal(false)}
       />
 
       <GrowthRecordSubmitModal
         isOpen={showSubmitModal}
         onCancel={() => setShowSubmitModal(false)}
-        onSubmit={() => setShowSubmitModal(false)}
+        onSubmit={() => {
+          isNavigatingForwardRef.current = true
+          setShowSubmitModal(false)
+        }}
         formData={{
           version,
           imagesByTab: Object.fromEntries(

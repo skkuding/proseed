@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,13 +11,27 @@ import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
-import { publishVersion, getProjectById, type CreateVersionDto } from '@/lib/api'
+import { useFeedbackTagStore } from '@/store/feedbackTagStore'
+import {
+  publishVersion,
+  getProjectById,
+  getDrafts,
+  upsertDraft,
+  type CreateVersionDto,
+  type RecordCategory,
+} from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
-import { JOB_TABS, RECORD_CATEGORY_TO_API } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  JOB_API_TO_LABEL,
+  RECORD_CATEGORY_TO_API,
+  RECORD_CATEGORY_LABELS,
+} from '@/app/_utils/projectConstants'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import { authClient } from '@/lib/auth-client'
 
 const FREE_COMMENT_CONTENT = '자유롭게 하고 싶은 말을 남겨주세요'
+const AUTOSAVE_DELAY_MS = 1000
 
 const TABS = JOB_TABS
 type TabLabel = (typeof TABS)[number]
@@ -37,6 +51,19 @@ type Question = {
   text: string
   isRequired: boolean
   isFreeComment: boolean
+}
+
+// growthRecordDraft.content에 함께 저장되는 이 폼의 몫 — answers/imageKeys(GrowthRecordForm 소유)는
+// 불러온 그대로 보존해서 저장 시 덮어쓰지 않는다
+type DraftFeedbackQuestion = { content: string; isRequired: boolean; isFreeComment: boolean }
+type DraftContent = {
+  answers?: Record<string, string>
+  imageKeys?: string[]
+  feedbackQuestions?: DraftFeedbackQuestion[]
+}
+
+function questionsToDefault(): Question[] {
+  return [createQuestion(), createFreeComment()]
 }
 
 function createQuestion(): Question {
@@ -70,25 +97,38 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 export function FeedbackQuestionsForm() {
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [questionsByTab, setQuestionsByTab] = useState<Record<TabLabel, Question[]>>({
-    기획: [createQuestion(), createFreeComment()],
-    디자인: [createQuestion(), createFreeComment()],
-    개발: [createQuestion(), createFreeComment()],
-    기타: [createQuestion(), createFreeComment()],
+    기획: questionsToDefault(),
+    디자인: questionsToDefault(),
+    개발: questionsToDefault(),
+    기타: questionsToDefault(),
   })
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isLead, setIsLead] = useState(false)
+  const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>(null)
   const [showLeadOnlyModal, setShowLeadOnlyModal] = useState(false)
+  const [draftsReady, setDraftsReady] = useState(false)
   const params = useParams()
   const router = useRouter()
   const projectId = params.projectId as string
   const { data: session, isPending: sessionPending } = authClient.useSession()
+  // GrowthRecordForm이 같은 draft에 저장한 answers/imageKeys — 자동저장 시 덮어쓰지 않도록 보존
+  const preservedContentByTab = useRef<Partial<Record<TabLabel, DraftContent>>>({})
+  // 발행 성공 후 성공 모달의 버튼으로 페이지를 벗어날 때는 이탈 확인 모달을 띄우지 않도록 막는 플래그
+  const isNavigatingForwardRef = useRef(false)
+  // 최초 1회만 기본 탭을 선택 — 브라우저 탭 전환 등으로 세션이 재검증돼 아래 effect가 다시 돌아도
+  // 사용자가 고른 탭을 덮어쓰지 않기 위함
+  const hasSetInitialTabRef = useRef(false)
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
     const handlePopState = () => {
+      if (isNavigatingForwardRef.current) {
+        isNavigatingForwardRef.current = false
+        return
+      }
       window.history.pushState(null, '', window.location.href)
       setShowLeaveModal(true)
     }
@@ -96,18 +136,83 @@ export function FeedbackQuestionsForm() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  // 발행은 리드만 가능 — 팀원이 여기까지 넘어오면 안내 모달을 띄움 (작성 내용은 이미 자동저장됨)
+  // 팀원은 자기 직군 질문만 작성 가능 — 발행은 리드만 가능하고, "프로젝트 업데이트" 클릭 시에만 안내
   useEffect(() => {
     if (sessionPending) return
 
     getProjectById(projectId)
       .then((project) => {
         const lead = !!session && Number(session.user.id) === project.createdById
+        const tabs = lead
+          ? [...JOB_TABS]
+          : project.myJobType
+            ? [JOB_API_TO_LABEL[project.myJobType]]
+            : []
         setIsLead(lead)
-        if (!lead) setShowLeadOnlyModal(true)
+        setAllowedTabs(tabs)
+        if (!hasSetInitialTabRef.current && tabs.length > 0) {
+          setActiveTab(tabs[0])
+          hasSetInitialTabRef.current = true
+        }
       })
-      .catch(() => setIsLead(false))
+      .catch(() => {
+        setIsLead(false)
+        setAllowedTabs([])
+      })
   }, [projectId, session, sessionPending])
+
+  // 직군별 공유 draft에서 이전에 작성된 질문을 불러옴 (리드는 전 직군, 팀원은 자기 직군만)
+  useEffect(() => {
+    if (allowedTabs === null) return
+
+    getDrafts(projectId)
+      .then((drafts) => {
+        const loaded: Partial<Record<TabLabel, Question[]>> = {}
+        for (const draft of drafts) {
+          const tab = RECORD_CATEGORY_LABELS[draft.category] as TabLabel
+          const content = draft.content as DraftContent
+          preservedContentByTab.current[tab] = content
+          const saved = content.feedbackQuestions
+          loaded[tab] =
+            saved && saved.length > 0
+              ? saved.map((q) => ({
+                  id: q.isFreeComment ? 'free-comment' : crypto.randomUUID(),
+                  text: q.isFreeComment ? '' : q.content,
+                  isRequired: q.isRequired,
+                  isFreeComment: q.isFreeComment,
+                }))
+              : questionsToDefault()
+        }
+        setQuestionsByTab((prev) => ({ ...prev, ...loaded }))
+      })
+      .catch(() => {
+        toast.error('임시저장된 질문을 불러오지 못했습니다')
+      })
+      .finally(() => setDraftsReady(true))
+  }, [projectId, allowedTabs])
+
+  // 활성 직군 탭의 질문을 draft로 자동저장 (초기 로딩 완료 후에만)
+  useEffect(() => {
+    if (!draftsReady) return
+
+    const timer = setTimeout(() => {
+      const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
+      const content: DraftContent = {
+        ...preservedContentByTab.current[activeTab],
+        feedbackQuestions: questionsByTab[activeTab].map((q) => ({
+          content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
+          isRequired: q.isRequired,
+          isFreeComment: q.isFreeComment,
+        })),
+      }
+      preservedContentByTab.current[activeTab] = content
+      upsertDraft(projectId, categoryApi, content).catch(() => {
+        toast.error('임시저장에 실패했습니다')
+      })
+    }, AUTOSAVE_DELAY_MS)
+
+    return () => clearTimeout(timer)
+  }, [projectId, activeTab, questionsByTab, draftsReady])
 
   const questions = questionsByTab[activeTab]
   const canAdd = questions.length < MAX_QUESTIONS
@@ -153,6 +258,7 @@ export function FeedbackQuestionsForm() {
         <RoleFilterTabs
           tabs={TABS}
           activeTab={activeTab}
+          disabledTabs={TABS.filter((t) => !(allowedTabs ?? []).includes(t))}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />
       </div>
@@ -245,8 +351,11 @@ export function FeedbackQuestionsForm() {
             size="sm"
             className="w-full text-sub3_sb_16"
             onClick={async () => {
-              const allTabs = Object.keys(questionsByTab) as TabLabel[]
-              const hasEmpty = allTabs.some((tab) =>
+              // 리드는 발행을 위해 4개 직군 전체가 필요하지만, 팀원은 자기 직군만 채우면 됨
+              const tabsToCheck = isLead
+                ? (Object.keys(questionsByTab) as TabLabel[])
+                : (allowedTabs ?? [])
+              const hasEmpty = tabsToCheck.some((tab) =>
                 questionsByTab[tab].some((q) => !q.isFreeComment && q.text.trim().length === 0)
               )
               if (hasEmpty) {
@@ -254,7 +363,12 @@ export function FeedbackQuestionsForm() {
                 return
               }
 
-              const { version, imagesByTab, answers, updateGoal, updateResult } =
+              if (!isLead) {
+                setShowLeadOnlyModal(true)
+                return
+              }
+
+              const { version, imagesByTab, answers, updateGoal, updateResult, taggedFeedbacks } =
                 useGrowthRecordStore.getState()
 
               const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
@@ -280,19 +394,41 @@ export function FeedbackQuestionsForm() {
                   }))
               )
 
+              const taggedFeedbacksPayload: CreateVersionDto['taggedFeedbacks'] = Object.entries(
+                taggedFeedbacks
+              )
+                .filter(([, entries]) => entries.length > 0)
+                .map(([category, entries]) => ({
+                  category: category as CreateVersionDto['feedbackQuestions'][number]['category'],
+                  submissions: entries.map((entry) => ({
+                    versionId: entry.versionId,
+                    userId: entry.userId,
+                  })),
+                }))
+
               const payload: CreateVersionDto = {
                 version: `${version.major}.${version.minor}.${version.patch}`,
                 updateGoal,
                 updateResults: [updateResult],
                 growthRecords,
                 feedbackQuestions,
-                taggedFeedbacks: [],
+                taggedFeedbacks: taggedFeedbacksPayload,
               }
 
               setIsPublishing(true)
               try {
                 await publishVersion(projectId, payload)
                 trackEvent('growth_record_published', { version: payload.version })
+                const adoptedCount = taggedFeedbacksPayload.reduce(
+                  (count, tag) => count + tag.submissions.length,
+                  0
+                )
+                if (adoptedCount > 0) {
+                  trackEvent('feedback_adopted', { adopted_count: adoptedCount })
+                }
+                useFeedbackTagStore.getState().resetTaggedFeedbacks()
+                useGrowthRecordStore.getState().reset()
+                isNavigatingForwardRef.current = true
                 setShowSuccessModal(true)
               } catch (err) {
                 toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')
@@ -300,7 +436,7 @@ export function FeedbackQuestionsForm() {
                 setIsPublishing(false)
               }
             }}
-            disabled={isPublishing || !isLead}
+            disabled={isPublishing}
           >
             {isPublishing ? '업데이트 중...' : '프로젝트 업데이트'}
           </Button>
@@ -329,9 +465,13 @@ export function FeedbackQuestionsForm() {
         title="리드만 발행할 수 있어요"
         description="지금까지 작성한 내용은 자동저장돼요."
         cancelLabel="돌아갈래요"
-        confirmLabel="확인했어요"
-        onCancel={() => router.back()}
-        onConfirm={() => setShowLeadOnlyModal(false)}
+        confirmLabel="저장할래요"
+        onCancel={() => setShowLeadOnlyModal(false)}
+        onConfirm={() => {
+          isNavigatingForwardRef.current = true
+          setShowLeadOnlyModal(false)
+          router.replace(`/projects/${projectId}`)
+        }}
       />
     </div>
   )

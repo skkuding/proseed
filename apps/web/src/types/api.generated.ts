@@ -391,6 +391,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/project/{id}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProjectController_getThumbnail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/{id}/versions": {
         parameters: {
             query?: never;
@@ -604,9 +620,10 @@ export interface components {
         };
         MyFeedbackProjectItemDto: {
             submissionId: number;
+            versionId: number;
             projectId: number;
             projectTitle: string;
-            projectThumbnailUrl: string;
+            projectIconUrl: string;
             oneLineDescription: string;
             isAdopted: boolean;
             /** Format: date-time */
@@ -659,9 +676,38 @@ export interface components {
             success: boolean;
             data: components["schemas"]["FeedbackQuestionItemDto"][];
         };
+        FeedbackSubmissionAuthorDto: {
+            role: components["schemas"]["JobType"] | null;
+            name: string;
+            profileImageUrl: string;
+        };
+        FeedbackListItemDto: {
+            category: components["schemas"]["RecordCategory"];
+            imageUrls: string[];
+            submissionId: number;
+            userId: number;
+            author: components["schemas"]["FeedbackSubmissionAuthorDto"];
+            oneLineReview: string;
+            /** @description 이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용 */
+            isAdopted: boolean;
+            id: number;
+            questionId: number;
+            questionTitle: string;
+            questionContent: string;
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        FeedbackListResponseDto: {
+            success: boolean;
+            data: components["schemas"]["FeedbackListItemDto"][];
+        };
         RecentFeedbackItemDto: {
             category: components["schemas"]["RecordCategory"];
             submissionId: number;
+            versionId: number;
             nickname: string;
             profileImageUrl: string;
             oneLineReview: string;
@@ -675,11 +721,6 @@ export interface components {
         RecentFeedbacksResponseDto: {
             success: boolean;
             data: components["schemas"]["RecentFeedbackItemDto"][];
-        };
-        FeedbackSubmissionAuthorDto: {
-            role: components["schemas"]["JobType"] | null;
-            name: string;
-            profileImageUrl: string;
         };
         FeedbackSubmissionAnswerDto: {
             category: components["schemas"]["RecordCategory"];
@@ -768,6 +809,17 @@ export interface components {
             nextCursor: number | null;
             data: components["schemas"]["ProjectListItemDto"][];
             hasNextPage: boolean;
+        };
+        MyProjectListItemDto: {
+            category: components["schemas"]["ProjectCategory"][];
+            id: number;
+            title: string;
+            oneLineDescription: string;
+            /** @description raw S3 key (presigned 변환은 P0-5 미해결) */
+            thumbnailUrl: string;
+            _count: components["schemas"]["ProjectVersionCountDto"];
+            feedbackCount: number;
+            isOwner: boolean;
         };
         ProjectImageDto: {
             order: number;
@@ -861,10 +913,14 @@ export interface components {
             /** @default false */
             isRequired: boolean;
         };
+        TaggedSubmissionRefDto: {
+            versionId: number;
+            userId: number;
+        };
         TaggedFeedbacksDto: {
             /** @enum {string} */
             category: "PLAN" | "DESIGN" | "DEVELOPMENT" | "GENERAL";
-            submissionIds: number[];
+            submissions: components["schemas"]["TaggedSubmissionRefDto"][];
         };
         CreateVersionDto: {
             version: string;
@@ -1364,7 +1420,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CreateFeedbackResponseDto"];
+                    "application/json": components["schemas"]["FeedbackListResponseDto"];
                 };
             };
         };
@@ -1539,7 +1595,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProjectListItemDto"][];
+                    "application/json": components["schemas"]["MyProjectListItemDto"][];
                 };
             };
         };
@@ -1612,6 +1668,25 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProjectRoleResponseDto"];
                 };
+            };
+        };
+    };
+    ProjectController_getThumbnail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

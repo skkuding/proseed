@@ -11,7 +11,6 @@ import { getMyProjects, getProjects, type Project as RecommendedProject } from '
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -28,22 +27,11 @@ type Project = {
   thumbnailUrl: string
   feedbackCount: number
   growthRecordCount: number
+  isOwner: boolean
 }
 
-function getVisiblePages(current: number, total: number): (number | 'ellipsis')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const rangePages: number[] = []
-  for (let i = 1; i <= total; i++) {
-    if (i === 1 || i === total || (i >= current - 2 && i <= current + 2)) rangePages.push(i)
-  }
-  const result: (number | 'ellipsis')[] = []
-  let prev = 0
-  for (const page of rangePages) {
-    if (prev && page - prev > 1) result.push('ellipsis')
-    result.push(page)
-    prev = page
-  }
-  return result
+function getVisiblePages(total: number): number[] {
+  return Array.from({ length: total }, (_, i) => i + 1)
 }
 
 export default function MyProject() {
@@ -163,26 +151,20 @@ export default function MyProject() {
                         className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
                       />
                     </PaginationItem>
-                    {getVisiblePages(currentPage, totalPages).map((page, idx) =>
-                      page === 'ellipsis' ? (
-                        <PaginationItem key={`e-${idx}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      ) : (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href="#"
-                            isActive={page === currentPage}
-                            onClick={(e) => {
-                              e.preventDefault()
-                              handlePageChange(page)
-                            }}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      )
-                    )}
+                    {getVisiblePages(totalPages).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handlePageChange(page)
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
                     <PaginationItem>
                       <PaginationNext
                         href="#"

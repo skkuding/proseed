@@ -196,6 +196,110 @@ describe('FeedbackService', () => {
     })
   })
 
+  describe('findFeedbacksForVersion', () => {
+    it('제출마다 submissionId/작성자/한줄평을 함께 실어 질문 순서대로 답변을 반환한다', async () => {
+      const createdAt = new Date('2026-07-20T00:00:00.000Z')
+      prisma.feedbackSubmission.findMany.mockResolvedValue([
+        {
+          id: 10,
+          userId: 7,
+          oneLineReview: '전체적으로 좋습니다.',
+          adoptions: [],
+          user: {
+            name: '피드백 작성자',
+            profileImageUrl: 'profile-key',
+            jobType: JobType.Developer,
+          },
+          feedbacks: [
+            {
+              id: 102,
+              questionId: 12,
+              content: '두 번째 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.DEVELOPMENT,
+                title: '두 번째 질문',
+                description: '두 번째 질문 설명',
+                order: 2,
+              },
+              images: [{ url: 'second-image-key', order: 0 }],
+            },
+            {
+              id: 101,
+              questionId: 11,
+              content: '첫 번째 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.PLAN,
+                title: '첫 번째 질문',
+                description: '첫 번째 질문 설명',
+                order: 1,
+              },
+              images: [],
+            },
+          ],
+        },
+      ])
+
+      await expect(service.findFeedbacksForVersion(1, 20)).resolves.toEqual({
+        success: true,
+        data: [
+          {
+            id: 101,
+            submissionId: 10,
+            userId: 7,
+            questionId: 11,
+            category: RecordCategory.PLAN,
+            questionTitle: '첫 번째 질문',
+            questionContent: '첫 번째 질문 설명',
+            author: {
+              name: '피드백 작성자',
+              profileImageUrl: 'profile-key',
+              role: JobType.Developer,
+            },
+            oneLineReview: '전체적으로 좋습니다.',
+            isAdopted: false,
+            content: '첫 번째 답변',
+            imageUrls: [],
+            createdAt,
+            updatedAt: createdAt,
+          },
+          {
+            id: 102,
+            submissionId: 10,
+            userId: 7,
+            questionId: 12,
+            category: RecordCategory.DEVELOPMENT,
+            questionTitle: '두 번째 질문',
+            questionContent: '두 번째 질문 설명',
+            author: {
+              name: '피드백 작성자',
+              profileImageUrl: 'profile-key',
+              role: JobType.Developer,
+            },
+            oneLineReview: '전체적으로 좋습니다.',
+            isAdopted: false,
+            content: '두 번째 답변',
+            imageUrls: ['signed:second-image-key'],
+            createdAt,
+            updatedAt: createdAt,
+          },
+        ],
+      })
+    })
+
+    it('제출이 없으면 빈 목록을 반환한다', async () => {
+      prisma.feedbackSubmission.findMany.mockResolvedValue([])
+
+      await expect(service.findFeedbacksForVersion(1, 20)).resolves.toEqual({
+        success: true,
+        data: [],
+      })
+    })
+  })
+
   describe('createFeedback', () => {
     beforeEach(() => {
       prisma.user.findUnique.mockResolvedValue({ userRole: UserRole.Sprout })

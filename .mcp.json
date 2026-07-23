@@ -6,6 +6,13 @@
       "env": {
         "NOTION_TOKEN": "${NOTION_PROSEED_TOKEN}"
       }
+    },
+    "figma-proseed": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "${FIGMA_PROSEED_TOKEN}"
+      }
     }
   }
 }

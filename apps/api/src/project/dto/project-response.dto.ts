@@ -39,6 +39,11 @@ export class ProjectListResponseDto {
   hasNextPage: boolean
 }
 
+//내 프로젝트 — 등록자(Lead)/참여 팀원 공통 목록. 편집 버튼은 isOwner(=Lead)만 노출
+export class MyProjectListItemDto extends ProjectListItemDto {
+  isOwner: boolean
+}
+
 export class MypageJoinedProjectListDto {
   id: number
   title: string

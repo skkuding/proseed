@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { authClient, authBaseURL } from '@/lib/auth-client'
 import { trackEvent } from '@/lib/analytics'
@@ -27,7 +26,6 @@ interface Props {
 type Step = 'reason' | 'reauth'
 
 export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
-  const router = useRouter()
   const [step, setStep] = useState<Step>('reason')
   const [selected, setSelected] = useState<string[]>([])
   const [customReason, setCustomReason] = useState('')
@@ -66,7 +64,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
 
       trackEvent('account_deletion', { reason: selected.join(',') || undefined })
       await authClient.signOut()
-      router.push('/goodbye')
+      window.location.href = '/goodbye'
     } catch (e) {
       console.error(e)
     } finally {

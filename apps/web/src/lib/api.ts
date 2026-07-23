@@ -19,6 +19,7 @@ export type ProjectResponseDto = components['schemas']['ProjectResponseDto']
 export type InviteCollaboratorDto = components['schemas']['InviteCollaboratorDto']
 export type ProjectRoleResponseDto = components['schemas']['ProjectRoleResponseDto']
 export type ProjectListItemDto = components['schemas']['ProjectListItemDto']
+export type MyProjectListItemDto = components['schemas']['MyProjectListItemDto']
 export type ProjectDetailResponseDto = components['schemas']['ProjectDetailResponseDto']
 export type ProjectVersionListItemDto = components['schemas']['ProjectVersionListItemDto']
 export type VersionDetailResponseDto = components['schemas']['VersionDetailResponseDto']
@@ -35,6 +36,8 @@ export type RecentGrowthRecordDto = components['schemas']['RecentGrowthRecordDto
 export type ProfilePreviewResponseDto = components['schemas']['ProfilePreviewResponseDto']
 export type MypageJoinedProjectListDto = components['schemas']['MypageJoinedProjectListDto']
 export type UpdateProjectDto = components['schemas']['UpdateProjectDto']
+export type FeedbackListItemDto = components['schemas']['FeedbackListItemDto']
+export type TaggedSubmissionRefDto = components['schemas']['TaggedSubmissionRefDto']
 
 export type MyProfile = {
   name: string
@@ -101,7 +104,7 @@ export async function getProjectById(id: string | number): Promise<ProjectDetail
   return res.json()
 }
 
-export async function getMyProjects(): Promise<ProjectListItemDto[]> {
+export async function getMyProjects(): Promise<MyProjectListItemDto[]> {
   const res = await fetch(`${BASE}/project/my`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch my projects')
   return res.json()
@@ -200,6 +203,20 @@ export async function inviteCollaborator(
     throw new Error(body?.message ?? '팀원 초대에 실패했습니다')
   }
   return res.json()
+}
+
+export async function removeCollaborator(
+  projectId: string | number,
+  memberId: string | number
+): Promise<void> {
+  const res = await fetch(`${BASE}/project/${projectId}/members/${memberId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '팀원 삭제에 실패했습니다')
+  }
 }
 
 export async function publishVersion(
@@ -320,6 +337,18 @@ export async function createFeedback(
     throw new Error(body?.message ?? '피드백 제출에 실패했습니다')
   }
   return res.json()
+}
+
+export async function getFeedbacksForVersion(
+  projectId: string | number,
+  versionId: string | number
+): Promise<FeedbackListItemDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/versions/${versionId}/feedbacks`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch feedbacks')
+  const body: { success: boolean; data: FeedbackListItemDto[] } = await res.json()
+  return body.data
 }
 
 export async function getDrafts(

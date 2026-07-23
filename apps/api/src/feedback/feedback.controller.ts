@@ -17,6 +17,7 @@ import {
   CreateFeedbackResponseDto,
   FeedbackSubmissionDetailResponseDto,
   FeedbackQuestionsResponseDto,
+  FeedbackListResponseDto,
   MyFeedbackProjectsResponseDto,
   RecentFeedbacksResponseDto,
 } from './dto/feedback-response.dto'
@@ -60,7 +61,7 @@ export class FeedbackController {
   async findFeedbacksForVersion(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
-  ): Promise<CreateFeedbackResponseDto> {
+  ): Promise<FeedbackListResponseDto> {
     return await this.feedbackService.findFeedbacksForVersion(
       projectId,
       versionId,

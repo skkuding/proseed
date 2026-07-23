@@ -46,9 +46,10 @@ export class FeedbackQuestionsResponseDto {
 
 export class MyFeedbackProjectItemDto {
   submissionId: number
+  versionId: number
   projectId: number
   projectTitle: string
-  projectThumbnailUrl: string
+  projectIconUrl: string
   oneLineDescription: string
   isAdopted: boolean
   createdAt: Date
@@ -101,9 +102,26 @@ export class FeedbackSubmissionDetailResponseDto {
   data: FeedbackSubmissionDetailDto
 }
 
+//버전의 피드백 목록 — 제출(submission) 정보를 답변마다 함께 내려줘 FE가 제출 단위로 그룹핑 가능
+export class FeedbackListItemDto extends FeedbackSubmissionAnswerDto {
+  submissionId: number
+  userId: number
+  author: FeedbackSubmissionAuthorDto
+  oneLineReview: string
+
+  /** 이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용 */
+  isAdopted: boolean
+}
+
+export class FeedbackListResponseDto {
+  success: boolean
+  data: FeedbackListItemDto[]
+}
+
 //mainpage 최근 피드백 카드 — 채택(FeedbackAdoption)된 제출×직군 단위
 export class RecentFeedbackItemDto {
   submissionId: number
+  versionId: number
 
   @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
   category: RecordCategory

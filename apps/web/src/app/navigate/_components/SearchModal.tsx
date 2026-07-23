@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
@@ -53,6 +53,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Project[]>([])
   const [clearCount, setClearCount] = useState(0)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -60,20 +61,15 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   }, [isOpen])
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    if (isOpen) document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
-
-  useEffect(() => {
     const trimmed = query.trim()
     if (!trimmed) return
     let cancelled = false
     getProjects({ search: trimmed })
       .then((res) => {
-        if (!cancelled) setSearchResults(res.data)
+        if (!cancelled) {
+          setSearchResults(res.data)
+          setHighlightedIndex(res.data.length > 0 ? 0 : -1)
+        }
       })
       .catch(console.error)
     return () => {
@@ -81,17 +77,47 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [query])
 
+  const trimmedQuery = query.trim()
+  const matchedProjects = useMemo(
+    () => (trimmedQuery ? searchResults : []),
+    [trimmedQuery, searchResults]
+  )
+
+  const handleProjectClick = useCallback(
+    (project: Project) => {
+      saveRecentProject(project)
+      onClose()
+      router.push(`/projects/${project.id}`)
+    },
+    [onClose, router]
+  )
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (matchedProjects.length === 0) return
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setHighlightedIndex((i) => (i + 1) % matchedProjects.length)
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setHighlightedIndex((i) => (i - 1 + matchedProjects.length) % matchedProjects.length)
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        const project = matchedProjects[highlightedIndex] ?? matchedProjects[0]
+        handleProjectClick(project)
+      }
+    }
+    if (isOpen) document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose, matchedProjects, highlightedIndex, handleProjectClick])
+
   if (!isOpen) return null
 
   const recentProjects = clearCount >= 0 ? getRecentProjects() : []
-  const trimmedQuery = query.trim()
-  const matchedProjects = trimmedQuery ? searchResults : []
-
-  const handleProjectClick = (project: Project) => {
-    saveRecentProject(project)
-    onClose()
-    router.push(`/projects/${project.id}`)
-  }
 
   const handleClearAll = () => {
     localStorage.removeItem(STORAGE_KEY)
@@ -138,11 +164,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             {trimmedQuery !== '' && (
               <div className="absolute left-0 right-0 top-full mt-2 z-20 h-[150px] overflow-y-auto rounded-xl bg-background-normal shadow-[0_4px_20px_0_rgba(0,0,0,0.12)] border border-neutral-200">
                 {matchedProjects.length > 0 ? (
-                  matchedProjects.map((project) => (
+                  matchedProjects.map((project, index) => (
                     <button
                       key={project.id}
                       onClick={() => handleProjectClick(project)}
-                      className="flex items-center w-full h-[50px] px-5 py-3 text-left text-body1_m_16 text-CoolNeutral-20 hover:bg-neutral-99 transition-colors hover:cursor-pointer"
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className={`flex items-center w-full h-[50px] px-5 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:cursor-pointer ${
+                        index === highlightedIndex ? 'bg-neutral-99' : 'hover:bg-neutral-95'
+                      }`}
                     >
                       {highlightText(project.title, trimmedQuery)}
                     </button>
@@ -183,7 +212,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   <button
                     key={project.id}
                     onClick={() => handleProjectClick(project)}
-                    className="flex items-center gap-4 p-4 rounded-[12px] bg-white hover:cursor-pointer"
+                    className="flex items-center gap-4 p-4 rounded-[12px] bg-white hover:cursor-pointer hover:bg-neutral-95"
                   >
                     <div className="relative h-15 w-15 rounded-[8px] overflow-hidden shrink-0">
                       <Image

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Header,
   Param,
@@ -20,7 +21,7 @@ import type {
 import { CreateProjectDto } from './dto/create-project.dto'
 import {
   ProjectDetailResponseDto,
-  ProjectListItemDto,
+  MyProjectListItemDto,
   ProjectListResponseDto,
   ProjectResponseDto,
   ProjectRoleResponseDto,
@@ -57,7 +58,7 @@ export class ProjectController {
   @Get('my')
   async getMyProjects(
     @Req() req: RequestWithUser,
-  ): Promise<ProjectListItemDto[]> {
+  ): Promise<MyProjectListItemDto[]> {
     return this.projectService.getMyProjects(req.user.id)
   }
 
@@ -94,6 +95,21 @@ export class ProjectController {
       projectId,
       dto.email,
       dto.role,
+    )
+  }
+
+  //팀원 삭제 — Lead만 (서비스에서 검증), Lead 본인은 삭제 불가
+  @ApiCookieAuth()
+  @Delete(':id/members/:memberId')
+  async removeCollaborator(
+    @Req() req: RequestWithUser,
+    @Param('id', ParseIntPipe) projectId: number,
+    @Param('memberId', ParseIntPipe) memberId: number,
+  ): Promise<void> {
+    return this.projectService.removeCollaborator(
+      req.user.id,
+      projectId,
+      memberId,
     )
   }
 

@@ -51,7 +51,7 @@ export default function Editor({
           }),
         ]}
         className={height ? 'mdxeditor-fixed' : 'min-h-50'}
-        contentEditableClassName="px-4 py-3"
+        contentEditableClassName="p-4 font-pretendard text-body1_m_16 text-CoolNeutral-20"
       />
     </div>
   )
