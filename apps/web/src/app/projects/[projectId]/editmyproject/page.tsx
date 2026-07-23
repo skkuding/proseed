@@ -33,6 +33,7 @@ import {
   type InviteCollaboratorDto,
   type UpdateProjectDto,
 } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 
 async function uploadImage(file: File): Promise<string> {
   const { url, key } = await getUploadUrl(file.name, file.type)
@@ -157,6 +158,7 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
       email: memberEmail.trim(),
       role: JOB_TO_API[memberTab] as InviteCollaboratorDto['role'],
     })
+    trackEvent('collaborator_invited', { role: JOB_TO_API[memberTab] })
     addMember(member)
   }
 

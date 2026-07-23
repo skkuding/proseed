@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
 import { getProjects, type Project } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import CategoryTabs from './CategoryTabs'
 import ProjectCard from './ProjectCard'
 import SectionTitle from './SectionTitle'
@@ -39,7 +40,12 @@ export default function RecentProjectsSection() {
           <div className="flex flex-col items-center justify-center pt-15 gap-6">
             <p className="text-title3_sb_24">아직 등록된 프로젝트가 없어요</p>
             <Button asChild size="lg" className="text-sub3_sb_16">
-              <Link href="/projects/new/register">프로젝트 등록하기</Link>
+              <Link
+                href="/projects/new/register"
+                onClick={() => trackEvent('cta_clicked', { location: 'recent_projects' })}
+              >
+                프로젝트 등록하기
+              </Link>
             </Button>
           </div>
         ) : (

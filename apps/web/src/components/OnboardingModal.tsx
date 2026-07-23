@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { BASE as API_URL } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 
 type JobType = 'Planner' | 'Designer' | 'Developer' | 'Other'
 
@@ -74,6 +75,9 @@ export function OnboardingModal({
       if (JOB_API_TO_LABEL[data.jobType]) {
         useAuthStore.getState().setJobType(JOB_API_TO_LABEL[data.jobType])
       }
+      const method = sessionStorage.getItem('proseed:signup_method') ?? undefined
+      trackEvent('sign_up', { method })
+      sessionStorage.removeItem('proseed:signup_method')
       onClose()
     } catch (e) {
       console.error(e)

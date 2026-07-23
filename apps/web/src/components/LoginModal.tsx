@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
+import { trackEvent } from '@/lib/analytics'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -38,6 +39,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   if (!isOpen) return null
 
   const handleLogin = async (provider: 'google' | 'kakao' | 'naver') => {
+    trackEvent('login_started', { method: provider })
+    sessionStorage.setItem('proseed:signup_method', provider)
     await authClient.signIn.social({
       provider,
       callbackURL: typeof window !== 'undefined' ? window.location.origin : '/',

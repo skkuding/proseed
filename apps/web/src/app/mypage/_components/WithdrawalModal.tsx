@@ -5,6 +5,7 @@ import { X } from 'lucide-react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { authClient, authBaseURL } from '@/lib/auth-client'
+import { trackEvent } from '@/lib/analytics'
 
 const REASONS = [
   '기대했던 서비스와 달라요',
@@ -61,6 +62,7 @@ export function WithdrawalModal({ isOpen, onClose, provider }: Props) {
 
       if (!res.ok) throw new Error('탈퇴 실패')
 
+      trackEvent('account_deletion', { reason: selected.join(',') || undefined })
       await authClient.signOut()
       window.location.href = '/goodbye'
     } catch (e) {

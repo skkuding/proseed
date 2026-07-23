@@ -8,6 +8,7 @@ import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
 import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
 import { RoleFilterTabs } from '@/components/RoleTabs'
+import { trackEvent } from '@/lib/analytics'
 
 const NAV_TABS = [
   { label: '메인 페이지', href: '/' },
@@ -112,7 +113,10 @@ export function Header() {
             </div>
           ) : (
             <button
-              onClick={openLoginModal}
+              onClick={() => {
+                trackEvent('cta_clicked', { location: 'header' })
+                openLoginModal()
+              }}
               className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white shadow-md hover:cursor-pointer hover:bg-neutral-99 transition-colors"
             >
               <Image src="/person_line.svg" alt="로그인" width={32} height={32} />

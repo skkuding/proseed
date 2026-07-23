@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { getUserProfile, getUserJoinedProjects, type UserProfileResponseDto } from '@/lib/api'
+import { authClient } from '@/lib/auth-client'
+import { trackEvent } from '@/lib/analytics'
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { UserInfoCard } from '@/app/mypage/_components/UserInfoCard'
 import { ProfileForm } from '@/app/mypage/_components/ProfileForm'
@@ -13,10 +15,18 @@ type ViewTab = '기본 프로필' | '참여한 프로젝트'
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>()
+  const { data: session, isPending } = authClient.useSession()
   const [profile, setProfile] = useState<UserProfileResponseDto | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [projects, setProjects] = useState<ParticipatedProject[]>([])
   const [view, setView] = useState<ViewTab>('기본 프로필')
+
+  const viewTracked = useRef(false)
+  useEffect(() => {
+    if (isPending || viewTracked.current) return
+    viewTracked.current = true
+    trackEvent('portfolio_viewed', { is_own: session?.user.id === userId })
+  }, [isPending, session, userId])
 
   useEffect(() => {
     getUserProfile(userId)

@@ -20,6 +20,7 @@ import {
   type CreateVersionDto,
   type RecordCategory,
 } from '@/lib/api'
+import { trackEvent } from '@/lib/analytics'
 import {
   JOB_TABS,
   JOB_API_TO_LABEL,
@@ -417,6 +418,14 @@ export function FeedbackQuestionsForm() {
               setIsPublishing(true)
               try {
                 await publishVersion(projectId, payload)
+                trackEvent('growth_record_published', { version: payload.version })
+                const adoptedCount = taggedFeedbacksPayload.reduce(
+                  (count, tag) => count + tag.submissions.length,
+                  0
+                )
+                if (adoptedCount > 0) {
+                  trackEvent('feedback_adopted', { adopted_count: adoptedCount })
+                }
                 useFeedbackTagStore.getState().resetTaggedFeedbacks()
                 useGrowthRecordStore.getState().reset()
                 isNavigatingForwardRef.current = true

@@ -8,6 +8,7 @@ import { LoginModal } from '@/components/LoginModal'
 import { OnboardingModal } from '@/components/OnboardingModal'
 import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
 import { BASE } from '@/lib/api'
+import { setAnalyticsUserId } from '@/lib/analytics'
 
 function randomProfileSrc() {
   return PROFILE_SRCS[Math.floor(Math.random() * PROFILE_SRCS.length)]
@@ -49,6 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const sessionId = session.session.id
     if (checkedSessionId.current === sessionId) return
     checkedSessionId.current = sessionId
+
+    setAnalyticsUserId(session.user.id).catch(console.error)
 
     fetch(`${BASE}/user/check`, { credentials: 'include' })
       .then((res) => res.json())
