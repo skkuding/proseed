@@ -84,7 +84,6 @@ jobs:
             NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=${{ env.NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT }}
             NEXT_PUBLIC_APP_ENV=production
             NEXT_PUBLIC_API_URL=https://proseednow.com/api
-            NEXT_PUBLIC_GA_MEASUREMENT_ID=G-X9Z2BWG12G
 
   build-and-push-postgres-backup:
     needs: changes

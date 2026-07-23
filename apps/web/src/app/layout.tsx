@@ -9,14 +9,12 @@ import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider } from '@/components/AuthProvider'
 import { JsonLd } from '@/components/JsonLd'
 import {
+  GA_MEASUREMENT_ID,
   GOOGLE_SITE_VERIFICATION,
   NAVER_SITE_VERIFICATION,
   SITE_DESCRIPTION,
   SITE_URL,
 } from '@/lib/site'
-
-/** GA4 측정 ID. 빌드 시점에 값이 주입될 때만(=프로덕션) 태그가 렌더된다. */
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 /**
  * 발급된 코드가 있을 때만 verification 태그를 내보낸다.
