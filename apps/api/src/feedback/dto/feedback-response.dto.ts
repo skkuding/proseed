@@ -126,6 +126,9 @@ export class UnlockFeedbackDataDto {
   submissionId: number
   isUnlocked: boolean
 
+  /** 이번 요청에서 실제로 티켓이 차감됐는지. 이미 열려 있던 제출이면 false(무과금) */
+  charged: boolean
+
   /** 차감 후 남은 티켓 수 */
   remainingTickets: number
 }

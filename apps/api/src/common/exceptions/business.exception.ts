@@ -83,6 +83,27 @@ export class UnprocessableFileDataException extends UnprocessableDataException {
   }
 }
 
+/**
+ * [422] 티켓 잔액 부족. 응답 body에 안정적인 `code`를 실어
+ * FE가 message 문자열 매칭 없이 다른 422와 구분할 수 있게 한다.
+ */
+export class InsufficientTicketException extends UnprocessableDataException {
+  static readonly CODE = 'INSUFFICIENT_TICKET'
+
+  constructor(message = 'Not enough tickets.') {
+    super(message)
+  }
+
+  convert2HTTPException(message?: string) {
+    return new UnprocessableEntityException({
+      statusCode: 422,
+      error: 'Unprocessable Entity',
+      code: InsufficientTicketException.CODE,
+      message: message ?? this.message,
+    })
+  }
+}
+
 /** [403] Throw when request cannot be carried due to lack of permission. */
 export class ForbiddenAccessException extends BusinessException {
   convert2HTTPException(message?: string) {

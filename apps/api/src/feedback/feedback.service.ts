@@ -19,6 +19,7 @@ import {
   DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
+  InsufficientTicketException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 
@@ -541,20 +542,9 @@ export class FeedbackService {
       throw new EntityNotExistException('FeedbackSubmission')
     }
 
-    //3. 이미 열려 있으면 재과금 없이 멱등 응답
+    //3. 이미 열려 있으면 재과금 없이 멱등 응답 (charged=false)
     if (submission.unlocks.length > 0) {
-      const me = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { ownedTicketCount: true },
-      })
-      return {
-        success: true,
-        data: {
-          submissionId,
-          isUnlocked: true,
-          remainingTickets: me?.ownedTicketCount ?? 0,
-        },
-      }
+      return this.alreadyUnlockedResponse(userId, submissionId)
     }
 
     //4. 트랜잭션: 잔액 확인 → unlock 기록 → 티켓 차감
@@ -565,7 +555,7 @@ export class FeedbackService {
           select: { ownedTicketCount: true },
         })
         if (!me || me.ownedTicketCount < UNLOCK_COST) {
-          throw new UnprocessableDataException(
+          throw new InsufficientTicketException(
             'Not enough tickets to unlock this feedback.',
           )
         }
@@ -583,28 +573,42 @@ export class FeedbackService {
 
       return {
         success: true,
-        data: { submissionId, isUnlocked: true, remainingTickets },
+        data: {
+          submissionId,
+          isUnlocked: true,
+          charged: true,
+          remainingTickets,
+        },
       }
     } catch (error) {
-      //경합: 다른 요청이 방금 unlock함 → 무과금으로 이미 열림 처리
+      //경합: 다른 요청이 방금 unlock함 → 무과금(charged=false)으로 이미 열림 처리
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        const me = await this.prisma.user.findUnique({
-          where: { id: userId },
-          select: { ownedTicketCount: true },
-        })
-        return {
-          success: true,
-          data: {
-            submissionId,
-            isUnlocked: true,
-            remainingTickets: me?.ownedTicketCount ?? 0,
-          },
-        }
+        return this.alreadyUnlockedResponse(userId, submissionId)
       }
       throw error
+    }
+  }
+
+  //이미 열려 있던 제출 — 무과금(charged=false), 현재 잔액 그대로 반환
+  private async alreadyUnlockedResponse(
+    userId: number,
+    submissionId: number,
+  ): Promise<UnlockFeedbackResponseDto> {
+    const me = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { ownedTicketCount: true },
+    })
+    return {
+      success: true,
+      data: {
+        submissionId,
+        isUnlocked: true,
+        charged: false,
+        remainingTickets: me?.ownedTicketCount ?? 0,
+      },
     }
   }
 

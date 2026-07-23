@@ -2,6 +2,7 @@ import { JobType, RecordCategory, UserRole } from '@prisma/client'
 import {
   EntityNotExistException,
   ForbiddenAccessException,
+  InsufficientTicketException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 import type { PrismaService } from '../prisma/prisma.service'
@@ -380,7 +381,7 @@ describe('FeedbackService', () => {
       )
     })
 
-    it('이미 열린 제출은 재과금 없이 멱등 응답', async () => {
+    it('이미 열린 제출은 재과금 없이 멱등 응답 (charged=false)', async () => {
       asMember()
       prisma.feedbackSubmission.findFirst.mockResolvedValue({
         id: 10,
@@ -390,13 +391,18 @@ describe('FeedbackService', () => {
 
       await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
         success: true,
-        data: { submissionId: 10, isUnlocked: true, remainingTickets: 4 },
+        data: {
+          submissionId: 10,
+          isUnlocked: true,
+          charged: false,
+          remainingTickets: 4,
+        },
       })
       expect(prisma.$transaction).not.toHaveBeenCalled()
       expect(prisma.user.update).not.toHaveBeenCalled()
     })
 
-    it('티켓 잔액이 부족하면 422, unlock을 만들지 않는다', async () => {
+    it('티켓 잔액이 부족하면 InsufficientTicketException(422, code) + unlock 미생성', async () => {
       asMember()
       prisma.feedbackSubmission.findFirst.mockResolvedValue({
         id: 10,
@@ -405,13 +411,21 @@ describe('FeedbackService', () => {
       prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 0 })
 
       await expect(service.unlockFeedback(5, 1, 2, 10)).rejects.toThrow(
-        UnprocessableDataException,
+        InsufficientTicketException,
       )
+      //응답 body에 안정 code가 실려 FE가 문자열 매칭 없이 구분 가능
+      const httpBody = new InsufficientTicketException()
+        .convert2HTTPException()
+        .getResponse()
+      expect(httpBody).toMatchObject({
+        statusCode: 422,
+        code: 'INSUFFICIENT_TICKET',
+      })
       expect(prisma.feedbackUnlock.create).not.toHaveBeenCalled()
       expect(prisma.user.update).not.toHaveBeenCalled()
     })
 
-    it('성공 시 unlock 기록 생성 + 티켓 1개 차감 후 잔액 반환', async () => {
+    it('성공 시 unlock 기록 생성 + 티켓 1개 차감 (charged=true) 후 잔액 반환', async () => {
       asMember()
       prisma.feedbackSubmission.findFirst.mockResolvedValue({
         id: 10,
@@ -423,7 +437,12 @@ describe('FeedbackService', () => {
 
       await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
         success: true,
-        data: { submissionId: 10, isUnlocked: true, remainingTickets: 2 },
+        data: {
+          submissionId: 10,
+          isUnlocked: true,
+          charged: true,
+          remainingTickets: 2,
+        },
       })
       expect(prisma.feedbackUnlock.create).toHaveBeenCalledWith({
         data: { submissionId: 10, unlockedById: 5 },
