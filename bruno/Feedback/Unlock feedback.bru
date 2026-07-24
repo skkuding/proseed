@@ -1,0 +1,25 @@
+meta {
+  name: Unlock feedback
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/project/1/versions/1/feedbacks/1/unlock
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  피드백 제출 열람(unlock) — 프로젝트 멤버만, 티켓 1개 차감 (인증 필수).
+  제출 단위: 1티켓으로 그 제출의 전 직군이 한 번에 열림.
+  전역 1회 공개 — 한 번 열리면 누구나 목록에서 본문 열람 가능.
+  이미 열린 제출은 재과금 없이 멱등 응답(200), 잔액 부족 시 422.
+  응답: { success, data: { submissionId, isUnlocked, remainingTickets } }.
+  에러: 비멤버 403, 제출 없음 404, 잔액 부족 422.
+}

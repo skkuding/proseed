@@ -1,6 +1,8 @@
 import { JobType, RecordCategory, UserRole } from '@prisma/client'
 import {
   EntityNotExistException,
+  ForbiddenAccessException,
+  InsufficientTicketException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 import type { PrismaService } from '../prisma/prisma.service'
@@ -12,12 +14,15 @@ describe('FeedbackService', () => {
   let prisma: {
     feedbackSubmission: {
       findUnique: jest.Mock
+      findFirst: jest.Mock
       findMany: jest.Mock
       create: jest.Mock
     }
     projectRole: { findUnique: jest.Mock }
     projectVersion: { findFirst: jest.Mock }
-    user: { findUnique: jest.Mock }
+    user: { findUnique: jest.Mock; update: jest.Mock }
+    feedbackUnlock: { create: jest.Mock }
+    $transaction: jest.Mock
   }
   let storage: { getSignedDownloadUrl: jest.Mock }
 
@@ -25,12 +30,18 @@ describe('FeedbackService', () => {
     prisma = {
       feedbackSubmission: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         findMany: jest.fn(),
         create: jest.fn(),
       },
       projectRole: { findUnique: jest.fn() },
       projectVersion: { findFirst: jest.fn() },
-      user: { findUnique: jest.fn() },
+      user: { findUnique: jest.fn(), update: jest.fn() },
+      feedbackUnlock: { create: jest.fn() },
+      //$transaction(cb) → cb(tx)로 즉시 실행, tx는 prisma 자신을 대입
+      $transaction: jest.fn((cb: (tx: typeof prisma) => Promise<unknown>) =>
+        cb(prisma),
+      ),
     }
     storage = {
       getSignedDownloadUrl: jest.fn((key: string) =>
@@ -205,6 +216,7 @@ describe('FeedbackService', () => {
           userId: 7,
           oneLineReview: '전체적으로 좋습니다.',
           adoptions: [],
+          unlocks: [{ id: 1 }],
           user: {
             name: '피드백 작성자',
             profileImageUrl: 'profile-key',
@@ -261,6 +273,7 @@ describe('FeedbackService', () => {
             },
             oneLineReview: '전체적으로 좋습니다.',
             isAdopted: false,
+            isUnlocked: true,
             content: '첫 번째 답변',
             imageUrls: [],
             createdAt,
@@ -281,6 +294,7 @@ describe('FeedbackService', () => {
             },
             oneLineReview: '전체적으로 좋습니다.',
             isAdopted: false,
+            isUnlocked: true,
             content: '두 번째 답변',
             imageUrls: ['signed:second-image-key'],
             createdAt,
@@ -290,12 +304,153 @@ describe('FeedbackService', () => {
       })
     })
 
+    it('열람되지 않은 제출은 content를 비우고 imageUrls를 []로 내려준다 (isUnlocked=false)', async () => {
+      const createdAt = new Date('2026-07-20T00:00:00.000Z')
+      prisma.feedbackSubmission.findMany.mockResolvedValue([
+        {
+          id: 11,
+          userId: 8,
+          oneLineReview: '한줄평은 잠겨도 보인다.',
+          adoptions: [],
+          unlocks: [], //잠김
+          user: {
+            name: '작성자',
+            profileImageUrl: 'profile-key',
+            jobType: JobType.Planner,
+          },
+          feedbacks: [
+            {
+              id: 201,
+              questionId: 21,
+              content: '숨겨져야 하는 본문',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.PLAN,
+                title: '질문',
+                description: '질문 설명',
+                order: 1,
+              },
+              images: [{ url: 'secret-image-key', order: 0 }],
+            },
+          ],
+        },
+      ])
+
+      const result = await service.findFeedbacksForVersion(1, 20)
+      const item = result.data[0]
+      expect(item.isUnlocked).toBe(false)
+      expect(item.content).toBe('')
+      expect(item.imageUrls).toEqual([])
+      //잠긴 본문/이미지는 presign도 시도하지 않는다
+      expect(storage.getSignedDownloadUrl).not.toHaveBeenCalled()
+      //질문·작성자·한줄평은 잠겨도 노출
+      expect(item.questionTitle).toBe('질문')
+      expect(item.oneLineReview).toBe('한줄평은 잠겨도 보인다.')
+    })
+
     it('제출이 없으면 빈 목록을 반환한다', async () => {
       prisma.feedbackSubmission.findMany.mockResolvedValue([])
 
       await expect(service.findFeedbacksForVersion(1, 20)).resolves.toEqual({
         success: true,
         data: [],
+      })
+    })
+  })
+
+  describe('unlockFeedback', () => {
+    const asMember = () =>
+      prisma.projectRole.findUnique.mockResolvedValue({ id: 1 })
+
+    it('프로젝트 멤버가 아니면 403, 티켓을 차감하지 않는다', async () => {
+      prisma.projectRole.findUnique.mockResolvedValue(null)
+
+      await expect(service.unlockFeedback(5, 1, 2, 10)).rejects.toThrow(
+        ForbiddenAccessException,
+      )
+      expect(prisma.$transaction).not.toHaveBeenCalled()
+    })
+
+    it('제출이 프로젝트/버전에 없으면 404', async () => {
+      asMember()
+      prisma.feedbackSubmission.findFirst.mockResolvedValue(null)
+
+      await expect(service.unlockFeedback(5, 1, 2, 999)).rejects.toThrow(
+        EntityNotExistException,
+      )
+    })
+
+    it('이미 열린 제출은 재과금 없이 멱등 응답 (charged=false)', async () => {
+      asMember()
+      prisma.feedbackSubmission.findFirst.mockResolvedValue({
+        id: 10,
+        unlocks: [{ id: 1 }],
+      })
+      prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 4 })
+
+      await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
+        success: true,
+        data: {
+          submissionId: 10,
+          isUnlocked: true,
+          charged: false,
+          remainingTickets: 4,
+        },
+      })
+      expect(prisma.$transaction).not.toHaveBeenCalled()
+      expect(prisma.user.update).not.toHaveBeenCalled()
+    })
+
+    it('티켓 잔액이 부족하면 InsufficientTicketException(422, code) + unlock 미생성', async () => {
+      asMember()
+      prisma.feedbackSubmission.findFirst.mockResolvedValue({
+        id: 10,
+        unlocks: [],
+      })
+      prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 0 })
+
+      await expect(service.unlockFeedback(5, 1, 2, 10)).rejects.toThrow(
+        InsufficientTicketException,
+      )
+      //응답 body에 안정 code가 실려 FE가 문자열 매칭 없이 구분 가능
+      const httpBody = new InsufficientTicketException()
+        .convert2HTTPException()
+        .getResponse()
+      expect(httpBody).toMatchObject({
+        statusCode: 422,
+        code: 'INSUFFICIENT_TICKET',
+      })
+      expect(prisma.feedbackUnlock.create).not.toHaveBeenCalled()
+      expect(prisma.user.update).not.toHaveBeenCalled()
+    })
+
+    it('성공 시 unlock 기록 생성 + 티켓 1개 차감 (charged=true) 후 잔액 반환', async () => {
+      asMember()
+      prisma.feedbackSubmission.findFirst.mockResolvedValue({
+        id: 10,
+        unlocks: [],
+      })
+      prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 3 })
+      prisma.feedbackUnlock.create.mockResolvedValue({ id: 77 })
+      prisma.user.update.mockResolvedValue({ ownedTicketCount: 2 })
+
+      await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
+        success: true,
+        data: {
+          submissionId: 10,
+          isUnlocked: true,
+          charged: true,
+          remainingTickets: 2,
+        },
+      })
+      expect(prisma.feedbackUnlock.create).toHaveBeenCalledWith({
+        data: { submissionId: 10, unlockedById: 5 },
+      })
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 5 },
+        data: { ownedTicketCount: { decrement: 1 } },
+        select: { ownedTicketCount: true },
       })
     })
   })

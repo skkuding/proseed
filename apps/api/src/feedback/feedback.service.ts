@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { RecordCategory, UserRole } from '@prisma/client'
+import { Prisma, RecordCategory, UserRole } from '@prisma/client'
 import {
   CreateFeedbackDto,
   MAX_FEEDBACK_IMAGES_PER_ITEM,
@@ -11,6 +11,7 @@ import {
   FeedbackListResponseDto,
   MyFeedbackProjectsResponseDto,
   RecentFeedbacksResponseDto,
+  UnlockFeedbackResponseDto,
 } from './dto/feedback-response.dto'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
@@ -18,6 +19,7 @@ import {
   DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
+  InsufficientTicketException,
   UnprocessableDataException,
 } from 'src/common/exceptions/business.exception'
 
@@ -25,6 +27,9 @@ const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
   UserRole.Sprout,
   UserRole.Seeder,
 ]
+
+//피드백 제출 하나를 열람하는 데 드는 티켓 수
+const UNLOCK_COST = 1
 
 type FeedbackImageInput = { url: string; order: number }
 
@@ -422,7 +427,8 @@ export class FeedbackService {
     }
   }
 
-  //제출(submission) 단위 그룹핑에 필요한 submissionId/작성자/한줄평을 답변마다 함께 내려줌
+  //제출(submission) 단위 그룹핑에 필요한 submissionId/작성자/한줄평을 답변마다 함께 내려줌.
+  //열람(unlock) 안 된 제출은 content/imageUrls를 서버에서 비워서 내려줌 (FE 블러가 아닌 실제 게이팅).
   async findFeedbacksForVersion(
     projectId: number,
     versionId: number,
@@ -435,6 +441,7 @@ export class FeedbackService {
         userId: true,
         oneLineReview: true,
         adoptions: { select: { id: true }, take: 1 },
+        unlocks: { select: { id: true }, take: 1 },
         user: {
           select: {
             name: true,
@@ -467,8 +474,9 @@ export class FeedbackService {
     })
 
     const data = await Promise.all(
-      submissions.flatMap((submission) =>
-        submission.feedbacks
+      submissions.flatMap((submission) => {
+        const isUnlocked = submission.unlocks.length > 0
+        return submission.feedbacks
           .sort((a, b) => a.question.order - b.question.order)
           .map(async (feedback) => ({
             id: feedback.id,
@@ -485,19 +493,123 @@ export class FeedbackService {
             },
             oneLineReview: submission.oneLineReview,
             isAdopted: submission.adoptions.length > 0,
-            content: feedback.content,
-            imageUrls: await Promise.all(
-              feedback.images.map((image) =>
-                this.storage.getSignedDownloadUrl(image.url),
-              ),
-            ),
+            isUnlocked,
+            //잠긴 제출은 본문/이미지 제거 (질문·작성자·한줄평만 노출)
+            content: isUnlocked ? feedback.content : '',
+            imageUrls: isUnlocked
+              ? await Promise.all(
+                  feedback.images.map((image) =>
+                    this.storage.getSignedDownloadUrl(image.url),
+                  ),
+                )
+              : [],
             createdAt: feedback.createdAt,
             updatedAt: feedback.updatedAt,
-          })),
-      ),
+          }))
+      }),
     )
 
     return { success: true, data }
+  }
+
+  /**
+   * 피드백 제출 열람(unlock) — 프로젝트 멤버만, 티켓 1개 차감.
+   * 제출 단위(전 직군 한 번에 열림). 전역 1회 공개 — 이미 열렸으면 무과금 멱등.
+   */
+  async unlockFeedback(
+    userId: number,
+    projectId: number,
+    versionId: number,
+    submissionId: number,
+  ): Promise<UnlockFeedbackResponseDto> {
+    //1. 프로젝트 멤버만 unlock 가능
+    const member = await this.prisma.projectRole.findUnique({
+      where: { userId_projectId: { userId, projectId } },
+      select: { id: true },
+    })
+    if (!member) {
+      throw new ForbiddenAccessException(
+        'Only project members can unlock feedback.',
+      )
+    }
+
+    //2. 제출이 이 프로젝트/버전에 속하는지
+    const submission = await this.prisma.feedbackSubmission.findFirst({
+      where: { id: submissionId, projectId, versionId },
+      select: { id: true, unlocks: { select: { id: true }, take: 1 } },
+    })
+    if (!submission) {
+      throw new EntityNotExistException('FeedbackSubmission')
+    }
+
+    //3. 이미 열려 있으면 재과금 없이 멱등 응답 (charged=false)
+    if (submission.unlocks.length > 0) {
+      return this.alreadyUnlockedResponse(userId, submissionId)
+    }
+
+    //4. 트랜잭션: 잔액 확인 → unlock 기록 → 티켓 차감
+    try {
+      const remainingTickets = await this.prisma.$transaction(async (tx) => {
+        const me = await tx.user.findUnique({
+          where: { id: userId },
+          select: { ownedTicketCount: true },
+        })
+        if (!me || me.ownedTicketCount < UNLOCK_COST) {
+          throw new InsufficientTicketException(
+            'Not enough tickets to unlock this feedback.',
+          )
+        }
+        //unique(submissionId)로 동시 unlock은 한쪽만 성공 → 이중 과금 방지
+        await tx.feedbackUnlock.create({
+          data: { submissionId, unlockedById: userId },
+        })
+        const updated = await tx.user.update({
+          where: { id: userId },
+          data: { ownedTicketCount: { decrement: UNLOCK_COST } },
+          select: { ownedTicketCount: true },
+        })
+        return updated.ownedTicketCount
+      })
+
+      return {
+        success: true,
+        data: {
+          submissionId,
+          isUnlocked: true,
+          charged: true,
+          remainingTickets,
+        },
+      }
+    } catch (error) {
+      //경합: 다른 요청이 방금 unlock함 → 무과금(charged=false)으로 이미 열림 처리
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return this.alreadyUnlockedResponse(userId, submissionId)
+      }
+      throw error
+    }
+  }
+
+  //이미 열려 있던 제출 — 무과금(charged=false), 현재 잔액 그대로 반환
+  private async alreadyUnlockedResponse(
+    userId: number,
+    submissionId: number,
+  ): Promise<UnlockFeedbackResponseDto> {
+    const me = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { ownedTicketCount: true },
+    })
+    return {
+      success: true,
+      data: {
+        submissionId,
+        isUnlocked: true,
+        charged: false,
+        remainingTickets: me?.ownedTicketCount ?? 0,
+      },
+    }
   }
 
   async findAllQuestions(

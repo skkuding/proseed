@@ -103,16 +103,7 @@
     "/storage/download-url/{key}": {
       "get": {
         "operationId": "StorageController_getDownloadUrl",
-        "parameters": [
-          {
-            "name": "key",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "",
@@ -138,16 +129,7 @@
     "/storage/{key}": {
       "delete": {
         "operationId": "StorageController_deleteFile",
-        "parameters": [
-          {
-            "name": "key",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "204": {
             "description": ""
@@ -554,11 +536,6 @@
             }
           }
         },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
         "tags": [
           "Feedback"
         ]
@@ -592,6 +569,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FeedbackQuestionsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/project/{projectId}/versions/{versionId}/feedbacks/{submissionId}/unlock": {
+      "post": {
+        "operationId": "FeedbackController_unlockFeedback",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnlockFeedbackResponseDto"
                 }
               }
             }
@@ -941,6 +969,42 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Project"
+        ]
+      }
+    },
+    "/project/{id}/members/{memberId}": {
+      "delete": {
+        "operationId": "ProjectController_removeCollaborator",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         },
         "security": [
@@ -2108,6 +2172,10 @@
             "type": "boolean",
             "description": "이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용"
           },
+          "isUnlocked": {
+            "type": "boolean",
+            "description": "이 제출이 열람(unlock)됐는지. false면 content/imageUrls는 서버에서 비워서 내려감"
+          },
           "id": {
             "type": "number"
           },
@@ -2140,6 +2208,7 @@
           "author",
           "oneLineReview",
           "isAdopted",
+          "isUnlocked",
           "id",
           "questionId",
           "questionTitle",
@@ -2160,6 +2229,46 @@
             "items": {
               "$ref": "#/components/schemas/FeedbackListItemDto"
             }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      },
+      "UnlockFeedbackDataDto": {
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "number"
+          },
+          "isUnlocked": {
+            "type": "boolean"
+          },
+          "charged": {
+            "type": "boolean",
+            "description": "이번 요청에서 실제로 티켓이 차감됐는지. 이미 열려 있던 제출이면 false(무과금)"
+          },
+          "remainingTickets": {
+            "type": "number",
+            "description": "차감 후 남은 티켓 수"
+          }
+        },
+        "required": [
+          "submissionId",
+          "isUnlocked",
+          "charged",
+          "remainingTickets"
+        ]
+      },
+      "UnlockFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UnlockFeedbackDataDto"
           }
         },
         "required": [

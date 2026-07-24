@@ -20,17 +20,18 @@ import {
   FeedbackListResponseDto,
   MyFeedbackProjectsResponseDto,
   RecentFeedbacksResponseDto,
+  UnlockFeedbackResponseDto,
 } from './dto/feedback-response.dto'
 import type { RequestWithUser } from 'src/common/types/request-with-user.type'
 
-//전역 가드로 전 라우트 인증 필수
+//공개 목록(feedbacks)이 섞여 있어 인증 표기는 라우트 레벨로
 @ApiTags('Feedback')
-@ApiCookieAuth()
 @Controller('project/:projectId/versions/:versionId')
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   // POST project/:id/versions/:versionId/feedbacks
+  @ApiCookieAuth()
   @Post('feedbacks')
   async createFeedback(
     @Req() req: RequestWithUser,
@@ -48,6 +49,7 @@ export class FeedbackController {
   }
 
   // GET project/:projectId/versions/:versionId/feedbackQuestions
+  @ApiCookieAuth()
   @Get('feedbackQuestions')
   async findAllQuestions(
     @Param('projectId', ParseIntPipe) projectId: number,
@@ -56,7 +58,8 @@ export class FeedbackController {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
 
-  // GET project/:projectId/versions/:versionId/feedbacks
+  // GET project/:projectId/versions/:versionId/feedbacks — 공개, 잠긴 제출은 본문 redact
+  @Public()
   @Get('feedbacks')
   async findFeedbacksForVersion(
     @Param('projectId', ParseIntPipe) projectId: number,
@@ -65,6 +68,23 @@ export class FeedbackController {
     return await this.feedbackService.findFeedbacksForVersion(
       projectId,
       versionId,
+    )
+  }
+
+  // POST .../feedbacks/:submissionId/unlock — 프로젝트 멤버만, 티켓 1개 차감
+  @ApiCookieAuth()
+  @Post('feedbacks/:submissionId/unlock')
+  async unlockFeedback(
+    @Req() req: RequestWithUser,
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('versionId', ParseIntPipe) versionId: number,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+  ): Promise<UnlockFeedbackResponseDto> {
+    return await this.feedbackService.unlockFeedback(
+      req.user.id,
+      projectId,
+      versionId,
+      submissionId,
     )
   }
 }

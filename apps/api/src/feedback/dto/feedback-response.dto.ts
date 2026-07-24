@@ -111,11 +111,31 @@ export class FeedbackListItemDto extends FeedbackSubmissionAnswerDto {
 
   /** 이미 다른 성장기록에 채택(태그)된 제출인지 — 성장기록 발행의 피드백 태그하기에서 재태그 방지용 */
   isAdopted: boolean
+
+  /** 이 제출이 열람(unlock)됐는지. false면 content/imageUrls는 서버에서 비워서 내려감 */
+  isUnlocked: boolean
 }
 
 export class FeedbackListResponseDto {
   success: boolean
   data: FeedbackListItemDto[]
+}
+
+//피드백 열람(unlock) 응답 — 티켓 1개 차감 후 잔액 반환
+export class UnlockFeedbackDataDto {
+  submissionId: number
+  isUnlocked: boolean
+
+  /** 이번 요청에서 실제로 티켓이 차감됐는지. 이미 열려 있던 제출이면 false(무과금) */
+  charged: boolean
+
+  /** 차감 후 남은 티켓 수 */
+  remainingTickets: number
+}
+
+export class UnlockFeedbackResponseDto {
+  success: boolean
+  data: UnlockFeedbackDataDto
 }
 
 //mainpage 최근 피드백 카드 — 채택(FeedbackAdoption)된 제출×직군 단위
