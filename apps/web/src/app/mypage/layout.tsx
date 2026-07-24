@@ -96,6 +96,7 @@ function MyPageShell({ children }: { children: ReactNode }) {
               profileImageUrl={currentUser?.image ?? ''}
               projectCount={profile?.joinedProjectCount ?? 0}
               feedbackCount={profile?.feedbackCount ?? 0}
+              ticketCount={profile?.ownedTicketCount}
             />
             <SideNav activeMenu={activeMenu} onMenuChange={handleMenuChange} />
           </div>

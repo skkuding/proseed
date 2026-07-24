@@ -527,6 +527,10 @@ describe('FeedbackService', () => {
         },
       })
       expect(prisma.feedbackSubmission.create).toHaveBeenCalled()
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 10 },
+        data: { ownedTicketCount: { increment: 2 } },
+      })
     })
 
     it('제출한 직군 안의 필수 질문이 빠지면 예외를 던진다', async () => {

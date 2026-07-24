@@ -19,6 +19,8 @@ interface UserInfoCardProps {
   profileImageUrl: string
   projectCount: number
   feedbackCount: number
+  /** 보유 티켓 수 — 본인 마이페이지에서만 전달(타인 프로필은 비공개 정보라 미표시) */
+  ticketCount?: number
   /** 참여 프로젝트 항목이 이동할 위치 (기본값: 내 마이페이지). onProjectsClick이 있으면 무시됨 */
   projectsHref?: string
   /** 페이지 이동 대신 같은 화면 안에서 뷰를 전환하고 싶을 때 (예: 타인 프로필의 탭 전환) */
@@ -35,6 +37,7 @@ export function UserInfoCard({
   profileImageUrl,
   projectCount,
   feedbackCount,
+  ticketCount,
   projectsHref = '/mypage/projects',
   onProjectsClick,
   readOnly = false,
@@ -138,6 +141,15 @@ export function UserInfoCard({
                 <ArrowRight />
               </span>
             </Link>
+          )}
+          {!readOnly && ticketCount !== undefined && (
+            <div className="flex items-center gap-5">
+              <span className="text-neutral-30 shrink-0 w-22 flex items-center gap-1">
+                <Image src="/ticket.svg" alt="" width={18} height={18} className="shrink-0" />
+                보유 티켓
+              </span>
+              <span>{ticketCount}개</span>
+            </div>
           )}
         </div>
 

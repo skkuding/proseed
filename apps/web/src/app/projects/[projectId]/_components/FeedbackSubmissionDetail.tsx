@@ -2,12 +2,19 @@ import Image from 'next/image'
 import { ChevronRightIcon, Dot } from 'lucide-react'
 import { AccordionContent } from '@/components/ui/accordion'
 import type { SubmissionCard } from './FeedbackSubmissionCard'
+import { FeedbackUnlockPopover } from './FeedbackUnlockPopover'
 
 interface FeedbackSubmissionDetailProps {
   card: SubmissionCard
   selectedQuestionId: number | undefined
   onSelectQuestion: (questionId: number) => void
   onImageClick: (images: string[], index: number) => void
+  /** 프로젝트 팀원만 unlock 가능 */
+  canUnlock: boolean
+  ticketCount: number | null
+  isUnlocking: boolean
+  unlockErrorMessage: string | null
+  onUnlock: () => void
 }
 
 export function FeedbackSubmissionDetail({
@@ -15,6 +22,11 @@ export function FeedbackSubmissionDetail({
   selectedQuestionId,
   onSelectQuestion,
   onImageClick,
+  canUnlock,
+  ticketCount,
+  isUnlocking,
+  unlockErrorMessage,
+  onUnlock,
 }: FeedbackSubmissionDetailProps) {
   const selectedQuestion =
     card.questions.find((q) => q.questionId === selectedQuestionId) ?? card.questions[0]
@@ -52,30 +64,60 @@ export function FeedbackSubmissionDetail({
 
         {/* Right content */}
         <div className="flex-1">
-          {selectedQuestion && (
-            <div className="flex flex-col gap-5">
-              <h3 className="text-title3_sb_24">{selectedQuestion.questionTitle}</h3>
-              <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
-                {selectedQuestion.content}
-              </p>
-              {selectedQuestion.imageUrls.length > 0 && (
-                <div className="grid grid-cols-4 gap-x-2 gap-y-4 mt-5">
-                  {selectedQuestion.imageUrls.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onImageClick(selectedQuestion.imageUrls, idx)
-                      }}
-                      className="relative aspect-video rounded-xl overflow-hidden bg-neutral-100 hover:opacity-90 transition-opacity hover:cursor-pointer"
-                    >
-                      <Image src={img} alt="" fill className="object-cover" />
-                    </button>
-                  ))}
+          {selectedQuestion &&
+            (card.isUnlocked ? (
+              <div className="flex flex-col gap-5">
+                <h3 className="text-title3_sb_24">{selectedQuestion.questionTitle}</h3>
+                <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
+                  {selectedQuestion.content}
+                </p>
+                {selectedQuestion.imageUrls.length > 0 && (
+                  <div className="grid grid-cols-4 gap-x-2 gap-y-4 mt-5">
+                    {selectedQuestion.imageUrls.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onImageClick(selectedQuestion.imageUrls, idx)
+                        }}
+                        className="relative aspect-video rounded-xl overflow-hidden bg-neutral-100 hover:opacity-90 transition-opacity hover:cursor-pointer"
+                      >
+                        <Image src={img} alt="" fill className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative min-h-50">
+                <div
+                  aria-hidden
+                  className="flex flex-col gap-3 blur-[6px] select-none pointer-events-none"
+                >
+                  <div className="h-6 w-2/3 rounded bg-neutral-95" />
+                  <div className="h-4 w-full rounded bg-neutral-95" />
+                  <div className="h-4 w-full rounded bg-neutral-95" />
+                  <div className="h-4 w-5/6 rounded bg-neutral-95" />
+                  <div className="grid grid-cols-4 gap-x-2 gap-y-4 mt-5">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="aspect-video rounded-xl bg-neutral-95" />
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <FeedbackUnlockPopover
+                    canUnlock={canUnlock}
+                    ticketCount={ticketCount}
+                    isUnlocking={isUnlocking}
+                    errorMessage={unlockErrorMessage}
+                    onUnlock={onUnlock}
+                  />
+                </div>
+              </div>
+            ))}
         </div>
       </div>
     </AccordionContent>

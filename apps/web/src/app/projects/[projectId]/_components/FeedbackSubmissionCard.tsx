@@ -17,6 +17,8 @@ export type SubmissionCard = {
   oneLineReview: string
   createdAt: string
   isAdopted: boolean
+  /** 이 제출이 열람(unlock)됐는지. false면 questions[].content/imageUrls는 서버에서 비워져 있음 */
+  isUnlocked: boolean
   questions: SubmissionQuestion[]
 }
 
@@ -30,6 +32,7 @@ export function buildSubmissionCards(items: FeedbackListItemDto[]): SubmissionCa
       oneLineReview: item.oneLineReview,
       createdAt: item.createdAt,
       isAdopted: item.isAdopted,
+      isUnlocked: item.isUnlocked,
       questions: [],
     }
     card.questions.push({
@@ -51,6 +54,12 @@ interface FeedbackSubmissionCardProps {
   selectedQuestionId: number | undefined
   onSelectQuestion: (questionId: number) => void
   onImageClick: (images: string[], index: number) => void
+  /** 프로젝트 팀원만 unlock 가능 */
+  canUnlock: boolean
+  ticketCount: number | null
+  isUnlocking: boolean
+  unlockErrorMessage: string | null
+  onUnlock: () => void
 }
 
 export function FeedbackSubmissionCard({
@@ -60,6 +69,11 @@ export function FeedbackSubmissionCard({
   selectedQuestionId,
   onSelectQuestion,
   onImageClick,
+  canUnlock,
+  ticketCount,
+  isUnlocking,
+  unlockErrorMessage,
+  onUnlock,
 }: FeedbackSubmissionCardProps) {
   return (
     <AccordionItem
@@ -73,6 +87,11 @@ export function FeedbackSubmissionCard({
         selectedQuestionId={selectedQuestionId}
         onSelectQuestion={onSelectQuestion}
         onImageClick={onImageClick}
+        canUnlock={canUnlock}
+        ticketCount={ticketCount}
+        isUnlocking={isUnlocking}
+        unlockErrorMessage={unlockErrorMessage}
+        onUnlock={onUnlock}
       />
     </AccordionItem>
   )

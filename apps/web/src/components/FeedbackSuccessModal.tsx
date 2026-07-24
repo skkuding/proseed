@@ -51,7 +51,7 @@ export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuc
       >
         {/* Header */}
         <div className="flex items-start justify-between">
-          <h2 className="text-head3_sb_36">피드백을 등록했어요!</h2>
+          <h2 className="text-head3_sb_36">피드백을 등록하고 티켓 2장을 받았어요!</h2>
           <Button variant="iconMuted" size="bare" onClick={onClose}>
             <X className="size-9 text-neutral-30" />
           </Button>

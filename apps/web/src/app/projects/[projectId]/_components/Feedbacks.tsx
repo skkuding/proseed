@@ -32,9 +32,14 @@ import {
   getProjectById,
   getProjectVersions,
   getFeedbacksForVersion,
+  getMyProfile,
+  unlockFeedback,
+  ApiError,
   type ProjectVersionListItemDto,
   type FeedbackListItemDto,
 } from '@/lib/api'
+import { authClient } from '@/lib/auth-client'
+import { useAuthStore } from '@/store/authStore'
 import { RECORD_CATEGORY_TO_API, JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
 
 type TabLabel = JobTab
@@ -63,12 +68,54 @@ export function Feedbacks() {
   const [showRoleSelectModal, setShowRoleSelectModal] = useState(false)
   const [isMyProject, setIsMyProject] = useState(false)
   const [showSelfFeedbackModal, setShowSelfFeedbackModal] = useState(false)
+  const { data: session } = authClient.useSession()
+  const { openLoginModal } = useAuthStore()
+  const [ticketCount, setTicketCount] = useState<number | null>(null)
+  const [unlockingId, setUnlockingId] = useState<number | null>(null)
+  const [unlockError, setUnlockError] = useState<{ id: number; message: string } | null>(null)
+  const [showInsufficientTicketModal, setShowInsufficientTicketModal] = useState(false)
 
   useEffect(() => {
     getProjectById(projectId)
       .then((project) => setIsMyProject(project.isMyProject))
       .catch(() => setIsMyProject(false))
   }, [projectId])
+
+  useEffect(() => {
+    if (!session) {
+      setTicketCount(null)
+      return
+    }
+    getMyProfile()
+      .then((profile) => setTicketCount(profile.ownedTicketCount))
+      .catch(() => setTicketCount(null))
+  }, [session])
+
+  const handleUnlock = async (submissionId: number) => {
+    if (!session) {
+      openLoginModal()
+      return
+    }
+    setUnlockError(null)
+    setUnlockingId(submissionId)
+    try {
+      const result = await unlockFeedback(projectId, selectedVersion, submissionId)
+      setTicketCount(result.remainingTickets)
+      const refreshed = await getFeedbacksForVersion(projectId, selectedVersion)
+      setFeedbacks(refreshed)
+    } catch (e) {
+      if (e instanceof ApiError && e.code === 'INSUFFICIENT_TICKET') {
+        setShowInsufficientTicketModal(true)
+      } else {
+        setUnlockError({
+          id: submissionId,
+          message: e instanceof Error ? e.message : '피드백 열람에 실패했습니다',
+        })
+      }
+    } finally {
+      setUnlockingId(null)
+    }
+  }
 
   const handleWriteFeedbackClick = () => {
     if (isMyProject) {
@@ -288,6 +335,13 @@ export function Feedbacks() {
                   setSelectedQuestions((prev) => ({ ...prev, [card.submissionId]: questionId }))
                 }
                 onImageClick={(images, index) => setLightbox({ images, index })}
+                canUnlock={isMyProject}
+                ticketCount={ticketCount}
+                isUnlocking={unlockingId === card.submissionId}
+                unlockErrorMessage={
+                  unlockError?.id === card.submissionId ? unlockError.message : null
+                }
+                onUnlock={() => handleUnlock(card.submissionId)}
               />
             ))}
           </Accordion>
@@ -370,6 +424,17 @@ export function Feedbacks() {
         confirmLabel="피드백 작성하기"
         confirmButtonClassName="w-auto px-5"
         onCancel={() => setShowSelfFeedbackModal(false)}
+        onConfirm={() => router.push('/navigate')}
+      />
+
+      <ConfirmModal
+        isOpen={showInsufficientTicketModal}
+        title="티켓이 부족하여 피드백을 해제할 수 없어요"
+        description="티켓은 타 프로젝트에 피드백을 남기거나, 성장기록을 작성하면 얻을 수 있어요. 피드백을 작성하고 티켓을 받아볼까요?"
+        cancelLabel="취소"
+        confirmLabel="피드백 작성하기"
+        confirmButtonClassName="w-auto px-5"
+        onCancel={() => setShowInsufficientTicketModal(false)}
         onConfirm={() => router.push('/navigate')}
       />
     </div>

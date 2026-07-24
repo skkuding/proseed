@@ -38,6 +38,17 @@ export type MypageJoinedProjectListDto = components['schemas']['MypageJoinedProj
 export type UpdateProjectDto = components['schemas']['UpdateProjectDto']
 export type FeedbackListItemDto = components['schemas']['FeedbackListItemDto']
 export type TaggedSubmissionRefDto = components['schemas']['TaggedSubmissionRefDto']
+export type UnlockFeedbackDataDto = components['schemas']['UnlockFeedbackDataDto']
+
+// 서버 BusinessException이 body.code로 실어보내는 안정적 식별자(예: INSUFFICIENT_TICKET)를 담아둔다.
+export class ApiError extends Error {
+  code?: string
+
+  constructor(message: string, code?: string) {
+    super(message)
+    this.code = code
+  }
+}
 
 export type MyProfile = {
   name: string
@@ -348,6 +359,22 @@ export async function getFeedbacksForVersion(
   })
   if (!res.ok) throw new Error('Failed to fetch feedbacks')
   const body: { success: boolean; data: FeedbackListItemDto[] } = await res.json()
+  return body.data
+}
+
+export async function unlockFeedback(
+  projectId: string | number,
+  versionId: string | number,
+  submissionId: string | number
+): Promise<UnlockFeedbackDataDto> {
+  const res = await fetch(
+    `${BASE}/project/${projectId}/versions/${versionId}/feedbacks/${submissionId}/unlock`,
+    { method: 'POST', credentials: 'include' }
+  )
+  const body = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new ApiError(body?.message ?? '피드백 열람에 실패했습니다', body?.code)
+  }
   return body.data
 }
 

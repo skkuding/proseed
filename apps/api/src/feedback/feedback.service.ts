@@ -31,6 +31,9 @@ const FEEDBACK_ALLOWED_USER_ROLES: readonly UserRole[] = [
 //피드백 제출 하나를 열람하는 데 드는 티켓 수
 const UNLOCK_COST = 1
 
+//피드백 작성 보상 (티켓 정책 확정)
+const FEEDBACK_WRITE_REWARD = 2
+
 type FeedbackImageInput = { url: string; order: number }
 
 @Injectable()
@@ -379,34 +382,44 @@ export class FeedbackService {
       )
     }
 
-    const submission = await this.prisma.feedbackSubmission.create({
-      data: {
-        userId,
-        projectId,
-        versionId,
-        oneLineReview: dto.oneLineReview,
-        feedbacks: {
-          create: dto.feedbacks.map((f) => {
-            const images = this.buildFeedbackImages(f.imageUrls, f.imageUrl)
+    // 제출 생성 + 작성 보상 지급을 하나의 트랜잭션으로
+    const submission = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.feedbackSubmission.create({
+        data: {
+          userId,
+          projectId,
+          versionId,
+          oneLineReview: dto.oneLineReview,
+          feedbacks: {
+            create: dto.feedbacks.map((f) => {
+              const images = this.buildFeedbackImages(f.imageUrls, f.imageUrl)
 
-            return {
-              questionId: f.questionId,
-              content: f.content,
-              images:
-                images.length > 0
-                  ? {
-                      create: images,
-                    }
-                  : undefined,
-            }
-          }),
+              return {
+                questionId: f.questionId,
+                content: f.content,
+                images:
+                  images.length > 0
+                    ? {
+                        create: images,
+                      }
+                    : undefined,
+              }
+            }),
+          },
         },
-      },
-      include: {
-        feedbacks: {
-          include: { images: { orderBy: { order: 'asc' } } },
+        include: {
+          feedbacks: {
+            include: { images: { orderBy: { order: 'asc' } } },
+          },
         },
-      },
+      })
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { ownedTicketCount: { increment: FEEDBACK_WRITE_REWARD } },
+      })
+
+      return created
     })
 
     return {
