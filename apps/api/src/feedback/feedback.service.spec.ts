@@ -216,7 +216,10 @@ describe('FeedbackService', () => {
           userId: 7,
           oneLineReview: '전체적으로 좋습니다.',
           adoptions: [],
-          unlocks: [{ id: 1 }],
+          unlocks: [
+            { category: RecordCategory.PLAN },
+            { category: RecordCategory.DEVELOPMENT },
+          ],
           user: {
             name: '피드백 작성자',
             profileImageUrl: 'profile-key',
@@ -255,53 +258,55 @@ describe('FeedbackService', () => {
         },
       ])
 
-      await expect(service.findFeedbacksForVersion(1, 20)).resolves.toEqual({
-        success: true,
-        data: [
-          {
-            id: 101,
-            submissionId: 10,
-            userId: 7,
-            questionId: 11,
-            category: RecordCategory.PLAN,
-            questionTitle: '첫 번째 질문',
-            questionContent: '첫 번째 질문 설명',
-            author: {
-              name: '피드백 작성자',
-              profileImageUrl: 'profile-key',
-              role: JobType.Developer,
+      await expect(service.findFeedbacksForVersion(1, 20, 99)).resolves.toEqual(
+        {
+          success: true,
+          data: [
+            {
+              id: 101,
+              submissionId: 10,
+              userId: 7,
+              questionId: 11,
+              category: RecordCategory.PLAN,
+              questionTitle: '첫 번째 질문',
+              questionContent: '첫 번째 질문 설명',
+              author: {
+                name: '피드백 작성자',
+                profileImageUrl: 'profile-key',
+                role: JobType.Developer,
+              },
+              oneLineReview: '전체적으로 좋습니다.',
+              isAdopted: false,
+              isUnlocked: true,
+              content: '첫 번째 답변',
+              imageUrls: [],
+              createdAt,
+              updatedAt: createdAt,
             },
-            oneLineReview: '전체적으로 좋습니다.',
-            isAdopted: false,
-            isUnlocked: true,
-            content: '첫 번째 답변',
-            imageUrls: [],
-            createdAt,
-            updatedAt: createdAt,
-          },
-          {
-            id: 102,
-            submissionId: 10,
-            userId: 7,
-            questionId: 12,
-            category: RecordCategory.DEVELOPMENT,
-            questionTitle: '두 번째 질문',
-            questionContent: '두 번째 질문 설명',
-            author: {
-              name: '피드백 작성자',
-              profileImageUrl: 'profile-key',
-              role: JobType.Developer,
+            {
+              id: 102,
+              submissionId: 10,
+              userId: 7,
+              questionId: 12,
+              category: RecordCategory.DEVELOPMENT,
+              questionTitle: '두 번째 질문',
+              questionContent: '두 번째 질문 설명',
+              author: {
+                name: '피드백 작성자',
+                profileImageUrl: 'profile-key',
+                role: JobType.Developer,
+              },
+              oneLineReview: '전체적으로 좋습니다.',
+              isAdopted: false,
+              isUnlocked: true,
+              content: '두 번째 답변',
+              imageUrls: ['signed:second-image-key'],
+              createdAt,
+              updatedAt: createdAt,
             },
-            oneLineReview: '전체적으로 좋습니다.',
-            isAdopted: false,
-            isUnlocked: true,
-            content: '두 번째 답변',
-            imageUrls: ['signed:second-image-key'],
-            createdAt,
-            updatedAt: createdAt,
-          },
-        ],
-      })
+          ],
+        },
+      )
     })
 
     it('열람되지 않은 제출은 content를 비우고 imageUrls를 []로 내려준다 (isUnlocked=false)', async () => {
@@ -337,7 +342,7 @@ describe('FeedbackService', () => {
         },
       ])
 
-      const result = await service.findFeedbacksForVersion(1, 20)
+      const result = await service.findFeedbacksForVersion(1, 20, 99)
       const item = result.data[0]
       expect(item.isUnlocked).toBe(false)
       expect(item.content).toBe('')
@@ -347,6 +352,142 @@ describe('FeedbackService', () => {
       //질문·작성자·한줄평은 잠겨도 노출
       expect(item.questionTitle).toBe('질문')
       expect(item.oneLineReview).toBe('한줄평은 잠겨도 보인다.')
+    })
+
+    it('같은 제출이 다른 직군에서 unlock돼도 unlock 안 된 직군은 잠긴 채로 내려간다', async () => {
+      const createdAt = new Date('2026-07-20T00:00:00.000Z')
+      prisma.feedbackSubmission.findMany.mockResolvedValue([
+        {
+          id: 12,
+          userId: 9,
+          oneLineReview: '한줄평',
+          adoptions: [],
+          unlocks: [{ category: RecordCategory.DEVELOPMENT }], //개발만 열림
+          user: {
+            name: '작성자',
+            profileImageUrl: 'profile-key',
+            jobType: JobType.Developer,
+          },
+          feedbacks: [
+            {
+              id: 301,
+              questionId: 31,
+              content: '개발 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.DEVELOPMENT,
+                title: '개발 질문',
+                description: '설명',
+                order: 1,
+              },
+              images: [],
+            },
+            {
+              id: 302,
+              questionId: 32,
+              content: '디자인 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.DESIGN,
+                title: '디자인 질문',
+                description: '설명',
+                order: 2,
+              },
+              images: [],
+            },
+          ],
+        },
+      ])
+
+      const result = await service.findFeedbacksForVersion(1, 20, 99)
+      const dev = result.data.find(
+        (d) => d.category === RecordCategory.DEVELOPMENT,
+      )
+      const design = result.data.find(
+        (d) => d.category === RecordCategory.DESIGN,
+      )
+      expect(dev?.isUnlocked).toBe(true)
+      expect(dev?.content).toBe('개발 답변')
+      expect(design?.isUnlocked).toBe(false)
+      expect(design?.content).toBe('')
+    })
+
+    it('본인이 작성한 답변은 unlock 여부와 무관하게 항상 노출된다', async () => {
+      const createdAt = new Date('2026-07-20T00:00:00.000Z')
+      prisma.feedbackSubmission.findMany.mockResolvedValue([
+        {
+          id: 13,
+          userId: 42, //조회자 본인
+          oneLineReview: '한줄평',
+          adoptions: [],
+          unlocks: [], //아무도 unlock 안 함
+          user: {
+            name: '나',
+            profileImageUrl: 'profile-key',
+            jobType: JobType.Planner,
+          },
+          feedbacks: [
+            {
+              id: 401,
+              questionId: 41,
+              content: '내가 쓴 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.PLAN,
+                title: '질문',
+                description: '설명',
+                order: 1,
+              },
+              images: [],
+            },
+          ],
+        },
+      ])
+
+      const result = await service.findFeedbacksForVersion(1, 20, 42)
+      expect(result.data[0].isUnlocked).toBe(true)
+      expect(result.data[0].content).toBe('내가 쓴 답변')
+    })
+
+    it('viewerId가 없으면(비로그인) 본인 판별 없이 unlock 여부로만 게이팅한다', async () => {
+      const createdAt = new Date('2026-07-20T00:00:00.000Z')
+      prisma.feedbackSubmission.findMany.mockResolvedValue([
+        {
+          id: 14,
+          userId: 42,
+          oneLineReview: '한줄평',
+          adoptions: [],
+          unlocks: [],
+          user: {
+            name: '나',
+            profileImageUrl: 'profile-key',
+            jobType: JobType.Planner,
+          },
+          feedbacks: [
+            {
+              id: 501,
+              questionId: 51,
+              content: '숨겨져야 하는 답변',
+              createdAt,
+              updatedAt: createdAt,
+              question: {
+                category: RecordCategory.PLAN,
+                title: '질문',
+                description: '설명',
+                order: 1,
+              },
+              images: [],
+            },
+          ],
+        },
+      ])
+
+      const result = await service.findFeedbacksForVersion(1, 20)
+      expect(result.data[0].isUnlocked).toBe(false)
+      expect(result.data[0].content).toBe('')
     })
 
     it('제출이 없으면 빈 목록을 반환한다', async () => {
@@ -366,9 +507,9 @@ describe('FeedbackService', () => {
     it('프로젝트 멤버가 아니면 403, 티켓을 차감하지 않는다', async () => {
       prisma.projectRole.findUnique.mockResolvedValue(null)
 
-      await expect(service.unlockFeedback(5, 1, 2, 10)).rejects.toThrow(
-        ForbiddenAccessException,
-      )
+      await expect(
+        service.unlockFeedback(5, 1, 2, 10, RecordCategory.PLAN),
+      ).rejects.toThrow(ForbiddenAccessException)
       expect(prisma.$transaction).not.toHaveBeenCalled()
     })
 
@@ -376,12 +517,12 @@ describe('FeedbackService', () => {
       asMember()
       prisma.feedbackSubmission.findFirst.mockResolvedValue(null)
 
-      await expect(service.unlockFeedback(5, 1, 2, 999)).rejects.toThrow(
-        EntityNotExistException,
-      )
+      await expect(
+        service.unlockFeedback(5, 1, 2, 999, RecordCategory.PLAN),
+      ).rejects.toThrow(EntityNotExistException)
     })
 
-    it('이미 열린 제출은 재과금 없이 멱등 응답 (charged=false)', async () => {
+    it('이미 열린 (제출, 직군)은 재과금 없이 멱등 응답 (charged=false)', async () => {
       asMember()
       prisma.feedbackSubmission.findFirst.mockResolvedValue({
         id: 10,
@@ -389,10 +530,13 @@ describe('FeedbackService', () => {
       })
       prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 4 })
 
-      await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
+      await expect(
+        service.unlockFeedback(5, 1, 2, 10, RecordCategory.PLAN),
+      ).resolves.toEqual({
         success: true,
         data: {
           submissionId: 10,
+          category: RecordCategory.PLAN,
           isUnlocked: true,
           charged: false,
           remainingTickets: 4,
@@ -400,6 +544,38 @@ describe('FeedbackService', () => {
       })
       expect(prisma.$transaction).not.toHaveBeenCalled()
       expect(prisma.user.update).not.toHaveBeenCalled()
+    })
+
+    it('다른 직군이 이미 열려 있어도 이번 직군은 별도로 과금된다', async () => {
+      asMember()
+      //findFirst의 unlocks select는 category로 필터되므로, 다른 직군만 열려 있으면 빈 배열이 온다
+      prisma.feedbackSubmission.findFirst.mockResolvedValue({
+        id: 10,
+        unlocks: [],
+      })
+      prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 3 })
+      prisma.feedbackUnlock.create.mockResolvedValue({ id: 78 })
+      prisma.user.update.mockResolvedValue({ ownedTicketCount: 2 })
+
+      await expect(
+        service.unlockFeedback(5, 1, 2, 10, RecordCategory.DESIGN),
+      ).resolves.toEqual({
+        success: true,
+        data: {
+          submissionId: 10,
+          category: RecordCategory.DESIGN,
+          isUnlocked: true,
+          charged: true,
+          remainingTickets: 2,
+        },
+      })
+      expect(prisma.feedbackUnlock.create).toHaveBeenCalledWith({
+        data: {
+          submissionId: 10,
+          category: RecordCategory.DESIGN,
+          unlockedById: 5,
+        },
+      })
     })
 
     it('티켓 잔액이 부족하면 InsufficientTicketException(422, code) + unlock 미생성', async () => {
@@ -410,9 +586,9 @@ describe('FeedbackService', () => {
       })
       prisma.user.findUnique.mockResolvedValue({ ownedTicketCount: 0 })
 
-      await expect(service.unlockFeedback(5, 1, 2, 10)).rejects.toThrow(
-        InsufficientTicketException,
-      )
+      await expect(
+        service.unlockFeedback(5, 1, 2, 10, RecordCategory.PLAN),
+      ).rejects.toThrow(InsufficientTicketException)
       //응답 body에 안정 code가 실려 FE가 문자열 매칭 없이 구분 가능
       const httpBody = new InsufficientTicketException()
         .convert2HTTPException()
@@ -435,17 +611,24 @@ describe('FeedbackService', () => {
       prisma.feedbackUnlock.create.mockResolvedValue({ id: 77 })
       prisma.user.update.mockResolvedValue({ ownedTicketCount: 2 })
 
-      await expect(service.unlockFeedback(5, 1, 2, 10)).resolves.toEqual({
+      await expect(
+        service.unlockFeedback(5, 1, 2, 10, RecordCategory.PLAN),
+      ).resolves.toEqual({
         success: true,
         data: {
           submissionId: 10,
+          category: RecordCategory.PLAN,
           isUnlocked: true,
           charged: true,
           remainingTickets: 2,
         },
       })
       expect(prisma.feedbackUnlock.create).toHaveBeenCalledWith({
-        data: { submissionId: 10, unlockedById: 5 },
+        data: {
+          submissionId: 10,
+          category: RecordCategory.PLAN,
+          unlockedById: 5,
+        },
       })
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 5 },

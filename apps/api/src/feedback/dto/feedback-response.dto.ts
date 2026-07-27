@@ -124,6 +124,10 @@ export class FeedbackListResponseDto {
 //피드백 열람(unlock) 응답 — 티켓 1개 차감 후 잔액 반환
 export class UnlockFeedbackDataDto {
   submissionId: number
+
+  @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
+  category: RecordCategory
+
   isUnlocked: boolean
 
   /** 이번 요청에서 실제로 티켓이 차감됐는지. 이미 열려 있던 제출이면 false(무과금) */

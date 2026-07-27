@@ -441,10 +441,12 @@ export class FeedbackService {
   }
 
   //제출(submission) 단위 그룹핑에 필요한 submissionId/작성자/한줄평을 답변마다 함께 내려줌.
-  //열람(unlock) 안 된 제출은 content/imageUrls를 서버에서 비워서 내려줌 (FE 블러가 아닌 실제 게이팅).
+  //열람(unlock)은 (제출, 직군) 단위 — 같은 제출이 여러 직군에 답했어도 직군별로 따로 열려야 함.
+  //본인이 작성한 답변은 unlock/프로젝트 멤버십과 무관하게 항상 열람 가능.
   async findFeedbacksForVersion(
     projectId: number,
     versionId: number,
+    viewerId?: number,
   ): Promise<FeedbackListResponseDto> {
     const submissions = await this.prisma.feedbackSubmission.findMany({
       where: { projectId, versionId },
@@ -454,7 +456,7 @@ export class FeedbackService {
         userId: true,
         oneLineReview: true,
         adoptions: { select: { id: true }, take: 1 },
-        unlocks: { select: { id: true }, take: 1 },
+        unlocks: { select: { category: true } },
         user: {
           select: {
             name: true,
@@ -488,37 +490,46 @@ export class FeedbackService {
 
     const data = await Promise.all(
       submissions.flatMap((submission) => {
-        const isUnlocked = submission.unlocks.length > 0
+        const isAuthor =
+          viewerId !== undefined && submission.userId === viewerId
+        const unlockedCategories = new Set(
+          submission.unlocks.map((u) => u.category),
+        )
         return submission.feedbacks
           .sort((a, b) => a.question.order - b.question.order)
-          .map(async (feedback) => ({
-            id: feedback.id,
-            submissionId: submission.id,
-            userId: submission.userId,
-            questionId: feedback.questionId,
-            category: feedback.question.category,
-            questionTitle: feedback.question.title,
-            questionContent: feedback.question.description,
-            author: {
-              name: submission.user.name,
-              profileImageUrl: submission.user.profileImageUrl,
-              role: submission.user.jobType,
-            },
-            oneLineReview: submission.oneLineReview,
-            isAdopted: submission.adoptions.length > 0,
-            isUnlocked,
-            //잠긴 제출은 본문/이미지 제거 (질문·작성자·한줄평만 노출)
-            content: isUnlocked ? feedback.content : '',
-            imageUrls: isUnlocked
-              ? await Promise.all(
-                  feedback.images.map((image) =>
-                    this.storage.getSignedDownloadUrl(image.url),
-                  ),
-                )
-              : [],
-            createdAt: feedback.createdAt,
-            updatedAt: feedback.updatedAt,
-          }))
+          .map(async (feedback) => {
+            const isUnlocked =
+              isAuthor || unlockedCategories.has(feedback.question.category)
+
+            return {
+              id: feedback.id,
+              submissionId: submission.id,
+              userId: submission.userId,
+              questionId: feedback.questionId,
+              category: feedback.question.category,
+              questionTitle: feedback.question.title,
+              questionContent: feedback.question.description,
+              author: {
+                name: submission.user.name,
+                profileImageUrl: submission.user.profileImageUrl,
+                role: submission.user.jobType,
+              },
+              oneLineReview: submission.oneLineReview,
+              isAdopted: submission.adoptions.length > 0,
+              isUnlocked,
+              //잠긴 직군 답변은 본문/이미지 제거 (질문·작성자·한줄평만 노출)
+              content: isUnlocked ? feedback.content : '',
+              imageUrls: isUnlocked
+                ? await Promise.all(
+                    feedback.images.map((image) =>
+                      this.storage.getSignedDownloadUrl(image.url),
+                    ),
+                  )
+                : [],
+              createdAt: feedback.createdAt,
+              updatedAt: feedback.updatedAt,
+            }
+          })
       }),
     )
 
@@ -526,14 +537,16 @@ export class FeedbackService {
   }
 
   /**
-   * 피드백 제출 열람(unlock) — 프로젝트 멤버만, 티켓 1개 차감.
-   * 제출 단위(전 직군 한 번에 열림). 전역 1회 공개 — 이미 열렸으면 무과금 멱등.
+   * 피드백 제출의 특정 직군 답변 열람(unlock) — 프로젝트 멤버만, 티켓 1개 차감.
+   * (제출, 직군) 단위 — 같은 제출이라도 다른 직군은 별도로 unlock해야 함.
+   * 전역 1회 공개 — 이미 열렸으면 무과금 멱등.
    */
   async unlockFeedback(
     userId: number,
     projectId: number,
     versionId: number,
     submissionId: number,
+    category: RecordCategory,
   ): Promise<UnlockFeedbackResponseDto> {
     //1. 프로젝트 멤버만 unlock 가능
     const member = await this.prisma.projectRole.findUnique({
@@ -546,10 +559,13 @@ export class FeedbackService {
       )
     }
 
-    //2. 제출이 이 프로젝트/버전에 속하는지
+    //2. 제출이 이 프로젝트/버전에 속하는지, 해당 직군이 이미 열려 있는지
     const submission = await this.prisma.feedbackSubmission.findFirst({
       where: { id: submissionId, projectId, versionId },
-      select: { id: true, unlocks: { select: { id: true }, take: 1 } },
+      select: {
+        id: true,
+        unlocks: { where: { category }, select: { id: true }, take: 1 },
+      },
     })
     if (!submission) {
       throw new EntityNotExistException('FeedbackSubmission')
@@ -557,7 +573,7 @@ export class FeedbackService {
 
     //3. 이미 열려 있으면 재과금 없이 멱등 응답 (charged=false)
     if (submission.unlocks.length > 0) {
-      return this.alreadyUnlockedResponse(userId, submissionId)
+      return this.alreadyUnlockedResponse(userId, submissionId, category)
     }
 
     //4. 트랜잭션: 잔액 확인 → unlock 기록 → 티켓 차감
@@ -572,9 +588,9 @@ export class FeedbackService {
             'Not enough tickets to unlock this feedback.',
           )
         }
-        //unique(submissionId)로 동시 unlock은 한쪽만 성공 → 이중 과금 방지
+        //unique(submissionId, category)로 동시 unlock은 한쪽만 성공 → 이중 과금 방지
         await tx.feedbackUnlock.create({
-          data: { submissionId, unlockedById: userId },
+          data: { submissionId, category, unlockedById: userId },
         })
         const updated = await tx.user.update({
           where: { id: userId },
@@ -588,6 +604,7 @@ export class FeedbackService {
         success: true,
         data: {
           submissionId,
+          category,
           isUnlocked: true,
           charged: true,
           remainingTickets,
@@ -599,16 +616,17 @@ export class FeedbackService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        return this.alreadyUnlockedResponse(userId, submissionId)
+        return this.alreadyUnlockedResponse(userId, submissionId, category)
       }
       throw error
     }
   }
 
-  //이미 열려 있던 제출 — 무과금(charged=false), 현재 잔액 그대로 반환
+  //이미 열려 있던 (제출, 직군) — 무과금(charged=false), 현재 잔액 그대로 반환
   private async alreadyUnlockedResponse(
     userId: number,
     submissionId: number,
+    category: RecordCategory,
   ): Promise<UnlockFeedbackResponseDto> {
     const me = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -618,6 +636,7 @@ export class FeedbackService {
       success: true,
       data: {
         submissionId,
+        category,
         isUnlocked: true,
         charged: false,
         remainingTickets: me?.ownedTicketCount ?? 0,

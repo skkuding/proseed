@@ -13,21 +13,24 @@ export type SubmissionQuestion = {
 
 export type SubmissionCard = {
   submissionId: number
+  category: FeedbackListItemDto['category']
   author: FeedbackListItemDto['author']
   oneLineReview: string
   createdAt: string
   isAdopted: boolean
-  /** 이 제출이 열람(unlock)됐는지. false면 questions[].content/imageUrls는 서버에서 비워져 있음 */
+  /** 이 (제출, 직군)이 열람(unlock)됐는지. false면 questions[].content/imageUrls는 서버에서 비워져 있음 */
   isUnlocked: boolean
   questions: SubmissionQuestion[]
 }
 
 //같은 제출이 여러 직군에 답했을 수 있어 (submissionId, category) 단위로 카드를 만든다
+//호출부가 items를 이미 단일 category로 필터해서 넘기므로 submissionId만으로 그룹핑해도 안전
 export function buildSubmissionCards(items: FeedbackListItemDto[]): SubmissionCard[] {
   const bySubmission = new Map<number, SubmissionCard>()
   for (const item of items) {
     const card = bySubmission.get(item.submissionId) ?? {
       submissionId: item.submissionId,
+      category: item.category,
       author: item.author,
       oneLineReview: item.oneLineReview,
       createdAt: item.createdAt,

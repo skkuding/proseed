@@ -91,7 +91,7 @@ export function Feedbacks() {
       .catch(() => setTicketCount(null))
   }, [session])
 
-  const handleUnlock = async (submissionId: number) => {
+  const handleUnlock = async (submissionId: number, category: FeedbackListItemDto['category']) => {
     if (!session) {
       openLoginModal()
       return
@@ -99,7 +99,7 @@ export function Feedbacks() {
     setUnlockError(null)
     setUnlockingId(submissionId)
     try {
-      const result = await unlockFeedback(projectId, selectedVersion, submissionId)
+      const result = await unlockFeedback(projectId, selectedVersion, submissionId, category)
       setTicketCount(result.remainingTickets)
       const refreshed = await getFeedbacksForVersion(projectId, selectedVersion)
       setFeedbacks(refreshed)
@@ -341,7 +341,7 @@ export function Feedbacks() {
                 unlockErrorMessage={
                   unlockError?.id === card.submissionId ? unlockError.message : null
                 }
-                onUnlock={() => handleUnlock(card.submissionId)}
+                onUnlock={() => handleUnlock(card.submissionId, card.category)}
               />
             ))}
           </Accordion>

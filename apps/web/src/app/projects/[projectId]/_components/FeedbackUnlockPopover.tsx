@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 //백엔드 UNLOCK_COST(apps/api/src/feedback/feedback.service.ts)와 동일한 고정값
@@ -39,8 +38,8 @@ export function FeedbackUnlockPopover({
       </div>
 
       <div className="flex items-center justify-between px-4 py-2 bg-neutral-99 border border-neutral-95 rounded-[6px]">
-        <div className="flex gap-1">
-          <Image src="/ticket.svg" alt="" width={16} height={16} className="shrink-0" />
+        <div className="flex items-center gap-2">
+          <span className="size-1 shrink-0 rounded-full bg-neutral-30" />
           <span className="text-body2_m_14 text-neutral-30">현재 보유 티켓</span>
         </div>
 

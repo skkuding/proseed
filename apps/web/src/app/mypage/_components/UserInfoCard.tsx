@@ -144,10 +144,7 @@ export function UserInfoCard({
           )}
           {!readOnly && ticketCount !== undefined && (
             <div className="flex items-center gap-5">
-              <span className="text-neutral-30 shrink-0 w-22 flex items-center gap-1">
-                <Image src="/ticket.svg" alt="" width={18} height={18} className="shrink-0" />
-                보유 티켓
-              </span>
+              <span className="text-neutral-30 shrink-0 w-22">보유한 티켓</span>
               <span>{ticketCount}개</span>
             </div>
           )}

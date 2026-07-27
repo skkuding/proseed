@@ -613,6 +613,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockFeedbackDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "",
@@ -2236,9 +2246,31 @@
           "data"
         ]
       },
+      "UnlockFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          }
+        },
+        "required": [
+          "category"
+        ]
+      },
       "UnlockFeedbackDataDto": {
         "type": "object",
         "properties": {
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordCategory"
+              }
+            ]
+          },
           "submissionId": {
             "type": "number"
           },
@@ -2255,6 +2287,7 @@
           }
         },
         "required": [
+          "category",
           "submissionId",
           "isUnlocked",
           "charged",

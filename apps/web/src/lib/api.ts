@@ -365,11 +365,17 @@ export async function getFeedbacksForVersion(
 export async function unlockFeedback(
   projectId: string | number,
   versionId: string | number,
-  submissionId: string | number
+  submissionId: string | number,
+  category: RecordCategory
 ): Promise<UnlockFeedbackDataDto> {
   const res = await fetch(
     `${BASE}/project/${projectId}/versions/${versionId}/feedbacks/${submissionId}/unlock`,
-    { method: 'POST', credentials: 'include' }
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category }),
+    }
   )
   const body = await res.json().catch(() => null)
   if (!res.ok) {

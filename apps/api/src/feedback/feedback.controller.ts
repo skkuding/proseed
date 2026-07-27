@@ -9,10 +9,11 @@ import {
   Req,
 } from '@nestjs/common'
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
-import { Public } from 'src/auth/decorators/public.decorator'
+import { OptionalAuth, Public } from 'src/auth/decorators/public.decorator'
 import { FeedbackService } from './feedback.service'
 import { CreateFeedbackDto } from './dto/create-feedback.dto'
 import { GetRecentFeedbacksDto } from './dto/get-recent-feedbacks.dto'
+import { UnlockFeedbackDto } from './dto/unlock-feedback.dto'
 import {
   CreateFeedbackResponseDto,
   FeedbackSubmissionDetailResponseDto,
@@ -22,7 +23,10 @@ import {
   RecentFeedbacksResponseDto,
   UnlockFeedbackResponseDto,
 } from './dto/feedback-response.dto'
-import type { RequestWithUser } from 'src/common/types/request-with-user.type'
+import type {
+  OptionalUserRequest,
+  RequestWithUser,
+} from 'src/common/types/request-with-user.type'
 
 //공개 목록(feedbacks)이 섞여 있어 인증 표기는 라우트 레벨로
 @ApiTags('Feedback')
@@ -58,20 +62,23 @@ export class FeedbackController {
     return await this.feedbackService.findAllQuestions(projectId, versionId)
   }
 
-  // GET project/:projectId/versions/:versionId/feedbacks — 공개, 잠긴 제출은 본문 redact
-  @Public()
+  // GET project/:projectId/versions/:versionId/feedbacks — 공개, 잠긴 답변은 본문 redact.
+  // 비로그인은 항상 잠김(preview만); 로그인 상태면 본인이 쓴 답변만 unlock 여부와 무관하게 노출.
+  @OptionalAuth()
   @Get('feedbacks')
   async findFeedbacksForVersion(
+    @Req() req: OptionalUserRequest,
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
   ): Promise<FeedbackListResponseDto> {
     return await this.feedbackService.findFeedbacksForVersion(
       projectId,
       versionId,
+      req.user?.id,
     )
   }
 
-  // POST .../feedbacks/:submissionId/unlock — 프로젝트 멤버만, 티켓 1개 차감
+  // POST .../feedbacks/:submissionId/unlock — 프로젝트 멤버만, 티켓 1개 차감 (제출×직군 단위)
   @ApiCookieAuth()
   @Post('feedbacks/:submissionId/unlock')
   async unlockFeedback(
@@ -79,12 +86,14 @@ export class FeedbackController {
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('versionId', ParseIntPipe) versionId: number,
     @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Body() dto: UnlockFeedbackDto,
   ): Promise<UnlockFeedbackResponseDto> {
     return await this.feedbackService.unlockFeedback(
       req.user.id,
       projectId,
       versionId,
       submissionId,
+      dto.category,
     )
   }
 }
