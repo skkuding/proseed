@@ -1,6 +1,23 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
+import { Skeleton } from '@/components/ui/skeleton'
+
+export function GrowthRecordCardSkeleton() {
+  return (
+    <article className="flex h-[198px] w-full gap-5 rounded-[12px] bg-white p-6 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)]">
+      <Skeleton className="h-16 w-16 shrink-0 rounded-[12px]" />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex flex-col gap-2 border-b border-CoolNeutral-95 pb-4">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+        <Skeleton className="h-4 w-32" />
+      </div>
+    </article>
+  )
+}
 
 interface GrowthRecordCardProps {
   projectId: number

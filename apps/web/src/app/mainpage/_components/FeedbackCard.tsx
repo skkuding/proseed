@@ -1,6 +1,33 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { RECORD_CATEGORY_LABELS } from '@/app/_utils/projectConstants'
+import { Skeleton } from '@/components/ui/skeleton'
+
+export function FeedbackCardSkeleton() {
+  return (
+    <article className="h-[362px] w-[536px] shrink-0 flex flex-col gap-6 rounded-[16px] bg-white p-7 shadow-[0_4px_20px_0_rgba(27,29,38,0.08)]">
+      <div className="flex items-center gap-4">
+        <Skeleton className="size-10 rounded-full" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-6 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+      </div>
+      <div className="flex items-center justify-between border-t border-neutral-95 pt-5">
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-7 rounded-full" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <Skeleton className="h-9 w-28 rounded-[6px]" />
+      </div>
+    </article>
+  )
+}
 
 interface FeedbackCardProps {
   submissionId: number

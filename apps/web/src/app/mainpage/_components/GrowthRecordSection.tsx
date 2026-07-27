@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import GrowthRecordCard from './GrowthRecordCard'
+import GrowthRecordCard, { GrowthRecordCardSkeleton } from './GrowthRecordCard'
 import SectionTitle from './SectionTitle'
 import { getRecentGrowthRecords, type RecentGrowthRecordDto } from '@/lib/api'
 
@@ -9,11 +9,12 @@ const RECENT_COUNT = 3
 
 export default function GrowthRecordSection() {
   const [recentGrowthRecords, setRecentGrowthRecords] = useState<RecentGrowthRecordDto[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getRecentGrowthRecords(RECENT_COUNT).then(setRecentGrowthRecords, () =>
-      setRecentGrowthRecords([])
-    )
+    getRecentGrowthRecords(RECENT_COUNT)
+      .then(setRecentGrowthRecords, () => setRecentGrowthRecords([]))
+      .finally(() => setIsLoading(false))
   }, [])
 
   // 발행 버전 하나당 4개 직군 레코드가 flat하게 오므로 버전당 1장만 남긴다
@@ -33,18 +34,22 @@ export default function GrowthRecordSection() {
       <SectionTitle title="최근 업데이트 된 성장기록" />
 
       <div className="flex flex-col gap-4">
-        {recent.map((record) => (
-          <GrowthRecordCard
-            key={record.growthRecordId}
-            projectId={record.projectId}
-            projectName={record.projectName}
-            projectIconUrl={record.projectIconUrl}
-            title={record.title}
-            updateGoal={record.updateGoal}
-            projectCategories={record.projectCategories}
-            releasedAt={String(record.releasedAt)}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: RECENT_COUNT }).map((_, idx) => (
+              <GrowthRecordCardSkeleton key={idx} />
+            ))
+          : recent.map((record) => (
+              <GrowthRecordCard
+                key={record.growthRecordId}
+                projectId={record.projectId}
+                projectName={record.projectName}
+                projectIconUrl={record.projectIconUrl}
+                title={record.title}
+                updateGoal={record.updateGoal}
+                projectCategories={record.projectCategories}
+                releasedAt={String(record.releasedAt)}
+              />
+            ))}
       </div>
     </section>
   )

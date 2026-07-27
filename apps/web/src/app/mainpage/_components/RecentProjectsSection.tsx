@@ -8,18 +8,21 @@ import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstan
 import { getProjects, type Project } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
 import CategoryTabs from './CategoryTabs'
-import ProjectCard from './ProjectCard'
+import ProjectCard, { ProjectCardSkeleton } from './ProjectCard'
 import SectionTitle from './SectionTitle'
 
 export default function RecentProjectsSection() {
   const [category, setCategory] = useState<CategoryLabel>('전체')
   const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    setIsLoading(true)
     const apiCategory = category === '전체' ? undefined : CATEGORY_TO_API[category]
     getProjects({ category: apiCategory, take: 6 })
       .then((res) => setProjects(res.data))
       .catch(console.error)
+      .finally(() => setIsLoading(false))
   }, [category])
 
   return (
@@ -36,7 +39,13 @@ export default function RecentProjectsSection() {
 
       <div className="flex flex-col gap-7">
         <CategoryTabs selectedCategory={category} onSelectCategory={setCategory} />
-        {projects.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <ProjectCardSkeleton key={idx} />
+            ))}
+          </div>
+        ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-15 gap-6">
             <p className="text-title3_sb_24">아직 등록된 프로젝트가 없어요</p>
             <Button asChild size="lg" className="text-sub3_sb_16">

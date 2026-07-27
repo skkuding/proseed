@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import FeedbackCard from './FeedbackCard'
+import FeedbackCard, { FeedbackCardSkeleton } from './FeedbackCard'
 import SectionTitle from './SectionTitle'
 import { getRecentFeedbacks, type RecentFeedbackItemDto } from '@/lib/api'
 
@@ -11,9 +11,12 @@ export default function FeedbackSection() {
   const [canLeft, setCanLeft] = useState(false)
   const [canRight, setCanRight] = useState(true)
   const [recentFeedbacks, setRecentFeedbacks] = useState<RecentFeedbackItemDto[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getRecentFeedbacks().then(setRecentFeedbacks, () => setRecentFeedbacks([]))
+    getRecentFeedbacks()
+      .then(setRecentFeedbacks, () => setRecentFeedbacks([]))
+      .finally(() => setIsLoading(false))
   }, [])
 
   const updateButtons = () => {
@@ -57,22 +60,24 @@ export default function FeedbackSection() {
         onScroll={updateButtons}
         className="flex gap-4 overflow-x-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {recentFeedbacks.map((feedback) => (
-          <div key={`${feedback.submissionId}-${feedback.category}`} className="shrink-0">
-            <FeedbackCard
-              submissionId={feedback.submissionId}
-              versionId={feedback.versionId}
-              nickname={feedback.nickname}
-              profileImageUrl={feedback.profileImageUrl}
-              category={feedback.category}
-              onelineReview={feedback.oneLineReview}
-              content={feedback.content}
-              projectId={feedback.projectId}
-              projectName={feedback.projectName}
-              projectIconUrl={feedback.projectIconUrl}
-            />
-          </div>
-        ))}
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, idx) => <FeedbackCardSkeleton key={idx} />)
+          : recentFeedbacks.map((feedback) => (
+              <div key={`${feedback.submissionId}-${feedback.category}`} className="shrink-0">
+                <FeedbackCard
+                  submissionId={feedback.submissionId}
+                  versionId={feedback.versionId}
+                  nickname={feedback.nickname}
+                  profileImageUrl={feedback.profileImageUrl}
+                  category={feedback.category}
+                  onelineReview={feedback.oneLineReview}
+                  content={feedback.content}
+                  projectId={feedback.projectId}
+                  projectName={feedback.projectName}
+                  projectIconUrl={feedback.projectIconUrl}
+                />
+              </div>
+            ))}
       </div>
     </section>
   )
