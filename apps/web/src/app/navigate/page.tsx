@@ -30,7 +30,6 @@ export default function Navigate() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setIsLoading(true)
     const apiCategory = selectedCategory === '전체' ? undefined : CATEGORY_TO_API[selectedCategory]
     getProjects({ category: apiCategory, take: 100 })
       .then((res) => setAllProjects(res.data))
@@ -45,6 +44,7 @@ export default function Navigate() {
     setSelectedCategory(category)
     setCurrentPage(1)
     setAllProjects([])
+    setIsLoading(true)
   }
 
   const handlePageChange = (page: number) => {

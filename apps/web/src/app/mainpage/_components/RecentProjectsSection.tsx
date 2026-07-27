@@ -17,13 +17,17 @@ export default function RecentProjectsSection() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setIsLoading(true)
     const apiCategory = category === '전체' ? undefined : CATEGORY_TO_API[category]
     getProjects({ category: apiCategory, take: 6 })
       .then((res) => setProjects(res.data))
       .catch(console.error)
       .finally(() => setIsLoading(false))
   }, [category])
+
+  const handleCategorySelect = (next: CategoryLabel) => {
+    setCategory(next)
+    setIsLoading(true)
+  }
 
   return (
     <section className="flex flex-col gap-3">
@@ -38,7 +42,7 @@ export default function RecentProjectsSection() {
       </div>
 
       <div className="flex flex-col gap-7">
-        <CategoryTabs selectedCategory={category} onSelectCategory={setCategory} />
+        <CategoryTabs selectedCategory={category} onSelectCategory={handleCategorySelect} />
         {isLoading ? (
           <div className="grid grid-cols-1 gap-x-4 gap-y-5 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, idx) => (
