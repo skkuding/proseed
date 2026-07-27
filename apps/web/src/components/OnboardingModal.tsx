@@ -7,7 +7,26 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { BASE as API_URL } from '@/lib/api'
+import { authBaseURL } from '@/lib/auth-client'
 import { trackEvent } from '@/lib/analytics'
+
+/**
+ * 실제 로그인 수단(credential/google/kakao/naver)을 better-auth의 계정 목록에서 읽어온다.
+ * 클릭 시점에 sessionStorage에 미리 적어두는 방식은 로그인을 시도만 하고 취소해도
+ * 값이 남아 있어(다음 가입 때 잘못된 provider가 새는) 신뢰할 수 없다.
+ */
+async function resolveSignupMethod(): Promise<string | undefined> {
+  try {
+    const res = await fetch(`${authBaseURL}/api/auth/list-accounts`, {
+      credentials: 'include',
+    })
+    if (!res.ok) return undefined
+    const accounts = (await res.json()) as { providerId: string }[]
+    return accounts[0]?.providerId
+  } catch {
+    return undefined
+  }
+}
 
 type JobType = 'Planner' | 'Designer' | 'Developer' | 'Other'
 
@@ -75,9 +94,8 @@ export function OnboardingModal({
       if (JOB_API_TO_LABEL[data.jobType]) {
         useAuthStore.getState().setJobType(JOB_API_TO_LABEL[data.jobType])
       }
-      const method = sessionStorage.getItem('proseed:signup_method') ?? undefined
+      const method = await resolveSignupMethod()
       trackEvent('sign_up', { method })
-      sessionStorage.removeItem('proseed:signup_method')
       onClose()
     } catch (e) {
       console.error(e)
