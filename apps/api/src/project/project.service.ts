@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ProjectMemberRole, type JobType, type Prisma } from '@prisma/client'
 import {
+  DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
 } from 'src/common/exceptions/business.exception'
@@ -393,6 +394,13 @@ export class ProjectService {
 
     if (!targetUser) {
       throw new EntityNotExistException('User')
+    }
+
+    const existingRole = await this.prisma.projectRole.findUnique({
+      where: { userId_projectId: { userId: targetUser.id, projectId } },
+    })
+    if (existingRole) {
+      throw new DuplicateFoundException('ProjectRole')
     }
 
     return await this.prisma.projectRole.create({

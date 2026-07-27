@@ -210,6 +210,9 @@ export async function inviteCollaborator(
     body: JSON.stringify(dto),
   })
   if (!res.ok) {
+    if (res.status === 409) {
+      throw new Error('이미 팀원인 사용자예요')
+    }
     const body = await res.json().catch(() => null)
     throw new Error(body?.message ?? '팀원 초대에 실패했습니다')
   }

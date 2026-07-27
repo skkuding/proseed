@@ -1,5 +1,6 @@
-import { ProjectMemberRole } from '@prisma/client'
+import { JobType, ProjectMemberRole } from '@prisma/client'
 import {
+  DuplicateFoundException,
   EntityNotExistException,
   ForbiddenAccessException,
 } from 'src/common/exceptions/business.exception'
@@ -128,6 +129,75 @@ describe('update — 프로젝트 편집 저장 (Lead만)', () => {
             { url: 'key-b', order: 1 },
           ],
         },
+      },
+    })
+  })
+})
+
+describe('inviteCollaborator — 팀원 초대 (Lead만)', () => {
+  let service: ProjectService
+  let prisma: {
+    projectRole: { findFirst: MockFn; findUnique: MockFn; create: MockFn }
+    user: { findFirst: MockFn }
+  }
+
+  const TARGET_USER_ID = 5
+
+  beforeEach(() => {
+    prisma = {
+      projectRole: {
+        //기본: 요청자가 Lead
+        findFirst: jest.fn().mockResolvedValue({ id: 1 }),
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({
+          id: 2,
+          userId: TARGET_USER_ID,
+          projectId: PROJECT_ID,
+        }),
+      },
+      user: {
+        findFirst: jest.fn().mockResolvedValue({ id: TARGET_USER_ID }),
+      },
+    }
+    service = new ProjectService(
+      prisma as unknown as PrismaService,
+      {} as unknown as StorageService,
+    )
+  })
+
+  it('이미 팀원인 사용자를 다시 초대하면 500 대신 409(DuplicateFoundException)를 던진다', async () => {
+    prisma.projectRole.findUnique.mockResolvedValue({
+      id: 2,
+      userId: TARGET_USER_ID,
+      projectId: PROJECT_ID,
+    })
+
+    await expect(
+      service.inviteCollaborator(
+        LEAD_ID,
+        PROJECT_ID,
+        'member@test.com',
+        JobType.Developer,
+      ),
+    ).rejects.toThrow(DuplicateFoundException)
+    expect(prisma.projectRole.create).not.toHaveBeenCalled()
+  })
+
+  it('아직 팀원이 아니면 정상적으로 초대된다', async () => {
+    await expect(
+      service.inviteCollaborator(
+        LEAD_ID,
+        PROJECT_ID,
+        'member@test.com',
+        JobType.Developer,
+      ),
+    ).resolves.toEqual({ id: 2, userId: TARGET_USER_ID, projectId: PROJECT_ID })
+    expect(prisma.projectRole.create).toHaveBeenCalledWith({
+      data: {
+        userId: TARGET_USER_ID,
+        projectId: PROJECT_ID,
+        projectMemberRole: ProjectMemberRole.TeamMember,
+        role: JobType.Developer,
       },
     })
   })
