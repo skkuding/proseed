@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 
@@ -9,6 +10,10 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
   useAuthGuard()
   const pathname = usePathname()
   const activeIndex = pathname.includes('feedback-questions') ? 1 : 0
+
+  useEffect(() => {
+    document.title = '성장기록 작성 | PROSEED'
+  }, [])
 
   return (
     <div>

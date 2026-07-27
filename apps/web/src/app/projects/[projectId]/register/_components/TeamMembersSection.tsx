@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { JOB_TABS, type JobTab, type Member } from './constants'
 import { MemberDeleteModal } from '@/components/MemberDeleteModal'
 import { getProfilePreviewByEmail, type ProfilePreviewResponseDto } from '@/lib/api'
-import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_LABEL, JOB_TAB_TO_EURO } from '@/app/_utils/projectConstants'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -158,7 +158,7 @@ export function TeamMembersSection({
               disabled={isAdding}
               className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
-              {isAdding ? '추가 중...' : `${memberTab}로 추가하기`}
+              {isAdding ? '추가 중...' : `${memberTab}${JOB_TAB_TO_EURO[memberTab]} 추가하기`}
             </button>
           </div>
         )}
@@ -171,7 +171,10 @@ export function TeamMembersSection({
 
       {tabMembers.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-sub1_sb_18 text-black">{memberTab}로 추가한 팀원</p>
+          <p className="text-sub1_sb_18 text-black">
+            {memberTab}
+            {JOB_TAB_TO_EURO[memberTab]} 추가한 팀원
+          </p>
           <div className="flex flex-wrap gap-2">
             {tabMembers.map((m) => (
               <div

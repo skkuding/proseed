@@ -77,7 +77,7 @@ export function Footer() {
               aria-label="Instagram"
               className="inline-flex h-15 w-15 items-center justify-center rounded-full bg-CoolNeutral-30 hover:bg-CoolNeutral-40"
             >
-              <Image src="/insta.svg" alt="insta" width={24} height={24} />
+              <Image src="/insta.svg" alt="" width={24} height={24} />
             </Link>
 
             <Link
@@ -85,7 +85,7 @@ export function Footer() {
               aria-label="YouTube"
               className="inline-flex h-15 w-15 items-center justify-center rounded-full bg-CoolNeutral-30 hover:bg-CoolNeutral-40"
             >
-              <Image src="/youtube.svg" alt="youtube" width={24} height={24} />
+              <Image src="/youtube.svg" alt="" width={24} height={24} />
             </Link>
           </div>
         </div>

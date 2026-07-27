@@ -70,6 +70,14 @@ export const JOB_TO_API: Record<string, string> = {
 export const JOB_TABS = ['기획', '디자인', '개발', '기타'] as const
 export type JobTab = (typeof JOB_TABS)[number]
 
+// "으로/로" 조사 — 받침 없거나 받침이 ㄹ이면 "로", 그 외엔 "으로"
+export const JOB_TAB_TO_EURO: Record<JobTab, string> = {
+  기획: '으로',
+  디자인: '으로',
+  개발: '로',
+  기타: '로',
+}
+
 export const JOB_API_TO_LABEL: Record<string, JobTab> = Object.fromEntries(
   Object.entries(JOB_TO_API).map(([label, api]) => [api, label])
 ) as Record<string, JobTab>

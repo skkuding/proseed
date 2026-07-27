@@ -344,6 +344,9 @@ export async function createFeedback(
     body: JSON.stringify(dto),
   })
   if (!res.ok) {
+    if (res.status === 409) {
+      throw new Error('이미 이 버전에 피드백을 제출하셨어요')
+    }
     const body = await res.json().catch(() => null)
     throw new Error(body?.message ?? '피드백 제출에 실패했습니다')
   }

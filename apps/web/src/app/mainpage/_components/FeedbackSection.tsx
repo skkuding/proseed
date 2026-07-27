@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import FeedbackCard, { FeedbackCardSkeleton } from './FeedbackCard'
 import SectionTitle from './SectionTitle'
 import { getRecentFeedbacks, type RecentFeedbackItemDto } from '@/lib/api'
@@ -33,52 +35,68 @@ export default function FeedbackSection() {
     el.scrollBy({ left: dir === 'right' ? cardWidth + 16 : -(cardWidth + 16), behavior: 'smooth' })
   }
 
+  const isEmpty = !isLoading && recentFeedbacks.length === 0
+
   return (
     <section className="flex flex-col gap-7">
       <div className="flex items-center justify-between">
         <SectionTitle title="최근 피드백을 모아봤어요" />
-        <div className="flex gap-4">
-          <button
-            onClick={() => scroll('left')}
-            disabled={!canLeft}
-            className="flex h-10 w-10 pr-[2px] justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
-          >
-            <Image src="/arrow3_left.svg" alt="이전" width={20} height={20} />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            disabled={!canRight}
-            className="flex h-10 w-10 pl-1 justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
-          >
-            <Image src="/arrow3_right.svg" alt="다음" width={20} height={20} />
-          </button>
-        </div>
+        {!isEmpty && (
+          <div className="flex gap-4">
+            <button
+              onClick={() => scroll('left')}
+              disabled={!canLeft}
+              className="flex h-10 w-10 pr-[2px] justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
+            >
+              <Image src="/arrow3_left.svg" alt="이전" width={20} height={20} />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              disabled={!canRight}
+              className="flex h-10 w-10 pl-1 justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
+            >
+              <Image src="/arrow3_right.svg" alt="다음" width={20} height={20} />
+            </button>
+          </div>
+        )}
       </div>
 
-      <div
-        ref={trackRef}
-        onScroll={updateButtons}
-        className="flex gap-4 overflow-x-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, idx) => <FeedbackCardSkeleton key={idx} />)
-          : recentFeedbacks.map((feedback) => (
-              <div key={`${feedback.submissionId}-${feedback.category}`} className="shrink-0">
-                <FeedbackCard
-                  submissionId={feedback.submissionId}
-                  versionId={feedback.versionId}
-                  nickname={feedback.nickname}
-                  profileImageUrl={feedback.profileImageUrl}
-                  category={feedback.category}
-                  onelineReview={feedback.oneLineReview}
-                  content={feedback.content}
-                  projectId={feedback.projectId}
-                  projectName={feedback.projectName}
-                  projectIconUrl={feedback.projectIconUrl}
-                />
-              </div>
-            ))}
-      </div>
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center gap-6 pt-15">
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-title3_sb_24">채택된 피드백이 없습니다</p>
+            <p className="text-body3_r_16 text-CoolNeutral-40">지금 피드백을 남겨보세요</p>
+          </div>
+          <Button asChild size="lg" className="text-sub3_sb_16">
+            <Link href="/navigate">피드백 작성하기</Link>
+          </Button>
+        </div>
+      ) : (
+        <div
+          ref={trackRef}
+          onScroll={updateButtons}
+          className="flex gap-4 overflow-x-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {isLoading
+            ? Array.from({ length: 3 }).map((_, idx) => <FeedbackCardSkeleton key={idx} />)
+            : recentFeedbacks.map((feedback) => (
+                <div key={`${feedback.submissionId}-${feedback.category}`} className="shrink-0">
+                  <FeedbackCard
+                    submissionId={feedback.submissionId}
+                    versionId={feedback.versionId}
+                    nickname={feedback.nickname}
+                    profileImageUrl={feedback.profileImageUrl}
+                    category={feedback.category}
+                    onelineReview={feedback.oneLineReview}
+                    content={feedback.content}
+                    projectId={feedback.projectId}
+                    projectName={feedback.projectName}
+                    projectIconUrl={feedback.projectIconUrl}
+                  />
+                </div>
+              ))}
+        </div>
+      )}
     </section>
   )
 }
