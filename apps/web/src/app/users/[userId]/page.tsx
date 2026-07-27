@@ -65,7 +65,6 @@ export default function UserProfilePage() {
   }
 
   const jobLabel = profile.jobType ? (JOB_API_TO_LABEL[profile.jobType] ?? profile.jobType) : '-'
-  const loginProvider = profile.accounts[0]?.providerId
 
   return (
     <main className="min-h-screen bg-neutral-99">
@@ -76,13 +75,12 @@ export default function UserProfilePage() {
           <div className="w-90 shrink-0">
             <UserInfoCard
               name={profile.name}
-              email={profile.email}
               job={jobLabel}
-              loginProvider={loginProvider}
               profileImageUrl={profile.profileImageUrl}
               projectCount={profile.joinedProjectCount}
               feedbackCount={profile.feedbackCount}
               onProjectsClick={() => setView('참여한 프로젝트')}
+              onNameClick={() => setView('기본 프로필')}
               readOnly
             />
           </div>

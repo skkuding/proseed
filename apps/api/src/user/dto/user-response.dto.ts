@@ -55,10 +55,6 @@ export class MyProfileUpdateResponseDto {
 export class OtherUserProfileResponseDto {
   id!: number
   name!: string
-  email!: string
-
-  @ApiProperty({ type: MyProfileAccountDto, isArray: true })
-  accounts!: MyProfileAccountDto[]
 
   @ApiProperty({ enum: JobType, enumName: 'JobType', nullable: true })
   jobType!: JobType | null

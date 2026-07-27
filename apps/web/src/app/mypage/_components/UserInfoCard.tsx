@@ -25,6 +25,8 @@ interface UserInfoCardProps {
   projectsHref?: string
   /** 페이지 이동 대신 같은 화면 안에서 뷰를 전환하고 싶을 때 (예: 타인 프로필의 탭 전환) */
   onProjectsClick?: () => void
+  /** 이름 클릭 시 기본 프로필 화면으로 돌아가기 (참여 프로젝트/작성한 피드백 화면에서 빠져나올 방법이 없어서 추가) */
+  onNameClick?: () => void
   /** 타인의 프로필 조회 — 이미지 변경 버튼 숨김, 작성한 피드백은 링크 없이 표시만 */
   readOnly?: boolean
 }
@@ -40,6 +42,7 @@ export function UserInfoCard({
   ticketCount,
   projectsHref = '/mypage/projects',
   onProjectsClick,
+  onNameClick,
   readOnly = false,
 }: UserInfoCardProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
@@ -81,10 +84,22 @@ export function UserInfoCard({
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-title1_sb_28 truncate">{name}</p>
-            <p className="text-body1__m_16 text-neutral-40 truncate">
-              {providerLabel}계정으로 로그인
-            </p>
+            {onNameClick ? (
+              <button
+                type="button"
+                onClick={onNameClick}
+                className="w-full block text-title1_sb_28 line-clamp-2 break-keep break-words text-left hover:cursor-pointer hover:underline"
+              >
+                {name}
+              </button>
+            ) : (
+              <p className="text-title1_sb_28 line-clamp-2 break-keep break-words">{name}</p>
+            )}
+            {!readOnly && (
+              <p className="text-body1__m_16 text-neutral-40 truncate">
+                {providerLabel}계정으로 로그인
+              </p>
+            )}
           </div>
         </div>
 

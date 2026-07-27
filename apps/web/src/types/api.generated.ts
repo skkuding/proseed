@@ -594,16 +594,11 @@ export interface components {
             jobType: components["schemas"]["JobType"] | null;
             name: string;
         };
-        MyProfileAccountDto: {
-            providerId: string;
-        };
         OtherUserProfileResponseDto: {
-            accounts: components["schemas"]["MyProfileAccountDto"][];
             jobType: components["schemas"]["JobType"] | null;
             bio: string | null;
             id: number;
             name: string;
-            email: string;
             profileImageUrl: string;
             skills: string[];
             links: string[];
@@ -619,6 +614,9 @@ export interface components {
             title: string;
             oneLineDescription: string;
             iconUrl: string;
+        };
+        MyProfileAccountDto: {
+            providerId: string;
         };
         MyProfileResponseDto: {
             accounts: components["schemas"]["MyProfileAccountDto"][];

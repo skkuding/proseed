@@ -97,6 +97,7 @@ function MyPageShell({ children }: { children: ReactNode }) {
               projectCount={profile?.joinedProjectCount ?? 0}
               feedbackCount={profile?.feedbackCount ?? 0}
               ticketCount={profile?.ownedTicketCount}
+              onNameClick={() => router.push('/mypage')}
             />
             <SideNav activeMenu={activeMenu} onMenuChange={handleMenuChange} />
           </div>

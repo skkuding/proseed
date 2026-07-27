@@ -1618,26 +1618,9 @@
           "name"
         ]
       },
-      "MyProfileAccountDto": {
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "providerId"
-        ]
-      },
       "OtherUserProfileResponseDto": {
         "type": "object",
         "properties": {
-          "accounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MyProfileAccountDto"
-            }
-          },
           "jobType": {
             "nullable": true,
             "allOf": [
@@ -1654,9 +1637,6 @@
             "type": "number"
           },
           "name": {
-            "type": "string"
-          },
-          "email": {
             "type": "string"
           },
           "profileImageUrl": {
@@ -1682,12 +1662,10 @@
           }
         },
         "required": [
-          "accounts",
           "jobType",
           "bio",
           "id",
           "name",
-          "email",
           "profileImageUrl",
           "skills",
           "links",
@@ -1740,6 +1718,17 @@
           "title",
           "oneLineDescription",
           "iconUrl"
+        ]
+      },
+      "MyProfileAccountDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId"
         ]
       },
       "MyProfileResponseDto": {

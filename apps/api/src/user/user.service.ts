@@ -162,15 +162,10 @@ export class UserService {
     const [user, joinedProjectCount, feedbackCount] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
+        //email/accounts(가입 소셜)는 개인정보라 공개 프로필엔 절대 포함하지 않는다
         select: {
           id: true,
           name: true,
-          email: true,
-          accounts: {
-            select: {
-              providerId: true,
-            },
-          },
           jobType: true,
           profileImageUrl: true,
           skills: true,

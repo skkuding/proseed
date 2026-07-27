@@ -56,7 +56,8 @@ export function generateRandomNickname(): string {
     const country = pickRandom(COUNTRIES)
     const adjective = pickRandom(EMOTIONAL_ADJECTIVES)
     const animal = pickRandom(ANIMALS)
-    const nickname = `${country}의${adjective}${animal}`
+    //카드에서 두 줄로 줄바꿈될 때 동물 이름이 잘리지 않도록 형용사와 동물 사이에 공백을 둔다
+    const nickname = `${country}의${adjective} ${animal}`
 
     if (nickname.length <= 12) {
       return nickname
