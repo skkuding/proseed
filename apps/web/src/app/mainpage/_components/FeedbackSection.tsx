@@ -64,8 +64,8 @@ export default function FeedbackSection() {
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center gap-6 pt-15">
           <div className="flex flex-col items-center gap-1">
-            <p className="text-title3_sb_24">채택된 피드백이 없습니다</p>
-            <p className="text-body3_r_16 text-CoolNeutral-40">지금 피드백을 남겨보세요</p>
+            <p className="text-head4_m_36">채택된 피드백이 없습니다</p>
+            <p className="text-title6_m_20 text-CoolNeutral-40">지금 피드백을 남겨보세요</p>
           </div>
           <Button asChild size="lg" className="text-sub3_sb_16">
             <Link href="/navigate">피드백 작성하기</Link>
