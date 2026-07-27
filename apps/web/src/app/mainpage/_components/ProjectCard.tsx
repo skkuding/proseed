@@ -2,6 +2,28 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
 import type { Project } from '@/lib/api'
+import { Skeleton } from '@/components/ui/skeleton'
+
+export function ProjectCardSkeleton() {
+  return (
+    <article className="w-full overflow-hidden rounded-[20px] bg-white shadow-sm px-2">
+      <div className="flex flex-col pt-2 pb-6">
+        <Skeleton className="relative mb-3 aspect-video w-full shrink-0 rounded-[16px]" />
+        <div className="flex flex-col px-4 gap-5">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-7 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+          </div>
+          <div className="flex w-fit items-center gap-4">
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-16" />
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
 
 export default function ProjectCard({ project }: { project: Project }) {
   return (

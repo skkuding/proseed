@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
 import { getProjects, type Project } from '@/lib/api'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
-import ProjectCard from '@/app/mainpage/_components/ProjectCard'
+import ProjectCard, { ProjectCardSkeleton } from '@/app/mainpage/_components/ProjectCard'
 import {
   Pagination,
   PaginationContent,
@@ -27,12 +27,15 @@ export default function Navigate() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [allProjects, setAllProjects] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    setIsLoading(true)
     const apiCategory = selectedCategory === '전체' ? undefined : CATEGORY_TO_API[selectedCategory]
     getProjects({ category: apiCategory, take: 100 })
       .then((res) => setAllProjects(res.data))
       .catch(console.error)
+      .finally(() => setIsLoading(false))
   }, [selectedCategory])
 
   const totalPages = Math.ceil(allProjects.length / PAGE_SIZE)
@@ -75,7 +78,13 @@ export default function Navigate() {
         <CategoryTabs selectedCategory={selectedCategory} onSelectCategory={handleCategorySelect} />
 
         {/* Project grid */}
-        {pagedProjects.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-3 gap-x-2 gap-y-5">
+            {Array.from({ length: PAGE_SIZE }).map((_, idx) => (
+              <ProjectCardSkeleton key={idx} />
+            ))}
+          </div>
+        ) : pagedProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-CoolNeutral-50">
             <Image src="/info_cool50.svg" alt="정보" width={24} height={24} />
             <p className="text-body3_r_16">해당 카테고리의 프로젝트가 없습니다.</p>
