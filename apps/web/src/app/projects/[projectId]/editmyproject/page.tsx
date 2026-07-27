@@ -154,12 +154,19 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
     ownRole: string
     profileImageUrl: string
   }) {
-    await inviteCollaborator(project.id, {
-      email: memberEmail.trim(),
+    const invitedEmail = memberEmail.trim()
+    const projectRole = await inviteCollaborator(project.id, {
+      email: invitedEmail,
       role: JOB_TO_API[memberTab] as InviteCollaboratorDto['role'],
     })
     trackEvent('collaborator_invited', { role: JOB_TO_API[memberTab] })
     addMember(member)
+    // addMember는 방금 입력한 실제 이메일을 email 필드에 그대로 남긴다.
+    // handleRemoveMember는 기존 팀원처럼 `member-{projectRoleId}` 형식을 기대하므로
+    // 초대 응답으로 받은 projectRole.id로 맞춰줘야 삭제 시 올바른 id가 전달된다.
+    setMembers((prev) =>
+      prev.map((m) => (m.email === invitedEmail ? { ...m, email: `member-${projectRole.id}` } : m))
+    )
   }
 
   // 팀원 삭제도 초대와 동일하게 즉시 실제 API를 호출
