@@ -21,3 +21,15 @@ export function formatDate(dateStr: string) {
   const date = new Date(dateStr)
   return `${date.getFullYear()}. ${String(date.getMonth() + 1).padStart(2, '0')}. ${String(date.getDate()).padStart(2, '0')}`
 }
+
+const SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+.-]*:/
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// 프로젝트 링크/연락처가 스킴 없이 저장된 경우(예: naver.com) next/link가 상대경로로 취급해
+// /projects/naver.com 같은 내부 404로 이동하는 문제 방지. 이메일이면 mailto:, 아니면 https:// 부여.
+export function toExternalHref(value: string): string {
+  const trimmed = value.trim()
+  if (SCHEME_REGEX.test(trimmed)) return trimmed
+  if (EMAIL_REGEX.test(trimmed)) return `mailto:${trimmed}`
+  return `https://${trimmed}`
+}

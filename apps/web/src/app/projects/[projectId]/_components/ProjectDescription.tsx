@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { CATEGORY_LABELS, STATUS_LABELS } from '@/app/_utils/projectConstants'
 import type { ProjectDetailResponseDto } from '@/lib/api'
 import { Button } from '@/components/ui/button'
+import { toExternalHref } from '@/lib/utils'
 import bullet from '../../../../../public/bullet_cool40.svg'
 import { Separator } from '@/components/ui/separator'
 
@@ -41,7 +42,11 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
             {/* <Button className="h-12 w-12 rounded-full shadow-sm bg-white hover:bg-neutral-99">
                     <Image src={bookmarkline} alt="북마크" width={24} height={24} />
                   </Button> */}
-            <Link href={project.projectLink} target="_blank">
+            <Link
+              href={toExternalHref(project.projectLink)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button className="w-[137px] h-12 rounded-md bg-CoolNeutral-20 hover:bg-CoolNeutral-30">
                 <p className="text-white text-sub3_sb_16">직접 사용해보기</p>
               </Button>
@@ -56,8 +61,9 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
               <p className="text-body1_m_16 text-CoolNeutral-30">연락 가능한 경로</p>
             </div>
             <Link
-              href={project.contactPath}
+              href={toExternalHref(project.contactPath)}
               target="_blank"
+              rel="noopener noreferrer"
               className="text-body1_m_16 underline text-right"
             >
               {project.contactPath}
