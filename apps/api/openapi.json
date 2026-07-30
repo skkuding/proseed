@@ -3716,6 +3716,12 @@
           "updateGoal": {
             "type": "string"
           },
+          "updateResults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "releasedAt": {
             "format": "date-time",
             "type": "string"
@@ -3731,6 +3737,7 @@
           "projectIconUrl",
           "title",
           "updateGoal",
+          "updateResults",
           "releasedAt"
         ]
       },

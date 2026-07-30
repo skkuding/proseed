@@ -72,6 +72,7 @@ export class GrowthRecordService {
       select: {
         id: true,
         updateGoal: true,
+        updateResults: true,
         releasedAt: true,
         createdAt: true,
         project: {
@@ -111,6 +112,7 @@ export class GrowthRecordService {
         category: record.category,
         title: record.contents[0]?.title ?? '',
         updateGoal: version.updateGoal,
+        updateResults: version.updateResults,
         releasedAt: version.releasedAt ?? version.createdAt,
       })),
     )

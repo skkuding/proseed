@@ -7,7 +7,8 @@ import { useGrowthRecordStore } from '@/store/growthRecordStore'
 import type { TaggedFeedbackEntry } from '@/store/feedbackTagStore'
 import type { RecordCategory } from '@/lib/api'
 
-const MAX_LENGTH = 600
+const GOAL_MAX_LENGTH = 20
+const RESULT_MAX_LENGTH = 600
 
 interface GrowthRecordSubmitModalProps {
   isOpen: boolean
@@ -45,7 +46,11 @@ export function GrowthRecordSubmitModal({
 
   if (!isOpen) return null
 
-  const isSubmitEnabled = goal.trim().length > 0 && result.trim().length > 0
+  const isSubmitEnabled =
+    goal.trim().length > 0 &&
+    goal.length <= GOAL_MAX_LENGTH &&
+    result.trim().length > 0 &&
+    result.length <= RESULT_MAX_LENGTH
 
   const handleSubmit = () => {
     setVersion(formData.version)
@@ -99,14 +104,20 @@ export function GrowthRecordSubmitModal({
             <div className="relative">
               <textarea
                 value={goal}
-                onChange={(e) => {
-                  if (e.target.value.length <= MAX_LENGTH) setGoal(e.target.value)
-                }}
+                onChange={(e) => setGoal(e.target.value)}
                 placeholder="이번 업데이트의 목표를 작성해주세요"
-                className="w-full h-44 resize-none rounded-xl border border-neutral-200 p-4 text-body2_m_14 text-CoolNeutral-20 placeholder:text-CoolNeutral-60 focus:outline-none focus:border-CoolNeutral-40 transition-colors"
+                className={`w-full h-44 resize-none rounded-xl border p-4 text-body2_m_14 text-CoolNeutral-20 placeholder:text-CoolNeutral-60 focus:outline-none transition-colors ${
+                  goal.length > GOAL_MAX_LENGTH
+                    ? 'border-primary focus:border-red-500'
+                    : 'border-neutral-95 focus:border-CoolNeutral-40'
+                }`}
               />
-              <span className="absolute bottom-3 right-4 text-caption1_m_13 text-CoolNeutral-50">
-                {goal.length}/{MAX_LENGTH}
+              <span
+                className={`absolute bottom-4 right-4 text-caption1_m_13 ${
+                  goal.length > GOAL_MAX_LENGTH ? 'text-primary' : 'text-CoolNeutral-50'
+                }`}
+              >
+                {goal.length}/{GOAL_MAX_LENGTH}
               </span>
             </div>
           </div>
@@ -118,13 +129,13 @@ export function GrowthRecordSubmitModal({
               <textarea
                 value={result}
                 onChange={(e) => {
-                  if (e.target.value.length <= MAX_LENGTH) setResult(e.target.value)
+                  setResult(e.target.value.slice(0, RESULT_MAX_LENGTH))
                 }}
                 placeholder="이번 업데이트의 결과물을 작성해주세요"
                 className="w-full h-44 resize-none rounded-xl border border-neutral-200 p-4 text-body2_m_14 text-CoolNeutral-20 placeholder:text-CoolNeutral-60 focus:outline-none focus:border-CoolNeutral-40 transition-colors"
               />
               <span className="absolute bottom-3 right-4 text-caption1_m_13 text-CoolNeutral-50">
-                {result.length}/{MAX_LENGTH}
+                {result.length}/{RESULT_MAX_LENGTH}
               </span>
             </div>
           </div>

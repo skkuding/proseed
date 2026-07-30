@@ -153,5 +153,6 @@ export class RecentGrowthRecordDto {
   title: string
 
   updateGoal: string
+  updateResults: string[]
   releasedAt: Date
 }

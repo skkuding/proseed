@@ -1091,6 +1091,7 @@ export interface components {
             /** @description 해당 직군 성장기록의 첫 번째 content title */
             title: string;
             updateGoal: string;
+            updateResults: string[];
             /** Format: date-time */
             releasedAt: string;
         };

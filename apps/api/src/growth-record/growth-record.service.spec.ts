@@ -518,6 +518,7 @@ describe('getRecentGrowthRecords — mainpage 최근 성장기록', () => {
   const buildVersion = (id: number, iconUrl = 'icon-key') => ({
     id,
     updateGoal: `goal-${id}`,
+    updateResults: [`result-${id}`],
     releasedAt: new Date('2026-07-01T00:00:00Z'),
     createdAt: new Date('2026-06-30T00:00:00Z'),
     project: {
@@ -570,6 +571,7 @@ describe('getRecentGrowthRecords — mainpage 최근 성장기록', () => {
       category: ALL_CATEGORIES[0],
       title: `title-${ALL_CATEGORIES[0]}`,
       updateGoal: 'goal-1',
+      updateResults: ['result-1'],
       releasedAt: new Date('2026-07-01T00:00:00Z'),
     })
   })

@@ -44,8 +44,8 @@ export default function GrowthRecordSection() {
                 projectId={record.projectId}
                 projectName={record.projectName}
                 projectIconUrl={record.projectIconUrl}
-                title={record.title}
                 updateGoal={record.updateGoal}
+                updateResults={record.updateResults}
                 projectCategories={record.projectCategories}
                 releasedAt={String(record.releasedAt)}
               />

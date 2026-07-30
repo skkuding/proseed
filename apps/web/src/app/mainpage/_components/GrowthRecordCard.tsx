@@ -23,8 +23,8 @@ interface GrowthRecordCardProps {
   projectId: number
   projectName: string
   projectIconUrl: string
-  title: string
   updateGoal: string
+  updateResults: string[]
   projectCategories: string[]
   releasedAt: string
 }
@@ -38,8 +38,8 @@ export default function GrowthRecordCard({
   projectId,
   projectName,
   projectIconUrl,
-  title,
   updateGoal,
+  updateResults,
   projectCategories,
   releasedAt,
 }: GrowthRecordCardProps) {
@@ -53,7 +53,7 @@ export default function GrowthRecordCard({
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-col gap-[6px] border-b border-CoolNeutral-95">
             <div className="flex flex-wrap items-center gap-[6px]">
-              <h3 className="text-title3_sb_24 text-black">{title}</h3>
+              <h3 className="text-title3_sb_24 whitespace-nowrap">{updateGoal}</h3>
 
               {projectCategories.map((cat) => (
                 <span
@@ -65,9 +65,7 @@ export default function GrowthRecordCard({
               ))}
             </div>
 
-            <p className="min-h-12 line-clamp-2 overflow-hidden mb-5 text-body3_r_16 text-CoolNeutral-20">
-              {updateGoal}
-            </p>
+            <p className="line-clamp-2 mb-5 text-body3_r_16 text-CoolNeutral-20">{updateResults}</p>
           </div>
 
           <div className="flex items-center gap-1 pt-3">
