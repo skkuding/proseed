@@ -17,7 +17,7 @@ export const GA_MEASUREMENT_ID = 'G-X9Z2BWG12G'
  * 출시 전: false → 전체 noindex (미완성 페이지 색인 방지).
  * 출시일: true 로 플립 → 색인 허용. 커밋 히스토리에 색인 개시 시점이 남는다.
  */
-export const ALLOW_INDEXING = false
+export const ALLOW_INDEXING = true
 
 /**
  * 검색엔진 소유확인(verification) 코드 (SSOT).
