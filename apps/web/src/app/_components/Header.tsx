@@ -2,13 +2,14 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
-import { PROFILE_SRCS } from '@/app/mypage/_components/ProfileImageModal'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { trackEvent } from '@/lib/analytics'
+import { getMyProfile, type MyProfile } from '@/lib/api'
+import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 
 const NAV_TABS = [
   { label: '메인 페이지', href: '/' },
@@ -21,6 +22,7 @@ export function Header() {
   const { data: session } = authClient.useSession()
   const { openLoginModal } = useAuthStore()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [profile, setProfile] = useState<MyProfile | null>(null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -29,13 +31,17 @@ export function Header() {
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
   )?.label
 
+  useEffect(() => {
+    if (!session) return
+    getMyProfile().then(setProfile).catch(console.error)
+  }, [session])
+
   const handleSignOut = async () => {
     setIsDropdownOpen(false)
     await authClient.signOut()
   }
 
-  const profileImage =
-    session?.user.image && PROFILE_SRCS.includes(session.user.image) ? session.user.image : null
+  const jobLabel = profile?.jobType ? JOB_API_TO_LABEL[profile.jobType] : null
 
   return (
     <header className="w-full">
@@ -76,38 +82,51 @@ export function Header() {
               )}
               <button
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
-                className="relative z-20 inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-CoolNeutral-20 shadow-md hover:cursor-pointer border-none outline-none focus:outline-none"
+                className="relative z-20 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white shadow-md hover:cursor-pointer hover:bg-neutral-99 transition-colors border-none outline-none focus:outline-none"
               >
-                {profileImage ? (
-                  <Image
-                    src={profileImage}
-                    alt="프로필"
-                    width={56}
-                    height={56}
-                    className="h-full w-full object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <span className="text-sub1_sb_18 text-white">
-                    {session.user.name?.[0]?.toUpperCase() ?? 'U'}
-                  </span>
-                )}
+                <Image src="/person_line.svg" alt="프로필" width={32} height={32} />
               </button>
               {isDropdownOpen && (
-                <div className="absolute right-0 top-full z-20 mt-2 w-28 rounded-xl bg-white shadow-lg">
-                  <Link
-                    href="/mypage"
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="block w-full rounded-t-xl px-4 py-3 text-left text-body4_r_14 text-CoolNeutral-40 transition-colors hover:bg-neutral-99 hover:text-CoolNeutral-20"
-                  >
-                    마이 페이지
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full rounded-b-xl px-4 py-3 text-left text-body4_r_14 text-CoolNeutral-40 transition-colors hover:cursor-pointer hover:bg-neutral-99 hover:text-CoolNeutral-20"
-                  >
-                    로그아웃
-                  </button>
+                <div className="absolute right-0 top-full z-20 mt-2 w-65 rounded-[12px] bg-white p-5 shadow-lg">
+                  <div className="flex items-center gap-2">
+                    {profile?.profileImageUrl ? (
+                      <Image
+                        src={profile.profileImageUrl}
+                        alt="프로필"
+                        width={40}
+                        height={40}
+                        unoptimized
+                        className="size-10 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="size-10 shrink-0 rounded-full bg-CoolNeutral-90" />
+                    )}
+                    <div className="flex min-w-0 flex-col gap-[2px]">
+                      <p className="truncate text-sub1_sb_18">
+                        {profile?.name ?? session.user.name}
+                      </p>
+                      {jobLabel && (
+                        <p className="truncate text-caption2_m_12 text-neutral-40">{jobLabel}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-col">
+                    <Link
+                      href="/mypage"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center justify-between rounded-lg py-2 text-body1_m_16 hover:cursor=pointer"
+                    >
+                      마이페이지
+                      <Image src="/arrow2_right_grey.svg" alt="" width={20} height={20} />
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center justify-between rounded-lg py-2 text-left text-body1_m_16 transition-colors hover:cursor-pointer"
+                    >
+                      로그아웃
+                      <Image src="/arrow2_right_grey.svg" alt="" width={20} height={20} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

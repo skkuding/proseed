@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { MyFeedbackCard } from './_components/MyFeedbackCard'
 import { FeedbackFilterSortPanel } from './_components/FeedbackFilterSortPanel'
+import { Button } from '@/components/ui/button'
 import { getMyFeedbacks, type MyFeedbackProjectItemDto } from '@/lib/api'
 
 type FilterMode = 'all' | 'adopted'
@@ -37,8 +39,17 @@ export default function MyFeedbacks() {
       </div>
 
       {displayed.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-body1_m_16 text-neutral-40">
-          아직 작성한 피드백이 없습니다.
+        <div className="flex flex-col items-center justify-center gap-6 py-30">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-title3_sb_24">아직 작성한 피드백이 없어요</p>
+            <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+              <p>아직 피드백을 작성하지 않았어요.</p>
+              <p>관심 있는 프로젝트에 의견을 남겨보세요.</p>
+            </div>
+          </div>
+          <Button asChild size="lg" className="text-sub3_sb_16">
+            <Link href="/myproject">프로젝트 참여하기</Link>
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
