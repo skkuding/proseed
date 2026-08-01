@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstants'
 import { getProjects, type Project } from '@/lib/api'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
 import ProjectCard, { ProjectCardSkeleton } from '@/app/mainpage/_components/ProjectCard'
+import { Button } from '@/components/ui/button'
 import {
   Pagination,
   PaginationContent,
@@ -38,6 +40,7 @@ export default function Navigate() {
   }, [selectedCategory])
 
   const totalPages = Math.ceil(allProjects.length / PAGE_SIZE)
+  const paginationPages = Math.max(totalPages, 1)
   const pagedProjects = allProjects.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   const handleCategorySelect = (category: CategoryLabel) => {
@@ -85,9 +88,17 @@ export default function Navigate() {
             ))}
           </div>
         ) : pagedProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3 text-CoolNeutral-50">
-            <Image src="/info_cool50.svg" alt="정보" width={24} height={24} />
-            <p className="text-body3_r_16">해당 카테고리의 프로젝트가 없습니다.</p>
+          <div className="flex flex-col items-center justify-center gap-6 py-20">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-title3_sb_24">등록된 프로젝트가 없습니다</p>
+              <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+                <p>새로운 프로젝트를 등록하고</p>
+                <p>성장의 첫걸음을 시작해 보세요.</p>
+              </div>
+            </div>
+            <Button asChild size="lg" className="text-sub3_sb_16">
+              <Link href="/projects/new/register">프로젝트 등록하기</Link>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-x-2 gap-y-5">
@@ -98,48 +109,46 @@ export default function Navigate() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
+        <Pagination className="mt-10">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  handlePageChange(currentPage - 1)
+                }}
+                className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
+              />
+            </PaginationItem>
+
+            {getVisiblePages(paginationPages).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
                   href="#"
+                  isActive={page === currentPage}
                   onClick={(e) => {
                     e.preventDefault()
-                    handlePageChange(currentPage - 1)
+                    handlePageChange(page)
                   }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
-                />
+                >
+                  {page}
+                </PaginationLink>
               </PaginationItem>
+            ))}
 
-              {getVisiblePages(totalPages).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === currentPage}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      handlePageChange(page)
-                    }}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handlePageChange(currentPage + 1)
-                  }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-40' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  handlePageChange(currentPage + 1)
+                }}
+                className={currentPage === paginationPages ? 'pointer-events-none opacity-40' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
 
       <SearchModal
