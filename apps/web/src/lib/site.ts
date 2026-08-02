@@ -25,5 +25,6 @@ export const ALLOW_INDEXING = false
  * 공용 계정 확보(#72 선행 과제) 후 발급받아 채운다.
  * 비어 있으면 해당 meta 태그는 렌더되지 않는다.
  */
+// 구글은 Search Console에서 도메인(DNS)으로 이미 소유확인 완료 → meta 태그 불필요
 export const GOOGLE_SITE_VERIFICATION = ''
-export const NAVER_SITE_VERIFICATION = ''
+export const NAVER_SITE_VERIFICATION = 'c5a505e29e82d15da015fb20e3ba5251949568fc'
