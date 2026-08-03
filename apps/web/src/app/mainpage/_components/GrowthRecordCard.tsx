@@ -45,13 +45,13 @@ export default function GrowthRecordCard({
 }: GrowthRecordCardProps) {
   return (
     <Link href={`/projects/${projectId}#growth-record`} className="block">
-      <article className="flex h-[198px] w-full cursor-pointer gap-5 rounded-[12px] bg-white p-6 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)] transition-colors hover:bg-CoolNeutral-90">
+      <article className="group flex w-full cursor-pointer gap-5 rounded-[12px] bg-white p-6 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)] transition-colors hover:bg-CoolNeutral-90">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] bg-gray-200">
           <Image src={projectIconUrl} alt={projectName} fill className="object-cover" />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-col gap-[6px] border-b border-CoolNeutral-95">
+          <div className="flex flex-col gap-[6px] border-b border-neutral-95 transition-colors group-hover:border-neutral-99">
             <div className="flex flex-wrap items-center gap-[6px]">
               <h3 className="text-title3_sb_24 whitespace-nowrap">{updateGoal}</h3>
 
@@ -65,7 +65,9 @@ export default function GrowthRecordCard({
               ))}
             </div>
 
-            <p className="line-clamp-2 mb-5 text-body3_r_16 text-CoolNeutral-20">{updateResults}</p>
+            <p className="line-clamp-2 mb-5 text-body3_r_16 text-CoolNeutral-20">
+              {updateResults.join(' ')}
+            </p>
           </div>
 
           <div className="flex items-center gap-1 pt-3">

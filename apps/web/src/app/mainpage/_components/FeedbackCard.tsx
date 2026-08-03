@@ -76,13 +76,13 @@ export default function FeedbackCard({
         <p className="min-h-17 line-clamp-2 text-title3_sb_24 text-CoolNeutral-20 transition-colors group-hover:text-white">
           {onelineReview}
         </p>
-        <p className="min-h-13 line-clamp-2 text-body3_r_16 text-CoolNeutral-40 transition-colors group-hover:text-color-CoolNeutral-80">
+        <p className="min-h-13 line-clamp-2 text-body3_r_16 text-CoolNeutral-40 transition-colors group-hover:text-CoolNeutral-80">
           {content}
         </p>
       </div>
 
       {/* 하단: 프로젝트 + 버튼 */}
-      <div className="flex items-center justify-between border-t border-neutral-95 pt-5 transition-colors group-hover:border-color-neutral-30">
+      <div className="flex items-center justify-between border-t border-neutral-95 pt-5 transition-colors group-hover:border-neutral-30">
         <div className="flex items-center gap-2">
           <div className="relative overflow-hidden rounded-full">
             <Image src={projectIconUrl} alt={projectName} height={28} width={28} />

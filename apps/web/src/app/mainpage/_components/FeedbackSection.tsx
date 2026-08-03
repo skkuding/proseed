@@ -41,31 +41,32 @@ export default function FeedbackSection() {
     <section className="flex flex-col gap-7">
       <div className="flex items-center justify-between">
         <SectionTitle title="최근 피드백을 모아봤어요" />
-        {!isEmpty && (
-          <div className="flex gap-4">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canLeft}
-              className="flex h-10 w-10 pr-[2px] justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
-            >
-              <Image src="/arrow3_left.svg" alt="이전" width={20} height={20} />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canRight}
-              className="flex h-10 w-10 pl-1 justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
-            >
-              <Image src="/arrow3_right.svg" alt="다음" width={20} height={20} />
-            </button>
-          </div>
-        )}
+        <div className="flex gap-4">
+          <button
+            onClick={() => scroll('left')}
+            disabled={isEmpty || !canLeft}
+            className="flex h-10 w-10 pr-[2px] justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
+          >
+            <Image src="/arrow3_left.svg" alt="이전" width={20} height={20} />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={isEmpty || !canRight}
+            className="flex h-10 w-10 pl-1 justify-center rounded-full cursor-pointer bg-CoolNeutral-30 transition-colors hover:bg-CoolNeutral-40 disabled:opacity-40"
+          >
+            <Image src="/arrow3_right.svg" alt="다음" width={20} height={20} />
+          </button>
+        </div>
       </div>
 
       {isEmpty ? (
-        <div className="flex flex-col items-center justify-center gap-6 pt-15">
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-head4_m_36">채택된 피드백이 없습니다</p>
-            <p className="text-title6_m_20 text-CoolNeutral-40">지금 피드백을 남겨보세요</p>
+        <div className="flex flex-col items-center justify-center gap-6 py-20">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-title3_sb_24">아직 등록된 피드백이 없습니다</p>
+            <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+              <p>피드백을 남겨 응원하는 서비스의 성장을</p>
+              <p>함께 만들어 보세요</p>
+            </div>
           </div>
           <Button asChild size="lg" className="text-sub3_sb_16">
             <Link href="/navigate">피드백 작성하기</Link>

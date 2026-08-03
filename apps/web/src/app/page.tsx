@@ -9,7 +9,7 @@ export default function HomePage() {
       <div className="mx-auto flex w-full max-w-[1200px] px-1 flex-col">
         <HeroSection />
 
-        <div className="mb-30 mt-11 flex flex-col gap-30">
+        <div className="mb-30 mt-15 flex flex-col gap-30">
           <RecentProjectsSection />
           <FeedbackSection />
           <GrowthRecordSection />

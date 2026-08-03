@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 import GrowthRecordCard, { GrowthRecordCardSkeleton } from './GrowthRecordCard'
 import SectionTitle from './SectionTitle'
 import { getRecentGrowthRecords, type RecentGrowthRecordDto } from '@/lib/api'
@@ -33,28 +35,45 @@ export default function GrowthRecordSection() {
     return deduped.slice(0, RECENT_COUNT)
   }, [recentGrowthRecords])
 
+  const isEmpty = !isLoading && recent.length === 0
+
   return (
     <section className="flex flex-col gap-7">
       <SectionTitle title="최근 업데이트 된 성장기록" />
 
-      <div className="flex flex-col gap-4">
-        {isLoading
-          ? Array.from({ length: RECENT_COUNT }).map((_, idx) => (
-              <GrowthRecordCardSkeleton key={idx} />
-            ))
-          : recent.map((record) => (
-              <GrowthRecordCard
-                key={record.growthRecordId}
-                projectId={record.projectId}
-                projectName={record.projectName}
-                projectIconUrl={record.projectIconUrl}
-                updateGoal={record.updateGoal}
-                updateResults={record.updateResults}
-                projectCategories={record.projectCategories}
-                releasedAt={String(record.releasedAt)}
-              />
-            ))}
-      </div>
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center gap-6 py-20">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-title3_sb_24 text-black">아직 등록된 성장기록이 없습니다</p>
+            <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+              <p>프로젝트를 등록하고 성장기록을 남겨</p>
+              <p>나만의 성장 스토리를 완성해보세요</p>
+            </div>
+          </div>
+          <Button asChild size="lg" className="text-sub3_sb_16">
+            <Link href="/myproject">성장기록 작성하기</Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {isLoading
+            ? Array.from({ length: RECENT_COUNT }).map((_, idx) => (
+                <GrowthRecordCardSkeleton key={idx} />
+              ))
+            : recent.map((record) => (
+                <GrowthRecordCard
+                  key={record.growthRecordId}
+                  projectId={record.projectId}
+                  projectName={record.projectName}
+                  projectIconUrl={record.projectIconUrl}
+                  updateGoal={record.updateGoal}
+                  updateResults={record.updateResults}
+                  projectCategories={record.projectCategories}
+                  releasedAt={String(record.releasedAt)}
+                />
+              ))}
+        </div>
+      )}
     </section>
   )
 }
