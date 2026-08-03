@@ -332,7 +332,7 @@ export function Feedbacks() {
             <SelectTrigger className="w-[105px] h-12 pr-4 pl-6 rounded-[8px] border border-neutral-90 text-body1_m_16! gap-1 hover:cursor-pointer">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper">
               <SelectItem value="latest" className="text-body1_m_16! hover:cursor-pointer">
                 최신순
               </SelectItem>
