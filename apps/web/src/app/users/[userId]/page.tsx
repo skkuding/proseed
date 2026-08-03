@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { getUserProfile, getUserJoinedProjects, type UserProfileResponseDto } from '@/lib/api'
 import { authClient } from '@/lib/auth-client'
 import { trackEvent } from '@/lib/analytics'
-import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_LABEL, JOB_API_TO_PERSON_LABEL } from '@/app/_utils/projectConstants'
 import { UserInfoCard } from '@/app/mypage/_components/UserInfoCard'
 import { ProfileForm } from '@/app/mypage/_components/ProfileForm'
 import { type ParticipatedProject } from '@/app/mypage/projects/_components/ParticipatedProjectCard'
@@ -64,7 +64,9 @@ export default function UserProfilePage() {
     )
   }
 
-  const jobLabel = profile.jobType ? (JOB_API_TO_LABEL[profile.jobType] ?? profile.jobType) : '-'
+  const jobLabel = profile.jobType
+    ? (JOB_API_TO_PERSON_LABEL[profile.jobType] ?? profile.jobType)
+    : '-'
 
   return (
     <main className="min-h-screen bg-neutral-99">

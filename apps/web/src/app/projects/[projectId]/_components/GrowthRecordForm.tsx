@@ -20,6 +20,7 @@ import {
   JOB_API_TO_LABEL,
   RECORD_CATEGORY_TO_API,
   RECORD_CATEGORY_LABELS,
+  jobTabToPersonLabel,
 } from '@/app/_utils/projectConstants'
 import type { JobTab } from '@/app/_utils/projectConstants'
 import {
@@ -313,6 +314,7 @@ export function GrowthRecordForm() {
           tabs={JOB_TABS}
           disabledTabs={JOB_TABS.filter((t) => !allowedTabs.includes(t))}
           activeTab={activeTab}
+          getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => {
             setActiveTab(tab as TabLabel)
             setImageModalIndex(null)

@@ -19,7 +19,7 @@ import { IconSection } from '../register/_components/IconSection'
 import { ThumbnailSection } from '../register/_components/ThumbnailSection'
 import { ProjectImagesSection } from '../register/_components/ProjectImagesSection'
 import { CATEGORY_LABELS, CATEGORY_TO_API, STATUS_TO_API } from '../register/_components/constants'
-import { JOB_TO_API, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_TO_API, JOB_API_TO_LABEL, jobTabToPersonLabel } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 import {
@@ -140,7 +140,7 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
       email: `member-${m.id}`,
       role: JOB_API_TO_LABEL[m.role] ?? '기획',
       name: m.user.name,
-      ownRole: `${JOB_API_TO_LABEL[m.role] ?? m.role} 참여자`,
+      ownRole: `${jobTabToPersonLabel(JOB_API_TO_LABEL[m.role] ?? m.role)} 참여자`,
       profileImageUrl: m.user.profileImageUrl,
     })),
   })

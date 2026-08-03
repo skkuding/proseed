@@ -26,6 +26,7 @@ import {
   JOB_API_TO_LABEL,
   RECORD_CATEGORY_TO_API,
   RECORD_CATEGORY_LABELS,
+  jobTabToPersonLabel,
 } from '@/app/_utils/projectConstants'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import { authClient } from '@/lib/auth-client'
@@ -259,6 +260,7 @@ export function FeedbackQuestionsForm() {
           tabs={TABS}
           activeTab={activeTab}
           disabledTabs={TABS.filter((t) => !(allowedTabs ?? []).includes(t))}
+          getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />
       </div>

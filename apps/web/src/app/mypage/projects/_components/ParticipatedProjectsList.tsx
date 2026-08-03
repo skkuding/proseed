@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import { JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
+import { JOB_TABS, jobTabToPersonLabel, type JobTab } from '@/app/_utils/projectConstants'
 import { ParticipatedProjectCard, type ParticipatedProject } from './ParticipatedProjectCard'
 
 interface ParticipatedProjectsListProps {
@@ -29,6 +29,7 @@ export function ParticipatedProjectsList({
         <RoleFilterTabs
           tabs={JOB_TABS}
           activeTab={selectedJob}
+          getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => setSelectedJob(tab as JobTab)}
         />
       </div>

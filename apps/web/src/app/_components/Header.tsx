@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { trackEvent } from '@/lib/analytics'
 import { getMyProfile, type MyProfile } from '@/lib/api'
-import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_PERSON_LABEL } from '@/app/_utils/projectConstants'
 
 const NAV_TABS = [
   { label: '메인 페이지', href: '/' },
@@ -41,7 +41,7 @@ export function Header() {
     await authClient.signOut()
   }
 
-  const jobLabel = profile?.jobType ? JOB_API_TO_LABEL[profile.jobType] : null
+  const jobLabel = profile?.jobType ? JOB_API_TO_PERSON_LABEL[profile.jobType] : null
 
   return (
     <header className="w-full">

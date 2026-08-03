@@ -31,9 +31,9 @@ async function resolveSignupMethod(): Promise<string | undefined> {
 type JobType = 'Planner' | 'Designer' | 'Developer' | 'Other'
 
 const JOB_TYPE_OPTIONS: { value: JobType; label: string }[] = [
-  { value: 'Planner', label: '기획' },
-  { value: 'Designer', label: '디자인' },
-  { value: 'Developer', label: '개발' },
+  { value: 'Planner', label: '기획자' },
+  { value: 'Designer', label: '디자이너' },
+  { value: 'Developer', label: '개발자' },
   { value: 'Other', label: '기타' },
 ]
 

@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { JOB_TABS, type JobTab, type Member } from './constants'
 import { MemberDeleteModal } from '@/components/MemberDeleteModal'
 import { getProfilePreviewByEmail, type ProfilePreviewResponseDto } from '@/lib/api'
-import { JOB_API_TO_LABEL, JOB_TAB_TO_EURO } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_PERSON_LABEL, jobTabToPersonLabel } from '@/app/_utils/projectConstants'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -81,7 +81,7 @@ export function TeamMembersSection({
     try {
       await onAddMember({
         name: preview?.name ?? email,
-        ownRole: `${memberTab} 참여자`,
+        ownRole: `${jobTabToPersonLabel(memberTab)} 참여자`,
         profileImageUrl: '',
       })
     } catch (err) {
@@ -117,7 +117,7 @@ export function TeamMembersSection({
                   : 'bg-neutral-99 text-black hover:bg-neutral-90'
               }`}
             >
-              {j}
+              {jobTabToPersonLabel(j)}
             </button>
           ))}
         </div>
@@ -149,7 +149,7 @@ export function TeamMembersSection({
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-sub3_sb_16 text-CoolNeutral-20 truncate">{preview.name}</span>
               <span className="text-caption1_m_13 text-CoolNeutral-50">
-                {preview.jobType ? JOB_API_TO_LABEL[preview.jobType] : '직군 미입력'}
+                {preview.jobType ? JOB_API_TO_PERSON_LABEL[preview.jobType] : '직군 미입력'}
               </span>
             </div>
             <button
@@ -158,7 +158,7 @@ export function TeamMembersSection({
               disabled={isAdding}
               className="h-10 px-3 py-[10px] rounded-[8px] bg-CoolNeutral-20 text-white text-sub4_sb_14 hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
-              {isAdding ? '추가 중...' : `${memberTab}${JOB_TAB_TO_EURO[memberTab]} 추가하기`}
+              {isAdding ? '추가 중...' : `${jobTabToPersonLabel(memberTab)}로 추가하기`}
             </button>
           </div>
         )}
@@ -172,8 +172,7 @@ export function TeamMembersSection({
       {tabMembers.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-sub1_sb_18 text-black">
-            {memberTab}
-            {JOB_TAB_TO_EURO[memberTab]} 추가한 팀원
+            {jobTabToPersonLabel(memberTab)}로 추가한 팀원
           </p>
           <div className="flex flex-wrap gap-2">
             {tabMembers.map((m) => (

@@ -4,12 +4,15 @@ export function RoleFilterTabs({
   onTabChange,
   textSize = 'text-body1_m_16',
   disabledTabs = [],
+  getLabel,
 }: {
   tabs: readonly string[]
   activeTab?: string
   onTabChange: (tab: string) => void
   textSize?: string
   disabledTabs?: readonly string[]
+  // 탭 값(상태 키)과 화면에 보여줄 라벨을 분리하고 싶을 때 사용 (예: '기획' 값은 유지하되 '기획자'로 표기)
+  getLabel?: (tab: string) => string
 }) {
   const activeIndex = activeTab ? tabs.indexOf(activeTab) : -1
 
@@ -38,7 +41,7 @@ export function RoleFilterTabs({
                 : `hover:cursor-pointer ${isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'}`
             }`}
           >
-            {tab}
+            {getLabel ? getLabel(tab) : tab}
           </button>
         )
       })}

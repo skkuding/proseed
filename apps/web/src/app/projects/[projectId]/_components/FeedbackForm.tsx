@@ -22,7 +22,12 @@ import {
   type FeedbackQuestionItemDto,
   type CreateFeedbackDto,
 } from '@/lib/api'
-import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  RECORD_CATEGORY_TO_API,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 import { trackEvent } from '@/lib/analytics'
 
 const ONE_LINE_MAX = 200
@@ -230,6 +235,7 @@ export function CreateFeedbackContent() {
           tabs={TABS}
           disabledTabs={TABS.filter((t) => !allowedTabs.includes(t))}
           activeTab={activeTab}
+          getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />
       </div>

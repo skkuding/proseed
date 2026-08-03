@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react'
 import { Dot } from 'lucide-react'
 import { XIcon } from 'lucide-react'
 import { getFeedbackTemplates, type FeedbackTemplate } from '@/lib/api'
-import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  RECORD_CATEGORY_TO_API,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 import {
   Pagination,
   PaginationContent,
@@ -103,7 +108,7 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
                 >
                   <span className="flex items-center justify-center gap-1">
                     {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
-                    {tab}
+                    {jobTabToPersonLabel(tab)}
                   </span>
                 </button>
               ))}

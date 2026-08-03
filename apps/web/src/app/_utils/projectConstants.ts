@@ -82,6 +82,19 @@ export const JOB_API_TO_LABEL: Record<string, JobTab> = Object.fromEntries(
   Object.entries(JOB_TO_API).map(([label, api]) => [api, label])
 ) as Record<string, JobTab>
 
+// 팀원 카드 등 "~하는 사람" 표기가 필요한 곳 전용 (기획자/디자이너/개발자/기타)
+export const JOB_API_TO_PERSON_LABEL: Record<string, string> = {
+  Planner: '기획자',
+  Designer: '디자이너',
+  Developer: '개발자',
+  Other: '기타',
+}
+
+// 탭 UI에서 JobTab(상태 키)은 그대로 두고 화면 표기만 "~하는 사람"으로 바꿀 때 사용
+export function jobTabToPersonLabel(tab: string): string {
+  return JOB_API_TO_PERSON_LABEL[JOB_TO_API[tab]] ?? tab
+}
+
 // ─── 성장기록/피드백 카테고리 (백엔드 RecordCategory enum) ────────────────────
 export const RECORD_CATEGORY_TO_API: Record<JobTab, string> = {
   기획: 'PLAN',

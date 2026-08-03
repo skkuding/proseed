@@ -5,7 +5,12 @@ import { X, Dot, CircleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { getFeedbackQuestions, type FeedbackQuestionItemDto } from '@/lib/api'
-import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  RECORD_CATEGORY_TO_API,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 
 const TABS = JOB_TABS
 type TabLabel = JobTab
@@ -107,6 +112,7 @@ export function FeedbackRoleSelectModal({
           <RoleFilterTabs
             tabs={TABS}
             activeTab={activeTab}
+            getLabel={jobTabToPersonLabel}
             onTabChange={(tab) => setActiveTab(tab as TabLabel)}
           />
         </div>

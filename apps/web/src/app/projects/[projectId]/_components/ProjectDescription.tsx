@@ -5,7 +5,6 @@ import type { ProjectDetailResponseDto } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { toExternalHref } from '@/lib/utils'
 import bullet from '../../../../../public/bullet_cool40.svg'
-import { Separator } from '@/components/ui/separator'
 
 interface ProjectDescriptionProps {
   project: ProjectDetailResponseDto
@@ -13,7 +12,7 @@ interface ProjectDescriptionProps {
 
 export function ProjectDescription({ project }: ProjectDescriptionProps) {
   return (
-    <div className="rounded-[16px] bg-white p-8 w-[944px] min-h-[451px] flex items-start gap-5">
+    <div className="rounded-[16px] bg-white p-8 w-[944px] flex items-start gap-5">
       <Image
         src={project.iconUrl}
         alt=""
@@ -78,9 +77,9 @@ export function ProjectDescription({ project }: ProjectDescriptionProps) {
           </div>
         </div>
         <div className="mt-10 flex flex-col gap-4">
-          <div className="flex gap-2 h-7">
-            <Separator orientation="vertical" className="border-4 border-CoolNeutral-30" />
-            <h2 className="text-lg font-semibold">프로젝트 설명</h2>
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-[6px] shrink-0 bg-CoolNeutral-30" />
+            <h2 className="text-title3_sb_24">프로젝트 설명</h2>
           </div>
           <p className="text-neutral-20 leading-relaxed text-body3_r_16">{project.description}</p>
         </div>

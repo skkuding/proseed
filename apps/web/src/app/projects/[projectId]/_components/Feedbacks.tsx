@@ -40,7 +40,12 @@ import {
 } from '@/lib/api'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
-import { RECORD_CATEGORY_TO_API, JOB_TABS, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  RECORD_CATEGORY_TO_API,
+  JOB_TABS,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 
 type TabLabel = JobTab
 
@@ -242,17 +247,17 @@ export function Feedbacks() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-head3_sb_36">프로젝트 피드백</h1>
-          <p className="text-body3_r_16 text-CoolNeutral-40 mt-2">
-            다른 팀의 프로젝트에 피드백을 남겨보세요!
+          <p className="text-sub2_m_18 text-CoolNeutral-50 mt-2">
+            피드백을 작성하고 프로젝트 리뷰 티켓을 받아보세요!
           </p>
         </div>
         <div className="flex items-center">
           <div className="min-h-12">
             <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-              <SelectTrigger className="px-4 rounded-lg border-neutral-90 text-body1_m_16! hover:cursor-pointer [&_svg]:size-5">
-                <SelectValue>
-                  업데이트 버전{' '}
-                  {versionList.find((v) => v.id.toString() === selectedVersion)?.version}
+              <SelectTrigger className="px-4 rounded-[8px] border-neutral-90 text-body1_m_16! hover:cursor-pointer [&_svg]:size-5">
+                <SelectValue placeholder="업데이트 버전 -">
+                  {versionList.length > 0 &&
+                    `업데이트 버전 ${versionList.find((v) => v.id.toString() === selectedVersion)?.version}`}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent position="popper">
@@ -284,6 +289,7 @@ export function Feedbacks() {
         <RoleFilterTabs
           tabs={JOB_TABS}
           activeTab={activeTab}
+          getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => handleTabChange(tab as TabLabel)}
         />
 
@@ -310,9 +316,20 @@ export function Feedbacks() {
       {loading ? (
         <p className="text-body3_r_16 text-CoolNeutral-40 py-10 text-center">불러오는 중...</p>
       ) : cards.length === 0 ? (
-        <p className="text-body3_r_16 text-CoolNeutral-40 py-10 text-center">
-          해당 카테고리의 피드백이 없습니다.
-        </p>
+        <div className="flex flex-col items-center justify-center gap-6 py-20">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-title3_sb_24">해당 카테고리의 피드백이 없습니다</p>
+            <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+              <p>피드백을 남겨 응원하는 서비스의</p>
+              <p>성장을 함께 만들어 보세요!</p>
+            </div>
+          </div>
+          {versionList[0] && selectedVersion === versionList[0].id.toString() && (
+            <Button onClick={handleWriteFeedbackClick} size="lg" className="text-sub3_sb_16">
+              피드백 작성하기
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="ml-[-20px]">
           <Accordion

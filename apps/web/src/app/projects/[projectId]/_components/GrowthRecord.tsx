@@ -20,7 +20,11 @@ import {
   type VersionDetailResponseDto,
 } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
-import { RECORD_CATEGORY_LABELS, JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import {
+  RECORD_CATEGORY_LABELS,
+  JOB_API_TO_PERSON_LABEL,
+  jobTabToPersonLabel,
+} from '@/app/_utils/projectConstants'
 import { formatDate } from '@/lib/utils'
 import { ImageLightbox } from './ImageLightbox'
 import { RoleFilterTabs } from '@/components/RoleTabs'
@@ -108,13 +112,15 @@ export function GrowthRecord() {
         <div className="flex flex-col gap-2">
           <h1 className="text-head3_sb_36">프로젝트 성장기록</h1>
           <p className="text-sub2_m_18 text-CoolNeutral-40">
-            업데이트 날짜 {versionDetail?.releasedAt ? formatDate(versionDetail.releasedAt) : '-'}
+            {versions.length > 0 && versionDetail?.releasedAt
+              ? `업데이트 날짜 ${formatDate(versionDetail.releasedAt)}`
+              : '업데이트 된 성장기록이 없습니다'}
           </p>
         </div>
         <div className="flex items-center">
           <Select value={selectedVersion} onValueChange={setSelectedVersion}>
             <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-[8px] hover:cursor-pointer border-neutral-90 [&_svg]:size-5">
-              <SelectValue>
+              <SelectValue placeholder="업데이트 버전 -">
                 {versions.length > 0 &&
                   `업데이트 버전 ${versions.find((v) => v.id.toString() === selectedVersion)?.version}`}
               </SelectValue>
@@ -147,6 +153,7 @@ export function GrowthRecord() {
       <RoleFilterTabs
         tabs={TABS}
         activeTab={activeTab}
+        getLabel={jobTabToPersonLabel}
         onTabChange={(tab) => setActiveTab(tab as TabLabel)}
       />
 
@@ -155,7 +162,18 @@ export function GrowthRecord() {
         versionDetail ? (
           <SummarySection versionDetail={versionDetail} />
         ) : (
-          <p className="text-body3_r_16 text-CoolNeutral-40">아직 발행된 성장기록이 없습니다.</p>
+          <div className="flex flex-col items-center justify-center gap-6 py-20">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-title3_sb_24">아직 프로젝트 성장기록이 없습니다</p>
+              <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+                <p>프로젝트를 등록하고 성장기록을 남겨</p>
+                <p>나만의 성장 스토리를 완성해보세요</p>
+              </div>
+            </div>
+            <Button onClick={() => router.push('/navigate')} size="lg" className="text-sub3_sb_16">
+              성장기록 작성하기
+            </Button>
+          </div>
         )
       ) : activeRecord ? (
         <RecordSection record={activeRecord} />
@@ -246,7 +264,7 @@ function RecordSection({ record }: { record: GrowthRecordItem }) {
                 className="border border-neutral-95 rounded-[12px] p-5 flex flex-col"
               >
                 <span className={`text-caption1_m_13 text-primary-strong`}>
-                  {(feedback.author.role && JOB_API_TO_LABEL[feedback.author.role]) ??
+                  {(feedback.author.role && JOB_API_TO_PERSON_LABEL[feedback.author.role]) ??
                     feedback.author.role}
                 </span>
                 <p className="text-sub1_sb_18">{feedback.author.name}</p>

@@ -61,18 +61,20 @@ export default function RegisterProject() {
     trackEvent('project_registration_started', {})
   }, [])
 
-  // 리더(등록자) 본인의 직군 — 로그인 시 온보딩에서 설정된 실제 값을 사용 (하드코딩 금지)
+  // 리더(등록자) 본인의 프로젝트 내 직군 — 기본값은 마이페이지 직군이지만,
+  // "함께한 팀원" 초대란에 본인 이메일로 직접 초대하면 그때 고른 탭이 우선한다.
   const [profileJobType, setProfileJobType] = useState<JobTab | null>(null)
+  const [myEmail, setMyEmail] = useState<string | null>(null)
   useEffect(() => {
     getMyProfile()
       .then((profile) => {
+        setMyEmail(profile.email)
         if (profile.jobType) setProfileJobType(JOB_API_TO_LABEL[profile.jobType])
       })
       .catch(() => {
         toast.error('내 직군 정보를 불러오지 못했습니다.')
       })
   }, [])
-  const leaderJobType: JobTab = profileJobType ?? '기획'
 
   const {
     selectedCategories,
@@ -127,6 +129,14 @@ export default function RegisterProject() {
         ...projectImages.map((img) => uploadImage(img.file!)),
       ])
 
+      // "함께한 팀원"에 본인 이메일로 직접 초대했다면 그때 고른 탭이 이 프로젝트에서의 내 역할이 되고,
+      // 아니라면 마이페이지 직군을 기본값으로 사용한다.
+      const selfMember = members.find(
+        (m) => myEmail && m.email.toLowerCase() === myEmail.toLowerCase()
+      )
+      const leaderJobType: JobTab = selfMember?.role ?? profileJobType
+      const inviteMembers = members.filter((m) => m !== selfMember)
+
       const project = await createProject({
         title,
         type: projectType as CreateProjectDto['type'],
@@ -148,7 +158,7 @@ export default function RegisterProject() {
       })
 
       await Promise.allSettled(
-        members.map((m) =>
+        inviteMembers.map((m) =>
           inviteCollaborator(project.id, {
             email: m.email,
             role: JOB_TO_API[m.role] as InviteCollaboratorDto['role'],

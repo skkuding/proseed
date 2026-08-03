@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { ChevronDownIcon } from 'lucide-react'
 import { AccordionTrigger } from '@/components/ui/accordion'
-import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_PERSON_LABEL } from '@/app/_utils/projectConstants'
 import type { SubmissionCard } from './FeedbackSubmissionCard'
 
 function formatDate(dateStr: string) {
@@ -16,7 +16,7 @@ interface FeedbackSubmissionPreviewProps {
 
 export function FeedbackSubmissionPreview({ card, isOpen }: FeedbackSubmissionPreviewProps) {
   const roleLabel =
-    (card.author.role && JOB_API_TO_LABEL[card.author.role]) ?? card.author.role ?? ''
+    (card.author.role && JOB_API_TO_PERSON_LABEL[card.author.role]) ?? card.author.role ?? ''
 
   return (
     <div className="flex flex-col gap-7 py-10">

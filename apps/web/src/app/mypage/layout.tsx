@@ -6,7 +6,7 @@ import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
 import { authClient, authBaseURL } from '@/lib/auth-client'
 import { getMyProfile } from '@/lib/api'
-import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
+import { JOB_API_TO_LABEL, jobTabToPersonLabel } from '@/app/_utils/projectConstants'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 import { MyPageProfileProvider, useMyPageProfile } from './_components/MyPageProfileContext'
 
@@ -91,7 +91,7 @@ function MyPageShell({ children }: { children: ReactNode }) {
             <UserInfoCard
               name={currentUser?.name ?? '테스트 유저'}
               email={currentUser?.email ?? 'test@example.com'}
-              job={currentJob || '직무 미입력'}
+              job={currentJob ? jobTabToPersonLabel(currentJob) : '직무 미입력'}
               loginProvider={provider || 'local'}
               profileImageUrl={currentUser?.image ?? ''}
               projectCount={profile?.joinedProjectCount ?? 0}

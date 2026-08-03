@@ -6,7 +6,12 @@ import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getFeedbacksForVersion, type FeedbackListItemDto, type RecordCategory } from '@/lib/api'
 import { useFeedbackTagStore, type TaggedFeedbackEntry } from '@/store/feedbackTagStore'
-import { JOB_TABS, RECORD_CATEGORY_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  RECORD_CATEGORY_TO_API,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 
 const MAX_PER_TAB = 3
 
@@ -291,7 +296,7 @@ export function FeedbackTagModal({
                   >
                     <span className="flex items-center justify-center gap-1">
                       {activeTab === tab && <Dot className="size-8 m-[-10px]" />}
-                      {tab}
+                      {jobTabToPersonLabel(tab)}
                     </span>
                   </button>
                 )

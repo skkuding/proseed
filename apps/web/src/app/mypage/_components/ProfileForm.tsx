@@ -6,7 +6,12 @@ import { RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TextInput } from '@/components/TextInput'
 import { authClient } from '@/lib/auth-client'
-import { JOB_TABS, JOB_TO_API, type JobTab } from '@/app/_utils/projectConstants'
+import {
+  JOB_TABS,
+  JOB_TO_API,
+  jobTabToPersonLabel,
+  type JobTab,
+} from '@/app/_utils/projectConstants'
 import { useAuthStore } from '@/store/authStore'
 import { BASE as API_URL, updateMyProfile } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
@@ -183,7 +188,7 @@ export function ProfileForm({
                 <span
                   className={`text-body1_m_16 ${job ? 'text-CoolNeutral-20' : 'text-neutral-80'}`}
                 >
-                  {job || '직무를 선택해주세요'}
+                  {job ? jobTabToPersonLabel(job) : '직무를 선택해주세요'}
                 </span>
                 {!readOnly && (
                   <Image
@@ -207,7 +212,7 @@ export function ProfileForm({
                       }}
                       className="w-full px-4 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99"
                     >
-                      {option}
+                      {jobTabToPersonLabel(option)}
                     </button>
                   ))}
                 </div>
