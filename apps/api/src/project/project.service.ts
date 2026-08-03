@@ -23,10 +23,10 @@ export class ProjectService {
 
     const where: Prisma.ProjectWhereInput = {
       ...(search && {
-        title: {
-          contains: search,
-          mode: 'insensitive' as const,
-        },
+        OR: [
+          { title: { contains: search, mode: 'insensitive' as const } },
+          { description: { contains: search, mode: 'insensitive' as const } },
+        ],
       }),
       ...(category && {
         category: {

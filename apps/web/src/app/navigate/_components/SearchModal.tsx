@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
@@ -92,6 +92,13 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     [onClose, router]
   )
 
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!trimmedQuery) return
+    onClose()
+    router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+  }
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -105,15 +112,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
         setHighlightedIndex((i) => (i - 1 + matchedProjects.length) % matchedProjects.length)
-      } else if (e.key === 'Enter') {
-        e.preventDefault()
-        const project = matchedProjects[highlightedIndex] ?? matchedProjects[0]
-        handleProjectClick(project)
       }
     }
     if (isOpen) document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose, matchedProjects, highlightedIndex, handleProjectClick])
+  }, [isOpen, onClose, matchedProjects])
 
   if (!isOpen) return null
 
@@ -149,7 +152,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
           {/* Search input + dropdown */}
           <div className="relative">
-            <div className="flex items-center rounded-full border-[1.4px] border-black pl-6 pr-4 py-3">
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-center rounded-full border-[1.4px] border-black pl-6 pr-4 py-3"
+            >
               <input
                 ref={inputRef}
                 type="text"
@@ -158,8 +164,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 placeholder="프로젝트명을 검색해보세요"
                 className="flex-1 text-body3_r_16 text-black placeholder:text-neutral-70 outline-none bg-transparent"
               />
-              <Image src="/search.svg" alt="검색" width={32} height={32} />
-            </div>
+              <button
+                type="submit"
+                className="flex items-center justify-center hover:cursor-pointer"
+                aria-label="검색 결과 전체 보기"
+              >
+                <Image src="/search.svg" alt="검색" width={32} height={32} />
+              </button>
+            </form>
 
             {trimmedQuery !== '' && (
               <div className="absolute left-0 right-0 top-full mt-2 z-20 h-[150px] overflow-y-auto rounded-xl bg-background-normal shadow-[0_4px_20px_0_rgba(0,0,0,0.12)] border border-neutral-200">
@@ -189,7 +201,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {/* 최근 조회한 프로젝트 */}
           <div className="flex flex-col gap-3 pt-3">
             <div className="flex items-center justify-between">
-              <span className="text-title5_sb_20">최근 조회한 프로젝트</span>
+              <span className="text-title5_sb_24">최근 조회한 프로젝트</span>
               <Button
                 variant="iconMuted"
                 size="bare"

@@ -123,7 +123,7 @@ export default function MyProject() {
             </div>
           )}
           {projects.length > 0 && (
-            <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-20">
               {pagedProjects.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
                   해당 카테고리의 프로젝트가 없습니다.
@@ -138,7 +138,7 @@ export default function MyProject() {
                   ))}
                 </div>
               )}
-              {totalPages > 1 && (
+              {totalPages > 0 && (
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
