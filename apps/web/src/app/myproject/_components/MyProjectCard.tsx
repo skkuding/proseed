@@ -40,7 +40,7 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
                   ))}
                 </div>
               </div>
-              <p className="line-clamp-2 text-body3_r_16 text-CoolNeutral-30">
+              <p className="line-clamp-2 h-13 text-body3_r_16 text-CoolNeutral-30">
                 {project.oneLineDescription}
               </p>
             </div>

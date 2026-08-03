@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface ConfirmModalProps {
   isOpen: boolean
-  title: string
+  title: ReactNode
   description?: string
   cancelLabel?: string
   confirmLabel?: string

@@ -86,8 +86,6 @@ export default function MyProject() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const isEmpty = !isLoading && projects.length === 0
-
   return (
     <main className="min-h-screen pt-10 ">
       <div className="mx-auto max-w-[1200px] flex flex-col gap-10">
@@ -109,35 +107,26 @@ export default function MyProject() {
           />
         </div>
         <div>
-          {isEmpty && (
-            <div className="flex flex-col items-center justify-center py-30 gap-2">
-              <p className="text-title3_sb_24 text-black">아직 등록된 내 프로젝트가 없어요</p>
-              <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
-                <p>프로젝트를 등록하여 피드백을 받고</p>
-                <p>성장기록을 작성하며 커리어 성장을 이뤄보세요</p>
+          {!isLoading && pagedProjects.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-6 py-30">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-title3_sb_24 text-black">아직 등록된 내 프로젝트가 없어요</p>
+                <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+                  <p>프로젝트를 등록하여 피드백을 받고</p>
+                  <p>성장기록을 작성하며 커리어 성장을 이뤄보세요</p>
+                </div>
               </div>
-
-              <Button asChild size="lg" className="mt-4 text-sub3_sb_16">
+              <Button asChild size="lg" className="text-sub3_sb_16">
                 <Link href="/projects/new/register">프로젝트 등록하기</Link>
               </Button>
             </div>
-          )}
-          {projects.length > 0 && (
+          ) : (
             <div className="flex flex-col gap-20">
-              {pagedProjects.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-30 text-body3_r_16 text-CoolNeutral-40">
-                  해당 카테고리의 프로젝트가 없습니다.
-                  <Button asChild size="lg" className="mt-4 text-sub3_sb_16">
-                    <Link href="/projects/new/register">프로젝트 등록하기</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-x-2 gap-y-5">
-                  {pagedProjects.map((project) => (
-                    <MyProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-3 gap-x-2 gap-y-5">
+                {pagedProjects.map((project) => (
+                  <MyProjectCard key={project.id} project={project} />
+                ))}
+              </div>
               {totalPages > 0 && (
                 <Pagination>
                   <PaginationContent>

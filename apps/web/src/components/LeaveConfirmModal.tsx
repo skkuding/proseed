@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import { ConfirmModal } from './ConfirmModal'
 
 interface LeaveConfirmModalProps {
   isOpen: boolean
-  title?: string
+  title?: ReactNode
   description?: string
   onCancel: () => void
   onConfirm: () => void

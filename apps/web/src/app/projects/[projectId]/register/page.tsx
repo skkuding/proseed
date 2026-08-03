@@ -251,7 +251,13 @@ export default function RegisterProject() {
 
       <LeaveConfirmModal
         isOpen={showLeaveModal}
-        title="프로젝트 등록을 취소하고 이전 페이지로 돌아가시겠습니까?"
+        title={
+          <>
+            프로젝트 등록을 취소하고
+            <br />
+            이전 페이지로 돌아가시겠습니까?
+          </>
+        }
         description="프로젝트 등록 취소 후, 지금까지 작성한 정보는 복구가 불가합니다."
         onCancel={() => setShowLeaveModal(false)}
         onConfirm={() => window.history.go(-2)}
