@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common'
 import { FeedbackService } from './feedback.service'
-import { FeedbackController, MyFeedbackController } from './feedback.controller'
+import {
+  FeedbackController,
+  MyFeedbackController,
+  ProjectFeedbackController,
+} from './feedback.controller'
 import { AuthModule } from '../auth/auth.module'
 
 @Module({
   imports: [AuthModule],
-  controllers: [FeedbackController, MyFeedbackController],
+  controllers: [
+    FeedbackController,
+    MyFeedbackController,
+    ProjectFeedbackController,
+  ],
   providers: [FeedbackService],
   exports: [FeedbackService],
 })

@@ -32,8 +32,10 @@ import {
   getProjectById,
   getProjectVersions,
   getFeedbacksForVersion,
+  getFreeformFeedbacks,
   getMyProfile,
   unlockFeedback,
+  unlockFreeformFeedback,
   ApiError,
   type ProjectVersionListItemDto,
   type FeedbackListItemDto,
@@ -59,6 +61,7 @@ export function Feedbacks() {
   const searchParams = useSearchParams()
   const projectId = params.projectId as string
   const [versionList, setVersionList] = useState<ProjectVersionListItemDto[]>([])
+  const [versionsLoaded, setVersionsLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [selectedVersion, setSelectedVersion] = useState('')
   const [feedbacks, setFeedbacks] = useState<FeedbackListItemDto[]>([])
@@ -104,10 +107,15 @@ export function Feedbacks() {
     setUnlockError(null)
     setUnlockingId(submissionId)
     try {
-      const result = await unlockFeedback(projectId, selectedVersion, submissionId, category)
-      setTicketCount(result.remainingTickets)
-      const refreshed = await getFeedbacksForVersion(projectId, selectedVersion)
-      setFeedbacks(refreshed)
+      if (versionList.length === 0) {
+        const result = await unlockFreeformFeedback(projectId, submissionId, category)
+        setTicketCount(result.remainingTickets)
+        setFeedbacks(await getFreeformFeedbacks(projectId))
+      } else {
+        const result = await unlockFeedback(projectId, selectedVersion, submissionId, category)
+        setTicketCount(result.remainingTickets)
+        setFeedbacks(await getFeedbacksForVersion(projectId, selectedVersion))
+      }
     } catch (e) {
       if (e instanceof ApiError && e.code === 'INSUFFICIENT_TICKET') {
         setShowInsufficientTicketModal(true)
@@ -127,6 +135,11 @@ export function Feedbacks() {
       setShowSelfFeedbackModal(true)
       return
     }
+    // 성장기록(버전)이 아직 없으면 직군 선택 모달 없이 자유 피드백 작성 페이지로 바로 이동
+    if (!versionList[0]) {
+      router.push(`/projects/${projectId}/feedback/create`)
+      return
+    }
     setShowRoleSelectModal(true)
   }
 
@@ -140,6 +153,7 @@ export function Feedbacks() {
   useEffect(() => {
     getProjectVersions(projectId).then((versions) => {
       setVersionList(versions)
+      setVersionsLoaded(true)
       setSelectedVersion((prev) => {
         if (prev) return prev
         const versionParam = searchParams.get('version')
@@ -151,7 +165,23 @@ export function Feedbacks() {
     })
   }, [projectId, searchParams])
 
+  // 성장기록(버전)이 아직 없는 프로젝트는 versionId 없이 남긴 자유 피드백 목록을 대신 불러온다
+  const feedbackKey = versionList.length > 0 ? selectedVersion : 'freeform'
+
   useEffect(() => {
+    if (!versionsLoaded) return
+    if (versionList.length === 0) {
+      getFreeformFeedbacks(projectId)
+        .then((data) => {
+          setFeedbacks(data)
+          setLoadedVersion('freeform')
+        })
+        .catch(() => {
+          setFeedbacks([])
+          setLoadedVersion('freeform')
+        })
+      return
+    }
     if (!selectedVersion) return
     getFeedbacksForVersion(projectId, selectedVersion)
       .then((data) => {
@@ -162,9 +192,9 @@ export function Feedbacks() {
         setFeedbacks([])
         setLoadedVersion(selectedVersion)
       })
-  }, [projectId, selectedVersion])
+  }, [projectId, selectedVersion, versionList, versionsLoaded])
 
-  const loading = selectedVersion !== '' && loadedVersion !== selectedVersion
+  const loading = versionsLoaded && loadedVersion !== feedbackKey
 
   //메인페이지 "최근 피드백" 카드 딥링크 — 현재 불러온 버전 안에서만 찾을 수 있음
   useEffect(() => {
@@ -276,7 +306,9 @@ export function Feedbacks() {
           <Button
             size="md"
             onClick={handleWriteFeedbackClick}
-            disabled={!versionList[0] || selectedVersion !== versionList[0].id.toString()}
+            // 성장기록(버전)이 아직 없으면 자유 피드백 작성이 가능하므로 막지 않는다.
+            // 버전이 있을 때는 최신 버전을 보고 있을 때만 작성 가능.
+            disabled={!!versionList[0] && selectedVersion !== versionList[0].id.toString()}
             className="ml-1.5 w-[137px] text-sub3_sb_16"
           >
             피드백 작성하기
@@ -324,11 +356,14 @@ export function Feedbacks() {
               <p>성장을 함께 만들어 보세요!</p>
             </div>
           </div>
-          {versionList[0] && selectedVersion === versionList[0].id.toString() && (
-            <Button onClick={handleWriteFeedbackClick} size="lg" className="text-sub3_sb_16">
-              피드백 작성하기
-            </Button>
-          )}
+          <Button
+            onClick={handleWriteFeedbackClick}
+            disabled={!!versionList[0] && selectedVersion !== versionList[0].id.toString()}
+            size="lg"
+            className="text-sub3_sb_16"
+          >
+            피드백 작성하기
+          </Button>
         </div>
       ) : (
         <div className="ml-[-20px]">

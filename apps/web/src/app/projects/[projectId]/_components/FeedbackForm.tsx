@@ -3,24 +3,32 @@
 import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
-import Image from 'next/image'
-import { Dot, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
+import { ConfirmModal } from '@/components/ConfirmModal'
 import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
-import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
-import { ChevronRightIcon } from 'lucide-react'
+import {
+  FeedbackQuestionBox,
+  MAX_QUESTION_IMAGES,
+  type QuestionImageItem,
+} from './FeedbackQuestionBox'
+import { FeedbackAnswerNavSidebar } from './FeedbackAnswerNavSidebar'
+import { ProjectSummarySidebar } from './ProjectSummarySidebar'
 import {
   getUploadUrl,
   uploadToS3,
   getProjectVersions,
   getFeedbackQuestions,
+  getProjectById,
   createFeedback,
+  createFreeformFeedback,
   type FeedbackQuestionItemDto,
   type CreateFeedbackDto,
+  type CreateFreeformFeedbackDto,
+  type ProjectDetailResponseDto,
 } from '@/lib/api'
 import {
   JOB_TABS,
@@ -31,18 +39,27 @@ import {
 import { trackEvent } from '@/lib/analytics'
 
 const ONE_LINE_MAX = 200
-const MAX_IMAGES = 8
 const TABS = JOB_TABS
 type TabLabel = JobTab
 
-type ImageItem = {
-  id: string
-  preview: string
-  key?: string
-  uploading: boolean
-}
-
 type ImageModal = { questionId: number; index: number } | null
+
+// 성장기록(버전)이 아직 없는 프로젝트는 실제 질문 대신 직군당 자유 텍스트 질문 하나로 대체한다.
+// FeedbackQuestionItemDto와 동일한 shape을 쓰면 기존 질문별 렌더링 코드를 그대로 재사용할 수 있다.
+const FREEFORM_QUESTION_ID: Record<TabLabel, number> = {
+  기획: -1,
+  디자인: -2,
+  개발: -3,
+  기타: -4,
+}
+const FREEFORM_QUESTIONS: FeedbackQuestionItemDto[] = TABS.map((tab) => ({
+  id: FREEFORM_QUESTION_ID[tab],
+  category: RECORD_CATEGORY_TO_API[tab] as FeedbackQuestionItemDto['category'],
+  title: '자유롭게 피드백을 남겨주세요',
+  description: '',
+  order: 0,
+  required: true,
+}))
 
 export function CreateFeedbackContent() {
   const router = useRouter()
@@ -52,6 +69,8 @@ export function CreateFeedbackContent() {
   const version = searchParams.get('version')
   const rolesParam = searchParams.get('roles')
   const allowedCategories = rolesParam ? rolesParam.split(',') : null
+  // 성장기록(버전)이 아직 없는 프로젝트는 ?version 없이 이 페이지로 바로 들어온다
+  const isFreeform = !version
 
   // GENERAL(기타) 필수 질문은 어떤 직군을 선택했든 항상 답변해야 하므로(백엔드 검증 기준)
   // 역할 선택에서 빠졌더라도 항상 탭에 포함시킨다
@@ -64,20 +83,22 @@ export function CreateFeedbackContent() {
   const [latestVersionId, setLatestVersionId] = useState<string | null>(null)
   const [versionChecked, setVersionChecked] = useState(false)
   const [allQuestions, setAllQuestions] = useState<FeedbackQuestionItemDto[]>([])
+  const [project, setProject] = useState<ProjectDetailResponseDto | null>(null)
 
   const isLatestVersion = latestVersionId !== null && version === latestVersionId
+  const effectiveQuestions = isFreeform ? FREEFORM_QUESTIONS : allQuestions
 
   const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획')
   const [oneLineReview, setOneLineReview] = useState('')
   const [answers, setAnswers] = useState<Record<number, string>>({})
-  const [questionImages, setQuestionImages] = useState<Record<number, ImageItem[]>>({})
+  const [questionImages, setQuestionImages] = useState<Record<number, QuestionImageItem[]>>({})
   const [imageModal, setImageModal] = useState<ImageModal>(null)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showFreeformConfirmModal, setShowFreeformConfirmModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const questionRefs = useRef<Record<number, HTMLDivElement | null>>({})
-  const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
   const startTracked = useRef(false)
   useEffect(() => {
@@ -87,16 +108,22 @@ export function CreateFeedbackContent() {
   }, [])
 
   const category = RECORD_CATEGORY_TO_API[activeTab]
-  const questions = allQuestions
+  const questions = effectiveQuestions
     .filter((q) => q.category === category)
     .sort((a, b) => a.order - b.order)
 
   const allowedApiCategories = new Set(allowedTabs.map((t) => RECORD_CATEGORY_TO_API[t]))
-  const visibleQuestions = allQuestions.filter((q) => allowedApiCategories.has(q.category))
+  const visibleQuestions = effectiveQuestions.filter((q) => allowedApiCategories.has(q.category))
   const hasMissingRequired = visibleQuestions.some(
     (q) => q.required && (answers[q.id] ?? '').trim().length === 0
   )
-  const isSubmitEnabled = oneLineReview.trim().length > 0 && !hasMissingRequired
+  // 자유 피드백은 직군 중 하나만 작성해도 제출 가능 — "모든 필수 질문 충족"이 아니라 "하나 이상 작성"으로 판단
+  const hasAnyFreeformAnswer = FREEFORM_QUESTIONS.some(
+    (q) => (answers[q.id] ?? '').trim().length > 0
+  )
+  const isSubmitEnabled = isFreeform
+    ? oneLineReview.trim().length > 0 && hasAnyFreeformAnswer
+    : oneLineReview.trim().length > 0 && !hasMissingRequired
 
   useEffect(() => {
     if (!version) return
@@ -110,10 +137,18 @@ export function CreateFeedbackContent() {
   }, [projectId, version])
 
   useEffect(() => {
+    if (isFreeform) return
     if (versionChecked && !isLatestVersion) {
       router.replace(`/projects/${params.projectId}/feedback`)
     }
-  }, [versionChecked, isLatestVersion, router, params.projectId])
+  }, [isFreeform, versionChecked, isLatestVersion, router, params.projectId])
+
+  useEffect(() => {
+    if (!isFreeform) return
+    getProjectById(projectId)
+      .then(setProject)
+      .catch(() => setProject(null))
+  }, [isFreeform, projectId])
 
   useEffect(() => {
     window.history.pushState(null, '', window.location.href)
@@ -125,7 +160,7 @@ export function CreateFeedbackContent() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  if (!versionChecked || !isLatestVersion) return null
+  if (!isFreeform && (!versionChecked || !isLatestVersion)) return null
 
   const handleLeaveConfirm = () => {
     window.history.go(-2)
@@ -134,24 +169,40 @@ export function CreateFeedbackContent() {
   const handleSubmit = async () => {
     if (!isSubmitEnabled) return
 
-    const dto: CreateFeedbackDto = {
-      oneLineReview,
-      // 백엔드가 content를 필수로 검증하므로, 선택 질문 중 답변 안 한 건 아예 빼고 보낸다
-      feedbacks: visibleQuestions
-        .filter((q) => (answers[q.id] ?? '').trim().length > 0)
-        .map((q) => ({
-          questionId: q.id,
-          content: answers[q.id] ?? '',
-          imageUrls: (questionImages[q.id] ?? [])
-            .filter((img) => !img.uploading && img.key)
-            .map((img) => img.key as string),
-        })),
-    }
-
     setSubmitting(true)
     try {
-      await createFeedback(projectId, version as string, dto)
-      trackEvent('feedback_submitted', { question_count: visibleQuestions.length })
+      if (isFreeform) {
+        const dto: CreateFreeformFeedbackDto = {
+          oneLineReview,
+          feedbacks: FREEFORM_QUESTIONS.filter((q) => (answers[q.id] ?? '').trim().length > 0).map(
+            (q) => ({
+              category: q.category as CreateFreeformFeedbackDto['feedbacks'][number]['category'],
+              content: answers[q.id] ?? '',
+              imageUrls: (questionImages[q.id] ?? [])
+                .filter((img) => !img.uploading && img.key)
+                .map((img) => img.key as string),
+            })
+          ),
+        }
+        await createFreeformFeedback(projectId, dto)
+        trackEvent('feedback_submitted', { question_count: dto.feedbacks.length })
+      } else {
+        const dto: CreateFeedbackDto = {
+          oneLineReview,
+          // 백엔드가 content를 필수로 검증하므로, 선택 질문 중 답변 안 한 건 아예 빼고 보낸다
+          feedbacks: visibleQuestions
+            .filter((q) => (answers[q.id] ?? '').trim().length > 0)
+            .map((q) => ({
+              questionId: q.id,
+              content: answers[q.id] ?? '',
+              imageUrls: (questionImages[q.id] ?? [])
+                .filter((img) => !img.uploading && img.key)
+                .map((img) => img.key as string),
+            })),
+        }
+        await createFeedback(projectId, version as string, dto)
+        trackEvent('feedback_submitted', { question_count: visibleQuestions.length })
+      }
       setShowSuccessModal(true)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '피드백 제출에 실패했습니다')
@@ -168,11 +219,11 @@ export function CreateFeedbackContent() {
     if (!files || files.length === 0) return
 
     const current = questionImages[questionId]?.length ?? 0
-    const remaining = MAX_IMAGES - current
+    const remaining = MAX_QUESTION_IMAGES - current
     const selected = Array.from(files).slice(0, remaining)
     if (selected.length === 0) return
 
-    const newImages: ImageItem[] = selected.map((file) => ({
+    const newImages: QuestionImageItem[] = selected.map((file) => ({
       id: crypto.randomUUID(),
       preview: URL.createObjectURL(file),
       uploading: true,
@@ -205,9 +256,6 @@ export function CreateFeedbackContent() {
         }
       })
     )
-
-    const input = fileInputRefs.current[questionId]
-    if (input) input.value = ''
   }
 
   const removeImage = (questionId: number, index: number) => {
@@ -267,95 +315,33 @@ export function CreateFeedbackContent() {
 
           {/* 질문별 답변 */}
           {questions.map((q) => (
-            <div
+            <FeedbackQuestionBox
               key={q.id}
-              ref={(el) => {
+              boxRef={(el) => {
                 questionRefs.current[q.id] = el
               }}
-              className="flex flex-col gap-3 bg-white rounded-[12px] p-7 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]"
-            >
-              <div className="flex items-center gap-2">
-                <h2 className="text-title1_sb_28 min-w-0 flex-1">{q.title}</h2>
-                {q.required && <FieldBadge type="필수" />}
-                <Button
-                  size="sm"
-                  onClick={() => fileInputRefs.current[q.id]?.click()}
-                  disabled={(questionImages[q.id]?.length ?? 0) >= MAX_IMAGES}
-                  className="w-34.25 shrink-0 px-5 text-sub3_sb_16"
-                >
-                  이미지 등록하기
-                </Button>
-                <input
-                  ref={(el) => {
-                    fileInputRefs.current[q.id] = el
-                  }}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleImageSelect(q.id, e.target.files)}
-                />
-              </div>
-              <Editor
-                markdown={answers[q.id] ?? ''}
-                onChange={(val) => setAnswers((prev) => ({ ...prev, [q.id]: val }))}
-                width="100%"
-                height={252}
-              />
-              {/* Image area */}
-              {(questionImages[q.id]?.length ?? 0) > 0 ? (
-                <div className="grid grid-cols-4 gap-x-2 gap-y-4">
-                  {questionImages[q.id].map((img, index) => (
-                    <button
-                      key={img.id}
-                      onClick={() => setImageModal({ questionId: q.id, index })}
-                      className="relative aspect-video w-full rounded-lg overflow-hidden hover:cursor-pointer"
-                    >
-                      <Image src={img.preview} alt="" fill className="object-cover" />
-                      {img.uploading && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <button
-                  onClick={() => fileInputRefs.current[q.id]?.click()}
-                  className="flex flex-col items-center justify-center gap-2 w-56.25 h-31.75 rounded-xl border border-dashed border-neutral-200 text-CoolNeutral-50 bg-neutral-99 hover:bg-neutral-95 hover:cursor-pointer transition-colors"
-                >
-                  <ImageIcon className="size-6" />
-                  <span className="text-caption1_m_13">이미지 등록</span>
-                </button>
-              )}
-            </div>
+              question={q}
+              answer={answers[q.id] ?? ''}
+              onAnswerChange={(val) => setAnswers((prev) => ({ ...prev, [q.id]: val }))}
+              images={questionImages[q.id] ?? []}
+              onImageSelect={(files) => handleImageSelect(q.id, files)}
+              onImageClick={(index) => setImageModal({ questionId: q.id, index })}
+            />
           ))}
         </div>
 
         {/* Sidebar */}
         <div className="sticky top-6">
           <div className="w-90 shrink-0 flex flex-col gap-5 truncate bg-white rounded-[12px] p-7 shadow-[0_4px_20px_0_rgba(27, 29, 38, 0.06)]">
-            <p className="text-title1_sb_28">피드백 답변 바로가기</p>
-            <div className="flex flex-col gap-3">
-              {questions.map((q) => (
-                <button
-                  key={q.id}
-                  onClick={() => scrollToQuestion(q.id)}
-                  className="flex items-center justify-between w-full rounded-lg text-body2_m_14 text-CoolNeutral-20 hover:bg-neutral-99 hover:cursor-pointer transition-colors text-left"
-                >
-                  <div className="flex items-center gap-0.5 min-w-0">
-                    <Dot className="size-6 shrink-0 text-CoolNeutral-20" />
-                    <span className="truncate text-body1_m_16">{q.title}</span>
-                  </div>
-                  <ChevronRightIcon className="size-5 shrink-0 text-CoolNeutral-40" />
-                </button>
-              ))}
-            </div>
+            {isFreeform ? (
+              <ProjectSummarySidebar project={project} />
+            ) : (
+              <FeedbackAnswerNavSidebar questions={questions} onScrollTo={scrollToQuestion} />
+            )}
           </div>
           <Button
             size="sm"
-            onClick={handleSubmit}
+            onClick={() => (isFreeform ? setShowFreeformConfirmModal(true) : handleSubmit())}
             disabled={submitting || !isSubmitEnabled}
             className="w-full mt-4 text-sub3_sb_16"
           >
@@ -368,6 +354,25 @@ export function CreateFeedbackContent() {
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
         projectId={params.projectId ?? ''}
+      />
+
+      <ConfirmModal
+        isOpen={showFreeformConfirmModal}
+        title="정말 제출하시겠어요?"
+        description={
+          <>
+            제출한 뒤에는 다시 수정하거나 작성하실 수 없어요.
+            <br />
+            다른 직군에 대한 의견도 남기고 싶으시다면, 지금 함께 작성해주세요!
+          </>
+        }
+        cancelLabel="취소"
+        confirmLabel="제출하기"
+        onCancel={() => setShowFreeformConfirmModal(false)}
+        onConfirm={() => {
+          setShowFreeformConfirmModal(false)
+          handleSubmit()
+        }}
       />
 
       <LeaveConfirmModal

@@ -28,6 +28,7 @@ export type MypageUpdateDto = components['schemas']['MypageUpdateDto']
 export type FeedbackQuestionItemDto = components['schemas']['FeedbackQuestionItemDto']
 export type CreateFeedbackDto = components['schemas']['CreateFeedbackDto']
 export type CreateFeedbackResponseDto = components['schemas']['CreateFeedbackResponseDto']
+export type CreateFreeformFeedbackDto = components['schemas']['CreateFreeformFeedbackDto']
 export type RecordCategory = components['schemas']['RecordCategory']
 export type GrowthRecordDraftResponseDto = components['schemas']['GrowthRecordDraftResponseDto']
 export type UserProfileResponseDto = components['schemas']['OtherUserProfileResponseDto']
@@ -356,6 +357,27 @@ export async function createFeedback(
   return res.json()
 }
 
+// 성장기록(버전)이 아직 없는 프로젝트에 남기는 자유 피드백
+export async function createFreeformFeedback(
+  projectId: string | number,
+  dto: CreateFreeformFeedbackDto
+): Promise<CreateFeedbackResponseDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/feedbacks`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  })
+  if (!res.ok) {
+    if (res.status === 409) {
+      throw new Error('이미 이 프로젝트에 피드백을 제출하셨어요')
+    }
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.message ?? '피드백 제출에 실패했습니다')
+  }
+  return res.json()
+}
+
 export async function getFeedbacksForVersion(
   projectId: string | number,
   versionId: string | number
@@ -383,6 +405,37 @@ export async function unlockFeedback(
       body: JSON.stringify({ category }),
     }
   )
+  const body = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new ApiError(body?.message ?? '피드백 열람에 실패했습니다', body?.code)
+  }
+  return body.data
+}
+
+// 성장기록(버전)이 아직 없는 프로젝트의 자유 피드백 목록
+export async function getFreeformFeedbacks(
+  projectId: string | number
+): Promise<FeedbackListItemDto[]> {
+  const res = await fetch(`${BASE}/project/${projectId}/feedbacks`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Failed to fetch feedbacks')
+  const body: { success: boolean; data: FeedbackListItemDto[] } = await res.json()
+  return body.data
+}
+
+// 자유 피드백 열람(unlock) — 버전이 있는 피드백과 동일하게 티켓 1개 차감
+export async function unlockFreeformFeedback(
+  projectId: string | number,
+  submissionId: string | number,
+  category: RecordCategory
+): Promise<UnlockFeedbackDataDto> {
+  const res = await fetch(`${BASE}/project/${projectId}/feedbacks/${submissionId}/unlock`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category }),
+  })
   const body = await res.json().catch(() => null)
   if (!res.ok) {
     throw new ApiError(body?.message ?? '피드백 열람에 실패했습니다', body?.code)

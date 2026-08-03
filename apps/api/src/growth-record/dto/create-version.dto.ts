@@ -114,10 +114,13 @@ export class CreateFeedbackQuestionDto {
 }
 
 // 태그(=채택)할 피드백 제출 참조 — FeedbackSubmission의 @@unique([versionId, userId])로
-// 제출을 특정. FE는 submissionId를 알 방법이 없어 (버전 id, 작성자 id) 쌍으로 대신 지정
+// 제출을 특정. FE는 submissionId를 알 방법이 없어 (버전 id, 작성자 id) 쌍으로 대신 지정.
+// 성장기록(버전)이 아직 없어 남긴 자유 피드백은 versionId가 null — 자유 피드백은 프로젝트당 1회만
+// 제출 가능해 (null, userId) 조합도 항상 유일하므로 동일한 방식으로 특정 가능.
 export class TaggedSubmissionRefDto {
+  @IsOptional()
   @IsInt()
-  versionId: number
+  versionId: number | null
 
   @IsInt()
   userId: number

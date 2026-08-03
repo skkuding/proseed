@@ -158,23 +158,44 @@ export function GrowthRecord() {
       />
 
       {/* Content */}
-      {activeTab === '전체 요약' ? (
-        versionDetail ? (
-          <SummarySection versionDetail={versionDetail} />
+      {!versionDetail ? (
+        canWriteGrowthRecord ? (
+          <div className="flex flex-col items-center justify-center gap-6 py-20">
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-title3_sb_24">아직 프로젝트 성장기록이 없습니다</p>
+              <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
+                <p>피드백을 받고 성장기록을 남겨</p>
+                <p>나만의 성장 스토리를 완성해보세요</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
+              size="lg"
+              className="text-sub3_sb_16"
+            >
+              성장기록 작성하기
+            </Button>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center gap-6 py-20">
             <div className="flex flex-col items-center gap-2">
               <p className="text-title3_sb_24">아직 프로젝트 성장기록이 없습니다</p>
               <div className="flex flex-col items-center text-body3_r_16 text-CoolNeutral-40">
-                <p>프로젝트를 등록하고 성장기록을 남겨</p>
-                <p>나만의 성장 스토리를 완성해보세요</p>
+                <p>피드백을 남겨 이 프로젝트가</p>
+                <p>성장기록을 완성할 수 있도록 도와주세요</p>
               </div>
             </div>
-            <Button onClick={() => router.push('/navigate')} size="lg" className="text-sub3_sb_16">
-              성장기록 작성하기
+            <Button
+              onClick={() => router.push(`/projects/${params.projectId}/feedback/create`)}
+              size="lg"
+              className="text-sub3_sb_16"
+            >
+              피드백 작성하기
             </Button>
           </div>
         )
+      ) : activeTab === '전체 요약' ? (
+        <SummarySection versionDetail={versionDetail} />
       ) : activeRecord ? (
         <RecordSection record={activeRecord} />
       ) : (

@@ -387,7 +387,8 @@ export class GrowthRecordService {
       return new Map()
     }
 
-    //(versionId, userId)는 @@unique([versionId, userId])로 제출 하나를 정확히 특정
+    //(versionId, userId)는 @@unique([versionId, userId])로 제출 하나를 정확히 특정.
+    //자유 피드백(versionId=null)도 프로젝트당 1회만 제출 가능해 (null, userId) 조합 역시 항상 유일하다.
     const submissions = await tx.feedbackSubmission.findMany({
       where: {
         OR: allRefs.map((ref) => ({
@@ -402,7 +403,9 @@ export class GrowthRecordService {
         userId: true,
         adoptions: { select: { id: true }, take: 1 },
         unlocks: { select: { id: true }, take: 1 },
-        feedbacks: { select: { question: { select: { category: true } } } },
+        feedbacks: {
+          select: { category: true, question: { select: { category: true } } },
+        },
       },
     })
     const submissionByKey = new Map(
@@ -429,8 +432,9 @@ export class GrowthRecordService {
           )
         }
         //해당 직군 답변이 있는 제출만 그 직군에 태그 가능
+        //자유 피드백은 question이 없으므로 답변에 기록된 category를 사용
         const hasCategoryAnswer = submission.feedbacks.some(
-          (f) => f.question.category === category,
+          (f) => (f.question?.category ?? f.category) === category,
         )
         if (!hasCategoryAnswer) {
           throw new UnprocessableDataException(

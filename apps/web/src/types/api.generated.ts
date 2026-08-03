@@ -343,6 +343,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/project/{projectId}/feedbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProjectFeedbackController_findFreeformFeedbacks"];
+        put?: never;
+        post: operations["ProjectFeedbackController_createFreeformFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/project/{projectId}/feedbacks/{submissionId}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProjectFeedbackController_unlockFreeformFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project": {
         parameters: {
             query?: never;
@@ -650,6 +682,7 @@ export interface components {
         };
         MyFeedbackProjectItemDto: {
             submissionId: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
             versionId: number;
             projectId: number;
             projectTitle: string;
@@ -677,7 +710,9 @@ export interface components {
             imageUrl: string | null;
             imageUrls: string[];
             id: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0 */
             questionId: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
             versionId: number;
             userId: number;
             content: string;
@@ -723,6 +758,7 @@ export interface components {
             /** @description 이 제출이 열람(unlock)됐는지. false면 content/imageUrls는 서버에서 비워서 내려감 */
             isUnlocked: boolean;
             id: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0 */
             questionId: number;
             questionTitle: string;
             questionContent: string;
@@ -774,6 +810,7 @@ export interface components {
             category: components["schemas"]["RecordCategory"];
             imageUrls: string[];
             id: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0 */
             questionId: number;
             questionTitle: string;
             questionContent: string;
@@ -786,6 +823,7 @@ export interface components {
         FeedbackSubmissionDetailDto: {
             id: number;
             projectId: number;
+            /** @description 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
             versionId: number;
             oneLineReview: string;
             author: components["schemas"]["FeedbackSubmissionAuthorDto"];
@@ -798,6 +836,16 @@ export interface components {
         FeedbackSubmissionDetailResponseDto: {
             success: boolean;
             data: components["schemas"]["FeedbackSubmissionDetailDto"];
+        };
+        FreeformFeedbackItemDto: {
+            /** @enum {string} */
+            category: "PLAN" | "DESIGN" | "DEVELOPMENT" | "GENERAL";
+            content: string;
+            imageUrls?: string[];
+        };
+        CreateFreeformFeedbackDto: {
+            oneLineReview: string;
+            feedbacks: components["schemas"]["FreeformFeedbackItemDto"][];
         };
         CreateProjectDto: {
             title: string;
@@ -962,7 +1010,7 @@ export interface components {
             isRequired: boolean;
         };
         TaggedSubmissionRefDto: {
-            versionId: number;
+            versionId: number | null;
             userId: number;
         };
         TaggedFeedbacksDto: {
@@ -1602,6 +1650,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FeedbackSubmissionDetailResponseDto"];
+                };
+            };
+        };
+    };
+    ProjectFeedbackController_findFreeformFeedbacks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackListResponseDto"];
+                };
+            };
+        };
+    };
+    ProjectFeedbackController_createFreeformFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFreeformFeedbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateFeedbackResponseDto"];
+                };
+            };
+        };
+    };
+    ProjectFeedbackController_unlockFreeformFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: number;
+                submissionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UnlockFeedbackDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnlockFeedbackResponseDto"];
                 };
             };
         };

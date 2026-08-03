@@ -739,6 +739,132 @@
         ]
       }
     },
+    "/project/{projectId}/feedbacks": {
+      "post": {
+        "operationId": "ProjectFeedbackController_createFreeformFeedback",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFreeformFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      },
+      "get": {
+        "operationId": "ProjectFeedbackController_findFreeformFeedbacks",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
+    "/project/{projectId}/feedbacks/{submissionId}/unlock": {
+      "post": {
+        "operationId": "ProjectFeedbackController_unlockFreeformFeedback",
+        "parameters": [
+          {
+            "name": "projectId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "submissionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockFeedbackDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnlockFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "tags": [
+          "Feedback"
+        ]
+      }
+    },
     "/project": {
       "post": {
         "operationId": "ProjectController_create",
@@ -1882,7 +2008,8 @@
             "type": "number"
           },
           "versionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0"
           },
           "projectId": {
             "type": "number"
@@ -1993,10 +2120,12 @@
             "type": "number"
           },
           "questionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0"
           },
           "versionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0"
           },
           "userId": {
             "type": "number"
@@ -2179,7 +2308,8 @@
             "type": "number"
           },
           "questionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0"
           },
           "questionTitle": {
             "type": "string"
@@ -2389,7 +2519,8 @@
             "type": "number"
           },
           "questionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0"
           },
           "questionTitle": {
             "type": "string"
@@ -2431,7 +2562,8 @@
             "type": "number"
           },
           "versionId": {
-            "type": "number"
+            "type": "number",
+            "description": "성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0"
           },
           "oneLineReview": {
             "type": "string"
@@ -2478,6 +2610,52 @@
         "required": [
           "success",
           "data"
+        ]
+      },
+      "FreeformFeedbackItemDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "PLAN",
+              "DESIGN",
+              "DEVELOPMENT",
+              "GENERAL"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "content"
+        ]
+      },
+      "CreateFreeformFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "oneLineReview": {
+            "type": "string"
+          },
+          "feedbacks": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreeformFeedbackItemDto"
+            }
+          }
+        },
+        "required": [
+          "oneLineReview",
+          "feedbacks"
         ]
       },
       "CreateProjectDto": {
@@ -3189,7 +3367,8 @@
         "type": "object",
         "properties": {
           "versionId": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "userId": {
             "type": "number"

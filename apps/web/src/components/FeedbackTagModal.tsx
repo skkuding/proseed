@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getFeedbacksForVersion, type FeedbackListItemDto, type RecordCategory } from '@/lib/api'
+import {
+  getFeedbacksForVersion,
+  getFreeformFeedbacks,
+  type FeedbackListItemDto,
+  type RecordCategory,
+} from '@/lib/api'
 import { useFeedbackTagStore, type TaggedFeedbackEntry } from '@/store/feedbackTagStore'
 import {
   JOB_TABS,
@@ -82,10 +87,12 @@ export function FeedbackTagModal({
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!isOpen || !previousVersionId) return
-    getFeedbacksForVersion(projectId, previousVersionId)
-      .then(setFeedbacks)
-      .catch(() => setFeedbacks([]))
+    if (!isOpen) return
+    // 성장기록(버전)이 아직 없는 프로젝트는 이전 버전 대신 자유 피드백을 태그 대상으로 불러온다
+    const fetchFeedbacks = previousVersionId
+      ? getFeedbacksForVersion(projectId, previousVersionId)
+      : getFreeformFeedbacks(projectId)
+    fetchFeedbacks.then(setFeedbacks).catch(() => setFeedbacks([]))
   }, [isOpen, previousVersionId, projectId])
 
   if (!isOpen) return null
@@ -107,7 +114,7 @@ export function FeedbackTagModal({
       }
       if (current.length >= MAX_PER_TAB) return prev
       const entry: TaggedFeedbackEntry = {
-        versionId: previousVersionId as number,
+        versionId: previousVersionId,
         userId: card.userId,
         submissionId: card.submissionId,
         author: card.author,
@@ -290,7 +297,7 @@ export function FeedbackTagModal({
                       setActiveTab(tab)
                       setDetailSubmissionId(null)
                     }}
-                    className={`text-body2_m_14 w-21 h-[38px] px-4 py-2 hover:cursor-pointer transition-colors relative ${
+                    className={`text-body2_m_14 w-23 h-[38px] px-4 py-2 whitespace-nowrap hover:cursor-pointer transition-colors relative ${
                       activeTab === tab ? 'text-black' : 'text-neutral-40'
                     }`}
                   >
@@ -311,11 +318,7 @@ export function FeedbackTagModal({
 
         {/* Feedback list */}
         <div className="overflow-y-auto flex-1 px-8 pt-4 pb-6">
-          {!previousVersionId ? (
-            <p className="text-body3_r_16 text-CoolNeutral-40 py-10 text-center">
-              아직 발행된 성장기록이 없어 태그할 피드백이 없습니다.
-            </p>
-          ) : cards.filter((c) => !c.isAdopted).length === 0 ? (
+          {cards.filter((c) => !c.isAdopted).length === 0 ? (
             <p className="text-body3_r_16 text-CoolNeutral-40 py-10 text-center">
               해당 카테고리의 피드백이 없습니다.
             </p>

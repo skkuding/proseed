@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 interface ConfirmModalProps {
   isOpen: boolean
   title: ReactNode
-  description?: string
+  description?: ReactNode
   cancelLabel?: string
   confirmLabel?: string
   cancelButtonClassName?: string

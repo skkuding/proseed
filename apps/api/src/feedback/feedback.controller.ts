@@ -11,7 +11,10 @@ import {
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger'
 import { OptionalAuth, Public } from 'src/auth/decorators/public.decorator'
 import { FeedbackService } from './feedback.service'
-import { CreateFeedbackDto } from './dto/create-feedback.dto'
+import {
+  CreateFeedbackDto,
+  CreateFreeformFeedbackDto,
+} from './dto/create-feedback.dto'
 import { GetRecentFeedbacksDto } from './dto/get-recent-feedbacks.dto'
 import { UnlockFeedbackDto } from './dto/unlock-feedback.dto'
 import {
@@ -27,6 +30,60 @@ import type {
   OptionalUserRequest,
   RequestWithUser,
 } from 'src/common/types/request-with-user.type'
+
+//성장기록(버전)이 아직 없는 프로젝트용 자유 피드백 — 버전에 매이지 않으므로 별도 컨트롤러
+@ApiTags('Feedback')
+@Controller('project/:projectId')
+export class ProjectFeedbackController {
+  constructor(private readonly feedbackService: FeedbackService) {}
+
+  // POST project/:projectId/feedbacks
+  @ApiCookieAuth()
+  @Post('feedbacks')
+  async createFreeformFeedback(
+    @Req() req: RequestWithUser,
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Body() dto: CreateFreeformFeedbackDto,
+  ): Promise<CreateFeedbackResponseDto> {
+    return await this.feedbackService.createFreeformFeedback(
+      req.user.id,
+      projectId,
+      dto,
+    )
+  }
+
+  // GET project/:projectId/feedbacks — 성장기록(버전) 없는 프로젝트의 자유 피드백 목록, 공개
+  @OptionalAuth()
+  @Get('feedbacks')
+  async findFreeformFeedbacks(
+    @Req() req: OptionalUserRequest,
+    @Param('projectId', ParseIntPipe) projectId: number,
+  ): Promise<FeedbackListResponseDto> {
+    return await this.feedbackService.findFeedbacksForVersion(
+      projectId,
+      null,
+      req.user?.id,
+    )
+  }
+
+  // POST project/:projectId/feedbacks/:submissionId/unlock — 자유 피드백 열람 (티켓 1개 차감, 무료 아님)
+  @ApiCookieAuth()
+  @Post('feedbacks/:submissionId/unlock')
+  async unlockFreeformFeedback(
+    @Req() req: RequestWithUser,
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Body() dto: UnlockFeedbackDto,
+  ): Promise<UnlockFeedbackResponseDto> {
+    return await this.feedbackService.unlockFeedback(
+      req.user.id,
+      projectId,
+      null,
+      submissionId,
+      dto.category,
+    )
+  }
+}
 
 //공개 목록(feedbacks)이 섞여 있어 인증 표기는 라우트 레벨로
 @ApiTags('Feedback')

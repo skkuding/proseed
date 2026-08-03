@@ -99,14 +99,16 @@ export class ProjectService {
       select: {
         submissionId: true,
         submission: { select: { projectId: true } },
+        category: true,
         question: { select: { category: true } },
       },
     })
 
     const seen = new Set<string>()
     const result = new Map<number, number>()
-    for (const { submissionId, submission, question } of feedbacks) {
-      const key = `${submissionId}:${question.category}`
+    for (const { submissionId, submission, question, category } of feedbacks) {
+      // 성장기록 없이 남긴 자유 피드백은 question이 없으므로 답변에 기록된 category를 사용
+      const key = `${submissionId}:${question?.category ?? category}`
       if (seen.has(key)) continue
       seen.add(key)
       result.set(

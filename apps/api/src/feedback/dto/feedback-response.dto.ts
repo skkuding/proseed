@@ -3,8 +3,13 @@ import { JobType, RecordCategory } from '@prisma/client'
 
 export class CreatedFeedbackDto {
   id: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0 */
   questionId: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
   versionId: number
+
   userId: number
   content: string
 
@@ -46,7 +51,10 @@ export class FeedbackQuestionsResponseDto {
 
 export class MyFeedbackProjectItemDto {
   submissionId: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
   versionId: number
+
   projectId: number
   projectTitle: string
   projectIconUrl: string
@@ -70,6 +78,8 @@ export class FeedbackSubmissionAuthorDto {
 
 export class FeedbackSubmissionAnswerDto {
   id: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0 */
   questionId: number
 
   @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
@@ -89,7 +99,10 @@ export class FeedbackSubmissionAnswerDto {
 export class FeedbackSubmissionDetailDto {
   id: number
   projectId: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
   versionId: number
+
   oneLineReview: string
   author: FeedbackSubmissionAuthorDto
   createdAt: Date

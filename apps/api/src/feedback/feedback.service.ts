@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Prisma, RecordCategory, UserRole } from '@prisma/client'
 import {
   CreateFeedbackDto,
+  CreateFreeformFeedbackDto,
   MAX_FEEDBACK_IMAGES_PER_ITEM,
 } from './dto/create-feedback.dto'
 import {
@@ -33,6 +34,9 @@ const UNLOCK_COST = 1
 
 //피드백 작성 보상 (티켓 정책 확정)
 const FEEDBACK_WRITE_REWARD = 2
+
+//성장기록(버전) 없이 남기는 자유 피드백의 고정 질문 문구
+const FREEFORM_FEEDBACK_TITLE = '자유롭게 피드백을 남겨주세요'
 
 type FeedbackImageInput = { url: string; order: number }
 
@@ -87,7 +91,8 @@ export class FeedbackService {
 
     const firstAnswerByKey = new Map<string, string>()
     for (const answer of answers) {
-      const key = `${answer.submissionId}:${answer.question.category}`
+      // where절이 question 관계 필터를 걸어 조회했으므로 question은 항상 존재
+      const key = `${answer.submissionId}:${answer.question!.category}`
       if (!firstAnswerByKey.has(key)) {
         firstAnswerByKey.set(key, answer.content)
       }
@@ -105,7 +110,8 @@ export class FeedbackService {
 
     const data = adoptions.map((adoption) => ({
       submissionId: adoption.submissionId,
-      versionId: adoption.submission.versionId,
+      // 채택(adoption)은 항상 발행된 버전의 성장기록에 연결되므로 versionId는 항상 존재
+      versionId: adoption.submission.versionId!,
       category: adoption.growthRecord.category,
       nickname: adoption.submission.user.name,
       profileImageUrl: adoption.submission.user.profileImageUrl,
@@ -149,6 +155,7 @@ export class FeedbackService {
           select: {
             id: true,
             questionId: true,
+            category: true,
             content: true,
             createdAt: true,
             updatedAt: true,
@@ -191,13 +198,15 @@ export class FeedbackService {
 
     const feedbacks = await Promise.all(
       submission.feedbacks
-        .sort((a, b) => a.question.order - b.question.order)
+        .sort((a, b) => (a.question?.order ?? 0) - (b.question?.order ?? 0))
         .map(async (feedback) => ({
           id: feedback.id,
-          questionId: feedback.questionId,
-          category: feedback.question.category,
-          questionTitle: feedback.question.title,
-          questionContent: feedback.question.description,
+          // 성장기록 없이 남긴 자유 피드백은 실제 질문이 없으므로 0
+          questionId: feedback.questionId ?? 0,
+          // 성장기록 없이 남긴 자유 피드백은 question이 없으므로 답변에 기록된 category를 사용
+          category: feedback.question?.category ?? feedback.category!,
+          questionTitle: feedback.question?.title ?? FREEFORM_FEEDBACK_TITLE,
+          questionContent: feedback.question?.description ?? '',
           content: feedback.content,
           imageUrls: await Promise.all(
             feedback.images.map((image) =>
@@ -214,7 +223,8 @@ export class FeedbackService {
       data: {
         id: submission.id,
         projectId: submission.projectId,
-        versionId: submission.versionId,
+        // 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0
+        versionId: submission.versionId ?? 0,
         oneLineReview: submission.oneLineReview,
         author: {
           name: submission.user.name,
@@ -267,7 +277,8 @@ export class FeedbackService {
       success: true,
       data: submissions.map((submission) => ({
         submissionId: submission.id,
-        versionId: submission.versionId,
+        // 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0
+        versionId: submission.versionId ?? 0,
         projectId: submission.project.id,
         projectTitle: submission.project.title,
         projectIconUrl:
@@ -428,8 +439,95 @@ export class FeedbackService {
         submittedCount: submission.feedbacks.length,
         feedbacks: submission.feedbacks.map((f) => ({
           id: f.id,
-          questionId: f.questionId,
-          versionId: submission.versionId,
+          questionId: f.questionId ?? 0,
+          versionId: submission.versionId ?? 0,
+          userId: submission.userId,
+          content: f.content,
+          imageUrl: f.images[0]?.url || null,
+          imageUrls: f.images.map((image) => image.url),
+          createdAt: f.createdAt,
+        })),
+      },
+    }
+  }
+
+  //성장기록(버전)이 아직 없는 프로젝트용 피드백 — 한 줄 평가(oneLineReview)는 제출 전체에서 공유하고,
+  //구조화된 질문(FeedbackQuestion) 없이 직군(category)별로 자유 텍스트 답변을 하나 이상 남긴다.
+  async createFreeformFeedback(
+    userId: number,
+    projectId: number,
+    dto: CreateFreeformFeedbackDto,
+  ): Promise<CreateFeedbackResponseDto> {
+    await this.assertCanCreateFeedback(userId)
+
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { id: true },
+    })
+    if (!project) {
+      throw new EntityNotExistException('Project')
+    }
+
+    const submittedCategories = dto.feedbacks.map((f) => f.category)
+    if (new Set(submittedCategories).size !== submittedCategories.length) {
+      throw new UnprocessableDataException(
+        'Duplicate feedback for the same category',
+      )
+    }
+
+    // 버전이 없어 DB unique 제약을 못 쓰므로 유저 × 프로젝트 중복 제출을 애플리케이션에서 체크.
+    // 자유 피드백은 프로젝트당 1회만 제출 가능 (그 1회 안에서 직군은 여러 개 선택 가능).
+    const existingSubmission = await this.prisma.feedbackSubmission.findFirst({
+      where: { projectId, userId, versionId: null },
+      select: { id: true },
+    })
+    if (existingSubmission) {
+      throw new DuplicateFoundException('FeedbackSubmission')
+    }
+
+    const submission = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.feedbackSubmission.create({
+        data: {
+          userId,
+          projectId,
+          versionId: null,
+          oneLineReview: dto.oneLineReview,
+          feedbacks: {
+            create: dto.feedbacks.map((f) => {
+              const images = this.buildFeedbackImages(f.imageUrls)
+
+              return {
+                questionId: null,
+                category: f.category,
+                content: f.content,
+                images: images.length > 0 ? { create: images } : undefined,
+              }
+            }),
+          },
+        },
+        include: {
+          feedbacks: {
+            include: { images: { orderBy: { order: 'asc' } } },
+          },
+        },
+      })
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { ownedTicketCount: { increment: FEEDBACK_WRITE_REWARD } },
+      })
+
+      return created
+    })
+
+    return {
+      success: true,
+      data: {
+        submittedCount: submission.feedbacks.length,
+        feedbacks: submission.feedbacks.map((f) => ({
+          id: f.id,
+          questionId: f.questionId ?? 0,
+          versionId: submission.versionId ?? 0,
           userId: submission.userId,
           content: f.content,
           imageUrl: f.images[0]?.url || null,
@@ -443,9 +541,10 @@ export class FeedbackService {
   //제출(submission) 단위 그룹핑에 필요한 submissionId/작성자/한줄평을 답변마다 함께 내려줌.
   //열람(unlock)은 (제출, 직군) 단위 — 같은 제출이 여러 직군에 답했어도 직군별로 따로 열려야 함.
   //본인이 작성한 답변은 unlock/프로젝트 멤버십과 무관하게 항상 열람 가능.
+  //versionId가 null이면 성장기록 없는 프로젝트의 자유 피드백 목록.
   async findFeedbacksForVersion(
     projectId: number,
-    versionId: number,
+    versionId: number | null,
     viewerId?: number,
   ): Promise<FeedbackListResponseDto> {
     const submissions = await this.prisma.feedbackSubmission.findMany({
@@ -468,6 +567,7 @@ export class FeedbackService {
           select: {
             id: true,
             questionId: true,
+            category: true,
             content: true,
             createdAt: true,
             updatedAt: true,
@@ -496,19 +596,23 @@ export class FeedbackService {
           submission.unlocks.map((u) => u.category),
         )
         return submission.feedbacks
-          .sort((a, b) => a.question.order - b.question.order)
+          .sort((a, b) => (a.question?.order ?? 0) - (b.question?.order ?? 0))
           .map(async (feedback) => {
+            // 성장기록 없이 남긴 자유 피드백은 question이 없으므로 답변에 기록된 category를 사용
+            const feedbackCategory =
+              feedback.question?.category ?? feedback.category!
             const isUnlocked =
-              isAuthor || unlockedCategories.has(feedback.question.category)
+              isAuthor || unlockedCategories.has(feedbackCategory)
 
             return {
               id: feedback.id,
               submissionId: submission.id,
               userId: submission.userId,
-              questionId: feedback.questionId,
-              category: feedback.question.category,
-              questionTitle: feedback.question.title,
-              questionContent: feedback.question.description,
+              questionId: feedback.questionId ?? 0,
+              category: feedbackCategory,
+              questionTitle:
+                feedback.question?.title ?? FREEFORM_FEEDBACK_TITLE,
+              questionContent: feedback.question?.description ?? '',
               author: {
                 name: submission.user.name,
                 profileImageUrl: submission.user.profileImageUrl,
@@ -539,12 +643,12 @@ export class FeedbackService {
   /**
    * 피드백 제출의 특정 직군 답변 열람(unlock) — 프로젝트 멤버만, 티켓 1개 차감.
    * (제출, 직군) 단위 — 같은 제출이라도 다른 직군은 별도로 unlock해야 함.
-   * 전역 1회 공개 — 이미 열렸으면 무과금 멱등.
+   * 전역 1회 공개 — 이미 열렸으면 무과금 멱등. versionId가 null이면 자유 피드백(성장기록 없는 프로젝트) 대상 — 무료 열람 아님, 규칙 동일.
    */
   async unlockFeedback(
     userId: number,
     projectId: number,
-    versionId: number,
+    versionId: number | null,
     submissionId: number,
     category: RecordCategory,
   ): Promise<UnlockFeedbackResponseDto> {
