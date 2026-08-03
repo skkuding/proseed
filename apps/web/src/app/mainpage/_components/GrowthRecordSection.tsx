@@ -6,24 +6,28 @@ import SectionTitle from './SectionTitle'
 import { getRecentGrowthRecords, type RecentGrowthRecordDto } from '@/lib/api'
 
 const RECENT_COUNT = 3
+// 같은 프로젝트가 여러 번 발행되면 백엔드가 버전 단위로 최신순 take를 채우기 때문에,
+// 카드 3장을 서로 다른 프로젝트로 채우려면 후보군을 넉넉히 받아와 프로젝트 단위로 걸러야 한다.
+const FETCH_COUNT = 20
 
 export default function GrowthRecordSection() {
   const [recentGrowthRecords, setRecentGrowthRecords] = useState<RecentGrowthRecordDto[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getRecentGrowthRecords(RECENT_COUNT)
+    getRecentGrowthRecords(FETCH_COUNT)
       .then(setRecentGrowthRecords, () => setRecentGrowthRecords([]))
       .finally(() => setIsLoading(false))
   }, [])
 
-  // 발행 버전 하나당 4개 직군 레코드가 flat하게 오므로 버전당 1장만 남긴다
+  // 발행 버전 하나당 4개 직군 레코드가 flat하게 오고, 같은 프로젝트가 여러 버전으로 나올 수도 있으므로
+  // 프로젝트당 가장 최근 성장기록 1장만 남긴다 (releasedAt desc로 오므로 첫 등장이 최신).
   const recent = useMemo(() => {
-    const seenVersionIds = new Set<number>()
+    const seenProjectIds = new Set<number>()
     const deduped: RecentGrowthRecordDto[] = []
     for (const record of recentGrowthRecords) {
-      if (seenVersionIds.has(record.versionId)) continue
-      seenVersionIds.add(record.versionId)
+      if (seenProjectIds.has(record.projectId)) continue
+      seenProjectIds.add(record.projectId)
       deduped.push(record)
     }
     return deduped.slice(0, RECENT_COUNT)

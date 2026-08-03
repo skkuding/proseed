@@ -4,6 +4,7 @@ import { ProjectImageCarousel } from '../_components/ProjectImageCarousel'
 import { ProjectMember } from '../_components/ProjectMember'
 import { ProjectDescription } from '../_components/ProjectDescription'
 import ProjectTabs from '../_components/ProjectTabs'
+import { ScrollToTop } from '../_components/ScrollToTop'
 
 type LayoutProps = {
   children: React.ReactNode
@@ -27,6 +28,7 @@ export default async function ProjectDetailLayout({ children, params }: LayoutPr
 
   return (
     <div className="w-full mt-5">
+      <ScrollToTop />
       {/* 이미지 영역 */}
       <ProjectImageCarousel images={[project.thumbnailUrl, ...sortedImages.map((i) => i.url)]} />
       {/* 본문 */}

@@ -84,6 +84,14 @@ export function GrowthRecord() {
     getVersionDetail(projectId, selectedVersion).then(setVersionDetail).catch(console.error)
   }, [projectId, selectedVersion])
 
+  // 메인페이지 "최근 업데이트된 성장기록" 카드에서 #growth-record 해시로 들어온 경우,
+  // 콘텐츠가 로드된 뒤 해당 섹션으로 스크롤한다 (로드 전엔 엘리먼트가 없어 기본 해시 스크롤이 동작 안 함).
+  useEffect(() => {
+    if (!versionDetail) return
+    if (window.location.hash !== '#growth-record') return
+    document.getElementById('growth-record')?.scrollIntoView({ block: 'start' })
+  }, [versionDetail])
+
   if (!versionsLoaded) return null
 
   // 버전이 있는데 상세를 아직 못 불러온 상태(로딩 중)에서는 이전 내용이 깜빡이지 않도록 대기
@@ -94,7 +102,7 @@ export function GrowthRecord() {
   )
 
   return (
-    <div className="flex flex-col gap-5">
+    <div id="growth-record" className="flex flex-col gap-5">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">

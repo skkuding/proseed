@@ -44,7 +44,7 @@ export default function GrowthRecordCard({
   releasedAt,
 }: GrowthRecordCardProps) {
   return (
-    <Link href={`/projects/${projectId}`} className="block">
+    <Link href={`/projects/${projectId}#growth-record`} className="block">
       <article className="flex h-[198px] w-full cursor-pointer gap-5 rounded-[12px] bg-white p-6 shadow-[0_4px_12px_0_rgba(27,29,38,0.06)] transition-colors hover:bg-CoolNeutral-90">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] bg-gray-200">
           <Image src={projectIconUrl} alt={projectName} fill className="object-cover" />
