@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
+import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { toast } from 'sonner'
@@ -105,6 +106,7 @@ export function FeedbackQuestionsForm() {
   })
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isLead, setIsLead] = useState(false)
@@ -352,7 +354,7 @@ export function FeedbackQuestionsForm() {
           <Button
             size="sm"
             className="w-full text-sub3_sb_16"
-            onClick={async () => {
+            onClick={() => {
               // 리드는 발행을 위해 4개 직군 전체가 필요하지만, 팀원은 자기 직군만 채우면 됨
               const tabsToCheck = isLead
                 ? (Object.keys(questionsByTab) as TabLabel[])
@@ -370,73 +372,9 @@ export function FeedbackQuestionsForm() {
                 return
               }
 
-              const { version, imagesByTab, answers, updateGoal, updateResult, taggedFeedbacks } =
-                useGrowthRecordStore.getState()
-
-              const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
-                category: RECORD_CATEGORY_TO_API[
-                  tab
-                ] as CreateVersionDto['growthRecords'][number]['category'],
-                contents: growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].map((q) => ({
-                  title: q.questionTitle,
-                  content: answers[q.questionId] ?? '',
-                  isDefault: true,
-                })),
-                imageKeys: imagesByTab[tab] ?? [],
-              }))
-
-              const feedbackQuestions: CreateVersionDto['feedbackQuestions'] = JOB_TABS.flatMap(
-                (tab) =>
-                  questionsByTab[tab].map((q) => ({
-                    category: RECORD_CATEGORY_TO_API[
-                      tab
-                    ] as CreateVersionDto['feedbackQuestions'][number]['category'],
-                    content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
-                    isRequired: q.isRequired,
-                  }))
-              )
-
-              const taggedFeedbacksPayload: CreateVersionDto['taggedFeedbacks'] = Object.entries(
-                taggedFeedbacks
-              )
-                .filter(([, entries]) => entries.length > 0)
-                .map(([category, entries]) => ({
-                  category: category as CreateVersionDto['feedbackQuestions'][number]['category'],
-                  submissions: entries.map((entry) => ({
-                    versionId: entry.versionId,
-                    userId: entry.userId,
-                  })),
-                }))
-
-              const payload: CreateVersionDto = {
-                version: `${version.major}.${version.minor}.${version.patch}`,
-                updateGoal,
-                updateResults: [updateResult],
-                growthRecords,
-                feedbackQuestions,
-                taggedFeedbacks: taggedFeedbacksPayload,
-              }
-
-              setIsPublishing(true)
-              try {
-                await publishVersion(projectId, payload)
-                trackEvent('growth_record_published', { version: payload.version })
-                const adoptedCount = taggedFeedbacksPayload.reduce(
-                  (count, tag) => count + tag.submissions.length,
-                  0
-                )
-                if (adoptedCount > 0) {
-                  trackEvent('feedback_adopted', { adopted_count: adoptedCount })
-                }
-                useFeedbackTagStore.getState().resetTaggedFeedbacks()
-                useGrowthRecordStore.getState().reset()
-                isNavigatingForwardRef.current = true
-                setShowSuccessModal(true)
-              } catch (err) {
-                toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')
-              } finally {
-                setIsPublishing(false)
-              }
+              // 이번 업데이트 목표/결과물은 전체 요약에 한 번만 노출되는 값이라
+              // 실제 발행자인 리드가 마지막에 입력
+              setShowSubmitModal(true)
             }}
             disabled={isPublishing}
           >
@@ -444,6 +382,80 @@ export function FeedbackQuestionsForm() {
           </Button>
         </div>
       </div>
+
+      <GrowthRecordSubmitModal
+        isOpen={showSubmitModal}
+        onCancel={() => setShowSubmitModal(false)}
+        onConfirm={async (goal, result) => {
+          setShowSubmitModal(false)
+
+          const { version, imagesByTab, answers, taggedFeedbacks } = useGrowthRecordStore.getState()
+
+          const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
+            category: RECORD_CATEGORY_TO_API[
+              tab
+            ] as CreateVersionDto['growthRecords'][number]['category'],
+            contents: growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].map((q) => ({
+              title: q.questionTitle,
+              content: answers[q.questionId] ?? '',
+              isDefault: true,
+            })),
+            imageKeys: imagesByTab[tab] ?? [],
+          }))
+
+          const feedbackQuestions: CreateVersionDto['feedbackQuestions'] = JOB_TABS.flatMap((tab) =>
+            questionsByTab[tab].map((q) => ({
+              category: RECORD_CATEGORY_TO_API[
+                tab
+              ] as CreateVersionDto['feedbackQuestions'][number]['category'],
+              content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
+              isRequired: q.isRequired,
+            }))
+          )
+
+          const taggedFeedbacksPayload: CreateVersionDto['taggedFeedbacks'] = Object.entries(
+            taggedFeedbacks
+          )
+            .filter(([, entries]) => entries.length > 0)
+            .map(([category, entries]) => ({
+              category: category as CreateVersionDto['feedbackQuestions'][number]['category'],
+              submissions: entries.map((entry) => ({
+                versionId: entry.versionId,
+                userId: entry.userId,
+              })),
+            }))
+
+          const payload: CreateVersionDto = {
+            version: `${version.major}.${version.minor}.${version.patch}`,
+            updateGoal: goal,
+            updateResults: [result],
+            growthRecords,
+            feedbackQuestions,
+            taggedFeedbacks: taggedFeedbacksPayload,
+          }
+
+          setIsPublishing(true)
+          try {
+            await publishVersion(projectId, payload)
+            trackEvent('growth_record_published', { version: payload.version })
+            const adoptedCount = taggedFeedbacksPayload.reduce(
+              (count, tag) => count + tag.submissions.length,
+              0
+            )
+            if (adoptedCount > 0) {
+              trackEvent('feedback_adopted', { adopted_count: adoptedCount })
+            }
+            useFeedbackTagStore.getState().resetTaggedFeedbacks()
+            useGrowthRecordStore.getState().reset()
+            isNavigatingForwardRef.current = true
+            setShowSuccessModal(true)
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')
+          } finally {
+            setIsPublishing(false)
+          }
+        }}
+      />
 
       <GrowthRecordSuccessModal
         isOpen={showSuccessModal}

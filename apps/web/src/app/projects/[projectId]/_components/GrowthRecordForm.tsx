@@ -2,9 +2,10 @@
 
 import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
+import { useGrowthRecordStore } from '@/store/growthRecordStore'
 import Image from 'next/image'
 import { ChevronRightIcon, ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -13,7 +14,6 @@ import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTagModal } from '@/components/FeedbackTagModal'
-import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import {
   JOB_TABS,
@@ -66,10 +66,10 @@ type ImageItem = {
 
 export function GrowthRecordForm() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.projectId as string
   const { data: session, isPending: sessionPending } = authClient.useSession()
   const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>(null)
-  const [isLead, setIsLead] = useState(false)
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [version, setVersion] = useState({ major: '', minor: '', patch: '' })
   const [imagesByTab, setImagesByTab] = useState<Record<TabLabel, ImageItem[]>>({
@@ -82,10 +82,13 @@ export function GrowthRecordForm() {
   const [answers, setAnswers] = useState<Record<number, string>>({})
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
-  const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
   const [previousVersionId, setPreviousVersionId] = useState<number | null>(null)
   const { taggedFeedbacks, removeTaggedFeedback } = useFeedbackTagStore()
+  const setStoreVersion = useGrowthRecordStore((s) => s.setVersion)
+  const setStoreImagesByTab = useGrowthRecordStore((s) => s.setImagesByTab)
+  const setStoreAnswers = useGrowthRecordStore((s) => s.setAnswers)
+  const setStoreTaggedFeedbacks = useGrowthRecordStore((s) => s.setTaggedFeedbacks)
 
   const imageInputRef = useRef<HTMLInputElement>(null)
   const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
@@ -125,7 +128,6 @@ export function GrowthRecordForm() {
           : project.myJobType
             ? [JOB_API_TO_LABEL[project.myJobType]]
             : []
-        setIsLead(lead)
         setAllowedTabs(tabs)
         if (tabs.length > 0) setActiveTab(tabs[0])
       })
@@ -198,21 +200,30 @@ export function GrowthRecordForm() {
   const questions = growthRecordQuestions.questions[category]
   const images = imagesByTab[activeTab]
 
-  // Lead는 발행을 위해 4개 직군 전체가 필요하지만, 팀원은 자기 직군만 채우면 다음 단계로 진행 가능
-  const relevantQuestions = isLead
-    ? Object.values(growthRecordQuestions.questions).flat()
-    : (allowedTabs ?? []).flatMap((tab) => growthRecordQuestions.questions[TAB_TO_CATEGORY[tab]])
-  const allRequiredQuestionIds = relevantQuestions
-    .filter((q) => q.isRequired)
-    .map((q) => q.questionId)
+  // "다음 단계로"를 거치지 않고 상단 탭으로 바로 피드백 질문 페이지로 넘어가도
+  // 발행 시점(FeedbackQuestionsForm)에 최신 값을 읽을 수 있도록 항상 동기화
+  useEffect(() => {
+    setStoreVersion(version)
+  }, [version, setStoreVersion])
 
-  const isVersionFilled =
-    version.major.trim().length > 0 &&
-    version.minor.trim().length > 0 &&
-    version.patch.trim().length > 0
+  useEffect(() => {
+    setStoreImagesByTab(
+      Object.fromEntries(
+        Object.entries(imagesByTab).map(([tab, imgs]) => [
+          tab,
+          imgs.filter((img) => !img.uploading && img.key).map((img) => img.key as string),
+        ])
+      )
+    )
+  }, [imagesByTab, setStoreImagesByTab])
 
-  const isNextEnabled =
-    isVersionFilled && allRequiredQuestionIds.every((id) => (answers[id] ?? '').trim().length > 0)
+  useEffect(() => {
+    setStoreAnswers(answers)
+  }, [answers, setStoreAnswers])
+
+  useEffect(() => {
+    setStoreTaggedFeedbacks(taggedFeedbacks)
+  }, [taggedFeedbacks, setStoreTaggedFeedbacks])
 
   // 활성 직군 탭의 이미지/답변을 draft로 자동저장 (초기 로딩 완료 후에만)
   useEffect(() => {
@@ -519,14 +530,16 @@ export function GrowthRecordForm() {
               <ChevronRightIcon className="size-5 text-CoolNeutral-40" />
             </div>
             <p className="text-body3_r_16 text-CoolNeutral-40">
-              업데이트에 도움이 되었던 피드백을 태그하여 고마움을 전달해보세요 (카테고리 별 최대 3개
-              선택 가능)
+              업데이트에 도움이 되었던 피드백을 태그하여 고마움을 전달해보세요 (직군당 최대 3개 선택
+              가능)
             </p>
           </button>
           <Button
             size="sm"
-            disabled={!isNextEnabled}
-            onClick={() => setShowSubmitModal(true)}
+            onClick={() => {
+              isNavigatingForwardRef.current = true
+              router.push(`/projects/${projectId}/growthrecord/feedback-questions`)
+            }}
             className="w-full mt-4 text-sub3_sb_16"
           >
             다음 단계로
@@ -547,26 +560,6 @@ export function GrowthRecordForm() {
         previousVersionId={previousVersionId}
         initialCategory={categoryApi}
         onClose={() => setShowFeedbackTagModal(false)}
-      />
-
-      <GrowthRecordSubmitModal
-        isOpen={showSubmitModal}
-        onCancel={() => setShowSubmitModal(false)}
-        onSubmit={() => {
-          isNavigatingForwardRef.current = true
-          setShowSubmitModal(false)
-        }}
-        formData={{
-          version,
-          imagesByTab: Object.fromEntries(
-            Object.entries(imagesByTab).map(([tab, imgs]) => [
-              tab,
-              imgs.filter((img) => !img.uploading && img.key).map((img) => img.key as string),
-            ])
-          ),
-          answers,
-          taggedFeedbacks,
-        }}
       />
 
       <ImageDeleteModal

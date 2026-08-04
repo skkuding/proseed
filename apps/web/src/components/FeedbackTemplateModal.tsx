@@ -102,7 +102,7 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
                 <button
                   key={tab}
                   onClick={() => handleTabChange(tab)}
-                  className={`text-body2_m_14 w-21 h-[38px] px-4 py-2 hover:cursor-pointer transition-colors relative ${
+                  className={`text-body2_m_14 w-25 h-[38px] px-4 py-2 hover:cursor-pointer transition-colors relative ${
                     activeTab === tab ? 'text-black' : 'text-neutral-40'
                   }`}
                 >

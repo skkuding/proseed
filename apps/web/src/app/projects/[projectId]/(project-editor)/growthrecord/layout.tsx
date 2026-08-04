@@ -1,14 +1,20 @@
 'use client'
 
 import { useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { usePathname, useParams } from 'next/navigation'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 
-const TABS = ['프로젝트 성장기록', '프로젝트 피드백 질문'] as const
+const TABS = [
+  { label: '프로젝트 성장기록', segment: 'create' },
+  { label: '프로젝트 피드백 질문', segment: 'feedback-questions' },
+] as const
 
 export default function GrowthRecordEditorLayout({ children }: { children: React.ReactNode }) {
   useAuthGuard()
   const pathname = usePathname()
+  const params = useParams()
+  const projectId = params.projectId as string
   const activeIndex = pathname.includes('feedback-questions') ? 1 : 0
 
   useEffect(() => {
@@ -20,16 +26,17 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
       <div>
         <div className="flex gap-8 px-0">
           {TABS.map((tab, i) => (
-            <span
-              key={tab}
-              className={`pb-2 text-sub1_sb_18 cursor-default select-none transition-colors ${
+            <Link
+              key={tab.segment}
+              href={`/projects/${projectId}/growthrecord/${tab.segment}`}
+              className={`pb-2 text-sub1_sb_18 select-none transition-colors ${
                 activeIndex === i
                   ? 'border-b-3 border-CoolNeutral-20 text-CoolNeutral-20'
-                  : 'text-CoolNeutral-50'
+                  : 'text-CoolNeutral-50 hover:text-CoolNeutral-30'
               }`}
             >
-              {tab}
-            </span>
+              {tab.label}
+            </Link>
           ))}
         </div>
       </div>

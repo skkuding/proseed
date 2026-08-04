@@ -1,11 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { useGrowthRecordStore } from '@/store/growthRecordStore'
-import type { TaggedFeedbackEntry } from '@/store/feedbackTagStore'
-import type { RecordCategory } from '@/lib/api'
 
 const GOAL_MAX_LENGTH = 20
 const RESULT_MAX_LENGTH = 600
@@ -13,55 +9,20 @@ const RESULT_MAX_LENGTH = 600
 interface GrowthRecordSubmitModalProps {
   isOpen: boolean
   onCancel: () => void
-  onSubmit: () => void
-  formData: {
-    version: { major: string; minor: string; patch: string }
-    imagesByTab: Record<string, string[]>
-    answers: Record<number, string>
-    taggedFeedbacks: Record<RecordCategory, TaggedFeedbackEntry[]>
-  }
+  onConfirm: (goal: string, result: string) => void
 }
 
 export function GrowthRecordSubmitModal({
   isOpen,
   onCancel,
-  onSubmit,
-  formData,
+  onConfirm,
 }: GrowthRecordSubmitModalProps) {
-  const {
-    setVersion,
-    setImagesByTab,
-    setAnswers,
-    setTaggedFeedbacks,
-    setUpdateGoal,
-    setUpdateResult,
-  } = useGrowthRecordStore()
-
-  const router = useRouter()
-  const params = useParams()
-  const projectId = params.projectId as string
-
   const [goal, setGoal] = useState('')
   const [result, setResult] = useState('')
 
   if (!isOpen) return null
 
-  const isSubmitEnabled =
-    goal.trim().length > 0 &&
-    goal.length <= GOAL_MAX_LENGTH &&
-    result.trim().length > 0 &&
-    result.length <= RESULT_MAX_LENGTH
-
-  const handleSubmit = () => {
-    setVersion(formData.version)
-    setImagesByTab(formData.imagesByTab)
-    setAnswers(formData.answers)
-    setTaggedFeedbacks(formData.taggedFeedbacks)
-    setUpdateGoal(goal)
-    setUpdateResult(result)
-    onSubmit()
-    router.push(`/projects/${projectId}/growthrecord/feedback-questions`)
-  }
+  const isSubmitEnabled = goal.length <= GOAL_MAX_LENGTH && result.length <= RESULT_MAX_LENGTH
 
   return (
     <div
@@ -87,7 +48,7 @@ export function GrowthRecordSubmitModal({
             </Button>
             <Button
               size="md"
-              onClick={handleSubmit}
+              onClick={() => onConfirm(goal, result)}
               disabled={!isSubmitEnabled}
               className="text-sub3_sb_16"
             >
