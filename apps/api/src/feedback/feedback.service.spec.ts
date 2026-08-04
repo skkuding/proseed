@@ -809,16 +809,18 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택/unlock 여부
     feedbacks: {
       content: string
       question: { category: RecordCategory } | null
+      category?: RecordCategory | null
     }[],
     projectIconUrl = 'icon-key',
+    versionId: number | null = 100 + id,
   ) => ({
     id,
-    versionId: 100 + id,
+    versionId,
     createdAt,
     oneLineReview: `review-${id}`,
     user: { name: `user-${id}`, profileImageUrl: '/profile.svg' },
     project: { id: 10, title: 'project', iconUrl: projectIconUrl },
-    feedbacks,
+    feedbacks: feedbacks.map((f) => ({ category: null, ...f })),
   })
 
   beforeEach(() => {
@@ -887,11 +889,11 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택/unlock 여부
         projectIconUrl: 'signed-icon-url',
       },
     ])
-    //채택(FeedbackAdoption) 여부와 무관하게 발행된 버전의 제출을 전부 조회
+    //채택(FeedbackAdoption) 여부와 무관하게 (자유 피드백 포함) 최근 제출을 전부 조회 — where절 없이 전체 조회
     expect(prisma.feedbackSubmission.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { versionId: { not: null } },
         orderBy: { createdAt: 'desc' },
+        take: 24,
       }),
     )
   })
@@ -941,10 +943,45 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택/unlock 여부
     expect(storage.getSignedDownloadUrl).toHaveBeenCalledTimes(1)
   })
 
-  it('question이 없는 답변(자유 피드백 잔재)은 건너뛴다', async () => {
+  it('성장기록(버전) 없이 남긴 자유 피드백도 포함한다 — question이 없으면 답변의 category를 쓴다', async () => {
+    prisma.feedbackSubmission.findMany.mockResolvedValue([
+      buildSubmission(
+        1,
+        new Date('2026-08-04T00:00:00Z'),
+        [
+          {
+            content: 'freeform-answer',
+            question: null,
+            category: RecordCategory.GENERAL,
+          },
+        ],
+        'icon-key',
+        null,
+      ),
+    ])
+
+    const result = await service.getRecentFeedbacks(6)
+
+    expect(result.data).toEqual([
+      {
+        submissionId: 1,
+        versionId: 0,
+        category: RecordCategory.GENERAL,
+        nickname: 'user-1',
+        profileImageUrl: '/profile.svg',
+        oneLineReview: 'review-1',
+        content: 'freeform-answer',
+        projectId: 10,
+        projectName: 'project',
+        projectIconUrl: 'signed-icon-url',
+      },
+    ])
+  })
+
+  it('question도 category도 없는 답변은 건너뛴다', async () => {
     prisma.feedbackSubmission.findMany.mockResolvedValue([
       buildSubmission(1, new Date('2026-08-04T00:00:00Z'), [
-        { content: 'no-question', question: null },
+        { content: 'no-question-no-category', question: null },
       ]),
     ])
 

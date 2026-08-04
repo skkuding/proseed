@@ -49,12 +49,11 @@ export class FeedbackService {
 
   /**
    * mainpage 최근 피드백 — 채택/unlock 여부와 무관하게 최근 제출 전체 공개 (PM 확정, 2026-08-04).
-   * 카드 단위 = 제출×직군, 본문 = 해당 직군 질문에 대한 첫 답변.
+   * 성장기록(버전) 없이 남긴 자유 피드백도 포함한다. 카드 단위 = 제출×직군, 본문 = 해당 직군의 첫 답변.
    */
   async getRecentFeedbacks(take: number): Promise<RecentFeedbacksResponseDto> {
     // 제출 하나가 최대 4개 직군에 답할 수 있어, 카드 수 확보를 위해 여유 있게 조회 후 슬라이스
     const submissions = await this.prisma.feedbackSubmission.findMany({
-      where: { versionId: { not: null } },
       orderBy: { createdAt: 'desc' },
       take: take * 4,
       select: {
@@ -68,6 +67,8 @@ export class FeedbackService {
           orderBy: [{ question: { order: 'asc' } }, { id: 'asc' }],
           select: {
             content: true,
+            // 자유 피드백은 question이 없어 답변에 기록된 category를 대신 쓴다
+            category: true,
             question: { select: { category: true } },
           },
         },
@@ -93,7 +94,7 @@ export class FeedbackService {
       // 직군별 첫 답변만 카드 본문으로 사용 (feedbacks는 question.order asc로 정렬돼 있음)
       const seenCategories = new Set<RecordCategory>()
       for (const answer of submission.feedbacks) {
-        const category = answer.question?.category
+        const category = answer.question?.category ?? answer.category
         if (!category || seenCategories.has(category)) {
           continue
         }
@@ -101,8 +102,8 @@ export class FeedbackService {
 
         cards.push({
           submissionId: submission.id,
-          // where절이 versionId not null로 필터했으므로 항상 존재
-          versionId: submission.versionId!,
+          // 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0
+          versionId: submission.versionId ?? 0,
           category,
           createdAt: submission.createdAt,
           nickname: submission.user.name,

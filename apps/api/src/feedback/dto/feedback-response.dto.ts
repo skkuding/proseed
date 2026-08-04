@@ -158,6 +158,8 @@ export class UnlockFeedbackResponseDto {
 //mainpage 최근 피드백 카드 — 채택/unlock 여부와 무관한 최근 제출×직군 단위
 export class RecentFeedbackItemDto {
   submissionId: number
+
+  /** 성장기록 없이 남긴 자유 피드백은 버전이 없으므로 0 */
   versionId: number
 
   @ApiProperty({ enum: RecordCategory, enumName: 'RecordCategory' })
