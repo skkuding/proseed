@@ -9,14 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Accordion } from '@/components/ui/accordion'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
+import { NumberedPagination } from '@/components/NumberedPagination'
 import { Button } from '@/components/ui/button'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { ImageLightbox } from './ImageLightbox'
@@ -28,6 +21,7 @@ import {
   type FeedbackAdoptionFilter,
 } from '@/components/FeedbackAdoptionFilterButton'
 import { FeedbackSubmissionCard, buildSubmissionCards } from './FeedbackSubmissionCard'
+import { VersionSelect } from './VersionSelect'
 import {
   getProjectById,
   getProjectVersions,
@@ -50,10 +44,6 @@ import {
 } from '@/app/_utils/projectConstants'
 
 type TabLabel = JobTab
-
-function getVisiblePages(total: number): number[] {
-  return Array.from({ length: total }, (_, i) => i + 1)
-}
 
 export function Feedbacks() {
   const router = useRouter()
@@ -282,27 +272,11 @@ export function Feedbacks() {
           </p>
         </div>
         <div className="flex items-center">
-          <div className="min-h-12">
-            <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-              <SelectTrigger className="px-4 rounded-[8px] border-neutral-90 text-body1_m_16! hover:cursor-pointer [&_svg]:size-5">
-                <SelectValue placeholder="업데이트 버전 -">
-                  {versionList.length > 0 &&
-                    `업데이트 버전 ${versionList.find((v) => v.id.toString() === selectedVersion)?.version}`}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {versionList.map((v) => (
-                  <SelectItem
-                    key={v.id}
-                    value={v.id.toString()}
-                    className="text-body1_m_16! hover:cursor-pointer"
-                  >
-                    버전 {v.version}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <VersionSelect
+            versions={versionList}
+            value={selectedVersion}
+            onChange={setSelectedVersion}
+          />
           <Button
             size="md"
             onClick={handleWriteFeedbackClick}
@@ -398,44 +372,12 @@ export function Feedbacks() {
             ))}
           </Accordion>
           {/* Pagination */}
-          <Pagination className="mt-10">
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handlePageChange(currentPage - 1)
-                  }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
-                />
-              </PaginationItem>
-              {getVisiblePages(totalPages).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    isActive={page === currentPage}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      handlePageChange(page)
-                    }}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handlePageChange(currentPage + 1)
-                  }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-40' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <NumberedPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            className="mt-10"
+          />
         </div>
       )}
 

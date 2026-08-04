@@ -1,19 +1,19 @@
 'use client'
 
-import { FieldBadge } from '@/components/FieldBadge'
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useFeedbackTagStore } from '@/store/feedbackTagStore'
 import { useGrowthRecordStore } from '@/store/growthRecordStore'
-import Image from 'next/image'
-import { ChevronRightIcon, ImageIcon } from 'lucide-react'
+import { ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import Editor from '@/components/mdxEditor/Editor'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
-import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTagModal } from '@/components/FeedbackTagModal'
+import { VersionInputCard } from './VersionInputCard'
+import { ImageUploadCard, type ImageItem } from './ImageUploadCard'
+import { GrowthRecordQuestionCard } from './GrowthRecordQuestionCard'
+import { FeedbackTagSection } from './FeedbackTagSection'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import {
   JOB_TABS,
@@ -57,13 +57,6 @@ const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.quest
   기타: 'general',
 }
 
-type ImageItem = {
-  id: string
-  preview: string
-  uploading: boolean
-  key: string | null
-}
-
 export function GrowthRecordForm() {
   const params = useParams()
   const router = useRouter()
@@ -80,7 +73,6 @@ export function GrowthRecordForm() {
   })
   const [imageModalIndex, setImageModalIndex] = useState<number | null>(null)
   const [answers, setAnswers] = useState<Record<number, string>>({})
-  const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showFeedbackTagModal, setShowFeedbackTagModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
   const [previousVersionId, setPreviousVersionId] = useState<number | null>(null)
@@ -90,10 +82,7 @@ export function GrowthRecordForm() {
   const setStoreAnswers = useGrowthRecordStore((s) => s.setAnswers)
   const setStoreTaggedFeedbacks = useGrowthRecordStore((s) => s.setTaggedFeedbacks)
 
-  const imageInputRef = useRef<HTMLInputElement>(null)
   const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
-  // "다음 단계로"로 의도적으로 이동할 때는 popstate 핸들러가 이탈 확인 모달을 띄우지 않도록 막는 플래그
-  const isNavigatingForwardRef = useRef(false)
 
   //피드백 태그하기는 이전에 발행된 버전(지금 작성 중인 버전은 아직 존재하지 않음)의 피드백을 대상으로 함
   useEffect(() => {
@@ -101,20 +90,6 @@ export function GrowthRecordForm() {
       setPreviousVersionId(versions[0]?.id ?? null)
     })
   }, [projectId])
-
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href)
-    const handlePopState = () => {
-      if (isNavigatingForwardRef.current) {
-        isNavigatingForwardRef.current = false
-        return
-      }
-      window.history.pushState(null, '', window.location.href)
-      setShowLeaveModal(true)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
 
   // 본인이 초대된 직군만 작성 가능, 프로젝트 등록자(Lead)는 전 직군 작성 가능
   useEffect(() => {
@@ -284,8 +259,6 @@ export function GrowthRecordForm() {
         }
       })
     )
-
-    if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
   const removeImage = (index: number) => {
@@ -337,186 +310,32 @@ export function GrowthRecordForm() {
       <div className="flex gap-6 items-start">
         {/* Main content */}
         <div className="flex-1 flex flex-col gap-5">
-          {/* 성장기록 버전 */}
-          <div className="flex justify-between bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-title1_sb_28">성장기록 버전</h2>
-                  <FieldBadge type="필수" />
-                </div>
-              </div>
-              <p className="text-body3_r_16 text-CoolNeutral-40">
-                업데이트하는 성장기록의 버전을 입력해주세요
-              </p>
-            </div>
-            <div className="flex items-end gap-1 mt-1">
-              <span className="text-title3_sb_20 text-CoolNeutral-40">v</span>
-              <input
-                type="number"
-                min={0}
-                value={version.major}
-                onChange={(e) => setVersion((v) => ({ ...v, major: e.target.value }))}
-                placeholder="0"
-                className="w-[42px] h-[50px] text-center rounded-lg border border-neutral-200 text-title3_sb_20 focus:outline-none focus:border-CoolNeutral-40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-              <span className="text-title3_sb_20 text-CoolNeutral-40">.</span>
-              <input
-                type="number"
-                min={0}
-                value={version.minor}
-                onChange={(e) => setVersion((v) => ({ ...v, minor: e.target.value }))}
-                placeholder="0"
-                className="w-[42px] h-[50px] text-center rounded-lg border border-neutral-200 text-title3_sb_20 focus:outline-none focus:border-CoolNeutral-40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-              <span className="text-title3_sb_20 text-CoolNeutral-40">.</span>
-              <input
-                type="number"
-                min={0}
-                value={version.patch}
-                onChange={(e) => setVersion((v) => ({ ...v, patch: e.target.value }))}
-                placeholder="0"
-                className="w-[42px] h-[50px] text-center rounded-lg border border-neutral-200 text-title3_sb_20 focus:outline-none focus:border-CoolNeutral-40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </div>
-          </div>
+          <VersionInputCard version={version} onChange={setVersion} />
 
-          {/* 이미지 등록하기 */}
-          <div className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <h2 className="text-title1_sb_28">이미지 등록하기</h2>
-                <FieldBadge type="필수" />
-              </div>
-
-              <Button
-                size="sm"
-                onClick={() => imageInputRef.current?.click()}
-                disabled={images.length >= 8}
-                className="w-34.25 px-5 text-sub3_sb_16"
-              >
-                이미지 등록하기
-              </Button>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => handleImageSelect(e.target.files)}
-              />
-            </div>
-            <p className="text-body3_r_16 text-CoolNeutral-40">
-              해당 카테고리의 프로젝트 성장기록을 쉽게 이해할 수 있도록 이미지를 등록해주세요
-              (직군당 최대 8장)
-            </p>
-            {images.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mt-1">
-                {images.map((img, index) => (
-                  <button
-                    key={img.id}
-                    onClick={() => setImageModalIndex(index)}
-                    className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
-                  >
-                    <Image src={img.preview} alt="" fill className="object-cover" />
-                    {img.uploading && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <button
-                onClick={() => imageInputRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-2 w-[225px] h-[127px] rounded-xl border border-dashed border-neutral-200 text-CoolNeutral-50 bg-neutral-99 hover:bg-neutral-95 hover:cursor-pointer transition-colors mt-1"
-              >
-                <ImageIcon className="size-6" />
-                <span className="text-caption1_m_13">이미지 등록</span>
-              </button>
-            )}
-          </div>
+          <ImageUploadCard
+            images={images}
+            onFilesSelected={handleImageSelect}
+            onImageClick={setImageModalIndex}
+          />
 
           {/* 질문별 답변 */}
           {questions.map((q) => (
-            <div
+            <GrowthRecordQuestionCard
               key={q.questionId}
-              className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]"
-            >
-              <div className="flex items-center gap-2">
-                <h2 className="text-title1_sb_28">{q.questionTitle}</h2>
-                {q.isRequired && <FieldBadge type="필수" />}
-              </div>
-              <Editor
-                markdown={answers[q.questionId] ?? ''}
-                onChange={(val) => setAnswers((prev) => ({ ...prev, [q.questionId]: val }))}
-                width="100%"
-                height={252}
-              />
-            </div>
+              title={q.questionTitle}
+              isRequired={q.isRequired}
+              value={answers[q.questionId] ?? ''}
+              onChange={(val) => setAnswers((prev) => ({ ...prev, [q.questionId]: val }))}
+            />
           ))}
 
-          {/* 피드백 태그하기 */}
-          <div className="flex flex-col gap-4 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-title1_sb_28">피드백 태그하기</h2>
-                <p className="text-body3_r_16 text-CoolNeutral-40">
-                  업데이트에 도움이 되었던 피드백을 태그하여 고마움을 전달해보세요 (직군당 최대 3개
-                  선택 가능)
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={() => setShowFeedbackTagModal(true)}
-                disabled={(taggedFeedbacks[categoryApi] ?? []).length >= 3}
-                className="shrink-0 px-5 text-sub3_sb_16"
-              >
-                피드백 태그하기
-              </Button>
-            </div>
-            {(() => {
-              const taggedItems = taggedFeedbacks[categoryApi] ?? []
-              if (taggedItems.length === 0) return null
-              return (
-                <div className="grid grid-cols-3 gap-3">
-                  {taggedItems.map((entry) => (
-                    <div
-                      key={`${entry.versionId}:${entry.userId}`}
-                      onClick={() => setShowFeedbackTagModal(true)}
-                      className="flex flex-col gap-2 rounded-xl border border-neutral-200 px-5 py-4 hover:cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex flex-col">
-                          <span className="text-caption1_m_13 text-primary-strong">
-                            {activeTab}
-                          </span>
-                          <span className="text-title5_sb_20 leading-tight">
-                            {entry.author.name}
-                          </span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            removeTaggedFeedback(categoryApi, entry.versionId, entry.userId)
-                          }}
-                          className="w-15 shrink-0 text-sub4_sb_14"
-                        >
-                          삭제
-                        </Button>
-                      </div>
-                      <p className="text-body2_m_14 text-neutral-30 line-clamp-2">
-                        {entry.oneLineReview}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )
-            })()}
-          </div>
+          <FeedbackTagSection
+            activeTabLabel={activeTab}
+            taggedItems={taggedFeedbacks[categoryApi] ?? []}
+            maxCount={3}
+            onOpen={() => setShowFeedbackTagModal(true)}
+            onRemove={(versionId, userId) => removeTaggedFeedback(categoryApi, versionId, userId)}
+          />
         </div>
 
         {/* Sidebar */}
@@ -537,8 +356,7 @@ export function GrowthRecordForm() {
           <Button
             size="sm"
             onClick={() => {
-              isNavigatingForwardRef.current = true
-              router.push(`/projects/${projectId}/growthrecord/feedback-questions`)
+              router.replace(`/projects/${projectId}/growthrecord/feedback-questions`)
             }}
             className="w-full mt-4 text-sub3_sb_16"
           >
@@ -546,12 +364,6 @@ export function GrowthRecordForm() {
           </Button>
         </div>
       </div>
-
-      <LeaveConfirmModal
-        isOpen={showLeaveModal}
-        onCancel={() => setShowLeaveModal(false)}
-        onConfirm={() => window.history.go(-2)}
-      />
 
       <FeedbackTagModal
         key={String(showFeedbackTagModal)}

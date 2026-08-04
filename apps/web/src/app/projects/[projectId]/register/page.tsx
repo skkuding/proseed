@@ -22,6 +22,7 @@ import { CATEGORY_TO_API, STATUS_TO_API, JOB_TO_API, type JobTab } from './_comp
 import { JOB_API_TO_LABEL } from '@/app/_utils/projectConstants'
 import { useProjectForm } from '../_hooks/useProjectForm'
 import { useAuthGuard } from '@/lib/useAuthGuard'
+import { useLeaveGuard } from '@/lib/useLeaveGuard'
 import { trackEvent } from '@/lib/analytics'
 import {
   createProject,
@@ -45,17 +46,7 @@ export default function RegisterProject() {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showRegisterConfirm, setShowRegisterConfirm] = useState(false)
-  const [showLeaveModal, setShowLeaveModal] = useState(false)
-
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href)
-    const handlePopState = () => {
-      window.history.pushState(null, '', window.location.href)
-      setShowLeaveModal(true)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
 
   useEffect(() => {
     trackEvent('project_registration_started', {})

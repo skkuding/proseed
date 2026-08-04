@@ -4,6 +4,8 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useParams } from 'next/navigation'
 import { useAuthGuard } from '@/lib/useAuthGuard'
+import { useLeaveGuard } from '@/lib/useLeaveGuard'
+import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 
 const TABS = [
   { label: '프로젝트 성장기록', segment: 'create' },
@@ -16,6 +18,10 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
   const params = useParams()
   const projectId = params.projectId as string
   const activeIndex = pathname.includes('feedback-questions') ? 1 : 0
+  // 성장기록/피드백 질문 탭은 같은 레이아웃 아래서만 오가므로(내부 이동은 replace라 히스토리가
+  // 쌓이지 않음) 뒤로가기 방어는 에디터 진입 시 한 번만 걸면 됨 — 탭마다 걸면 전환할 때마다
+  // 더미 엔트리가 계속 쌓여 뒤로가기를 여러 번 눌러야 빠져나가는 문제가 생긴다
+  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
 
   useEffect(() => {
     document.title = '성장기록 작성 | PROSEED'
@@ -29,6 +35,7 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
             <Link
               key={tab.segment}
               href={`/projects/${projectId}/growthrecord/${tab.segment}`}
+              replace
               className={`pb-2 text-sub1_sb_18 select-none transition-colors ${
                 activeIndex === i
                   ? 'border-b-3 border-CoolNeutral-20 text-CoolNeutral-20'
@@ -41,6 +48,12 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
         </div>
       </div>
       {children}
+
+      <LeaveConfirmModal
+        isOpen={showLeaveModal}
+        onCancel={() => setShowLeaveModal(false)}
+        onConfirm={() => window.history.go(-2)}
+      />
     </div>
   )
 }

@@ -8,14 +8,7 @@ import { CATEGORY_TO_API, type CategoryLabel } from '@/app/_utils/projectConstan
 import MyProjectCard from './_components/MyProjectCard'
 import ProjectCard from '@/app/mainpage/_components/ProjectCard'
 import { getMyProjects, getProjects, type Project as RecommendedProject } from '@/lib/api'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
+import { NumberedPagination } from '@/components/NumberedPagination'
 import { useAuthGuard } from '@/lib/useAuthGuard'
 
 const PAGE_SIZE = 9
@@ -29,10 +22,6 @@ type Project = {
   feedbackCount: number
   growthRecordCount: number
   isOwner: boolean
-}
-
-function getVisiblePages(total: number): number[] {
-  return Array.from({ length: total }, (_, i) => i + 1)
 }
 
 export default function MyProject() {
@@ -130,46 +119,11 @@ export default function MyProject() {
                 ))}
               </div>
               {totalPages > 0 && (
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(currentPage - 1)
-                        }}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
-                      />
-                    </PaginationItem>
-                    {getVisiblePages(totalPages).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          isActive={page === currentPage}
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handlePageChange(page)
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(currentPage + 1)
-                        }}
-                        className={
-                          currentPage === totalPages ? 'pointer-events-none opacity-40' : ''
-                        }
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+                <NumberedPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               )}
             </div>
           )}

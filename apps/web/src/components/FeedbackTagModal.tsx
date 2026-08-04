@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
+import { Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   getFeedbacksForVersion,
@@ -17,48 +16,10 @@ import {
   jobTabToPersonLabel,
   type JobTab,
 } from '@/app/_utils/projectConstants'
+import { FeedbackTagCard, buildSubmissionCards } from './FeedbackTagCard'
+import { FeedbackTagDetailView } from './FeedbackTagDetailView'
 
 const MAX_PER_TAB = 3
-
-type SubmissionQuestion = {
-  questionId: number
-  questionTitle: string
-  questionContent: string
-  content: string
-  imageUrls: string[]
-}
-
-type SubmissionCard = {
-  submissionId: number
-  userId: number
-  isAdopted: boolean
-  author: { name: string; profileImageUrl: string }
-  oneLineReview: string
-  questions: SubmissionQuestion[]
-}
-
-function buildSubmissionCards(items: FeedbackListItemDto[]): SubmissionCard[] {
-  const bySubmission = new Map<number, SubmissionCard>()
-  for (const item of items) {
-    const card = bySubmission.get(item.submissionId) ?? {
-      submissionId: item.submissionId,
-      userId: item.userId,
-      isAdopted: item.isAdopted,
-      author: { name: item.author.name, profileImageUrl: item.author.profileImageUrl },
-      oneLineReview: item.oneLineReview,
-      questions: [],
-    }
-    card.questions.push({
-      questionId: item.questionId,
-      questionTitle: item.questionTitle,
-      questionContent: item.questionContent,
-      content: item.content,
-      imageUrls: item.imageUrls,
-    })
-    bySubmission.set(item.submissionId, card)
-  }
-  return [...bySubmission.values()]
-}
 
 interface Props {
   isOpen: boolean
@@ -101,9 +62,9 @@ export function FeedbackTagModal({
   const cards = buildSubmissionCards(feedbacks.filter((f) => f.category === activeCategory))
   const selected = selectedByCategory[activeCategory] ?? []
 
-  const isSelected = (card: SubmissionCard) => selected.some((e) => e.userId === card.userId)
+  const isSelected = (userId: number) => selected.some((e) => e.userId === userId)
 
-  const toggleSelect = (card: SubmissionCard) => {
+  const toggleSelect = (card: (typeof cards)[number]) => {
     setSelectedByCategory((prev) => {
       const current = prev[activeCategory] ?? []
       if (current.some((e) => e.userId === card.userId)) {
@@ -124,7 +85,7 @@ export function FeedbackTagModal({
     })
   }
 
-  const openDetail = (card: SubmissionCard) => {
+  const openDetail = (card: (typeof cards)[number]) => {
     setDetailSubmissionId(card.submissionId)
     setSelectedQuestionId(card.questions[0]?.questionId ?? null)
   }
@@ -140,11 +101,6 @@ export function FeedbackTagModal({
 
   // Detail view
   if (detailCard) {
-    const currentQuestion =
-      detailCard.questions.find((q) => q.questionId === selectedQuestionId) ??
-      detailCard.questions[0]
-    const detailSelected = isSelected(detailCard)
-
     return (
       <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 "
@@ -154,104 +110,19 @@ export function FeedbackTagModal({
           className="w-270 bg-background-normal rounded-2xl overflow-hidden"
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
-          <div className="max-h-165.5 overflow-y-auto">
-            <div>
-              {/* Header */}
-              <div className="flex items-center justify-between px-8 py-6">
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="iconMuted"
-                    size="bare"
-                    onClick={() => setDetailSubmissionId(null)}
-                  >
-                    <ChevronLeftIcon className="size-6" />
-                  </Button>
-                  <h2 className="text-title1_sb_28 text-CoolNeutral-20">피드백 자세히 보기</h2>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    toggleSelect(detailCard)
-                    setDetailSubmissionId(null)
-                  }}
-                  className={`px-6 text-sub3_sb_16 ${
-                    detailSelected ? 'bg-neutral-200 text-CoolNeutral-40 hover:bg-neutral-300' : ''
-                  }`}
-                  disabled={!detailSelected && selected.length >= MAX_PER_TAB}
-                >
-                  {detailSelected ? '선택 해제하기' : '피드백 선택하기'}
-                </Button>
-              </div>
-
-              {/* Body */}
-              <div className="px-8 py-6 flex flex-col gap-5 bg-white rounded-xl mx-7 mb-10">
-                {/* Profile */}
-                <div className="flex items-center gap-4">
-                  <div className="relative w-17.5 h-17.5 rounded-full overflow-hidden shrink-0 bg-neutral-100">
-                    <Image
-                      src={detailCard.author.profileImageUrl}
-                      alt={detailCard.author.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-body2_m_14 text-primary-strong">{activeTab}</span>
-                    <span className="text-[28px] font-semibold tracking-[-0.04em]">
-                      {detailCard.author.name}
-                    </span>
-                  </div>
-                </div>
-
-                {/* One-line review */}
-                <div className="bg-[#0000000A] border border-[#00000033] rounded-xl px-6 py-5">
-                  <p className="text-title4_m_20 leading-[130%] truncate">
-                    {detailCard.oneLineReview}
-                  </p>
-                </div>
-
-                {/* Q&A */}
-                <div className="flex min-h-50 gap-6">
-                  {/* Sidebar */}
-                  <div className="w-62.5 shrink-0 p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] rounded-lg flex flex-col">
-                    <p className="text-title3_sb_20 mb-3">피드백 답변 바로가기</p>
-                    <div className="flex flex-col">
-                      {detailCard.questions.map((q) => {
-                        const isQuestionSelected = selectedQuestionId === q.questionId
-                        return (
-                          <button
-                            key={q.questionId}
-                            onClick={() => setSelectedQuestionId(q.questionId)}
-                            className={`flex justify-between items-center text-left w-full px-1 py-2 rounded-lg text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99 hover:cursor-pointer ${
-                              isQuestionSelected ? 'bg-neutral-99' : ''
-                            }`}
-                          >
-                            <div className="flex items-center gap-0.5">
-                              <Dot className="size-4 shrink-0" />
-                              <span className="max-w-37.5 truncate">{q.questionTitle}</span>
-                            </div>
-                            <ChevronRightIcon className="size-5 shrink-0 text-[#7B7B7B]" />
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    {currentQuestion && (
-                      <div className="flex flex-col gap-6">
-                        <h3 className="text-title5_sb_20">{currentQuestion.questionTitle}</h3>
-                        <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
-                          {currentQuestion.content}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <FeedbackTagDetailView
+            card={detailCard}
+            activeTabLabel={activeTab}
+            isSelected={isSelected(detailCard.userId)}
+            canSelect={selected.length < MAX_PER_TAB}
+            selectedQuestionId={selectedQuestionId}
+            onSelectQuestion={setSelectedQuestionId}
+            onBack={() => setDetailSubmissionId(null)}
+            onToggleSelect={() => {
+              toggleSelect(detailCard)
+              setDetailSubmissionId(null)
+            }}
+          />
         </div>
       </div>
     )
@@ -331,80 +202,17 @@ export function FeedbackTagModal({
             <div className="grid grid-cols-2 gap-4">
               {cards
                 .filter((c) => !c.isAdopted)
-                .map((card) => {
-                  const cardSelected = isSelected(card)
-                  const disabled = !cardSelected && selected.length >= MAX_PER_TAB
-
-                  return (
-                    <div
-                      key={card.submissionId}
-                      onClick={() => {
-                        if (disabled) return
-                        toggleSelect(card)
-                      }}
-                      className={`rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${disabled ? '' : 'hover:cursor-pointer'} ${
-                        cardSelected
-                          ? 'border-primary-strong bg-white'
-                          : disabled
-                            ? 'border-none bg-neutral-99 opacity-60'
-                            : 'border-none bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-10">
-                        {/* Profile */}
-                        <div className="flex items-center gap-3">
-                          <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0">
-                            <Image
-                              src={card.author.profileImageUrl}
-                              alt={card.author.name}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-body2_m_14 text-primary-strong">{activeTab}</span>
-                            <span className="text-title5_sb_20 leading-tight">
-                              {card.author.name}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Checkbox */}
-                        <div
-                          className={`size-8 shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
-                            cardSelected
-                              ? 'bg-primary-strong border-primary-strong'
-                              : 'border-neutral-300 bg-white'
-                          }`}
-                        >
-                          {cardSelected && (
-                            <svg
-                              viewBox="0 0 12 10"
-                              className="size-4 text-white fill-none stroke-current stroke-2"
-                            >
-                              <polyline points="1,5 4.5,8.5 11,1" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* One-line review */}
-                      <Button
-                        variant="iconMuted"
-                        size="bare"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openDetail(card)
-                        }}
-                        className="w-full text-left text-black"
-                      >
-                        <div className="rounded-[12px] border border-[#00000033] bg-[#0000000A] px-4 py-3 w-full">
-                          <p className="text-body1_m_16 truncate">{card.oneLineReview}</p>
-                        </div>
-                      </Button>
-                    </div>
-                  )
-                })}
+                .map((card) => (
+                  <FeedbackTagCard
+                    key={card.submissionId}
+                    card={card}
+                    activeTabLabel={activeTab}
+                    isSelected={isSelected(card.userId)}
+                    disabled={!isSelected(card.userId) && selected.length >= MAX_PER_TAB}
+                    onToggle={() => toggleSelect(card)}
+                    onOpenDetail={() => openDetail(card)}
+                  />
+                ))}
             </div>
           )}
         </div>

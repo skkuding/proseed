@@ -7,19 +7,14 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
+import { useLeaveGuard } from '@/lib/useLeaveGuard'
 import { ConfirmModal } from '@/components/ConfirmModal'
 import { FeedbackSuccessModal } from '@/components/FeedbackSuccessModal'
 import { ImageDeleteModal } from '@/components/ImageDeleteModal'
-import {
-  FeedbackQuestionBox,
-  MAX_QUESTION_IMAGES,
-  type QuestionImageItem,
-} from './FeedbackQuestionBox'
+import { FeedbackQuestionBox } from './FeedbackQuestionBox'
 import { FeedbackAnswerNavSidebar } from './FeedbackAnswerNavSidebar'
 import { ProjectSummarySidebar } from './ProjectSummarySidebar'
 import {
-  getUploadUrl,
-  uploadToS3,
   getProjectVersions,
   getFeedbackQuestions,
   getProjectById,
@@ -37,12 +32,11 @@ import {
   type JobTab,
 } from '@/app/_utils/projectConstants'
 import { trackEvent } from '@/lib/analytics'
+import { useQuestionImages } from '../_hooks/useQuestionImages'
 
 const ONE_LINE_MAX = 200
 const TABS = JOB_TABS
 type TabLabel = JobTab
-
-type ImageModal = { questionId: number; index: number } | null
 
 // 성장기록(버전)이 아직 없는 프로젝트는 실제 질문 대신 직군당 자유 텍스트 질문 하나로 대체한다.
 // FeedbackQuestionItemDto와 동일한 shape을 쓰면 기존 질문별 렌더링 코드를 그대로 재사용할 수 있다.
@@ -91,9 +85,16 @@ export function CreateFeedbackContent() {
   const [activeTab, setActiveTab] = useState<TabLabel>(allowedTabs[0] ?? '기획')
   const [oneLineReview, setOneLineReview] = useState('')
   const [answers, setAnswers] = useState<Record<number, string>>({})
-  const [questionImages, setQuestionImages] = useState<Record<number, QuestionImageItem[]>>({})
-  const [imageModal, setImageModal] = useState<ImageModal>(null)
-  const [showLeaveModal, setShowLeaveModal] = useState(false)
+  const {
+    questionImages,
+    imageModal,
+    setImageModal,
+    handleImageSelect,
+    removeImage,
+    modalImages,
+    modalImage,
+  } = useQuestionImages()
+  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFreeformConfirmModal, setShowFreeformConfirmModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -150,16 +151,6 @@ export function CreateFeedbackContent() {
       .catch(() => setProject(null))
   }, [isFreeform, projectId])
 
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href)
-    const handlePopState = () => {
-      window.history.pushState(null, '', window.location.href)
-      setShowLeaveModal(true)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
-
   if (!isFreeform && (!versionChecked || !isLatestVersion)) return null
 
   const handleLeaveConfirm = () => {
@@ -214,60 +205,6 @@ export function CreateFeedbackContent() {
   const scrollToQuestion = (questionId: number) => {
     questionRefs.current[questionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
-
-  const handleImageSelect = async (questionId: number, files: FileList | null) => {
-    if (!files || files.length === 0) return
-
-    const current = questionImages[questionId]?.length ?? 0
-    const remaining = MAX_QUESTION_IMAGES - current
-    const selected = Array.from(files).slice(0, remaining)
-    if (selected.length === 0) return
-
-    const newImages: QuestionImageItem[] = selected.map((file) => ({
-      id: crypto.randomUUID(),
-      preview: URL.createObjectURL(file),
-      uploading: true,
-    }))
-
-    setQuestionImages((prev) => ({
-      ...prev,
-      [questionId]: [...(prev[questionId] ?? []), ...newImages],
-    }))
-
-    await Promise.all(
-      selected.map(async (file, i) => {
-        const imageId = newImages[i].id
-        try {
-          const { url, key } = await getUploadUrl(file.name, file.type)
-          await uploadToS3(url, file)
-          setQuestionImages((prev) => ({
-            ...prev,
-            [questionId]: prev[questionId].map((img) =>
-              img.id === imageId ? { ...img, key, uploading: false } : img
-            ),
-          }))
-        } catch {
-          setQuestionImages((prev) => ({
-            ...prev,
-            [questionId]: prev[questionId].map((img) =>
-              img.id === imageId ? { ...img, uploading: false } : img
-            ),
-          }))
-        }
-      })
-    )
-  }
-
-  const removeImage = (questionId: number, index: number) => {
-    setQuestionImages((prev) => {
-      const updated = prev[questionId].filter((_, i) => i !== index)
-      return { ...prev, [questionId]: updated }
-    })
-    setImageModal(null)
-  }
-
-  const modalImages = imageModal ? (questionImages[imageModal.questionId] ?? []) : []
-  const modalImage = imageModal ? modalImages[imageModal.index] : null
 
   return (
     <div className="flex flex-col gap-10 mt-10">

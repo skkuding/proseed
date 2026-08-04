@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
-import { LeaveConfirmModal } from '@/components/LeaveConfirmModal'
 import { FeedbackTemplateModal } from '@/components/FeedbackTemplateModal'
 import { GrowthRecordSubmitModal } from '@/components/GrowthRecordSubmitModal'
 import { GrowthRecordSuccessModal } from '@/components/GrowthRecordSuccessModal'
@@ -18,7 +17,6 @@ import {
   getProjectById,
   getDrafts,
   upsertDraft,
-  type CreateVersionDto,
   type RecordCategory,
 } from '@/lib/api'
 import { trackEvent } from '@/lib/analytics'
@@ -29,31 +27,22 @@ import {
   RECORD_CATEGORY_LABELS,
   jobTabToPersonLabel,
 } from '@/app/_utils/projectConstants'
-import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import { authClient } from '@/lib/auth-client'
+import { FeedbackQuestionCard } from './FeedbackQuestionCard'
+import {
+  buildGrowthRecordPublishPayload,
+  FREE_COMMENT_CONTENT,
+  type FeedbackQuestionDraft,
+  type TabLabel,
+} from '../_utils/buildGrowthRecordPublishPayload'
 
-const FREE_COMMENT_CONTENT = '자유롭게 하고 싶은 말을 남겨주세요'
 const AUTOSAVE_DELAY_MS = 1000
 
 const TABS = JOB_TABS
-type TabLabel = (typeof TABS)[number]
-
-const TAB_TO_MOCK_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.questions> = {
-  기획: 'plan',
-  디자인: 'design',
-  개발: 'dev',
-  기타: 'general',
-}
 
 const MAX_QUESTIONS = 4 // 자유롭게 하고 싶은 말을 남겨주세요 포함
-const MAX_LENGTH = 200
 
-type Question = {
-  id: string
-  text: string
-  isRequired: boolean
-  isFreeComment: boolean
-}
+type Question = FeedbackQuestionDraft
 
 // growthRecordDraft.content에 함께 저장되는 이 폼의 몫 — answers/imageKeys(GrowthRecordForm 소유)는
 // 불러온 그대로 보존해서 저장 시 덮어쓰지 않는다
@@ -76,26 +65,6 @@ function createFreeComment(): Question {
   return { id: 'free-comment', text: '', isRequired: false, isFreeComment: true }
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors hover:cursor-pointer ${
-        checked ? 'bg-primary-strong' : 'bg-neutral-200'
-      }`}
-    >
-      <span
-        className={`inline-block size-5 rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-5.5' : 'translate-x-0.5'
-        }`}
-      />
-    </button>
-  )
-}
-
 export function FeedbackQuestionsForm() {
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
   const [questionsByTab, setQuestionsByTab] = useState<Record<TabLabel, Question[]>>({
@@ -104,7 +73,6 @@ export function FeedbackQuestionsForm() {
     개발: questionsToDefault(),
     기타: questionsToDefault(),
   })
-  const [showLeaveModal, setShowLeaveModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -119,25 +87,9 @@ export function FeedbackQuestionsForm() {
   const { data: session, isPending: sessionPending } = authClient.useSession()
   // GrowthRecordForm이 같은 draft에 저장한 answers/imageKeys — 자동저장 시 덮어쓰지 않도록 보존
   const preservedContentByTab = useRef<Partial<Record<TabLabel, DraftContent>>>({})
-  // 발행 성공 후 성공 모달의 버튼으로 페이지를 벗어날 때는 이탈 확인 모달을 띄우지 않도록 막는 플래그
-  const isNavigatingForwardRef = useRef(false)
   // 최초 1회만 기본 탭을 선택 — 브라우저 탭 전환 등으로 세션이 재검증돼 아래 effect가 다시 돌아도
   // 사용자가 고른 탭을 덮어쓰지 않기 위함
   const hasSetInitialTabRef = useRef(false)
-
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href)
-    const handlePopState = () => {
-      if (isNavigatingForwardRef.current) {
-        isNavigatingForwardRef.current = false
-        return
-      }
-      window.history.pushState(null, '', window.location.href)
-      setShowLeaveModal(true)
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
 
   // 팀원은 자기 직군 질문만 작성 가능 — 발행은 리드만 가능하고, "프로젝트 업데이트" 클릭 시에만 안내
   useEffect(() => {
@@ -277,47 +229,19 @@ export function FeedbackQuestionsForm() {
               if (!q.isFreeComment) questionIndex++
               const num = questionIndex
               return (
-                <div
+                <FeedbackQuestionCard
                   key={q.id}
-                  className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-title1_sb_28">
-                      {q.isFreeComment
-                        ? '자유롭게 하고 싶은 말을 남겨주세요'
-                        : `피드백 질문 ${num}`}
-                    </h2>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-body2_m_14 text-CoolNeutral-40">필수 질문</span>
-                        <Toggle checked={q.isRequired} onChange={() => toggleRequired(q.id)} />
-                      </div>
-                      <Button
-                        size="xs"
-                        onClick={() => removeQuestion(q.id)}
-                        disabled={questions.length === 1}
-                        className="px-4 text-sub4_sb_14"
-                      >
-                        삭제하기
-                      </Button>
-                    </div>
-                  </div>
-                  {!q.isFreeComment && (
-                    <div className="relative">
-                      <textarea
-                        value={q.text}
-                        onChange={(e) => {
-                          if (e.target.value.length <= MAX_LENGTH) updateText(q.id, e.target.value)
-                        }}
-                        placeholder="텍스트를 입력해주세요"
-                        className="w-full h-32 resize-none rounded-xl border border-neutral-200 p-4 text-body2_m_14 text-CoolNeutral-20 placeholder:text-CoolNeutral-60 focus:outline-none focus:border-CoolNeutral-40 transition-colors"
-                      />
-                      <span className="absolute bottom-3 right-4 text-caption1_m_13 text-CoolNeutral-50">
-                        {q.text.length}/{MAX_LENGTH}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                  title={
+                    q.isFreeComment ? '자유롭게 하고 싶은 말을 남겨주세요' : `피드백 질문 ${num}`
+                  }
+                  isFreeComment={q.isFreeComment}
+                  text={q.text}
+                  isRequired={q.isRequired}
+                  canRemove={questions.length > 1}
+                  onTextChange={(text) => updateText(q.id, text)}
+                  onToggleRequired={() => toggleRequired(q.id)}
+                  onRemove={() => removeQuestion(q.id)}
+                />
               )
             })
           })()}
@@ -391,54 +315,21 @@ export function FeedbackQuestionsForm() {
 
           const { version, imagesByTab, answers, taggedFeedbacks } = useGrowthRecordStore.getState()
 
-          const growthRecords: CreateVersionDto['growthRecords'] = JOB_TABS.map((tab) => ({
-            category: RECORD_CATEGORY_TO_API[
-              tab
-            ] as CreateVersionDto['growthRecords'][number]['category'],
-            contents: growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].map((q) => ({
-              title: q.questionTitle,
-              content: answers[q.questionId] ?? '',
-              isDefault: true,
-            })),
-            imageKeys: imagesByTab[tab] ?? [],
-          }))
-
-          const feedbackQuestions: CreateVersionDto['feedbackQuestions'] = JOB_TABS.flatMap((tab) =>
-            questionsByTab[tab].map((q) => ({
-              category: RECORD_CATEGORY_TO_API[
-                tab
-              ] as CreateVersionDto['feedbackQuestions'][number]['category'],
-              content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
-              isRequired: q.isRequired,
-            }))
-          )
-
-          const taggedFeedbacksPayload: CreateVersionDto['taggedFeedbacks'] = Object.entries(
-            taggedFeedbacks
-          )
-            .filter(([, entries]) => entries.length > 0)
-            .map(([category, entries]) => ({
-              category: category as CreateVersionDto['feedbackQuestions'][number]['category'],
-              submissions: entries.map((entry) => ({
-                versionId: entry.versionId,
-                userId: entry.userId,
-              })),
-            }))
-
-          const payload: CreateVersionDto = {
-            version: `${version.major}.${version.minor}.${version.patch}`,
-            updateGoal: goal,
-            updateResults: [result],
-            growthRecords,
-            feedbackQuestions,
-            taggedFeedbacks: taggedFeedbacksPayload,
-          }
+          const payload = buildGrowthRecordPublishPayload({
+            version,
+            imagesByTab,
+            answers,
+            taggedFeedbacks,
+            questionsByTab,
+            goal,
+            result,
+          })
 
           setIsPublishing(true)
           try {
             await publishVersion(projectId, payload)
             trackEvent('growth_record_published', { version: payload.version })
-            const adoptedCount = taggedFeedbacksPayload.reduce(
+            const adoptedCount = (payload.taggedFeedbacks ?? []).reduce(
               (count, tag) => count + tag.submissions.length,
               0
             )
@@ -447,7 +338,6 @@ export function FeedbackQuestionsForm() {
             }
             useFeedbackTagStore.getState().resetTaggedFeedbacks()
             useGrowthRecordStore.getState().reset()
-            isNavigatingForwardRef.current = true
             setShowSuccessModal(true)
           } catch (err) {
             toast.error(err instanceof Error ? err.message : '성장기록 발행에 실패했습니다')
@@ -468,12 +358,6 @@ export function FeedbackQuestionsForm() {
         onClose={() => setShowTemplateModal(false)}
       />
 
-      <LeaveConfirmModal
-        isOpen={showLeaveModal}
-        onCancel={() => setShowLeaveModal(false)}
-        onConfirm={() => window.history.go(-2)}
-      />
-
       <ConfirmModal
         isOpen={showLeadOnlyModal}
         title="리드만 발행할 수 있어요"
@@ -482,7 +366,6 @@ export function FeedbackQuestionsForm() {
         confirmLabel="저장할래요"
         onCancel={() => setShowLeadOnlyModal(false)}
         onConfirm={() => {
-          isNavigatingForwardRef.current = true
           setShowLeadOnlyModal(false)
           router.replace(`/projects/${projectId}`)
         }}

@@ -10,14 +10,7 @@ import {
   jobTabToPersonLabel,
   type JobTab,
 } from '@/app/_utils/projectConstants'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
+import { NumberedPagination } from '@/components/NumberedPagination'
 
 const TABS = JOB_TABS
 type TabLabel = JobTab
@@ -63,7 +56,10 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
     setTimeout(() => setCopiedIndex(null), 2000)
   }
 
-  const getPageNumbers = () => Array.from({ length: totalPages }, (_, i) => i + 1)
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return
+    setCurrentPage(page)
+  }
 
   return (
     <div
@@ -143,53 +139,11 @@ export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-2 items-center shrink-0">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage > 1) setCurrentPage((p) => p - 1)
-                    }}
-                    className={
-                      currentPage === 1 ? 'pointer-events-none opacity-40' : 'hover:cursor-pointer'
-                    }
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      href="#"
-                      isActive={currentPage === page}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        setCurrentPage(page)
-                      }}
-                      className="hover:cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage < totalPages) setCurrentPage((p) => p + 1)
-                    }}
-                    className={
-                      currentPage === totalPages
-                        ? 'pointer-events-none opacity-40'
-                        : 'hover:cursor-pointer'
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <NumberedPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
       </div>

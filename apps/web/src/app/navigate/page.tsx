@@ -8,21 +8,10 @@ import { getProjects, type Project } from '@/lib/api'
 import CategoryTabs from '@/app/mainpage/_components/CategoryTabs'
 import ProjectCard, { ProjectCardSkeleton } from '@/app/mainpage/_components/ProjectCard'
 import { Button } from '@/components/ui/button'
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
+import { NumberedPagination } from '@/components/NumberedPagination'
 import { SearchModal } from './_components/SearchModal'
 
 const PAGE_SIZE = 9
-
-function getVisiblePages(total: number): number[] {
-  return Array.from({ length: total }, (_, i) => i + 1)
-}
 
 export default function Navigate() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')
@@ -109,46 +98,12 @@ export default function Navigate() {
         )}
 
         {/* Pagination */}
-        <Pagination className="mt-10">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault()
-                  handlePageChange(currentPage - 1)
-                }}
-                className={currentPage === 1 ? 'pointer-events-none opacity-40' : ''}
-              />
-            </PaginationItem>
-
-            {getVisiblePages(paginationPages).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  href="#"
-                  isActive={page === currentPage}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handlePageChange(page)
-                  }}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault()
-                  handlePageChange(currentPage + 1)
-                }}
-                className={currentPage === paginationPages ? 'pointer-events-none opacity-40' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <NumberedPagination
+          currentPage={currentPage}
+          totalPages={paginationPages}
+          onPageChange={handlePageChange}
+          className="mt-10"
+        />
       </div>
 
       <SearchModal

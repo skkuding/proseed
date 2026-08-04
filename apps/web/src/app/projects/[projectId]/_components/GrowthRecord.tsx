@@ -5,13 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import {
   getProjectById,
@@ -30,6 +23,7 @@ import { formatDate } from '@/lib/utils'
 import { ImageLightbox } from './ImageLightbox'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { authClient } from '@/lib/auth-client'
+import { VersionSelect } from './VersionSelect'
 
 const TABS = ['전체 요약', '기획', '디자인', '개발', '기타'] as const
 type TabLabel = (typeof TABS)[number]
@@ -119,25 +113,11 @@ export function GrowthRecord() {
           </p>
         </div>
         <div className="flex items-center">
-          <Select value={selectedVersion} onValueChange={setSelectedVersion}>
-            <SelectTrigger className="h-12 px-4 text-body1_m_16 rounded-[8px] hover:cursor-pointer border-neutral-90 [&_svg]:size-5">
-              <SelectValue placeholder="업데이트 버전 -">
-                {versions.length > 0 &&
-                  `업데이트 버전 ${versions.find((v) => v.id.toString() === selectedVersion)?.version}`}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent position="popper">
-              {versions.map((v) => (
-                <SelectItem
-                  key={v.id}
-                  value={v.id.toString()}
-                  className="text-body1_m_16! hover:cursor-pointer"
-                >
-                  버전 {v.version}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <VersionSelect
+            versions={versions}
+            value={selectedVersion}
+            onChange={setSelectedVersion}
+          />
           {canWriteGrowthRecord && (
             <Button
               onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
