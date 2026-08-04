@@ -32,6 +32,7 @@ import { FeedbackQuestionCard } from './FeedbackQuestionCard'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import {
   buildGrowthRecordPublishPayload,
+  isTabComplete,
   FREE_COMMENT_CONTENT,
   TAB_TO_MOCK_CATEGORY,
   type FeedbackQuestionDraft,
@@ -82,6 +83,7 @@ export function FeedbackQuestionsForm() {
   const [isLead, setIsLead] = useState(false)
   const [allowedTabs, setAllowedTabs] = useState<TabLabel[] | null>(null)
   const [showLeadOnlyModal, setShowLeadOnlyModal] = useState(false)
+  const [showGeneralPartialWarningModal, setShowGeneralPartialWarningModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
   const params = useParams()
   const router = useRouter()
@@ -94,10 +96,22 @@ export function FeedbackQuestionsForm() {
   // 최초 1회만 기본 탭을 선택 — 브라우저 탭 전환 등으로 세션이 재검증돼 아래 effect가 다시 돌아도
   // 사용자가 고른 탭을 덮어쓰지 않기 위함
   const hasSetInitialTabRef = useRef(false)
+  // 탭별로 드래프트 로드 후 첫 autosave 실행은 건너뛴다 — "프로젝트 성장기록" 페이지에서 이동해 온
+  // 직후라면, 이 컴포넌트의 getDrafts가 그쪽 컴포넌트의 unmount flush보다 먼저 도착해 answers/imageKeys가
+  // 아직 서버에 반영되기 전의 값을 얻어올 수 있다 — 그 상태로 바로 재저장하면 preservedContentByTab에
+  // 없는 answers/imageKeys를 통째로 지워버리므로, 방금 불러온 값을 그대로 재저장하는 첫 실행은 건너뛴다
+  const hasAutosavedOnceByTab = useRef<Partial<Record<TabLabel, boolean>>>({})
+  // React Strict Mode(dev 기본값)는 마운트 시 effect를 한 번 더 재실행한다 — 아래 두 effect가 async
+  // 호출 전에 동기적으로 ref를 세팅해두지 않으면, 두 번째 invoke가 첫 호출의 응답이 오기 전에 시작돼
+  // getProjectById/getDrafts가 중복으로 나가고 그 요청들이 뒤섞이면서 아직 반영 안 된 answers/imageKeys를
+  // 옛 값으로 덮어쓸 수 있다
+  const hasInitializedRef = useRef(false)
+  const hasLoadedDraftsRef = useRef(false)
 
   // 팀원은 자기 직군 질문만 작성 가능 — 발행은 리드만 가능하고, "프로젝트 업데이트" 클릭 시에만 안내
   useEffect(() => {
-    if (sessionPending) return
+    if (sessionPending || hasInitializedRef.current) return
+    hasInitializedRef.current = true
 
     getProjectById(projectId)
       .then((project) => {
@@ -122,7 +136,8 @@ export function FeedbackQuestionsForm() {
 
   // 직군별 공유 draft에서 이전에 작성된 질문을 불러옴 (리드는 전 직군, 팀원은 자기 직군만)
   useEffect(() => {
-    if (allowedTabs === null) return
+    if (allowedTabs === null || hasLoadedDraftsRef.current) return
+    hasLoadedDraftsRef.current = true
 
     getDrafts(projectId)
       .then((drafts) => {
@@ -154,6 +169,11 @@ export function FeedbackQuestionsForm() {
   useEffect(() => {
     if (!draftsReady) return
 
+    if (!hasAutosavedOnceByTab.current[activeTab]) {
+      hasAutosavedOnceByTab.current[activeTab] = true
+      return
+    }
+
     const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
     const content: DraftContent = {
       ...preservedContentByTab.current[activeTab],
@@ -177,15 +197,14 @@ export function FeedbackQuestionsForm() {
   }, [projectId, activeTab, questionsByTab, draftsReady])
 
   // 디바운스가 끝나기 전에 다른 직군 탭으로 바꾸거나 페이지를 벗어나면 위 타이머가 취소되면서
-  // 방금 입력한 내용이 그대로 유실됐다 — 탭이 바뀌거나 언마운트되는 시점에 남은 저장을 즉시 반영한다
+  // 방금 입력한 내용이 그대로 유실됐다 — 탭이 바뀌거나 언마운트되는 시점에 남은 저장을 즉시 반영한다.
+  // 이미 페이지를 벗어나는 중(로그아웃 포함)이라 실패해도 보여줄 화면이 없으니 토스트는 띄우지 않는다.
   useEffect(() => {
     return () => {
       const pending = pendingDraftRef.current
       if (!pending) return
       pendingDraftRef.current = null
-      upsertDraft(projectId, pending.category, pending.content).catch(() => {
-        toast.error('임시저장에 실패했습니다')
-      })
+      upsertDraft(projectId, pending.category, pending.content).catch(() => {})
     }
   }, [projectId, activeTab])
 
@@ -303,10 +322,12 @@ export function FeedbackQuestionsForm() {
               const tabsToCheck = isLead
                 ? (Object.keys(questionsByTab) as TabLabel[])
                 : (allowedTabs ?? [])
+              // 기타(GENERAL)는 선택사항 — 안 채워도 발행을 막지 않는다 (채워져 있으면 정상 발행에 포함됨)
+              const requiredTabsToCheck = tabsToCheck.filter((tab) => tab !== '기타')
 
               // 백엔드가 빈 답변을 그대로 422로 거부하므로, 여기서 먼저 걸러 원문 에러 대신 안내 문구를 보여준다
               const { answers, imagesByTab } = useGrowthRecordStore.getState()
-              const hasMissingGrowthRecordAnswers = tabsToCheck.some((tab) =>
+              const hasMissingGrowthRecordAnswers = requiredTabsToCheck.some((tab) =>
                 growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].some(
                   (q) => (answers[q.questionId] ?? '').trim().length === 0
                 )
@@ -316,7 +337,7 @@ export function FeedbackQuestionsForm() {
                 return
               }
 
-              const hasEmpty = tabsToCheck.some((tab) =>
+              const hasEmpty = requiredTabsToCheck.some((tab) =>
                 questionsByTab[tab].some((q) => !q.isFreeComment && q.text.trim().length === 0)
               )
               if (hasEmpty) {
@@ -324,7 +345,7 @@ export function FeedbackQuestionsForm() {
                 return
               }
 
-              const hasMissingImages = tabsToCheck.some(
+              const hasMissingImages = requiredTabsToCheck.some(
                 (tab) => (imagesByTab[tab] ?? []).length === 0
               )
               if (hasMissingImages) {
@@ -334,6 +355,25 @@ export function FeedbackQuestionsForm() {
 
               if (!isLead) {
                 setShowLeadOnlyModal(true)
+                return
+              }
+
+              // 기타는 일부만 채워도 저장은 되지만, 발행 시 전부 채워지지 않으면 통째로 제외된다
+              // (buildGrowthRecordPublishPayload의 isTabComplete) — 사용자가 모르고 발행하면
+              // "분명 뭔가 썼는데 아무것도 안 보인다"고 느끼므로 발행 전에 한 번 안내한다
+              const hasAnyGeneralAnswer = growthRecordQuestions.questions[
+                TAB_TO_MOCK_CATEGORY['기타']
+              ].some((q) => (answers[q.questionId] ?? '').trim().length > 0)
+              const hasGeneralImage = (imagesByTab['기타'] ?? []).length > 0
+              const hasAnyGeneralQuestionText = questionsByTab['기타'].some(
+                (q) => !q.isFreeComment && q.text.trim().length > 0
+              )
+              const hasPartialGeneralContent =
+                (hasAnyGeneralAnswer || hasGeneralImage || hasAnyGeneralQuestionText) &&
+                !isTabComplete('기타', imagesByTab, answers, questionsByTab)
+
+              if (hasPartialGeneralContent) {
+                setShowGeneralPartialWarningModal(true)
                 return
               }
 
@@ -395,8 +435,10 @@ export function FeedbackQuestionsForm() {
       />
 
       <FeedbackTemplateModal
+        key={String(showTemplateModal)}
         isOpen={showTemplateModal}
         onClose={() => setShowTemplateModal(false)}
+        initialTab={activeTab}
       />
 
       <ConfirmModal
@@ -409,6 +451,27 @@ export function FeedbackQuestionsForm() {
         onConfirm={() => {
           setShowLeadOnlyModal(false)
           router.replace(`/projects/${projectId}`)
+        }}
+      />
+
+      <ConfirmModal
+        isOpen={showGeneralPartialWarningModal}
+        title="정말 제출하시겠어요?"
+        description={
+          <>
+            제출한 뒤에는 다시 수정하거나 작성하실 수 없어요.
+            <br />
+            다른 직군에 대한 의견도 남기고 싶으시다면,
+            <br />
+            지금 함께 작성해주세요!
+          </>
+        }
+        cancelLabel="취소"
+        confirmLabel="제출하기"
+        onCancel={() => setShowGeneralPartialWarningModal(false)}
+        onConfirm={() => {
+          setShowGeneralPartialWarningModal(false)
+          setShowSubmitModal(true)
         }}
       />
     </div>

@@ -35,7 +35,7 @@ interface BuildGrowthRecordPublishPayloadParams {
 // 기타(GENERAL)는 선택사항 — 성장기록 답변·이미지·피드백 질문이 전부(필수 직군과 동일한 기준으로)
 // 채워져 있을 때만 발행에 포함하고, 하나라도 비어있으면 기타 관련 내용은 이번 발행에서 통째로 제외한다
 // (일부만 채운 채로 보내면 백엔드의 "content should not be empty" 같은 필드 검증에 걸리기 때문)
-function isTabComplete(
+export function isTabComplete(
   tab: TabLabel,
   imagesByTab: BuildGrowthRecordPublishPayloadParams['imagesByTab'],
   answers: BuildGrowthRecordPublishPayloadParams['answers'],

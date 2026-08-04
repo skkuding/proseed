@@ -37,10 +37,6 @@ import { authClient } from '@/lib/auth-client'
 
 const AUTOSAVE_DELAY_MS = 1000
 
-// content shape은 백엔드 seed.ts(growthRecordDraft.createMany)가 실제로 쓰는 형식을 그대로 따름 —
-// answers는 questionId가 아니라 questionTitle로 키(백엔드 성장기록엔 questionId 개념 자체가 없음)
-// feedbackQuestions는 FeedbackQuestionsForm이 같은 직군 draft에 함께 저장하는 필드 — 이 컴포넌트는
-// 그 값을 모르지만 저장할 때 덮어쓰지 않도록 불러온 그대로 보존한다
 type DraftContent = {
   answers: Record<string, string>
   imageKeys: string[]
@@ -103,8 +99,13 @@ export function GrowthRecordForm() {
   const setStoreTaggedFeedbacks = useGrowthRecordStore((s) => s.setTaggedFeedbacks)
 
   const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
-  // 디바운스로 아직 서버에 반영되지 않은 최신 내용 — 탭 전환/이탈 시 즉시 flush하는 데 사용
+
   const pendingDraftRef = useRef<{ category: RecordCategory; content: DraftContent } | null>(null)
+
+  const hasInitializedRef = useRef(false)
+  const hasAutosavedOnceByTab = useRef<Partial<Record<TabLabel, boolean>>>({})
+
+  const hasLoadedDraftsRef = useRef(false)
 
   //피드백 태그하기는 이전에 발행된 버전(지금 작성 중인 버전은 아직 존재하지 않음)의 피드백을 대상으로 함
   useEffect(() => {
@@ -115,7 +116,8 @@ export function GrowthRecordForm() {
 
   // 본인이 초대된 직군만 작성 가능, 프로젝트 등록자(Lead)는 전 직군 작성 가능
   useEffect(() => {
-    if (sessionPending) return
+    if (sessionPending || hasInitializedRef.current) return
+    hasInitializedRef.current = true
 
     getProjectById(projectId)
       .then((project) => {
@@ -136,7 +138,8 @@ export function GrowthRecordForm() {
 
   // 직군별 공유 draft 불러오기 (리드는 전 직군, 팀원은 자기 직군만 응답에 포함됨)
   useEffect(() => {
-    if (allowedTabs === null) return
+    if (allowedTabs === null || hasLoadedDraftsRef.current) return
+    hasLoadedDraftsRef.current = true
     let cancelled = false
 
     getDrafts(projectId)
@@ -226,6 +229,11 @@ export function GrowthRecordForm() {
   useEffect(() => {
     if (!draftsReady) return
 
+    if (!hasAutosavedOnceByTab.current[activeTab]) {
+      hasAutosavedOnceByTab.current[activeTab] = true
+      return
+    }
+
     const content = buildDraftContent(
       activeTab,
       images,
@@ -245,16 +253,12 @@ export function GrowthRecordForm() {
     return () => clearTimeout(timer)
   }, [projectId, activeTab, categoryApi, images, answers, questions, version, draftsReady])
 
-  // 디바운스가 끝나기 전에 다른 직군 탭으로 바꾸거나 페이지를 벗어나면 위 타이머가 취소되면서
-  // 방금 입력한 내용이 그대로 유실됐다 — 탭이 바뀌거나 언마운트되는 시점에 남은 저장을 즉시 반영한다
   useEffect(() => {
     return () => {
       const pending = pendingDraftRef.current
       if (!pending) return
       pendingDraftRef.current = null
-      upsertDraft(projectId, pending.category, pending.content).catch(() => {
-        toast.error('임시저장에 실패했습니다')
-      })
+      upsertDraft(projectId, pending.category, pending.content).catch(() => {})
     }
   }, [projectId, activeTab])
 
@@ -268,8 +272,6 @@ export function GrowthRecordForm() {
     const selected = Array.from(files).slice(0, 8 - images.length)
     if (selected.length === 0) return
 
-    // 업로드 도중 다른 직군 탭으로 넘어가도, 완료된 이미지는 "지금 활성 탭"이 아니라
-    // 업로드를 시작한 이 탭에 저장돼야 한다 — 클로저로 캡처해둔다
     const originTab = activeTab
     const originCategoryApi = RECORD_CATEGORY_TO_API[originTab] as RecordCategory
 
@@ -292,8 +294,7 @@ export function GrowthRecordForm() {
             const updated = prev[originTab].map((img) =>
               img.id === imageId ? { ...img, uploading: false, key } : img
             )
-            // 자동저장 effect는 "지금 활성 탭"만 지켜보므로, 업로드가 끝난 시점에 이미
-            // 다른 탭으로 넘어가 있었다면 이 완료를 영영 저장할 기회가 없다 — 여기서 직접 저장한다
+
             const content = buildDraftContent(
               originTab,
               updated,
@@ -373,21 +374,25 @@ export function GrowthRecordForm() {
             images={images}
             onFilesSelected={handleImageSelect}
             onImageClick={setImageModalIndex}
+            isRequired={activeTab !== '기타'}
           />
 
           {/* 질문별 답변 */}
           {questions.map((q) => (
+            // MDXEditor의 markdown prop은 최초 마운트 시 초기값으로만 쓰이고 이후 값이 바뀌어도
+            // 반영되지 않는다 — draftsReady를 key에 포함해 draft 로드가 끝나는 순간 한 번
+            // remount시켜야 불러온 답변이 에디터에 제대로 나타난다
             <GrowthRecordQuestionCard
-              key={q.questionId}
+              key={`${q.questionId}-${draftsReady}`}
               title={q.questionTitle}
-              isRequired={q.isRequired}
+              isRequired={q.isRequired && activeTab !== '기타'}
               value={answers[q.questionId] ?? ''}
               onChange={(val) => setAnswers((prev) => ({ ...prev, [q.questionId]: val }))}
             />
           ))}
 
           <FeedbackTagSection
-            activeTabLabel={activeTab}
+            activeTabLabel={jobTabToPersonLabel(activeTab)}
             taggedItems={taggedFeedbacks[categoryApi] ?? []}
             maxCount={3}
             onOpen={() => setShowFeedbackTagModal(true)}

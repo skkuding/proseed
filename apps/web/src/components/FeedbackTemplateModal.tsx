@@ -20,10 +20,12 @@ const ITEMS_PER_PAGE = 4
 interface Props {
   isOpen: boolean
   onClose: () => void
+  // 열 때마다 지금 작성 중인 직군 탭으로 맞춰서 보여준다
+  initialTab: TabLabel
 }
 
-export function FeedbackTemplateModal({ isOpen, onClose }: Props) {
-  const [activeTab, setActiveTab] = useState<TabLabel>('기획')
+export function FeedbackTemplateModal({ isOpen, onClose, initialTab }: Props) {
+  const [activeTab, setActiveTab] = useState<TabLabel>(initialTab)
   const [currentPage, setCurrentPage] = useState(1)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [templates, setTemplates] = useState<FeedbackTemplate[]>([])
