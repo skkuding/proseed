@@ -796,32 +796,34 @@ describe('FeedbackService', () => {
 
 type MockFn = jest.Mock
 
-describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)', () => {
+describe('getRecentFeedbacks — mainpage 최근 피드백 (채택/unlock 여부 무관)', () => {
   let service: FeedbackService
   let prisma: {
-    feedbackAdoption: { findMany: MockFn }
-    feedback: { findMany: MockFn }
+    feedbackSubmission: { findMany: MockFn }
   }
   let storage: { getSignedDownloadUrl: MockFn }
 
-  const buildAdoption = (
-    submissionId: number,
-    category: RecordCategory,
+  const buildSubmission = (
+    id: number,
+    createdAt: Date,
+    feedbacks: {
+      content: string
+      question: { category: RecordCategory } | null
+    }[],
     projectIconUrl = 'icon-key',
   ) => ({
-    submissionId,
-    growthRecord: { category },
-    submission: {
-      oneLineReview: `review-${submissionId}`,
-      user: { name: `user-${submissionId}`, profileImageUrl: '/profile.svg' },
-      project: { id: 10, title: 'project', iconUrl: projectIconUrl },
-    },
+    id,
+    versionId: 100 + id,
+    createdAt,
+    oneLineReview: `review-${id}`,
+    user: { name: `user-${id}`, profileImageUrl: '/profile.svg' },
+    project: { id: 10, title: 'project', iconUrl: projectIconUrl },
+    feedbacks,
   })
 
   beforeEach(() => {
     prisma = {
-      feedbackAdoption: { findMany: jest.fn().mockResolvedValue([]) },
-      feedback: { findMany: jest.fn().mockResolvedValue([]) },
+      feedbackSubmission: { findMany: jest.fn().mockResolvedValue([]) },
     }
     storage = {
       getSignedDownloadUrl: jest.fn().mockResolvedValue('signed-icon-url'),
@@ -832,35 +834,29 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)
     )
   })
 
-  it('채택이 없으면 빈 목록을 반환하고 답변 조회를 생략한다', async () => {
+  it('제출이 없으면 빈 목록을 반환한다', async () => {
     const result = await service.getRecentFeedbacks(6)
 
     expect(result).toEqual({ success: true, data: [] })
-    expect(prisma.feedback.findMany).not.toHaveBeenCalled()
+    expect(storage.getSignedDownloadUrl).not.toHaveBeenCalled()
   })
 
-  it('채택(제출×직군) 단위로 카드를 만들고 해당 직군 첫 답변을 본문으로 쓴다', async () => {
-    prisma.feedbackAdoption.findMany.mockResolvedValue([
-      buildAdoption(1, RecordCategory.PLAN),
-      buildAdoption(1, RecordCategory.DESIGN),
-    ])
-    //orderBy(question.order asc)로 정렬된 답변 — 직군별 첫 번째만 채택
-    prisma.feedback.findMany.mockResolvedValue([
-      {
-        submissionId: 1,
-        content: 'plan-answer-1',
-        question: { category: RecordCategory.PLAN },
-      },
-      {
-        submissionId: 1,
-        content: 'plan-answer-2',
-        question: { category: RecordCategory.PLAN },
-      },
-      {
-        submissionId: 1,
-        content: 'design-answer',
-        question: { category: RecordCategory.DESIGN },
-      },
+  it('제출×직군 단위로 카드를 만들고 해당 직군 첫 답변을 본문으로 쓴다 (채택 여부 무관)', async () => {
+    prisma.feedbackSubmission.findMany.mockResolvedValue([
+      buildSubmission(1, new Date('2026-08-04T00:00:00Z'), [
+        {
+          content: 'plan-answer-1',
+          question: { category: RecordCategory.PLAN },
+        },
+        {
+          content: 'plan-answer-2',
+          question: { category: RecordCategory.PLAN },
+        },
+        {
+          content: 'design-answer',
+          question: { category: RecordCategory.DESIGN },
+        },
+      ]),
     ])
 
     const result = await service.getRecentFeedbacks(6)
@@ -868,6 +864,7 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)
     expect(result.data).toEqual([
       {
         submissionId: 1,
+        versionId: 101,
         category: RecordCategory.PLAN,
         nickname: 'user-1',
         profileImageUrl: '/profile.svg',
@@ -879,6 +876,7 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)
       },
       {
         submissionId: 1,
+        versionId: 101,
         category: RecordCategory.DESIGN,
         nickname: 'user-1',
         profileImageUrl: '/profile.svg',
@@ -889,31 +887,69 @@ describe('getRecentFeedbacks — mainpage 최근 피드백 (채택된 제출만)
         projectIconUrl: 'signed-icon-url',
       },
     ])
-    expect(prisma.feedbackAdoption.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { id: 'desc' }, take: 6 }),
-    )
-    //(제출, 직군) 쌍 단위 조회 — 채택 안 된 직군 답변은 가져오지 않는다
-    expect(prisma.feedback.findMany).toHaveBeenCalledWith(
+    //채택(FeedbackAdoption) 여부와 무관하게 발행된 버전의 제출을 전부 조회
+    expect(prisma.feedbackSubmission.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
-          OR: [
-            { submissionId: 1, question: { category: RecordCategory.PLAN } },
-            { submissionId: 1, question: { category: RecordCategory.DESIGN } },
-          ],
-        },
+        where: { versionId: { not: null } },
+        orderBy: { createdAt: 'desc' },
       }),
     )
   })
 
-  it('해당 직군 답변이 없으면 본문은 빈 문자열, 같은 아이콘은 presign 1회', async () => {
-    prisma.feedbackAdoption.findMany.mockResolvedValue([
-      buildAdoption(1, RecordCategory.PLAN, 'same-key'),
-      buildAdoption(2, RecordCategory.DESIGN, 'same-key'),
+  it('최신 제출 순으로 정렬하고 take만큼만 슬라이스한다, 같은 아이콘은 presign 1회', async () => {
+    prisma.feedbackSubmission.findMany.mockResolvedValue([
+      buildSubmission(
+        2,
+        new Date('2026-08-04T00:00:00Z'),
+        [
+          {
+            content: 'design-answer',
+            question: { category: RecordCategory.DESIGN },
+          },
+        ],
+        'same-key',
+      ),
+      buildSubmission(
+        1,
+        new Date('2026-08-03T00:00:00Z'),
+        [
+          {
+            content: 'plan-answer',
+            question: { category: RecordCategory.PLAN },
+          },
+        ],
+        'same-key',
+      ),
+    ])
+
+    const result = await service.getRecentFeedbacks(1)
+
+    expect(result.data).toEqual([
+      {
+        submissionId: 2,
+        versionId: 102,
+        category: RecordCategory.DESIGN,
+        nickname: 'user-2',
+        profileImageUrl: '/profile.svg',
+        oneLineReview: 'review-2',
+        content: 'design-answer',
+        projectId: 10,
+        projectName: 'project',
+        projectIconUrl: 'signed-icon-url',
+      },
+    ])
+    expect(storage.getSignedDownloadUrl).toHaveBeenCalledTimes(1)
+  })
+
+  it('question이 없는 답변(자유 피드백 잔재)은 건너뛴다', async () => {
+    prisma.feedbackSubmission.findMany.mockResolvedValue([
+      buildSubmission(1, new Date('2026-08-04T00:00:00Z'), [
+        { content: 'no-question', question: null },
+      ]),
     ])
 
     const result = await service.getRecentFeedbacks(6)
 
-    expect(result.data.map((item) => item.content)).toEqual(['', ''])
-    expect(storage.getSignedDownloadUrl).toHaveBeenCalledTimes(1)
+    expect(result).toEqual({ success: true, data: [] })
   })
 })

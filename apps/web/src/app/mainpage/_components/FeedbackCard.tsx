@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { RECORD_CATEGORY_LABELS } from '@/app/_utils/projectConstants'
+import { RECORD_CATEGORY_LABELS, jobTabToPersonLabel } from '@/app/_utils/projectConstants'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export function FeedbackCardSkeleton() {
@@ -59,14 +59,14 @@ export default function FeedbackCard({
       {/* 유저 정보 */}
       <div className="flex items-center gap-4">
         <div className="relative overflow-hidden rounded-full">
-          <Image src={profileImageUrl} alt={nickname} height={40} width={40} />
+          <Image src={profileImageUrl} alt={nickname} height={60} width={60} />
         </div>
         <div className="flex flex-col">
           <span className="text-title5_sb_20 transition-colors group-hover:text-white">
             {nickname}
           </span>
           <span className="text-body1_m_16 text-CoolNeutral-50 transition-colors group-hover:text-CoolNeutral-60">
-            {RECORD_CATEGORY_LABELS[category] ?? category}
+            {jobTabToPersonLabel(RECORD_CATEGORY_LABELS[category] ?? category)}
           </span>
         </div>
       </div>

@@ -31,8 +31,7 @@ export default function FeedbackSection() {
   const scroll = (dir: 'left' | 'right') => {
     const el = trackRef.current
     if (!el) return
-    const cardWidth = (el.children[0] as HTMLElement)?.offsetWidth ?? 0
-    el.scrollBy({ left: dir === 'right' ? cardWidth + 16 : -(cardWidth + 16), behavior: 'smooth' })
+    el.scrollTo({ left: dir === 'right' ? el.scrollWidth : 0, behavior: 'smooth' })
   }
 
   const isEmpty = !isLoading && recentFeedbacks.length === 0

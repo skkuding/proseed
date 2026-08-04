@@ -161,7 +161,7 @@ export class FeedbackController {
 export class MyFeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  // GET feedbacks/recent — mainpage 최근 피드백 (채택된 제출만, 공개)
+  // GET feedbacks/recent — mainpage 최근 피드백 (채택/unlock 여부 무관 전체, 공개)
   // 반드시 :submissionId 보다 먼저 선언 — 아니면 recent가 submissionId로 매칭됨
   @Public()
   @Get('recent')

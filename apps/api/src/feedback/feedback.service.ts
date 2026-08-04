@@ -48,83 +48,101 @@ export class FeedbackService {
   ) {}
 
   /**
-   * mainpage 최근 피드백 — 채택(FeedbackAdoption)된 제출만 공개 (본문 게이팅 정책과 정합).
-   * 카드 단위 = 채택(제출×직군), 본문 = 해당 직군 질문에 대한 첫 답변.
+   * mainpage 최근 피드백 — 채택/unlock 여부와 무관하게 최근 제출 전체 공개 (PM 확정, 2026-08-04).
+   * 카드 단위 = 제출×직군, 본문 = 해당 직군 질문에 대한 첫 답변.
    */
   async getRecentFeedbacks(take: number): Promise<RecentFeedbacksResponseDto> {
-    const adoptions = await this.prisma.feedbackAdoption.findMany({
-      orderBy: { id: 'desc' },
-      take,
+    // 제출 하나가 최대 4개 직군에 답할 수 있어, 카드 수 확보를 위해 여유 있게 조회 후 슬라이스
+    const submissions = await this.prisma.feedbackSubmission.findMany({
+      where: { versionId: { not: null } },
+      orderBy: { createdAt: 'desc' },
+      take: take * 4,
       select: {
-        submissionId: true,
-        growthRecord: { select: { category: true } },
-        submission: {
+        id: true,
+        versionId: true,
+        createdAt: true,
+        oneLineReview: true,
+        user: { select: { name: true, profileImageUrl: true } },
+        project: { select: { id: true, title: true, iconUrl: true } },
+        feedbacks: {
+          orderBy: [{ question: { order: 'asc' } }, { id: 'asc' }],
           select: {
-            versionId: true,
-            oneLineReview: true,
-            user: { select: { name: true, profileImageUrl: true } },
-            project: { select: { id: true, title: true, iconUrl: true } },
+            content: true,
+            question: { select: { category: true } },
           },
         },
       },
     })
 
-    if (adoptions.length === 0) {
-      return { success: true, data: [] }
+    type Card = {
+      submissionId: number
+      versionId: number
+      category: RecordCategory
+      createdAt: Date
+      nickname: string
+      profileImageUrl: string
+      oneLineReview: string
+      content: string
+      projectId: number
+      projectName: string
+      projectIconKey: string
     }
 
-    //채택 직군의 첫 답변을 카드 본문으로 사용 — (제출, 직군) 쌍 단위로 정확히 조회
-    const answers = await this.prisma.feedback.findMany({
-      where: {
-        OR: adoptions.map((a) => ({
-          submissionId: a.submissionId,
-          question: { category: a.growthRecord.category },
-        })),
-      },
-      orderBy: [{ question: { order: 'asc' } }, { id: 'asc' }],
-      select: {
-        submissionId: true,
-        content: true,
-        question: { select: { category: true } },
-      },
-    })
+    const cards: Card[] = []
+    for (const submission of submissions) {
+      // 직군별 첫 답변만 카드 본문으로 사용 (feedbacks는 question.order asc로 정렬돼 있음)
+      const seenCategories = new Set<RecordCategory>()
+      for (const answer of submission.feedbacks) {
+        const category = answer.question?.category
+        if (!category || seenCategories.has(category)) {
+          continue
+        }
+        seenCategories.add(category)
 
-    const firstAnswerByKey = new Map<string, string>()
-    for (const answer of answers) {
-      // where절이 question 관계 필터를 걸어 조회했으므로 question은 항상 존재
-      const key = `${answer.submissionId}:${answer.question!.category}`
-      if (!firstAnswerByKey.has(key)) {
-        firstAnswerByKey.set(key, answer.content)
+        cards.push({
+          submissionId: submission.id,
+          // where절이 versionId not null로 필터했으므로 항상 존재
+          versionId: submission.versionId!,
+          category,
+          createdAt: submission.createdAt,
+          nickname: submission.user.name,
+          profileImageUrl: submission.user.profileImageUrl,
+          oneLineReview: submission.oneLineReview,
+          content: answer.content,
+          projectId: submission.project.id,
+          projectName: submission.project.title,
+          projectIconKey: submission.project.iconUrl,
+        })
       }
+    }
+
+    cards.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    const sliced = cards.slice(0, take)
+
+    if (sliced.length === 0) {
+      return { success: true, data: [] }
     }
 
     //프로젝트 아이콘 S3 key → presigned URL (중복 프로젝트는 1회만 변환)
     const iconUrlByKey = new Map<string, string>()
     await Promise.all(
-      [...new Set(adoptions.map((a) => a.submission.project.iconUrl))].map(
-        async (key) => {
-          iconUrlByKey.set(key, await this.storage.getSignedDownloadUrl(key))
-        },
-      ),
+      [...new Set(sliced.map((c) => c.projectIconKey))].map(async (key) => {
+        iconUrlByKey.set(key, await this.storage.getSignedDownloadUrl(key))
+      }),
     )
 
-    const data = adoptions.map((adoption) => ({
-      submissionId: adoption.submissionId,
-      // 채택(adoption)은 항상 발행된 버전의 성장기록에 연결되므로 versionId는 항상 존재
-      versionId: adoption.submission.versionId!,
-      category: adoption.growthRecord.category,
-      nickname: adoption.submission.user.name,
-      profileImageUrl: adoption.submission.user.profileImageUrl,
-      oneLineReview: adoption.submission.oneLineReview,
-      content:
-        firstAnswerByKey.get(
-          `${adoption.submissionId}:${adoption.growthRecord.category}`,
-        ) ?? '',
-      projectId: adoption.submission.project.id,
-      projectName: adoption.submission.project.title,
+    const data = sliced.map((card) => ({
+      submissionId: card.submissionId,
+      versionId: card.versionId,
+      category: card.category,
+      nickname: card.nickname,
+      profileImageUrl: card.profileImageUrl,
+      oneLineReview: card.oneLineReview,
+      content: card.content,
+      projectId: card.projectId,
+      projectName: card.projectName,
       projectIconUrl:
-        iconUrlByKey.get(adoption.submission.project.iconUrl) ??
-        adoption.submission.project.iconUrl,
+        iconUrlByKey.get(card.projectIconKey) ?? card.projectIconKey,
     }))
 
     return { success: true, data }

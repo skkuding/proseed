@@ -155,7 +155,7 @@ export class UnlockFeedbackResponseDto {
   data: UnlockFeedbackDataDto
 }
 
-//mainpage 최근 피드백 카드 — 채택(FeedbackAdoption)된 제출×직군 단위
+//mainpage 최근 피드백 카드 — 채택/unlock 여부와 무관한 최근 제출×직군 단위
 export class RecentFeedbackItemDto {
   submissionId: number
   versionId: number
@@ -167,7 +167,7 @@ export class RecentFeedbackItemDto {
   profileImageUrl: string
   oneLineReview: string
 
-  /** 채택된 직군 질문에 대한 첫 번째 답변 본문 */
+  /** 해당 직군 질문에 대한 첫 번째 답변 본문 */
   content: string
 
   projectId: number
