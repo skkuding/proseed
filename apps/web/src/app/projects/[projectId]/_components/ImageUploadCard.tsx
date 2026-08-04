@@ -19,17 +19,23 @@ interface ImageUploadCardProps {
   images: ImageItem[]
   onFilesSelected: (files: FileList | null) => Promise<void>
   onImageClick: (index: number) => void
+  isRequired?: boolean
 }
 
-export function ImageUploadCard({ images, onFilesSelected, onImageClick }: ImageUploadCardProps) {
+export function ImageUploadCard({
+  images,
+  onFilesSelected,
+  onImageClick,
+  isRequired = true,
+}: ImageUploadCardProps) {
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-title1_sb_28">이미지 등록하기</h2>
-          <FieldBadge type="필수" />
+          <FieldBadge type={isRequired ? '필수' : '선택'} />
         </div>
 
         <Button

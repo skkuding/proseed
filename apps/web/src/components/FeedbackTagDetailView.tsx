@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { ChevronLeftIcon, ChevronRightIcon, Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { FeedbackUnlockPopover } from '@/app/projects/[projectId]/_components/FeedbackUnlockPopover'
 import type { SubmissionCard } from './FeedbackTagCard'
 
 interface FeedbackTagDetailViewProps {
@@ -14,6 +15,12 @@ interface FeedbackTagDetailViewProps {
   onSelectQuestion: (questionId: number) => void
   onBack: () => void
   onToggleSelect: () => void
+  /** 프로젝트 팀원만 unlock 가능 */
+  canUnlock: boolean
+  ticketCount: number | null
+  isUnlocking: boolean
+  unlockErrorMessage: string | null
+  onUnlock: () => void
 }
 
 export function FeedbackTagDetailView({
@@ -25,6 +32,11 @@ export function FeedbackTagDetailView({
   onSelectQuestion,
   onBack,
   onToggleSelect,
+  canUnlock,
+  ticketCount,
+  isUnlocking,
+  unlockErrorMessage,
+  onUnlock,
 }: FeedbackTagDetailViewProps) {
   const currentQuestion =
     card.questions.find((q) => q.questionId === selectedQuestionId) ?? card.questions[0]
@@ -33,19 +45,18 @@ export function FeedbackTagDetailView({
     <div className="max-h-165.5 overflow-y-auto">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between px-7 py-10">
+          <div className="flex items-center gap-2">
             <Button variant="iconMuted" size="bare" onClick={onBack}>
-              <ChevronLeftIcon className="size-6" />
+              <ChevronLeftIcon className="size-9" />
             </Button>
-            <h2 className="text-title1_sb_28 text-CoolNeutral-20">피드백 자세히 보기</h2>
+            <h2 className="text-head3_sb_36">피드백 자세히 보기</h2>
           </div>
           <Button
             size="sm"
+            variant={isSelected ? 'outline' : 'default'}
             onClick={onToggleSelect}
-            className={`px-6 text-sub3_sb_16 ${
-              isSelected ? 'bg-neutral-200 text-CoolNeutral-40 hover:bg-neutral-300' : ''
-            }`}
+            className="px-6 text-sub3_sb_16"
             disabled={!isSelected && !canSelect}
           >
             {isSelected ? '선택 해제하기' : '피드백 선택하기'}
@@ -53,10 +64,10 @@ export function FeedbackTagDetailView({
         </div>
 
         {/* Body */}
-        <div className="px-8 py-6 flex flex-col gap-5 bg-white rounded-xl mx-7 mb-10">
+        <div className="p-6 flex flex-col gap-5 bg-white rounded-[12px] mx-7 mb-10">
           {/* Profile */}
-          <div className="flex items-center gap-4">
-            <div className="relative w-17.5 h-17.5 rounded-full overflow-hidden shrink-0 bg-neutral-100">
+          <div className="flex items-center gap-3">
+            <div className="relative w-15 h-15 rounded-full overflow-hidden shrink-0 bg-neutral-100">
               <Image
                 src={card.author.profileImageUrl}
                 alt={card.author.name}
@@ -66,22 +77,20 @@ export function FeedbackTagDetailView({
             </div>
             <div className="flex flex-col">
               <span className="text-body2_m_14 text-primary-strong">{activeTabLabel}</span>
-              <span className="text-[28px] font-semibold tracking-[-0.04em]">
-                {card.author.name}
-              </span>
+              <span className="text-title3_sb_24">{card.author.name}</span>
             </div>
           </div>
 
           {/* One-line review */}
-          <div className="bg-[#0000000A] border border-[#00000033] rounded-xl px-6 py-5">
-            <p className="text-title4_m_20 leading-[130%] truncate">{card.oneLineReview}</p>
+          <div className="bg-[#0000000A] border border-[#00000033] rounded-[12px] px-4 py-3">
+            <p className="text-body1_m_16 truncate">{card.oneLineReview}</p>
           </div>
 
           {/* Q&A */}
           <div className="flex min-h-50 gap-6">
             {/* Sidebar */}
-            <div className="w-62.5 shrink-0 p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] rounded-lg flex flex-col">
-              <p className="text-title3_sb_20 mb-3">피드백 답변 바로가기</p>
+            <div className="w-64 shrink-0 p-5 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] rounded-[8px] flex flex-col">
+              <p className="text-title5_sb_20 mb-3">피드백 답변 바로가기</p>
               <div className="flex flex-col">
                 {card.questions.map((q) => {
                   const isQuestionSelected = selectedQuestionId === q.questionId
@@ -89,7 +98,7 @@ export function FeedbackTagDetailView({
                     <button
                       key={q.questionId}
                       onClick={() => onSelectQuestion(q.questionId)}
-                      className={`flex justify-between items-center text-left w-full px-1 py-2 rounded-lg text-body1_m_16 text-CoolNeutral-20 transition-colors hover:bg-neutral-99 hover:cursor-pointer ${
+                      className={`flex justify-between items-center text-left w-full px-1 py-2 rounded-lg text-body2_m_14 text-CoolNeutral-20 transition-colors hover:bg-neutral-99 hover:cursor-pointer ${
                         isQuestionSelected ? 'bg-neutral-99' : ''
                       }`}
                     >
@@ -106,14 +115,45 @@ export function FeedbackTagDetailView({
 
             {/* Content */}
             <div className="flex-1">
-              {currentQuestion && (
-                <div className="flex flex-col gap-6">
-                  <h3 className="text-title5_sb_20">{currentQuestion.questionTitle}</h3>
-                  <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
-                    {currentQuestion.content}
-                  </p>
-                </div>
-              )}
+              {currentQuestion &&
+                (card.isUnlocked ? (
+                  <div className="flex flex-col gap-6">
+                    <h3 className="text-title5_sb_20">{currentQuestion.questionTitle}</h3>
+                    <p className="text-body3_r_16 text-CoolNeutral-20 leading-relaxed whitespace-pre-line">
+                      {currentQuestion.content}
+                    </p>
+                  </div>
+                ) : (
+                  // 프로젝트 피드백 탭(FeedbackSubmissionDetail)과 동일한 스켈레톤+unlock 팝오버 패턴
+                  <div className="relative min-h-50">
+                    <div
+                      aria-hidden
+                      className="flex flex-col gap-3 blur-[6px] select-none pointer-events-none"
+                    >
+                      <div className="h-6 w-2/3 rounded bg-neutral-95" />
+                      <div className="h-4 w-full rounded bg-neutral-95" />
+                      <div className="h-4 w-full rounded bg-neutral-95" />
+                      <div className="h-4 w-5/6 rounded bg-neutral-95" />
+                      <div className="grid grid-cols-4 gap-x-2 gap-y-4 mt-5">
+                        {Array.from({ length: 4 }).map((_, idx) => (
+                          <div key={idx} className="aspect-video rounded-xl bg-neutral-95" />
+                        ))}
+                      </div>
+                    </div>
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <FeedbackUnlockPopover
+                        canUnlock={canUnlock}
+                        ticketCount={ticketCount}
+                        isUnlocking={isUnlocking}
+                        errorMessage={unlockErrorMessage}
+                        onUnlock={onUnlock}
+                      />
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         </div>

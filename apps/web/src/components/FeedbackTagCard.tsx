@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { LockIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { FeedbackListItemDto } from '@/lib/api'
 
@@ -16,6 +17,8 @@ export type SubmissionCard = {
   submissionId: number
   userId: number
   isAdopted: boolean
+  // 같은 제출·같은 직군 안에서는 항상 동일한 값(직군 단위 unlock)이라 카드 하나당 하나로 취급한다
+  isUnlocked: boolean
   author: { name: string; profileImageUrl: string }
   oneLineReview: string
   questions: SubmissionQuestion[]
@@ -28,6 +31,7 @@ export function buildSubmissionCards(items: FeedbackListItemDto[]): SubmissionCa
       submissionId: item.submissionId,
       userId: item.userId,
       isAdopted: item.isAdopted,
+      isUnlocked: item.isUnlocked,
       author: { name: item.author.name, profileImageUrl: item.author.profileImageUrl },
       oneLineReview: item.oneLineReview,
       questions: [],
@@ -67,7 +71,7 @@ export function FeedbackTagCard({
         if (disabled) return
         onToggle()
       }}
-      className={`rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${disabled ? '' : 'hover:cursor-pointer'} ${
+      className={`rounded-[12px] border p-5 flex flex-col gap-4 transition-colors ${disabled ? '' : 'hover:cursor-pointer'} ${
         isSelected
           ? 'border-primary-strong bg-white'
           : disabled
@@ -78,7 +82,7 @@ export function FeedbackTagCard({
       <div className="flex items-center justify-between gap-10">
         {/* Profile */}
         <div className="flex items-center gap-3">
-          <div className="relative w-[50px] h-[50px] rounded-full overflow-hidden shrink-0">
+          <div className="relative w-15 h-15 rounded-full overflow-hidden shrink-0">
             <Image
               src={card.author.profileImageUrl}
               alt={card.author.name}
@@ -88,7 +92,13 @@ export function FeedbackTagCard({
           </div>
           <div className="flex flex-col">
             <span className="text-body2_m_14 text-primary-strong">{activeTabLabel}</span>
-            <span className="text-title5_sb_20 leading-tight">{card.author.name}</span>
+            <span className="flex items-center gap-1 text-title5_sb_20 leading-tight">
+              {card.author.name}
+              {/* 디자인 확정 전 임시 표시 — 티켓으로 열람하지 않은 피드백 */}
+              {!card.isUnlocked && (
+                <LockIcon className="size-4 shrink-0 text-CoolNeutral-50" aria-label="잠김" />
+              )}
+            </span>
           </div>
         </div>
 

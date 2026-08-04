@@ -55,7 +55,7 @@ export default function EditMyProject() {
 function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
-  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
+  const { showLeaveModal, setShowLeaveModal, onLeaveConfirm } = useLeaveGuard()
 
   const {
     selectedCategories,
@@ -237,7 +237,7 @@ function EditMyProjectForm({ project }: { project: ProjectDetailResponseDto }) {
         }
         description="프로젝트 편집 취소 후, 지금까지 작성한 내용은 복구가 불가합니다."
         onCancel={() => setShowLeaveModal(false)}
-        onConfirm={() => window.history.go(-2)}
+        onConfirm={onLeaveConfirm}
       />
     </main>
   )

@@ -19,13 +19,19 @@ import {
 
 const ALL_RECORD_CATEGORIES = Object.values(RecordCategory)
 
+// GENERAL(기타)은 마케팅/AI 개발 등 팀에 따라 없을 수 있는 직군이라 선택사항 — 나머지는 전부 필수
+const REQUIRED_RECORD_CATEGORIES = ALL_RECORD_CATEGORIES.filter(
+  (c) => c !== RecordCategory.GENERAL,
+)
+
 // 직군당 태그(=채택) 가능한 피드백 제출 수
 export const MAX_TAGGED_FEEDBACKS_PER_CATEGORY = 3
 
 // 성장기록 버전 형식: major.minor.patch
 export const VERSION_PATTERN = /^\d+\.\d+\.\d+$/
 
-// 피드백 질문은 4개 직군 전부 필수, 직군당 1~4개
+// 피드백 질문은 GENERAL(기타)을 제외한 나머지 직군은 전부 필수, 직군당 1~4개
+// (GENERAL은 아예 없어도 되고, 있다면 최대 4개까지)
 @ValidatorConstraint({ name: 'feedbackQuestionsPerCategory' })
 export class FeedbackQuestionsPerCategoryConstraint implements ValidatorConstraintInterface {
   private readonly MIN = 1
@@ -39,33 +45,38 @@ export class FeedbackQuestionsPerCategoryConstraint implements ValidatorConstrai
       grouped.set(q.category, (grouped.get(q.category) ?? 0) + 1)
     }
 
-    return ALL_RECORD_CATEGORIES.every((category) => {
+    const requiredOk = REQUIRED_RECORD_CATEGORIES.every((category) => {
       const count = grouped.get(category) ?? 0
       return count >= this.MIN && count <= this.MAX
     })
+    const generalCount = grouped.get(RecordCategory.GENERAL) ?? 0
+    return requiredOk && generalCount <= this.MAX
   }
 
   defaultMessage() {
-    return `Every category (${ALL_RECORD_CATEGORIES.join(', ')}) must have between 1 and 4 feedback questions`
+    return `Every category except GENERAL (${REQUIRED_RECORD_CATEGORIES.join(', ')}) must have between 1 and 4 feedback questions; GENERAL may have up to 4`
   }
 }
 
-// 성장기록은 4개 직군을 정확히 하나씩 전부 포함
+// 성장기록은 GENERAL(기타)을 제외한 나머지 직군은 정확히 하나씩 전부 포함, GENERAL은 없어도 되고 있어도 하나만
 @ValidatorConstraint({ name: 'growthRecordCategoryCoverage' })
 export class GrowthRecordCategoryCoverageConstraint implements ValidatorConstraintInterface {
   validate(records: CreateGrowthRecordDto[]) {
     if (!Array.isArray(records)) return false
 
     const categories = records.map((r) => r?.category)
+    const generalCount = categories.filter(
+      (c) => c === RecordCategory.GENERAL,
+    ).length
     return (
-      categories.length === ALL_RECORD_CATEGORIES.length &&
       new Set(categories).size === categories.length &&
-      ALL_RECORD_CATEGORIES.every((c) => categories.includes(c))
+      generalCount <= 1 &&
+      REQUIRED_RECORD_CATEGORIES.every((c) => categories.includes(c))
     )
   }
 
   defaultMessage() {
-    return `Growth records must cover every category exactly once (${ALL_RECORD_CATEGORIES.join(', ')})`
+    return `Growth records must cover every category except GENERAL exactly once (${REQUIRED_RECORD_CATEGORIES.join(', ')}); GENERAL is optional but may appear at most once`
   }
 }
 

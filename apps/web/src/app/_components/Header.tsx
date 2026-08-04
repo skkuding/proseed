@@ -3,9 +3,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
+import { useLeaveGuardStore } from '@/store/leaveGuardStore'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { trackEvent } from '@/lib/analytics'
 import { getMyProfile, type MyProfile } from '@/lib/api'
@@ -21,9 +22,14 @@ const NAV_TABS = [
 export function Header() {
   const { data: session } = authClient.useSession()
   const { openLoginModal } = useAuthStore()
+  // 성장기록 작성/프로젝트 등록·수정/피드백 작성 중일 때, 상단 탭이나 로그아웃으로
+  // 곧장 빠져나가는 대신 그 페이지의 이탈 확인 모달을 띄운다
+  const isLeaveGuardActive = useLeaveGuardStore((s) => s.isActive)
+  const requestLeave = useLeaveGuardStore((s) => s.requestLeave)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [profile, setProfile] = useState<MyProfile | null>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   // nav에 없는 라우트(/privacy 등)에서는 어떤 탭도 활성화하지 않는다 (undefined).
   const activeTab = NAV_TABS.find(({ href }) =>
@@ -37,6 +43,12 @@ export function Header() {
 
   const handleSignOut = async () => {
     setIsDropdownOpen(false)
+    if (isLeaveGuardActive) {
+      requestLeave(() => {
+        authClient.signOut()
+      })
+      return
+    }
     await authClient.signOut()
   }
 
@@ -65,6 +77,11 @@ export function Header() {
               onTabChange={(label, e) => {
                 const tab = NAV_TABS.find((t) => t.label === label)
                 if (!tab) return
+                if (isLeaveGuardActive) {
+                  e?.preventDefault()
+                  requestLeave(() => router.push(tab.href))
+                  return
+                }
                 if (!session && (tab.href === '/mypage' || tab.href === '/myproject')) {
                   e?.preventDefault()
                   openLoginModal()

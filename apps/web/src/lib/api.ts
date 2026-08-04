@@ -247,10 +247,29 @@ export async function publishVersion(
   })
   if (!res.ok) {
     const body = await res.json().catch(() => null)
-    if (body?.message === 'ProjectVersion is already in use') {
+    const message: string = Array.isArray(body?.message)
+      ? body.message.join(', ')
+      : (body?.message ?? '')
+
+    // 백엔드 class-validator 메시지는 항상 영문이라, 알려진 케이스는 원인이 드러나도록
+    // 한국어로 바꿔서 보여준다. 못 알아본 메시지는 영문 원문 대신 일반 안내 문구로 대체한다.
+    if (message.includes('ProjectVersion is already in use')) {
       throw new Error('동일한 버전이 이미 등록되어 있습니다')
     }
-    throw new Error(body?.message ?? '성장기록 발행에 실패했습니다')
+    if (message.includes('must cover every category')) {
+      throw new Error(
+        '기획·디자인·개발 성장기록은 전부 작성되어야 발행할 수 있습니다 (기타는 선택)'
+      )
+    }
+    if (message.includes('must have between 1 and 4 feedback questions')) {
+      throw new Error(
+        '기획·디자인·개발 피드백 질문은 각각 1~4개씩 있어야 발행할 수 있습니다 (기타는 선택)'
+      )
+    }
+    if (message.includes('content should not be empty')) {
+      throw new Error('비어있는 항목이 있습니다. 모든 내용을 채워주세요')
+    }
+    throw new Error('성장기록 발행에 실패했습니다')
   }
   return res.json()
 }

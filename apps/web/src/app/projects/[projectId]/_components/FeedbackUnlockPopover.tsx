@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button'
 
-//백엔드 UNLOCK_COST(apps/api/src/feedback/feedback.service.ts)와 동일한 고정값
 const UNLOCK_COST = 1
 
 interface FeedbackUnlockPopoverProps {
@@ -37,10 +36,10 @@ export function FeedbackUnlockPopover({
         </p>
       </div>
 
-      <div className="flex items-center justify-between px-4 py-2 bg-neutral-99 border border-neutral-95 rounded-[6px]">
+      <div className="flex items-center justify-between p-2 bg-neutral-99 border border-neutral-95 rounded-[6px]">
         <div className="flex items-center gap-2">
-          <span className="size-1 shrink-0 rounded-full bg-neutral-30" />
-          <span className="text-body2_m_14 text-neutral-30">현재 보유 티켓</span>
+          <span className="size-1 shrink-0 rounded-full bg-CoolNeutral-30" />
+          <span className="text-body2_m_14 text-CoolNeutral-20">현재 보유 티켓</span>
         </div>
 
         <span className="text-sub4_sb_14 text-primary-strong">{ticketCount ?? '-'}장</span>

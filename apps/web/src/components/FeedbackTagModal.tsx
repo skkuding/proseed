@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   getFeedbacksForVersion,
   getFreeformFeedbacks,
+  getProjectById,
+  getMyProfile,
+  unlockFeedback,
+  unlockFreeformFeedback,
+  ApiError,
   type FeedbackListItemDto,
   type RecordCategory,
 } from '@/lib/api'
@@ -46,15 +51,53 @@ export function FeedbackTagModal({
     useState<Record<RecordCategory, TaggedFeedbackEntry[]>>(taggedFeedbacks)
   const [detailSubmissionId, setDetailSubmissionId] = useState<number | null>(null)
   const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null)
+  // 잠긴(unlock 안 한) 피드백을 자세히 보기에서 티켓으로 열람하기 위한 상태 —
+  // 프로젝트 피드백 탭(Feedbacks.tsx)의 unlock 패턴을 그대로 재사용
+  const [canUnlock, setCanUnlock] = useState(false)
+  const [ticketCount, setTicketCount] = useState<number | null>(null)
+  const [unlockingId, setUnlockingId] = useState<number | null>(null)
+  const [unlockError, setUnlockError] = useState<{ id: number; message: string } | null>(null)
+
+  const fetchFeedbacks = useCallback(
+    () =>
+      // 성장기록(버전)이 아직 없는 프로젝트는 이전 버전 대신 자유 피드백을 태그 대상으로 불러온다
+      (previousVersionId
+        ? getFeedbacksForVersion(projectId, previousVersionId)
+        : getFreeformFeedbacks(projectId)
+      ).then(setFeedbacks),
+    [previousVersionId, projectId]
+  )
 
   useEffect(() => {
     if (!isOpen) return
-    // 성장기록(버전)이 아직 없는 프로젝트는 이전 버전 대신 자유 피드백을 태그 대상으로 불러온다
-    const fetchFeedbacks = previousVersionId
-      ? getFeedbacksForVersion(projectId, previousVersionId)
-      : getFreeformFeedbacks(projectId)
-    fetchFeedbacks.then(setFeedbacks).catch(() => setFeedbacks([]))
-  }, [isOpen, previousVersionId, projectId])
+    fetchFeedbacks().catch(() => setFeedbacks([]))
+    getProjectById(projectId)
+      .then((project) => setCanUnlock(project.isMyProject))
+      .catch(() => setCanUnlock(false))
+    getMyProfile()
+      .then((profile) => setTicketCount(profile.ownedTicketCount))
+      .catch(() => setTicketCount(null))
+  }, [isOpen, previousVersionId, projectId, fetchFeedbacks])
+
+  const handleUnlock = async (submissionId: number, category: RecordCategory) => {
+    setUnlockError(null)
+    setUnlockingId(submissionId)
+    try {
+      const result = previousVersionId
+        ? await unlockFeedback(projectId, previousVersionId, submissionId, category)
+        : await unlockFreeformFeedback(projectId, submissionId, category)
+      setTicketCount(result.remainingTickets)
+      await fetchFeedbacks()
+    } catch (e) {
+      setUnlockError({
+        id: submissionId,
+        message:
+          e instanceof ApiError || e instanceof Error ? e.message : '피드백 열람에 실패했습니다',
+      })
+    } finally {
+      setUnlockingId(null)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -122,6 +165,13 @@ export function FeedbackTagModal({
               toggleSelect(detailCard)
               setDetailSubmissionId(null)
             }}
+            canUnlock={canUnlock}
+            ticketCount={ticketCount}
+            isUnlocking={unlockingId === detailCard.submissionId}
+            unlockErrorMessage={
+              unlockError?.id === detailCard.submissionId ? unlockError.message : null
+            }
+            onUnlock={() => handleUnlock(detailCard.submissionId, activeCategory)}
           />
         </div>
       </div>

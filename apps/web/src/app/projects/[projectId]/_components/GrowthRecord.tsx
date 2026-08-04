@@ -36,7 +36,7 @@ export function GrowthRecord() {
   const projectId = params.projectId as string
 
   const { data: session, isPending: sessionPending } = authClient.useSession()
-  const [activeTab, setActiveTab] = useState<TabLabel>('전체 요약')
+  const [selectedTab, setSelectedTab] = useState<TabLabel>('전체 요약')
   const [versions, setVersions] = useState<ProjectVersionListItemDto[]>([])
   const [versionsLoaded, setVersionsLoaded] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState('')
@@ -86,6 +86,16 @@ export function GrowthRecord() {
     document.getElementById('growth-record')?.scrollIntoView({ block: 'start' })
   }, [versionDetail])
 
+  // 기타(GENERAL)는 발행 시 선택사항이라 이 버전에 실제로 없으면 탭 자체를 숨긴다
+  // (버전이 아직 없으면 판단할 근거가 없으니 기본값대로 다 보여준다)
+  const hasGeneralRecord =
+    !versionDetail || versionDetail.growthRecords.some((r) => r.category === 'GENERAL')
+  const visibleTabs = TABS.filter((tab) => tab !== '기타' || hasGeneralRecord)
+
+  // 버전을 바꿨는데 그 버전엔 기타가 없어서 탭이 사라진 경우, 숨겨진 탭에 머물러 있지 않도록
+  // effect로 state를 되돌리는 대신 렌더링 중에 바로 유효한 탭으로 대체한다
+  const activeTab = visibleTabs.includes(selectedTab) ? selectedTab : '전체 요약'
+
   if (!versionsLoaded) return null
 
   // 버전이 있는데 상세를 아직 못 불러온 상태(로딩 중)에서는 이전 내용이 깜빡이지 않도록 대기
@@ -127,10 +137,10 @@ export function GrowthRecord() {
 
       {/* Role filter tabs */}
       <RoleFilterTabs
-        tabs={TABS}
+        tabs={visibleTabs}
         activeTab={activeTab}
         getLabel={jobTabToPersonLabel}
-        onTabChange={(tab) => setActiveTab(tab as TabLabel)}
+        onTabChange={(tab) => setSelectedTab(tab as TabLabel)}
       />
 
       {/* Content */}

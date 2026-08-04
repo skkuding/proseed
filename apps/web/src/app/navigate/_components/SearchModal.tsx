@@ -207,17 +207,19 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 variant="iconMuted"
                 size="bare"
                 onClick={handleClearAll}
-                className="flex items-center gap-0.5 text-body2_m_14"
+                className="flex items-center text-body1_m_16 gap-0 justify-center"
               >
                 전체 삭제
-                <ChevronRightIcon className="size-4" />
+                <ChevronRightIcon className="size-5" />
               </Button>
             </div>
 
             {recentProjects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-2 text-CoolNeutral-50">
-                <Image src="/info_cool50.svg" alt="정보" width={20} height={20} />
-                <p className="text-body3_r_16">최근에 조회한 프로젝트가 없습니다</p>
+              <div className="flex flex-col items-center justify-center py-20 gap-2 text-CoolNeutral-50">
+                <Image src="/info_cool50.svg" alt="정보" width={24} height={24} />
+                <p className="text-body1_m_16 text-CoolNeutral-30">
+                  최근에 조회한 프로젝트가 없습니다
+                </p>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
@@ -236,9 +238,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         className="object-cover"
                       />
                     </div>
-                    <div className="flex flex-col items-start flex-1 min-w-0">
+                    <div className="flex flex-col items-start flex-1 min-w-0 gap-1">
                       <div className="flex items-center gap-1 flex-wrap">
-                        <span className="text-sub1_sb_18 text-CoolNeutral-20">{project.title}</span>
+                        <span className="text-sub1_sb_18">{project.title}</span>
                         {(project.category ?? []).map((cat) => (
                           <span
                             key={cat}
@@ -248,7 +250,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           </span>
                         ))}
                       </div>
-                      <p className="text-body4_r_14 text-CoolNeutral-30 truncate w-full text-left h-13">
+                      <p className="text-body4_r_14 text-CoolNeutral-30 truncate w-full text-left">
                         {project.oneLineDescription}
                       </p>
                     </div>

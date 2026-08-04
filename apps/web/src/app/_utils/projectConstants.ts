@@ -70,6 +70,10 @@ export const JOB_TO_API: Record<string, string> = {
 export const JOB_TABS = ['기획', '디자인', '개발', '기타'] as const
 export type JobTab = (typeof JOB_TABS)[number]
 
+// 기타(GENERAL)는 마케팅/AI 개발 등 팀에 따라 없을 수 있는 직군이라 성장기록 발행 시 선택사항 —
+// 나머지 세 직군만 필수로 다 채워야 발행 가능
+export const REQUIRED_JOB_TABS: readonly JobTab[] = JOB_TABS.filter((t) => t !== '기타')
+
 // "으로/로" 조사 — 받침 없거나 받침이 ㄹ이면 "로", 그 외엔 "으로"
 export const JOB_TAB_TO_EURO: Record<JobTab, string> = {
   기획: '으로',

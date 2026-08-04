@@ -99,17 +99,24 @@
 - **태그 = 채택 (보상 포함 구현)**: 버전 발행 시의 피드백 태그가 곧 채택. 알림은 P2(`Notification`)로 분리.
 - **태그(채택) 보상**: 태그된 피드백 1건 기준 작성자 **+3**, 같은 피드백이 **2개 이상 직군에서 동시 채택되면 총 +5**. → 기존 `adoptFeedback`의 "작성자별 버전당 +3/+2" 로직과 다름, 대체 예정.
 - **태그 한도**: 직군당 3개. **태그 대상**: 이전 버전 전체의 **미채택** 피드백만 (기채택 재태그 불가).
-- **성장기록 카테고리**: 4개(PLAN/DESIGN/DEVELOPMENT/GENERAL) **전부 필수**.
+- **성장기록 카테고리**: 4개(PLAN/DESIGN/DEVELOPMENT/GENERAL) **전부 필수**. → **2026-08-04 변경**: GENERAL(기타)은 마케팅/AI 개발 등 팀에 따라 담당자가 없을 수 있어 **선택**으로 완화, PLAN/DESIGN/DEVELOPMENT만 필수 유지 (아래 "2026-08-04 변경분" 참조).
 - **성장기록 이미지**: 최소 제한 없음, **직군당 최대 8장** (FE 폼의 "필수" 배지는 제거 필요).
 - **free-comment 질문**: 고정 문구를 content로 갖는 일반 질문으로 저장 (스키마 변경 없음).
 - **updateResults**: 리스트(`string[]`)가 맞음 — FE 입력을 리스트형으로 변경 필요 (현재 textarea 1개).
 - **발행 권한**: **Lead만** (현재 "팀원 전원" → 수정 필요). **버전 수정/삭제는 이번 스코프에서 제외** (엔드포인트 없음 유지, 티켓 회수 등 명세는 추후).
 - **releasedAt**: 발행 시각(now)으로 설정. **발행 보상**: 팀원 전원 +1 유지.
 - **태그=채택 전환 확정**: 기존 `PATCH .../adopt` 라우트, 답변 단위 `isAdopted`/`adoptedCategory`, 작성자별 버전당 +3/+2 보상 로직은 **제거·대체**. 보상은 제출별 독립 정산(작성자 상한 없음). 태그는 **해당 직군 답변을 포함한 제출만** 가능.
-- **피드백 질문 커버리지**: 성장기록과 동일하게 4개 직군 전부 필수(각 1~4개).
+- **피드백 질문 커버리지**: 성장기록과 동일하게 4개 직군 전부 필수(각 1~4개). → **2026-08-04 변경**: GENERAL은 0~4개(선택), 나머지 3개 직군은 1~4개 필수로 완화.
 - **중복 제출 방지**: `FeedbackSubmission`에 유저×버전 unique 제약 추가.
 - **버전 순서**: `major.minor.patch` 형식 강제 + 기존 모든 버전보다 커야 발행 가능.
 - **임시저장(draft)**: **직군별 공유 draft 1개**(프로젝트×직군 unique — 같은 직군 팀원끼리 공유). 팀원은 자기 직군(`ProjectRole.role` 매핑: Planner→PLAN, Designer→DESIGN, Developer→DEVELOPMENT, Other→GENERAL)만 조회/작성/수정, 리드는 전 직군 접근 + 최종 발행. content는 JSON 스냅샷(발행 시점에만 정식 검증). **발행 성공 시 자동 삭제**.
+
+### ✅ 2026-08-04 변경분 — GENERAL(기타) 직군 선택사항으로 완화
+
+- **배경**: GENERAL(기타)은 마케팅/AI 개발 등 프로젝트마다 담당자가 없을 수 있는 직군이라, 발행 때마다 강제로 채우게 하는 게 부적절하다는 PM 판단으로 완화.
+- **백엔드** (`apps/api/src/growth-record/dto/create-version.dto.ts`): `GrowthRecordCategoryCoverageConstraint`는 PLAN/DESIGN/DEVELOPMENT만 정확히 하나씩 필수, GENERAL은 0개(생략) 또는 1개까지 허용. `FeedbackQuestionsPerCategoryConstraint`도 동일하게 GENERAL만 0~4개(선택), 나머지는 1~4개 필수로 완화. 신규 단위 테스트: `create-version.dto.spec.ts`.
+- **프론트** (`apps/web`): `projectConstants.ts`에 `REQUIRED_JOB_TABS`(기획/디자인/개발) 추가. `FeedbackQuestionsForm.tsx`의 발행 전 검증(성장기록 답변/이미지/질문란 필수 체크)에서 기타 탭 제외. `buildGrowthRecordPublishPayload.ts`는 기타 탭이 **완전히 다 채워진 경우에만**(답변 전부·이미지 1장 이상·질문란 전부) payload에 포함하고, 하나라도 비었으면 기타 관련 항목을 통째로 생략(반쯤 채운 상태로 보내면 백엔드 필드별 non-empty 검증에 걸리기 때문). `ImageUploadCard`/`GrowthRecordQuestionCard`의 "필수" 배지도 기타 탭에서는 "선택"으로 표시.
+- **알려진 부작용(의도적으로 그대로 둠)**: 발행 성공 시 draft는 카테고리 구분 없이 프로젝트 전체가 삭제됨(`growth-record.service.ts:204`) — 기타를 안 채운 채로 발행하면, 기타에 반쯤 써뒀던 draft 내용도 그 발행 성공과 함께 같이 삭제된다. 카테고리별로 선택 삭제하도록 바꾸는 건 이번 스코프에서 보류.
 
 ---
 

@@ -94,7 +94,7 @@ export function CreateFeedbackContent() {
     modalImages,
     modalImage,
   } = useQuestionImages()
-  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
+  const { showLeaveModal, setShowLeaveModal, onLeaveConfirm } = useLeaveGuard()
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showFreeformConfirmModal, setShowFreeformConfirmModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -152,10 +152,6 @@ export function CreateFeedbackContent() {
   }, [isFreeform, projectId])
 
   if (!isFreeform && (!versionChecked || !isLatestVersion)) return null
-
-  const handleLeaveConfirm = () => {
-    window.history.go(-2)
-  }
 
   const handleSubmit = async () => {
     if (!isSubmitEnabled) return
@@ -314,7 +310,7 @@ export function CreateFeedbackContent() {
       <LeaveConfirmModal
         isOpen={showLeaveModal}
         onCancel={() => setShowLeaveModal(false)}
-        onConfirm={handleLeaveConfirm}
+        onConfirm={onLeaveConfirm}
       />
 
       <ImageDeleteModal

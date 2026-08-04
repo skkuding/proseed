@@ -46,7 +46,7 @@ export default function RegisterProject() {
   const [tab, setTab] = useState<'basic' | 'image'>('basic')
   const [submitting, setSubmitting] = useState(false)
   const [showRegisterConfirm, setShowRegisterConfirm] = useState(false)
-  const { showLeaveModal, setShowLeaveModal } = useLeaveGuard()
+  const { showLeaveModal, setShowLeaveModal, onLeaveConfirm } = useLeaveGuard()
 
   useEffect(() => {
     trackEvent('project_registration_started', {})
@@ -261,7 +261,7 @@ export default function RegisterProject() {
         }
         description="프로젝트 등록 취소 후, 지금까지 작성한 정보는 복구가 불가합니다."
         onCancel={() => setShowLeaveModal(false)}
-        onConfirm={() => window.history.go(-2)}
+        onConfirm={onLeaveConfirm}
       />
     </main>
   )
