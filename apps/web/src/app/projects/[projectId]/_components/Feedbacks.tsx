@@ -21,7 +21,7 @@ import {
   type FeedbackAdoptionFilter,
 } from '@/components/FeedbackAdoptionFilterButton'
 import { FeedbackSubmissionCard, buildSubmissionCards } from './FeedbackSubmissionCard'
-import { VersionSelect } from './VersionSelect'
+import { VersionSelect, FREEFORM_VERSION_VALUE } from './VersionSelect'
 import {
   getProjectById,
   getProjectVersions,
@@ -89,6 +89,9 @@ export function Feedbacks() {
       .catch(() => setTicketCount(null))
   }, [session])
 
+  // 실제 버전이 생긴 뒤에도 성장기록 이전에 남겨진 자유 피드백을 계속 조회할 수 있어야 한다
+  const isFreeformView = versionList.length === 0 || selectedVersion === FREEFORM_VERSION_VALUE
+
   const handleUnlock = async (submissionId: number, category: FeedbackListItemDto['category']) => {
     if (!session) {
       openLoginModal()
@@ -97,7 +100,7 @@ export function Feedbacks() {
     setUnlockError(null)
     setUnlockingId(submissionId)
     try {
-      if (versionList.length === 0) {
+      if (isFreeformView) {
         const result = await unlockFreeformFeedback(projectId, submissionId, category)
         setTicketCount(result.remainingTickets)
         setFeedbacks(await getFreeformFeedbacks(projectId))
@@ -139,7 +142,8 @@ export function Feedbacks() {
     router.push(`/projects/${projectId}/feedback/create?version=${selectedVersion}&roles=${roles}`)
   }
 
-  //메인페이지/마이페이지 카드에서 특정 버전의 피드백으로 딥링크될 때 해당 버전을 기본 선택
+  //메인페이지/마이페이지 카드에서 특정 버전의 피드백으로 딥링크될 때 해당 버전을 기본 선택.
+  //versionId=0은 자유 피드백(성장기록 없이 남긴 피드백)을 가리킨다.
   useEffect(() => {
     getProjectVersions(projectId).then((versions) => {
       setVersionList(versions)
@@ -147,20 +151,21 @@ export function Feedbacks() {
       setSelectedVersion((prev) => {
         if (prev) return prev
         const versionParam = searchParams.get('version')
+        if (versionParam === '0') return FREEFORM_VERSION_VALUE
         if (versionParam && versions.some((v) => v.id.toString() === versionParam)) {
           return versionParam
         }
-        return versions[0] ? versions[0].id.toString() : ''
+        return versions[0] ? versions[0].id.toString() : FREEFORM_VERSION_VALUE
       })
     })
   }, [projectId, searchParams])
 
-  // 성장기록(버전)이 아직 없는 프로젝트는 versionId 없이 남긴 자유 피드백 목록을 대신 불러온다
-  const feedbackKey = versionList.length > 0 ? selectedVersion : 'freeform'
+  // 성장기록(버전)이 아직 없는 프로젝트, 또는 버전이 생긴 뒤에도 "자유 피드백"을 직접 선택한 경우
+  const feedbackKey = isFreeformView ? 'freeform' : selectedVersion
 
   useEffect(() => {
     if (!versionsLoaded) return
-    if (versionList.length === 0) {
+    if (isFreeformView) {
       getFreeformFeedbacks(projectId)
         .then((data) => {
           setFeedbacks(data)
@@ -182,7 +187,7 @@ export function Feedbacks() {
         setFeedbacks([])
         setLoadedVersion(selectedVersion)
       })
-  }, [projectId, selectedVersion, versionList, versionsLoaded])
+  }, [projectId, selectedVersion, versionList, versionsLoaded, isFreeformView])
 
   const loading = versionsLoaded && loadedVersion !== feedbackKey
 
@@ -276,6 +281,7 @@ export function Feedbacks() {
             versions={versionList}
             value={selectedVersion}
             onChange={setSelectedVersion}
+            showFreeformOption
           />
           <Button
             size="md"
