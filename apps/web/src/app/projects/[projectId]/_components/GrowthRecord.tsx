@@ -43,19 +43,25 @@ export function GrowthRecord() {
   const [versionDetail, setVersionDetail] = useState<VersionDetailResponseDto | null>(null)
   const [canWriteGrowthRecord, setCanWriteGrowthRecord] = useState(false)
 
+  // 조회수 트래킹 + "성장기록 작성하기" 버튼 노출 여부(리드 또는 직군 배정된 팀원)를
+  // 같은 프로젝트 조회 응답 하나로 처리 — getProjectById를 두 번 따로 호출하지 않는다.
   const viewTracked = useRef(false)
   useEffect(() => {
-    if (viewTracked.current) return
-    viewTracked.current = true
+    if (sessionPending) return
     getProjectById(projectId)
-      .then((p) =>
-        trackEvent('project_viewed', {
-          is_own: p.isMyProject,
-          project_type: p.type,
-        })
-      )
-      .catch(() => {})
-  }, [projectId])
+      .then((project) => {
+        if (!viewTracked.current) {
+          viewTracked.current = true
+          trackEvent('project_viewed', {
+            is_own: project.isMyProject,
+            project_type: project.type,
+          })
+        }
+        const isLead = !!session && Number(session.user.id) === project.createdById
+        setCanWriteGrowthRecord(isLead || !!project.myJobType)
+      })
+      .catch(() => setCanWriteGrowthRecord(false))
+  }, [projectId, session, sessionPending])
 
   useEffect(() => {
     getProjectVersions(projectId)
@@ -66,17 +72,6 @@ export function GrowthRecord() {
       .catch(console.error)
       .finally(() => setVersionsLoaded(true))
   }, [projectId])
-
-  // 성장기록 작성하기 버튼은 프로젝트 참여자(리드 또는 직군 배정된 팀원)에게만 노출
-  useEffect(() => {
-    if (sessionPending) return
-    getProjectById(projectId)
-      .then((project) => {
-        const isLead = !!session && Number(session.user.id) === project.createdById
-        setCanWriteGrowthRecord(isLead || !!project.myJobType)
-      })
-      .catch(() => setCanWriteGrowthRecord(false))
-  }, [projectId, session, sessionPending])
 
   useEffect(() => {
     if (!selectedVersion) return

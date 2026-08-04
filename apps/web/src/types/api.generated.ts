@@ -896,8 +896,8 @@ export interface components {
             id: number;
             title: string;
             oneLineDescription: string;
-            /** @description raw S3 key (presigned 변환은 P0-5 미해결) */
             thumbnailUrl: string;
+            iconUrl: string;
             _count: components["schemas"]["ProjectVersionCountDto"];
             feedbackCount: number;
         };
@@ -911,8 +911,8 @@ export interface components {
             id: number;
             title: string;
             oneLineDescription: string;
-            /** @description raw S3 key (presigned 변환은 P0-5 미해결) */
             thumbnailUrl: string;
+            iconUrl: string;
             _count: components["schemas"]["ProjectVersionCountDto"];
             feedbackCount: number;
             isOwner: boolean;

@@ -16,8 +16,8 @@ export function ProjectMember({ members }: ProjectMemberProps) {
   const { data: session } = authClient.useSession()
 
   return (
-    <div className="flex w-[396px] flex-col p-8 rounded-[16px] bg-white">
-      <div className="mb-4 flex items-center gap-2">
+    <div className="flex w-[396px] h-full flex-col p-8 rounded-[16px] bg-white overflow-hidden">
+      <div className="mb-4 flex items-center gap-2 shrink-0">
         <div className="h-6 w-[6px] shrink-0 bg-CoolNeutral-30" />
         <h2 className="text-title3_sb_24">함께한 팀원</h2>
       </div>
@@ -49,7 +49,7 @@ export function ProjectMember({ members }: ProjectMemberProps) {
                   </div>
                   <Image src={arrowRightGrey} alt="" width={20} height={20} />
                 </Link>
-                <Separator className="w-full border-CoolNeutral-30 mt-5" />
+                <Separator className="w-full border-CoolNeutral-30" />
               </div>
             )
           })}

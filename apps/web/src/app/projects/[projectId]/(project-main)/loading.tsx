@@ -1,8 +1,13 @@
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollToTop } from '../_components/ScrollToTop'
 
 export default function ProjectDetailLoading() {
   return (
     <div className="w-full mt-5">
+      {/* 실제 콘텐츠(layout.tsx)는 프로젝트 조회가 끝나야 마운트되므로, 그 사이 보여지는
+          이 스켈레톤 단계에서도 스크롤을 맨 위로 되돌려둔다 — 안 그러면 API 응답이 느릴 때
+          (주로 프로덕션) 스켈레톤이 이전 페이지의 스크롤 위치(성장기록 부근)에 걸린 채 노출된다. */}
+      <ScrollToTop />
       {/* 이미지 캐러셀 */}
       <Skeleton className="h-[474px] w-[826px] rounded-xl" />
 

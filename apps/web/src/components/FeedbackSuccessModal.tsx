@@ -100,14 +100,14 @@ export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuc
                       className="object-cover rounded-xl"
                     />
                   </div>
-                  <div className="flex flex-col gap-1 px-2 h-26.25 shrink-0">
+                  <div className="flex flex-col gap-1 px-2 shrink-0">
                     <div className="flex items-center gap-1">
                       <span className="text-title3_sb_24">{project.title}</span>
                       <span className="text-body1_m_16 text-CoolNeutral-40 px-2 py-1 bg-neutral-99 rounded-[4px]">
                         {CATEGORY_LABELS[project.category[0]] ?? project.category[0]}
                       </span>
                     </div>
-                    <p className="text-body3_r_16 text-CoolNeutral-30 line-clamp-2">
+                    <p className="text-body3_r_16 text-CoolNeutral-30 line-clamp-2 h-13">
                       {project.oneLineDescription}
                     </p>
                   </div>

@@ -57,6 +57,26 @@ const TAB_TO_CATEGORY: Record<TabLabel, keyof typeof growthRecordQuestions.quest
   기타: 'general',
 }
 
+function buildDraftContent(
+  tab: TabLabel,
+  imgs: ImageItem[],
+  answersMap: Record<number, string>,
+  versionValue: DraftContent['version'],
+  preservedFeedbackQuestions: unknown
+): DraftContent {
+  return {
+    imageKeys: imgs.filter((img) => !img.uploading && img.key).map((img) => img.key as string),
+    answers: Object.fromEntries(
+      growthRecordQuestions.questions[TAB_TO_CATEGORY[tab]].map((q) => [
+        q.questionTitle,
+        answersMap[q.questionId] ?? '',
+      ])
+    ),
+    version: versionValue,
+    feedbackQuestions: preservedFeedbackQuestions,
+  }
+}
+
 export function GrowthRecordForm() {
   const params = useParams()
   const router = useRouter()
@@ -83,6 +103,8 @@ export function GrowthRecordForm() {
   const setStoreTaggedFeedbacks = useGrowthRecordStore((s) => s.setTaggedFeedbacks)
 
   const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
+  // 디바운스로 아직 서버에 반영되지 않은 최신 내용 — 탭 전환/이탈 시 즉시 flush하는 데 사용
+  const pendingDraftRef = useRef<{ category: RecordCategory; content: DraftContent } | null>(null)
 
   //피드백 태그하기는 이전에 발행된 버전(지금 작성 중인 버전은 아직 존재하지 않음)의 피드백을 대상으로 함
   useEffect(() => {
@@ -204,25 +226,37 @@ export function GrowthRecordForm() {
   useEffect(() => {
     if (!draftsReady) return
 
+    const content = buildDraftContent(
+      activeTab,
+      images,
+      answers,
+      version,
+      preservedFeedbackQuestionsByTab.current[activeTab]
+    )
+    pendingDraftRef.current = { category: categoryApi, content }
+
     const timer = setTimeout(() => {
-      const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
-      const content: DraftContent = {
-        imageKeys: images
-          .filter((img) => !img.uploading && img.key)
-          .map((img) => img.key as string),
-        answers: Object.fromEntries(
-          questions.map((q) => [q.questionTitle, answers[q.questionId] ?? ''])
-        ),
-        version,
-        feedbackQuestions: preservedFeedbackQuestionsByTab.current[activeTab],
-      }
+      pendingDraftRef.current = null
       upsertDraft(projectId, categoryApi, content).catch(() => {
         toast.error('임시저장에 실패했습니다')
       })
     }, AUTOSAVE_DELAY_MS)
 
     return () => clearTimeout(timer)
-  }, [projectId, activeTab, images, answers, questions, version, draftsReady])
+  }, [projectId, activeTab, categoryApi, images, answers, questions, version, draftsReady])
+
+  // 디바운스가 끝나기 전에 다른 직군 탭으로 바꾸거나 페이지를 벗어나면 위 타이머가 취소되면서
+  // 방금 입력한 내용이 그대로 유실됐다 — 탭이 바뀌거나 언마운트되는 시점에 남은 저장을 즉시 반영한다
+  useEffect(() => {
+    return () => {
+      const pending = pendingDraftRef.current
+      if (!pending) return
+      pendingDraftRef.current = null
+      upsertDraft(projectId, pending.category, pending.content).catch(() => {
+        toast.error('임시저장에 실패했습니다')
+      })
+    }
+  }, [projectId, activeTab])
 
   const setImages = (updater: (prev: ImageItem[]) => ImageItem[]) => {
     setImagesByTab((prev) => ({ ...prev, [activeTab]: updater(prev[activeTab]) }))
@@ -233,6 +267,11 @@ export function GrowthRecordForm() {
 
     const selected = Array.from(files).slice(0, 8 - images.length)
     if (selected.length === 0) return
+
+    // 업로드 도중 다른 직군 탭으로 넘어가도, 완료된 이미지는 "지금 활성 탭"이 아니라
+    // 업로드를 시작한 이 탭에 저장돼야 한다 — 클로저로 캡처해둔다
+    const originTab = activeTab
+    const originCategoryApi = RECORD_CATEGORY_TO_API[originTab] as RecordCategory
 
     const newImages: ImageItem[] = selected.map((file) => ({
       id: crypto.randomUUID(),
@@ -249,13 +288,31 @@ export function GrowthRecordForm() {
         try {
           const { url, key } = await getUploadUrl(file.name, file.type)
           await uploadToS3(url, file)
-          setImages((prev) =>
-            prev.map((img) => (img.id === imageId ? { ...img, uploading: false, key } : img))
-          )
+          setImagesByTab((prev) => {
+            const updated = prev[originTab].map((img) =>
+              img.id === imageId ? { ...img, uploading: false, key } : img
+            )
+            // 자동저장 effect는 "지금 활성 탭"만 지켜보므로, 업로드가 끝난 시점에 이미
+            // 다른 탭으로 넘어가 있었다면 이 완료를 영영 저장할 기회가 없다 — 여기서 직접 저장한다
+            const content = buildDraftContent(
+              originTab,
+              updated,
+              answers,
+              version,
+              preservedFeedbackQuestionsByTab.current[originTab]
+            )
+            upsertDraft(projectId, originCategoryApi, content).catch(() => {
+              toast.error('임시저장에 실패했습니다')
+            })
+            return { ...prev, [originTab]: updated }
+          })
         } catch {
-          setImages((prev) =>
-            prev.map((img) => (img.id === imageId ? { ...img, uploading: false } : img))
-          )
+          setImagesByTab((prev) => ({
+            ...prev,
+            [originTab]: prev[originTab].map((img) =>
+              img.id === imageId ? { ...img, uploading: false } : img
+            ),
+          }))
         }
       })
     )

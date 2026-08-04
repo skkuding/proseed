@@ -33,11 +33,15 @@ export default async function ProjectDetailLayout({ children, params }: LayoutPr
       <ProjectImageCarousel images={[project.thumbnailUrl, ...sortedImages.map((i) => i.url)]} />
       {/* 본문 */}
       <section className="mt-5 flex flex-col gap-5">
-        <div className="flex justify-between gap-4">
-          {/* 왼쪽 */}
+        <div className="flex justify-between items-stretch gap-4">
+          {/* 왼쪽 - 설명 길이만큼만 (팀원 카드 높이에 맞춰 늘어나지 않음) */}
           <ProjectDescription project={project} />
-          {/* 오른쪽 - 함께한 팀원 */}
-          <ProjectMember members={project.projectRoles} />
+          {/* 오른쪽 - 함께한 팀원 (고정 높이, 팀원이 적으면 흰 배경으로 채워지고 많으면 내부 스크롤) */}
+          <div className="relative w-[396px] shrink-0">
+            <div className="absolute inset-0">
+              <ProjectMember members={project.projectRoles} />
+            </div>
+          </div>
         </div>
       </section>
       <div className="flex flex-col bg-white w-full px-8 py-7 rounded-[16px] mt-6">

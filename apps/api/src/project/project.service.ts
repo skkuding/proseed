@@ -49,6 +49,7 @@ export class ProjectService {
         oneLineDescription: true,
         category: true,
         thumbnailUrl: true,
+        iconUrl: true,
         _count: {
           select: {
             versions: true,
@@ -63,7 +64,7 @@ export class ProjectService {
 
     const [feedbackCounts, resolved] = await Promise.all([
       this.getFeedbackCountsByProjectIds(projectIds),
-      this.resolveThumbnailUrls(sliced),
+      this.resolveImageUrls(sliced, ['thumbnailUrl', 'iconUrl']),
     ])
 
     const data = resolved.map((project) => ({
@@ -132,6 +133,7 @@ export class ProjectService {
         oneLineDescription: true,
         category: true,
         thumbnailUrl: true,
+        iconUrl: true,
         createdById: true,
         _count: {
           select: {
@@ -144,7 +146,7 @@ export class ProjectService {
     const projectIds = projects.map((p) => p.id)
     const [feedbackCounts, resolved] = await Promise.all([
       this.getFeedbackCountsByProjectIds(projectIds),
-      this.resolveThumbnailUrls(projects),
+      this.resolveImageUrls(projects, ['thumbnailUrl', 'iconUrl']),
     ])
 
     return resolved.map(({ createdById, ...project }) => ({
@@ -201,23 +203,38 @@ export class ProjectService {
     return this.storage.getSignedDownloadUrl(project.thumbnailUrl)
   }
 
-  /** 목록용: thumbnailUrl (S3 key) → presigned download URL 일괄 변환 */
-  private async resolveThumbnailUrls<T extends { thumbnailUrl: string }>(
+  /** 목록용: 지정된 필드들(S3 key) → presigned download URL 일괄 변환 */
+  private async resolveImageUrls<T extends Record<string, unknown>>(
     projects: T[],
+    fields: (keyof T)[],
   ): Promise<T[]> {
     if (projects.length === 0) return projects
 
+    const keys = new Set<string>()
+    for (const project of projects) {
+      for (const field of fields) {
+        const value = project[field]
+        if (typeof value === 'string') keys.add(value)
+      }
+    }
+
     const urlMap = new Map<string, string>()
     await Promise.all(
-      [...new Set(projects.map((p) => p.thumbnailUrl))].map(async (key) => {
+      [...keys].map(async (key) => {
         urlMap.set(key, await this.storage.getSignedDownloadUrl(key))
       }),
     )
 
-    return projects.map((p) => ({
-      ...p,
-      thumbnailUrl: urlMap.get(p.thumbnailUrl) ?? p.thumbnailUrl,
-    }))
+    return projects.map((p) => {
+      const resolved = { ...p }
+      for (const field of fields) {
+        const value = p[field]
+        if (typeof value === 'string') {
+          resolved[field] = (urlMap.get(value) ?? value) as T[keyof T]
+        }
+      }
+      return resolved
+    })
   }
 
   async getProjectById(userId: number | undefined, projectId: number) {

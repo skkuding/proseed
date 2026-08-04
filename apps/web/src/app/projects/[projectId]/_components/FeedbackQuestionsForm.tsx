@@ -29,9 +29,11 @@ import {
 } from '@/app/_utils/projectConstants'
 import { authClient } from '@/lib/auth-client'
 import { FeedbackQuestionCard } from './FeedbackQuestionCard'
+import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import {
   buildGrowthRecordPublishPayload,
   FREE_COMMENT_CONTENT,
+  TAB_TO_MOCK_CATEGORY,
   type FeedbackQuestionDraft,
   type TabLabel,
 } from '../_utils/buildGrowthRecordPublishPayload'
@@ -87,6 +89,8 @@ export function FeedbackQuestionsForm() {
   const { data: session, isPending: sessionPending } = authClient.useSession()
   // GrowthRecordForm이 같은 draft에 저장한 answers/imageKeys — 자동저장 시 덮어쓰지 않도록 보존
   const preservedContentByTab = useRef<Partial<Record<TabLabel, DraftContent>>>({})
+  // 디바운스로 아직 서버에 반영되지 않은 최신 내용 — 탭 전환/이탈 시 즉시 flush하는 데 사용
+  const pendingDraftRef = useRef<{ category: RecordCategory; content: DraftContent } | null>(null)
   // 최초 1회만 기본 탭을 선택 — 브라우저 탭 전환 등으로 세션이 재검증돼 아래 effect가 다시 돌아도
   // 사용자가 고른 탭을 덮어쓰지 않기 위함
   const hasSetInitialTabRef = useRef(false)
@@ -150,17 +154,20 @@ export function FeedbackQuestionsForm() {
   useEffect(() => {
     if (!draftsReady) return
 
+    const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
+    const content: DraftContent = {
+      ...preservedContentByTab.current[activeTab],
+      feedbackQuestions: questionsByTab[activeTab].map((q) => ({
+        content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
+        isRequired: q.isRequired,
+        isFreeComment: q.isFreeComment,
+      })),
+    }
+    preservedContentByTab.current[activeTab] = content
+    pendingDraftRef.current = { category: categoryApi, content }
+
     const timer = setTimeout(() => {
-      const categoryApi = RECORD_CATEGORY_TO_API[activeTab] as RecordCategory
-      const content: DraftContent = {
-        ...preservedContentByTab.current[activeTab],
-        feedbackQuestions: questionsByTab[activeTab].map((q) => ({
-          content: q.isFreeComment ? FREE_COMMENT_CONTENT : q.text,
-          isRequired: q.isRequired,
-          isFreeComment: q.isFreeComment,
-        })),
-      }
-      preservedContentByTab.current[activeTab] = content
+      pendingDraftRef.current = null
       upsertDraft(projectId, categoryApi, content).catch(() => {
         toast.error('임시저장에 실패했습니다')
       })
@@ -168,6 +175,19 @@ export function FeedbackQuestionsForm() {
 
     return () => clearTimeout(timer)
   }, [projectId, activeTab, questionsByTab, draftsReady])
+
+  // 디바운스가 끝나기 전에 다른 직군 탭으로 바꾸거나 페이지를 벗어나면 위 타이머가 취소되면서
+  // 방금 입력한 내용이 그대로 유실됐다 — 탭이 바뀌거나 언마운트되는 시점에 남은 저장을 즉시 반영한다
+  useEffect(() => {
+    return () => {
+      const pending = pendingDraftRef.current
+      if (!pending) return
+      pendingDraftRef.current = null
+      upsertDraft(projectId, pending.category, pending.content).catch(() => {
+        toast.error('임시저장에 실패했습니다')
+      })
+    }
+  }, [projectId, activeTab])
 
   const questions = questionsByTab[activeTab]
   const canAdd = questions.length < MAX_QUESTIONS
@@ -283,11 +303,32 @@ export function FeedbackQuestionsForm() {
               const tabsToCheck = isLead
                 ? (Object.keys(questionsByTab) as TabLabel[])
                 : (allowedTabs ?? [])
+
+              // 백엔드가 빈 답변을 그대로 422로 거부하므로, 여기서 먼저 걸러 원문 에러 대신 안내 문구를 보여준다
+              const { answers, imagesByTab } = useGrowthRecordStore.getState()
+              const hasMissingGrowthRecordAnswers = tabsToCheck.some((tab) =>
+                growthRecordQuestions.questions[TAB_TO_MOCK_CATEGORY[tab]].some(
+                  (q) => (answers[q.questionId] ?? '').trim().length === 0
+                )
+              )
+              if (hasMissingGrowthRecordAnswers) {
+                toast.error('성장기록을 모두 작성해주세요')
+                return
+              }
+
               const hasEmpty = tabsToCheck.some((tab) =>
                 questionsByTab[tab].some((q) => !q.isFreeComment && q.text.trim().length === 0)
               )
               if (hasEmpty) {
                 toast.error('모든 질문란을 채워주세요')
+                return
+              }
+
+              const hasMissingImages = tabsToCheck.some(
+                (tab) => (imagesByTab[tab] ?? []).length === 0
+              )
+              if (hasMissingImages) {
+                toast.error('모든 직군에 이미지를 최소 1장 등록해주세요')
                 return
               }
 

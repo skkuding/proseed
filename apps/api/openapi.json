@@ -2891,8 +2891,10 @@
             "type": "string"
           },
           "thumbnailUrl": {
-            "type": "string",
-            "description": "raw S3 key (presigned 변환은 P0-5 미해결)"
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
           },
           "_count": {
             "$ref": "#/components/schemas/ProjectVersionCountDto"
@@ -2907,6 +2909,7 @@
           "title",
           "oneLineDescription",
           "thumbnailUrl",
+          "iconUrl",
           "_count",
           "feedbackCount"
         ]
@@ -2953,8 +2956,10 @@
             "type": "string"
           },
           "thumbnailUrl": {
-            "type": "string",
-            "description": "raw S3 key (presigned 변환은 P0-5 미해결)"
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string"
           },
           "_count": {
             "$ref": "#/components/schemas/ProjectVersionCountDto"
@@ -2972,6 +2977,7 @@
           "title",
           "oneLineDescription",
           "thumbnailUrl",
+          "iconUrl",
           "_count",
           "feedbackCount",
           "isOwner"

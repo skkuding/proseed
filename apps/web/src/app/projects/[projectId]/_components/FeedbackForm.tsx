@@ -295,13 +295,11 @@ export function CreateFeedbackContent() {
 
       <ConfirmModal
         isOpen={showFreeformConfirmModal}
-        title="정말 제출하시겠어요?"
+        title="피드백을 등록하시겠습니까?"
         description={
           <>
-            제출한 뒤에는 다시 수정하거나 작성하실 수 없어요.
-            <br />
-            다른 직군에 대한 의견도 남기고 싶으시다면, <br />
-            지금 함께 작성해주세요!
+            피드백을 제출한 뒤에는 다시 수정하거나 작성하실 수 없습니다. <br />
+            정말 피드백을 등록하시겠습니까?
           </>
         }
         cancelLabel="취소"

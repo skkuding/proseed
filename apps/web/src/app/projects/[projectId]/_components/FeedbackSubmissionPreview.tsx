@@ -47,7 +47,7 @@ export function FeedbackSubmissionPreview({ card, isOpen }: FeedbackSubmissionPr
       <div
         className={`bg-[#0000000A] border border-[#00000033] rounded-[12px] px-6 py-5 ml-2 ${isOpen ? '' : 'h-[66px]'}`}
       >
-        <p className={`text-title4_m_20 leading-[130%] ${isOpen ? '' : 'truncate'}`}>
+        <p className={`text-title6_m_20 leading-[130%] ${isOpen ? '' : 'truncate'}`}>
           {card.oneLineReview}
         </p>
       </div>

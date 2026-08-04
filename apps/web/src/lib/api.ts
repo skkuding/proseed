@@ -82,6 +82,7 @@ export type Project = {
   oneLineDescription: string
   category: string[]
   thumbnailUrl: string
+  iconUrl: string
   feedbackCount: number
   growthRecordCount?: number
 }
@@ -246,6 +247,9 @@ export async function publishVersion(
   })
   if (!res.ok) {
     const body = await res.json().catch(() => null)
+    if (body?.message === 'ProjectVersion is already in use') {
+      throw new Error('동일한 버전이 이미 등록되어 있습니다')
+    }
     throw new Error(body?.message ?? '성장기록 발행에 실패했습니다')
   }
   return res.json()

@@ -23,8 +23,8 @@ export class ProjectListItemDto {
   })
   category: ProjectCategory[]
 
-  /** raw S3 key (presigned 변환은 P0-5 미해결) */
   thumbnailUrl: string
+  iconUrl: string
 
   _count: ProjectVersionCountDto
   feedbackCount: number

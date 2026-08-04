@@ -96,7 +96,7 @@ export function GrowthRecordSuccessModal({
                   key={project.id}
                   href={`/projects/${project.id}`}
                   style={{ width: 336, height: 305 }}
-                  className="flex flex-col shrink-0 p-2 pb-5 rounded-xl bg-white overflow-hidden shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] text-left hover:shadow-lg hover:cursor-pointer transition-shadow"
+                  className="flex flex-col shrink-0 p-2 pb-5 rounded-xl gap-2 bg-white overflow-hidden shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] text-left hover:shadow-lg hover:cursor-pointer transition-shadow"
                 >
                   <div className="relative w-full flex-1 min-h-0">
                     <Image
@@ -106,14 +106,14 @@ export function GrowthRecordSuccessModal({
                       className="object-cover rounded-xl"
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5 p-4 h-26.25 shrink-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sub3_sb_16 text-CoolNeutral-20">{project.title}</span>
-                      <span className="text-caption1_m_13 text-CoolNeutral-40 px-2 py-1 bg-neutral-99 rounded">
+                  <div className="flex flex-col gap-1 px-2 shrink-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-title3_sb_24">{project.title}</span>
+                      <span className="text-body1_m_16 text-CoolNeutral-40 px-2 py-1 bg-neutral-99 rounded-[4px]">
                         {CATEGORY_LABELS[project.category[0]] ?? project.category[0]}
                       </span>
                     </div>
-                    <p className="text-body2_m_14 text-CoolNeutral-40 line-clamp-2">
+                    <p className="text-body3_r_16 text-CoolNeutral-30 line-clamp-2 h-13">
                       {project.oneLineDescription}
                     </p>
                   </div>

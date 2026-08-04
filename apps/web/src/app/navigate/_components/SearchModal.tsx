@@ -202,7 +202,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {/* 최근 조회한 프로젝트 */}
           <div className="flex flex-col gap-3 pt-3">
             <div className="flex items-center justify-between">
-              <span className="text-title5_sb_24">최근 조회한 프로젝트</span>
+              <span className="text-title3_sb_24">최근 조회한 프로젝트</span>
               <Button
                 variant="iconMuted"
                 size="bare"
@@ -230,7 +230,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   >
                     <div className="relative h-15 w-15 rounded-[8px] overflow-hidden shrink-0">
                       <Image
-                        src={project.thumbnailUrl}
+                        src={project.iconUrl}
                         alt={project.title}
                         fill
                         className="object-cover"
@@ -248,7 +248,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           </span>
                         ))}
                       </div>
-                      <p className="text-body4_r_14 text-CoolNeutral-30 truncate w-full text-left">
+                      <p className="text-body4_r_14 text-CoolNeutral-30 truncate w-full text-left h-13">
                         {project.oneLineDescription}
                       </p>
                     </div>
