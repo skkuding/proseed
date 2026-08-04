@@ -1,7 +1,7 @@
 'use client'
 
 import { Suspense, useEffect, useSyncExternalStore, type ReactNode } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { UserInfoCard } from './_components/UserInfoCard'
 import { SideNav } from './_components/SideNav'
 import { authClient, authBaseURL } from '@/lib/auth-client'
@@ -24,7 +24,6 @@ function useMounted() {
 
 function MyPageShell({ children }: { children: ReactNode }) {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const { data: session, isPending } = authClient.useSession()
   const { currentJob, setCurrentJob, provider, setProvider, setUser, profile, setProfile } =
     useMyPageProfile()
@@ -70,10 +69,6 @@ function MyPageShell({ children }: { children: ReactNode }) {
 
   if (!mounted || isPending || !session) return null
 
-  const handleMenuChange = (menu: MenuItem) => {
-    router.push(`/mypage?tab=${menu}`, { scroll: false })
-  }
-
   const currentUser = session.user
 
   return (
@@ -97,9 +92,9 @@ function MyPageShell({ children }: { children: ReactNode }) {
               projectCount={profile?.joinedProjectCount ?? 0}
               feedbackCount={profile?.feedbackCount ?? 0}
               ticketCount={profile?.ownedTicketCount}
-              onNameClick={() => router.push('/mypage')}
+              nameHref="/mypage"
             />
-            <SideNav activeMenu={activeMenu} onMenuChange={handleMenuChange} />
+            <SideNav activeMenu={activeMenu} />
           </div>
 
           <div className="flex-1 min-w-0 w-235 rounded-[12px] bg-white px-9 py-10 shadow-[0_1px_3px_rgba(27,29,38,0.06)]">

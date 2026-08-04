@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { JOB_API_TO_PERSON_LABEL } from '@/app/_utils/projectConstants'
 import type { ProjectDetailResponseDto } from '@/lib/api'
@@ -13,7 +13,6 @@ interface ProjectMemberProps {
 }
 
 export function ProjectMember({ members }: ProjectMemberProps) {
-  const router = useRouter()
   const { data: session } = authClient.useSession()
 
   return (
@@ -29,10 +28,8 @@ export function ProjectMember({ members }: ProjectMemberProps) {
 
             return (
               <div key={member.id}>
-                <div
-                  onClick={() => {
-                    router.push(isSelf ? '/mypage' : `/users/${member.userId}`)
-                  }}
+                <Link
+                  href={isSelf ? '/mypage' : `/users/${member.userId}`}
                   className="flex items-center w-full justify-between px-3 py-5 cursor-pointer hover:bg-neutral-99 rounded-[16px]"
                 >
                   <div className="flex items-center gap-3">
@@ -51,7 +48,7 @@ export function ProjectMember({ members }: ProjectMemberProps) {
                     </div>
                   </div>
                   <Image src={arrowRightGrey} alt="" width={20} height={20} />
-                </div>
+                </Link>
                 <Separator className="w-full border-CoolNeutral-30 mt-5" />
               </div>
             )

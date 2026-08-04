@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { getProjects, type Project } from '@/lib/api'
 import { CATEGORY_LABELS } from '@/app/_utils/projectConstants'
@@ -18,7 +18,6 @@ const VISIBLE_COUNT = 3
 const MAX_PROJECTS = 5
 
 export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuccessModalProps) {
-  const router = useRouter()
   const [startIndex, setStartIndex] = useState(0)
   const [projects, setProjects] = useState<Project[]>([])
 
@@ -87,9 +86,9 @@ export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuc
               style={{ transform: `translateX(-${offset}px)` }}
             >
               {displayProjects.map((project) => (
-                <button
+                <Link
                   key={project.id}
-                  onClick={() => router.push(`/projects/${project.id}`)}
+                  href={`/projects/${project.id}`}
                   style={{ width: 336, height: 305 }}
                   className="flex flex-col shrink-0 p-2 pb-5 gap-2 rounded-[20px] bg-white overflow-hidden shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] text-left hover:shadow-lg hover:cursor-pointer transition-shadow"
                 >
@@ -112,27 +111,18 @@ export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuc
                       {project.oneLineDescription}
                     </p>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 px-7">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => router.push('/')}
-            className="w-[140px] text-sub3_sb_16"
-          >
-            홈 화면 바로가기
+          <Button asChild variant="outline" size="lg" className="w-[140px] text-sub3_sb_16">
+            <Link href="/">홈 화면 바로가기</Link>
           </Button>
-          <Button
-            size="lg"
-            onClick={() => router.push(`/projects/${projectId}/feedback`)}
-            className="w-[179px] text-sub3_sb_16"
-          >
-            작성된 피드백 바로가기
+          <Button asChild size="lg" className="w-[179px] text-sub3_sb_16">
+            <Link href={`/projects/${projectId}/feedback`}>작성된 피드백 바로가기</Link>
           </Button>
         </div>
       </div>

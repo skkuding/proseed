@@ -1,11 +1,16 @@
+import { Suspense } from 'react'
 import HeroSection from './mainpage/_components/HeroSection'
 import RecentProjectsSection from './mainpage/_components/RecentProjectsSection'
 import FeedbackSection from './mainpage/_components/FeedbackSection'
 import GrowthRecordSection from './mainpage/_components/GrowthRecordSection'
+import { RequireLoginParamHandler } from './mainpage/_components/RequireLoginParamHandler'
 
 export default function HomePage() {
   return (
     <main className="w-full bg-background-normal">
+      <Suspense fallback={null}>
+        <RequireLoginParamHandler />
+      </Suspense>
       <div className="mx-auto flex w-full max-w-[1200px] px-1 flex-col">
         <HeroSection />
 

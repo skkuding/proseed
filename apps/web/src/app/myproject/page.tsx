@@ -16,6 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
+import { useAuthGuard } from '@/lib/useAuthGuard'
 
 const PAGE_SIZE = 9
 
@@ -35,6 +36,7 @@ function getVisiblePages(total: number): number[] {
 }
 
 export default function MyProject() {
+  useAuthGuard()
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<CategoryLabel>('전체')

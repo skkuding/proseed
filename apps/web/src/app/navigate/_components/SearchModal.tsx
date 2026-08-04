@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { XIcon, ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -87,9 +88,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     (project: Project) => {
       saveRecentProject(project)
       onClose()
-      router.push(`/projects/${project.id}`)
     },
-    [onClose, router]
+    [onClose]
   )
 
   const handleSubmit = (e: FormEvent) => {
@@ -177,8 +177,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               <div className="absolute left-0 right-0 top-full mt-2 z-20 h-[150px] overflow-y-auto rounded-xl bg-background-normal shadow-[0_4px_20px_0_rgba(0,0,0,0.12)] border border-neutral-200">
                 {matchedProjects.length > 0 ? (
                   matchedProjects.map((project, index) => (
-                    <button
+                    <Link
                       key={project.id}
+                      href={`/projects/${project.id}`}
                       onClick={() => handleProjectClick(project)}
                       onMouseEnter={() => setHighlightedIndex(index)}
                       className={`flex items-center w-full h-[50px] px-5 py-3 text-left text-body1_m_16 text-CoolNeutral-20 transition-colors hover:cursor-pointer ${
@@ -186,7 +187,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       }`}
                     >
                       {highlightText(project.title, trimmedQuery)}
-                    </button>
+                    </Link>
                   ))
                 ) : (
                   <div className="flex items-center justify-center h-full gap-2 text-CoolNeutral-50">
@@ -221,8 +222,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             ) : (
               <div className="flex flex-col gap-2">
                 {recentProjects.map((project) => (
-                  <button
+                  <Link
                     key={project.id}
+                    href={`/projects/${project.id}`}
                     onClick={() => handleProjectClick(project)}
                     className="flex items-center gap-4 p-4 rounded-[12px] bg-white hover:cursor-pointer hover:bg-neutral-95"
                   >
@@ -251,7 +253,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       </p>
                     </div>
                     <ChevronRightIcon className="size-7 text-neutral-40 shrink-0" />
-                  </button>
+                  </Link>
                 ))}
               </div>
             )}

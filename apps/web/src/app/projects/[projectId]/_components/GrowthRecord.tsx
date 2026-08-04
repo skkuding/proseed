@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
@@ -168,12 +169,10 @@ export function GrowthRecord() {
                 <p>나만의 성장 스토리를 완성해보세요</p>
               </div>
             </div>
-            <Button
-              onClick={() => router.push(`/projects/${params.projectId}/growthrecord/create`)}
-              size="lg"
-              className="text-sub3_sb_16"
-            >
-              성장기록 작성하기
+            <Button asChild size="lg" className="text-sub3_sb_16">
+              <Link href={`/projects/${params.projectId}/growthrecord/create`}>
+                성장기록 작성하기
+              </Link>
             </Button>
           </div>
         ) : (
@@ -185,12 +184,8 @@ export function GrowthRecord() {
                 <p>성장기록을 완성할 수 있도록 도와주세요</p>
               </div>
             </div>
-            <Button
-              onClick={() => router.push(`/projects/${params.projectId}/feedback/create`)}
-              size="lg"
-              className="text-sub3_sb_16"
-            >
-              피드백 작성하기
+            <Button asChild size="lg" className="text-sub3_sb_16">
+              <Link href={`/projects/${params.projectId}/feedback/create`}>피드백 작성하기</Link>
             </Button>
           </div>
         )

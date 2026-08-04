@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export function RoleFilterTabs({
   tabs,
   activeTab,
@@ -5,14 +7,17 @@ export function RoleFilterTabs({
   textSize = 'text-body1_m_16',
   disabledTabs = [],
   getLabel,
+  getHref,
 }: {
   tabs: readonly string[]
   activeTab?: string
-  onTabChange: (tab: string) => void
+  onTabChange: (tab: string, e?: React.MouseEvent) => void
   textSize?: string
   disabledTabs?: readonly string[]
   // 탭 값(상태 키)과 화면에 보여줄 라벨을 분리하고 싶을 때 사용 (예: '기획' 값은 유지하되 '기획자'로 표기)
   getLabel?: (tab: string) => string
+  // 제공하면 button 대신 next/link로 렌더링 (헤더 내비게이션처럼 실제 페이지 이동이 필요할 때 — prefetch 이점)
+  getHref?: (tab: string) => string
 }) {
   const activeIndex = activeTab ? tabs.indexOf(activeTab) : -1
 
@@ -30,18 +35,40 @@ export function RoleFilterTabs({
       {tabs.map((tab) => {
         const isActive = activeTab === tab
         const isDisabled = disabledTabs.includes(tab)
+        const className = `relative z-10 flex h-[50px] w-28 items-center justify-center rounded-full px-4 py-3 transition-colors ${textSize} ${
+          isDisabled
+            ? 'text-neutral-70 cursor-not-allowed'
+            : `hover:cursor-pointer ${isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'}`
+        }`
+        const label = getLabel ? getLabel(tab) : tab
+
+        if (getHref) {
+          return (
+            <Link
+              key={tab}
+              href={getHref(tab)}
+              onClick={(e) => {
+                if (isDisabled) {
+                  e.preventDefault()
+                  return
+                }
+                onTabChange(tab, e)
+              }}
+              className={className}
+            >
+              {label}
+            </Link>
+          )
+        }
+
         return (
           <button
             key={tab}
             onClick={() => !isDisabled && onTabChange(tab)}
             disabled={isDisabled}
-            className={`relative z-10 h-[50px] w-28 rounded-full px-4 py-3 transition-colors ${textSize} ${
-              isDisabled
-                ? 'text-neutral-70 cursor-not-allowed'
-                : `hover:cursor-pointer ${isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'}`
-            }`}
+            className={className}
           >
-            {getLabel ? getLabel(tab) : tab}
+            {label}
           </button>
         )
       })}

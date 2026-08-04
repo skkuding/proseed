@@ -27,6 +27,8 @@ interface UserInfoCardProps {
   onProjectsClick?: () => void
   /** 이름 클릭 시 기본 프로필 화면으로 돌아가기 (참여 프로젝트/작성한 피드백 화면에서 빠져나올 방법이 없어서 추가) */
   onNameClick?: () => void
+  /** 이름 클릭 시 페이지 이동만 하면 될 때 (onNameClick이 있으면 무시됨) */
+  nameHref?: string
   /** 타인의 프로필 조회 — 이미지 변경 버튼 숨김, 작성한 피드백은 링크 없이 표시만 */
   readOnly?: boolean
 }
@@ -43,6 +45,7 @@ export function UserInfoCard({
   projectsHref = '/mypage/projects',
   onProjectsClick,
   onNameClick,
+  nameHref,
   readOnly = false,
 }: UserInfoCardProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
@@ -92,6 +95,13 @@ export function UserInfoCard({
               >
                 {name}
               </button>
+            ) : nameHref ? (
+              <Link
+                href={nameHref}
+                className="w-full block text-title1_sb_28 line-clamp-2 break-keep break-words hover:cursor-pointer hover:underline"
+              >
+                {name}
+              </Link>
             ) : (
               <p className="text-title1_sb_28 line-clamp-2 break-keep break-words">{name}</p>
             )}

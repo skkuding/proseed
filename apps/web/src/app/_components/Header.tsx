@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { authClient } from '@/lib/auth-client'
 import { useAuthStore } from '@/store/authStore'
 import { RoleFilterTabs } from '@/components/RoleTabs'
@@ -24,7 +24,6 @@ export function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [profile, setProfile] = useState<MyProfile | null>(null)
   const pathname = usePathname()
-  const router = useRouter()
 
   // nav에 없는 라우트(/privacy 등)에서는 어떤 탭도 활성화하지 않는다 (undefined).
   const activeTab = NAV_TABS.find(({ href }) =>
@@ -62,14 +61,14 @@ export function Header() {
             <RoleFilterTabs
               tabs={NAV_TABS.map((t) => t.label)}
               activeTab={activeTab}
-              onTabChange={(label) => {
+              getHref={(label) => NAV_TABS.find((t) => t.label === label)?.href ?? '/'}
+              onTabChange={(label, e) => {
                 const tab = NAV_TABS.find((t) => t.label === label)
                 if (!tab) return
                 if (!session && (tab.href === '/mypage' || tab.href === '/myproject')) {
+                  e?.preventDefault()
                   openLoginModal()
-                  return
                 }
-                router.push(tab.href)
               }}
               textSize="text-body2_m_14"
             />
