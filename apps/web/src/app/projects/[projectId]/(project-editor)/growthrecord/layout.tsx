@@ -60,8 +60,9 @@ export default function GrowthRecordEditorLayout({ children }: { children: React
 
       <ConfirmModal
         isOpen={showGeneralCategoryInfo}
-        title="기타 직군이란?"
-        description="기타 직군은 마케터와 같은 타 직군의 피드백을 받고자 할 때 활용됩니다. 이 직군은 피드백 질문을 작성하지 않으면 타 사용자들에게 노출되지 않아요"
+        title="기타 직군에 대해 알려드려요!"
+        description="기타 직군은 마케팅 또는 AI 엔지니어링과 같은 타 직군의 피드백을
+받고자 할 때 활용됩니다. 참고해주세요."
         onConfirm={() => setShowGeneralCategoryInfo(false)}
       />
     </div>

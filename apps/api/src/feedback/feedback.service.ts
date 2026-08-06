@@ -267,6 +267,7 @@ export class FeedbackService {
         id: true,
         versionId: true,
         createdAt: true,
+        oneLineReview: true,
         adoptions: {
           select: { id: true },
           take: 1,
@@ -276,7 +277,6 @@ export class FeedbackService {
             id: true,
             title: true,
             iconUrl: true,
-            oneLineDescription: true,
           },
         },
       },
@@ -303,7 +303,7 @@ export class FeedbackService {
         projectIconUrl:
           iconUrlByKey.get(submission.project.iconUrl) ??
           submission.project.iconUrl,
-        oneLineDescription: submission.project.oneLineDescription,
+        oneLineDescription: submission.oneLineReview,
         isAdopted: submission.adoptions.length > 0,
         createdAt: submission.createdAt,
       })),

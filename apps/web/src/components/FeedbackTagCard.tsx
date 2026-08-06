@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { LockIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import lockIcon from '../../public/lock.svg'
 import type { FeedbackListItemDto } from '@/lib/api'
 
 export type SubmissionQuestion = {
@@ -65,6 +65,32 @@ export function FeedbackTagCard({
   onToggle,
   onOpenDetail,
 }: FeedbackTagCardProps) {
+  if (!card.isUnlocked) {
+    return (
+      <div className="relative rounded-[12px] border-none bg-white p-5 flex flex-col gap-4">
+        <div className="flex gap-3">
+          <div className="size-15 rounded-full bg-neutral-99 shrink-0" />
+          <div className="flex flex-col gap-2">
+            <div className="h-5.5 w-12 rounded bg-neutral-99" />
+            <div className="h-7 w-[215px] rounded bg-neutral-99" />
+          </div>
+        </div>
+
+        <div className="w-full h-[50px] rounded-[12px] bg-neutral-99 " />
+
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1">
+          <Image src={lockIcon} alt="" width={24} height={24} />
+          <p className="text-title5_sb_20">해제하지 않은 피드백입니다</p>
+          <p className="text-caption1_m_13 text-CoolNeutral-40 text-center mt-1">
+            티켓을 사용하여 피드백을 해제하고
+            <br />
+            세부 내용을 확인해보세요
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       onClick={() => {
@@ -92,13 +118,7 @@ export function FeedbackTagCard({
           </div>
           <div className="flex flex-col">
             <span className="text-body2_m_14 text-primary-strong">{activeTabLabel}</span>
-            <span className="flex items-center gap-1 text-title5_sb_20 leading-tight">
-              {card.author.name}
-              {/* 디자인 확정 전 임시 표시 — 티켓으로 열람하지 않은 피드백 */}
-              {!card.isUnlocked && (
-                <LockIcon className="size-4 shrink-0 text-CoolNeutral-50" aria-label="잠김" />
-              )}
-            </span>
+            <span className="text-title5_sb_20 leading-tight">{card.author.name}</span>
           </div>
         </div>
 

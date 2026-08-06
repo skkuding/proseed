@@ -38,12 +38,10 @@ export function ConfirmModal({
         className="w-100 bg-white rounded-[12px] p-6 flex flex-col gap-5"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <Image src="/info_cool30.svg" alt="info" width={24} height={24} />
-          <div className="flex flex-col gap-2">
-            <p className="text-title5_sb_20 text-black">{title}</p>
-            {description && <p className="text-body2_m_14 text-CoolNeutral-30">{description}</p>}
-          </div>
+          <p className="text-title5_sb_20 text-black">{title}</p>
+          {description && <p className="text-body2_m_14 text-CoolNeutral-30">{description}</p>}
         </div>
         <div className="flex justify-end gap-1">
           {onCancel && (
