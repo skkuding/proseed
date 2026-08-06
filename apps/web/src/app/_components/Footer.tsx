@@ -73,7 +73,9 @@ export function Footer() {
           </div>
           <div className="flex min-w-55 items-center justify-end gap-3">
             <Link
-              href="#"
+              href="https://www.instagram.com/proseednow"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
               className="inline-flex h-15 w-15 items-center justify-center rounded-full bg-CoolNeutral-30 hover:bg-CoolNeutral-40"
             >
