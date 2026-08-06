@@ -14,6 +14,7 @@ import { VersionInputCard } from './VersionInputCard'
 import { ImageUploadCard, type ImageItem } from './ImageUploadCard'
 import { GrowthRecordQuestionCard } from './GrowthRecordQuestionCard'
 import { FeedbackTagSection } from './FeedbackTagSection'
+import { GeneralTabToggleCard } from './GeneralTabToggleCard'
 import growthRecordQuestions from '@/app/_mockdata/project-detail/project-growthrecordQuestion.json'
 import {
   JOB_TABS,
@@ -97,6 +98,8 @@ export function GrowthRecordForm() {
   const setStoreImagesByTab = useGrowthRecordStore((s) => s.setImagesByTab)
   const setStoreAnswers = useGrowthRecordStore((s) => s.setAnswers)
   const setStoreTaggedFeedbacks = useGrowthRecordStore((s) => s.setTaggedFeedbacks)
+  const includeGeneralTab = useGrowthRecordStore((s) => s.includeGeneralTab)
+  const setIncludeGeneralTab = useGrowthRecordStore((s) => s.setIncludeGeneralTab)
 
   const preservedFeedbackQuestionsByTab = useRef<Partial<Record<TabLabel, unknown>>>({})
 
@@ -368,13 +371,18 @@ export function GrowthRecordForm() {
       <div className="flex gap-6 items-start">
         {/* Main content */}
         <div className="flex-1 flex flex-col gap-5">
+          {activeTab === '기타' && (
+            <GeneralTabToggleCard checked={includeGeneralTab} onChange={setIncludeGeneralTab} />
+          )}
+
           <VersionInputCard version={version} onChange={setVersion} />
 
           <ImageUploadCard
             images={images}
             onFilesSelected={handleImageSelect}
             onImageClick={setImageModalIndex}
-            isRequired={activeTab !== '기타'}
+            isRequired={activeTab !== '기타' || includeGeneralTab}
+            disabled={activeTab === '기타' && !includeGeneralTab}
           />
 
           {/* 질문별 답변 */}
@@ -385,9 +393,10 @@ export function GrowthRecordForm() {
             <GrowthRecordQuestionCard
               key={`${q.questionId}-${draftsReady}`}
               title={q.questionTitle}
-              isRequired={q.isRequired && activeTab !== '기타'}
+              isRequired={q.isRequired && (activeTab !== '기타' || includeGeneralTab)}
               value={answers[q.questionId] ?? ''}
               onChange={(val) => setAnswers((prev) => ({ ...prev, [q.questionId]: val }))}
+              disabled={activeTab === '기타' && !includeGeneralTab}
             />
           ))}
 

@@ -16,6 +16,7 @@ interface EditorProps {
   placeholder?: string
   width: string | number
   height: string | number
+  readOnly?: boolean
 }
 
 export default function Editor({
@@ -24,6 +25,7 @@ export default function Editor({
   placeholder = '텍스트를 입력해주세요',
   width,
   height,
+  readOnly = false,
 }: EditorProps) {
   return (
     <div
@@ -34,6 +36,7 @@ export default function Editor({
         markdown={markdown}
         onChange={onChange}
         placeholder={placeholder}
+        readOnly={readOnly}
         plugins={[
           toolbarPlugin({
             toolbarClassName:

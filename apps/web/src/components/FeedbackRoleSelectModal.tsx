@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { X, Dot, CircleAlert } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, Dot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RoleFilterTabs } from '@/components/RoleTabs'
 import { getFeedbackQuestions, type FeedbackQuestionItemDto } from '@/lib/api'
@@ -21,6 +21,8 @@ interface FeedbackRoleSelectModalProps {
   onConfirm: (selectedRoles: TabLabel[]) => void
   projectId: string
   versionId: string
+  // 해당 버전의 성장기록에 기타 직군이 포함돼 있는지 — 아니면 기타 탭을 disable
+  hasGeneralCategory: boolean
 }
 
 export function FeedbackRoleSelectModal({
@@ -29,15 +31,11 @@ export function FeedbackRoleSelectModal({
   onConfirm,
   projectId,
   versionId,
+  hasGeneralCategory,
 }: FeedbackRoleSelectModalProps) {
   const [activeTab, setActiveTab] = useState<TabLabel>('기획')
-  // 기타(GENERAL) 필수 질문은 어떤 직군을 고르든 항상 답변해야 하므로 처음부터 선택돼 있고 해제 불가
-  const [selectedRoles, setSelectedRoles] = useState<Set<TabLabel>>(new Set(['기획', '기타']))
+  const [selectedRoles, setSelectedRoles] = useState<Set<TabLabel>>(new Set(['기획']))
   const [questions, setQuestions] = useState<FeedbackQuestionItemDto[]>([])
-  const [isOtherRequiredShaking, setIsOtherRequiredShaking] = useState(false)
-  const [showOtherRequiredWarning, setShowOtherRequiredWarning] = useState(false)
-  const shakeResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const shakeRestartTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!isOpen) return
@@ -45,13 +43,6 @@ export function FeedbackRoleSelectModal({
       .then(setQuestions)
       .catch(() => setQuestions([]))
   }, [isOpen, projectId, versionId])
-
-  useEffect(() => {
-    return () => {
-      if (shakeResetTimeout.current) clearTimeout(shakeResetTimeout.current)
-      if (shakeRestartTimeout.current) clearTimeout(shakeRestartTimeout.current)
-    }
-  }, [])
 
   if (!isOpen) return null
 
@@ -61,19 +52,6 @@ export function FeedbackRoleSelectModal({
     .sort((a, b) => a.order - b.order)
 
   const toggleRole = (tab: TabLabel) => {
-    if (tab === '기타') {
-      // 항상 포함돼야 해서 해제 불가 — 시도 시 1초간 흔들리고, 안내 문구는 계속 노출
-      if (shakeResetTimeout.current) clearTimeout(shakeResetTimeout.current)
-      if (shakeRestartTimeout.current) clearTimeout(shakeRestartTimeout.current)
-      setShowOtherRequiredWarning(true)
-      setIsOtherRequiredShaking(false)
-      shakeRestartTimeout.current = setTimeout(() => {
-        setIsOtherRequiredShaking(true)
-        shakeResetTimeout.current = setTimeout(() => setIsOtherRequiredShaking(false), 1000)
-      }, 10)
-      return
-    }
-
     setSelectedRoles((prev) => {
       const next = new Set(prev)
       if (next.has(tab)) {
@@ -112,6 +90,7 @@ export function FeedbackRoleSelectModal({
           <RoleFilterTabs
             tabs={TABS}
             activeTab={activeTab}
+            disabledTabs={hasGeneralCategory ? [] : ['기타']}
             getLabel={jobTabToPersonLabel}
             onTabChange={(tab) => setActiveTab(tab as TabLabel)}
           />
@@ -135,7 +114,7 @@ export function FeedbackRoleSelectModal({
             onClick={() => toggleRole(activeTab)}
             className={`flex items-center justify-between bg-white rounded-[12px] border-2 p-5 hover:cursor-pointer transition-colors ${
               selectedRoles.has(activeTab) ? 'border-primary' : 'border-transparent'
-            } ${activeTab === '기타' && isOtherRequiredShaking ? 'animate-shake' : ''}`}
+            }`}
           >
             <div className="flex flex-col gap-1 text-left">
               <p className="text-title5_sb_20 text-black">{activeTab} 직군의 피드백을 작성할게요</p>
@@ -160,12 +139,6 @@ export function FeedbackRoleSelectModal({
               )}
             </div>
           </button>
-          {activeTab === '기타' && showOtherRequiredWarning && (
-            <div className="flex items-center gap-1 px-1">
-              <CircleAlert className="size-4 text-destructive" />
-              <span className="text-body4_r_14 text-destructive">기타 항목은 필수예요</span>
-            </div>
-          )}
         </div>
 
         {/* Action buttons */}

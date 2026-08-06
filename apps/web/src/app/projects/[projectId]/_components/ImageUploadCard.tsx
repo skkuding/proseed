@@ -20,6 +20,7 @@ interface ImageUploadCardProps {
   onFilesSelected: (files: FileList | null) => Promise<void>
   onImageClick: (index: number) => void
   isRequired?: boolean
+  disabled?: boolean
 }
 
 export function ImageUploadCard({
@@ -27,21 +28,24 @@ export function ImageUploadCard({
   onFilesSelected,
   onImageClick,
   isRequired = true,
+  disabled = false,
 }: ImageUploadCardProps) {
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className="flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)]">
+    <div
+      className={`flex flex-col gap-3 bg-white rounded-xl p-6 shadow-[0_4px_20px_0_rgba(53,78,116,0.1)] ${disabled ? 'pointer-events-none' : ''}`}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h2 className="text-title1_sb_28">이미지 등록하기</h2>
-          <FieldBadge type={isRequired ? '필수' : '선택'} />
+          {isRequired && <FieldBadge type="필수" />}
         </div>
 
         <Button
           size="sm"
           onClick={() => imageInputRef.current?.click()}
-          disabled={images.length >= MAX_IMAGES}
+          disabled={disabled || images.length >= MAX_IMAGES}
           className="w-34.25 px-5 text-sub3_sb_16"
         >
           이미지 등록하기
@@ -82,7 +86,8 @@ export function ImageUploadCard({
       ) : (
         <button
           onClick={() => imageInputRef.current?.click()}
-          className="flex flex-col items-center justify-center gap-2 w-[225px] h-[127px] rounded-xl border border-dashed border-neutral-200 text-CoolNeutral-50 bg-neutral-99 hover:bg-neutral-95 hover:cursor-pointer transition-colors mt-1"
+          disabled={disabled}
+          className="flex flex-col items-center justify-center gap-2 w-[225px] h-[127px] rounded-xl border border-dashed border-neutral-200 text-CoolNeutral-50 bg-neutral-99 not-disabled:hover:bg-neutral-95 not-disabled:hover:cursor-pointer transition-colors mt-1"
         >
           <ImageIcon className="size-6" />
           <span className="text-caption1_m_13">이미지 등록</span>

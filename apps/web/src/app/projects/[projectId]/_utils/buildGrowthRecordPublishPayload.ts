@@ -30,6 +30,8 @@ interface BuildGrowthRecordPublishPayloadParams {
   questionsByTab: Record<TabLabel, FeedbackQuestionDraft[]>
   goal: string
   result: string
+  // 기타 직군 토글이 켜져 있으면 다른 직군과 동일하게 필수로 취급한다
+  includeGeneralTab: boolean
 }
 
 // 기타(GENERAL)는 선택사항 — 성장기록 답변·이미지·피드백 질문이 전부(필수 직군과 동일한 기준으로)
@@ -61,12 +63,14 @@ export function buildGrowthRecordPublishPayload({
   questionsByTab,
   goal,
   result,
+  includeGeneralTab,
 }: BuildGrowthRecordPublishPayloadParams): CreateVersionDto {
+  const requiredTabs = includeGeneralTab ? JOB_TABS : REQUIRED_JOB_TABS
   const includedTabs: TabLabel[] = [
-    ...REQUIRED_JOB_TABS,
+    ...requiredTabs,
     ...JOB_TABS.filter(
       (tab) =>
-        !REQUIRED_JOB_TABS.includes(tab) && isTabComplete(tab, imagesByTab, answers, questionsByTab)
+        !requiredTabs.includes(tab) && isTabComplete(tab, imagesByTab, answers, questionsByTab)
     ),
   ]
 

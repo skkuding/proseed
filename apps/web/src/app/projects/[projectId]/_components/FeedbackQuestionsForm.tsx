@@ -85,6 +85,7 @@ export function FeedbackQuestionsForm() {
   const [showLeadOnlyModal, setShowLeadOnlyModal] = useState(false)
   const [showGeneralPartialWarningModal, setShowGeneralPartialWarningModal] = useState(false)
   const [draftsReady, setDraftsReady] = useState(false)
+  const includeGeneralTab = useGrowthRecordStore((s) => s.includeGeneralTab)
   const params = useParams()
   const router = useRouter()
   const projectId = params.projectId as string
@@ -252,7 +253,9 @@ export function FeedbackQuestionsForm() {
         <RoleFilterTabs
           tabs={TABS}
           activeTab={activeTab}
-          disabledTabs={TABS.filter((t) => !(allowedTabs ?? []).includes(t))}
+          disabledTabs={TABS.filter(
+            (t) => !(allowedTabs ?? []).includes(t) || (t === '기타' && !includeGeneralTab)
+          )}
           getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => setActiveTab(tab as TabLabel)}
         />
@@ -322,8 +325,10 @@ export function FeedbackQuestionsForm() {
               const tabsToCheck = isLead
                 ? (Object.keys(questionsByTab) as TabLabel[])
                 : (allowedTabs ?? [])
-              // 기타(GENERAL)는 선택사항 — 안 채워도 발행을 막지 않는다 (채워져 있으면 정상 발행에 포함됨)
-              const requiredTabsToCheck = tabsToCheck.filter((tab) => tab !== '기타')
+              // 기타(GENERAL)는 토글이 꺼져 있으면 선택사항 — 켜져 있으면 다른 직군과 동일하게 필수
+              const requiredTabsToCheck = tabsToCheck.filter(
+                (tab) => tab !== '기타' || includeGeneralTab
+              )
 
               // 백엔드가 빈 답변을 그대로 422로 거부하므로, 여기서 먼저 걸러 원문 에러 대신 안내 문구를 보여준다
               const { answers, imagesByTab } = useGrowthRecordStore.getState()
@@ -369,6 +374,7 @@ export function FeedbackQuestionsForm() {
                 (q) => !q.isFreeComment && q.text.trim().length > 0
               )
               const hasPartialGeneralContent =
+                !includeGeneralTab &&
                 (hasAnyGeneralAnswer || hasGeneralImage || hasAnyGeneralQuestionText) &&
                 !isTabComplete('기타', imagesByTab, answers, questionsByTab)
 
@@ -404,6 +410,7 @@ export function FeedbackQuestionsForm() {
             questionsByTab,
             goal,
             result,
+            includeGeneralTab,
           })
 
           setIsPublishing(true)

@@ -25,6 +25,7 @@ import { VersionSelect, FREEFORM_VERSION_VALUE } from './VersionSelect'
 import {
   getProjectById,
   getProjectVersions,
+  getVersionDetail,
   getFeedbacksForVersion,
   getFreeformFeedbacks,
   getMyProfile,
@@ -72,6 +73,7 @@ export function Feedbacks() {
   const [unlockingId, setUnlockingId] = useState<number | null>(null)
   const [unlockError, setUnlockError] = useState<{ id: number; message: string } | null>(null)
   const [showInsufficientTicketModal, setShowInsufficientTicketModal] = useState(false)
+  const [hasGeneralCategory, setHasGeneralCategory] = useState(false)
 
   useEffect(() => {
     getProjectById(projectId)
@@ -91,6 +93,20 @@ export function Feedbacks() {
 
   // 실제 버전이 생긴 뒤에도 성장기록 이전에 남겨진 자유 피드백을 계속 조회할 수 있어야 한다
   const isFreeformView = versionList.length === 0 || selectedVersion === FREEFORM_VERSION_VALUE
+
+  // 자유 피드백은 성장기록에 매이지 않아 기타 직군도 항상 다룰 수 있다 —
+  // 버전이 선택된 경우에만 해당 버전 발행 시 기타 성장기록이 포함됐는지로 disable 여부를 정한다
+  useEffect(() => {
+    if (isFreeformView || !selectedVersion) {
+      setHasGeneralCategory(true)
+      return
+    }
+    getVersionDetail(projectId, selectedVersion)
+      .then((detail) =>
+        setHasGeneralCategory(detail.growthRecords.some((gr) => gr.category === 'GENERAL'))
+      )
+      .catch(() => setHasGeneralCategory(true))
+  }, [projectId, selectedVersion, isFreeformView])
 
   const handleUnlock = async (submissionId: number, category: FeedbackListItemDto['category']) => {
     if (!session) {
@@ -301,6 +317,7 @@ export function Feedbacks() {
         <RoleFilterTabs
           tabs={JOB_TABS}
           activeTab={activeTab}
+          disabledTabs={hasGeneralCategory ? [] : ['기타']}
           getLabel={jobTabToPersonLabel}
           onTabChange={(tab) => handleTabChange(tab as TabLabel)}
         />
@@ -414,6 +431,7 @@ export function Feedbacks() {
         onConfirm={handleRoleSelectConfirm}
         projectId={projectId}
         versionId={selectedVersion}
+        hasGeneralCategory={hasGeneralCategory}
       />
 
       <ConfirmModal

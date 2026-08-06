@@ -37,7 +37,7 @@ export function RoleFilterTabs({
         const isDisabled = disabledTabs.includes(tab)
         const className = `relative z-10 flex h-[50px] w-28 items-center justify-center rounded-full px-4 py-3 transition-colors ${textSize} ${
           isDisabled
-            ? 'text-neutral-70 cursor-not-allowed'
+            ? 'text-neutral-70'
             : `hover:cursor-pointer ${isActive ? 'text-white' : 'text-black hover:text-CoolNeutral-20'}`
         }`
         const label = getLabel ? getLabel(tab) : tab
