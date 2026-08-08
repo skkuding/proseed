@@ -305,7 +305,7 @@ export function CreateFeedbackContent() {
                       onClick={() => setImageModal({ questionId: q.id, index })}
                       className="relative aspect-video w-full rounded-lg overflow-hidden hover:cursor-pointer"
                     >
-                      <Image src={img.preview} alt="" fill className="object-cover" />
+                      <Image src={img.preview} alt="" fill sizes="300px" className="object-cover" />
                       {img.uploading && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                           <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

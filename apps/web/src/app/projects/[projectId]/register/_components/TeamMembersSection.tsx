@@ -187,6 +187,7 @@ export function TeamMembersSection({
                       src={m.profileImageUrl}
                       alt={m.name ?? ''}
                       fill
+                      sizes="42px"
                       className="object-cover"
                     />
                   ) : (

@@ -33,7 +33,7 @@ export function ProjectImageCarousel({ images }: Props) {
                 className="relative h-[474px] w-[826px] overflow-hidden rounded-xl bg-gray-100 cursor-pointer"
                 onClick={() => setLightboxIndex(idx)}
               >
-                <Image src={src} alt="" fill className="object-cover" />
+                <Image src={src} alt="" fill sizes="826px" className="object-cover" />
               </div>
             </CarouselItem>
           ))}

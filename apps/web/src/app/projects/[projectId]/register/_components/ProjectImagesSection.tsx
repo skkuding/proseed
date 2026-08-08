@@ -82,7 +82,13 @@ export function ProjectImagesSection({ images, onAdd, onRemove }: ProjectImagesS
               onClick={() => setViewingIdx(idx)}
               className="relative h-[100px] rounded-[8px] border border-neutral-90 overflow-hidden bg-gray-100 hover:cursor-pointer"
             >
-              <Image src={img.preview} alt={`이미지 ${idx + 1}`} fill className="object-cover" />
+              <Image
+                src={img.preview}
+                alt={`이미지 ${idx + 1}`}
+                fill
+                sizes="200px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

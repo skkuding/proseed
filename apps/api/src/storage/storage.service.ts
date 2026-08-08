@@ -9,6 +9,12 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
+// 다운로드 presigned URL은 고정 창 단위로 서명한다. 같은 창 안에서는 URL 문자열이
+// 완전히 동일해져 Next 이미지 캐시와 브라우저 캐시가 적중한다.
+// expiresIn은 창 시작 시각부터 세므로 창보다 길어야 창 끝에 받은 URL도 유효하다.
+const DOWNLOAD_URL_WINDOW_MS = 6 * 60 * 60 * 1000
+const DOWNLOAD_URL_EXPIRES_IN = 8 * 60 * 60
+
 @Injectable()
 export class StorageService implements OnModuleInit {
   private readonly logger = new Logger(StorageService.name)
@@ -76,13 +82,23 @@ export class StorageService implements OnModuleInit {
     return getSignedUrl(this.s3Client, command, { expiresIn })
   }
 
-  async getSignedDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
+  async getSignedDownloadUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
     })
 
-    return getSignedUrl(this.s3Client, command, { expiresIn })
+    return getSignedUrl(this.s3Client, command, {
+      expiresIn: DOWNLOAD_URL_EXPIRES_IN,
+      signingDate: this.downloadSigningDate(),
+    })
+  }
+
+  // 현재 시각을 창 크기로 내림한 값. 창이 넘어갈 때만 URL이 바뀐다.
+  private downloadSigningDate(): Date {
+    return new Date(
+      Math.floor(Date.now() / DOWNLOAD_URL_WINDOW_MS) * DOWNLOAD_URL_WINDOW_MS,
+    )
   }
 
   async deleteFile(key: string): Promise<void> {

@@ -219,6 +219,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         src={project.thumbnailUrl}
                         alt={project.title}
                         fill
+                        sizes="60px"
                         className="object-cover"
                       />
                     </div>

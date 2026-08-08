@@ -31,7 +31,13 @@ export default function ProjectCard({ project }: { project: Project }) {
       <article className="w-full cursor-pointer overflow-hidden rounded-[20px] bg-white shadow-sm px-2 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
         <div className="flex flex-col pt-2 pb-6">
           <div className="relative mb-3 aspect-video w-full shrink-0 overflow-hidden rounded-[16px] bg-gray-200">
-            <Image src={project.thumbnailUrl} alt={project.title} fill className="object-cover" />
+            <Image
+              src={project.thumbnailUrl}
+              alt={project.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 450px"
+              className="object-cover"
+            />
           </div>
 
           <div className="flex flex-col px-4 gap-5">

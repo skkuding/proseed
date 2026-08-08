@@ -180,6 +180,7 @@ export function FeedbackTagModal({
                       src={detailCard.author.profileImageUrl}
                       alt={detailCard.author.name}
                       fill
+                      sizes="70px"
                       className="object-cover"
                     />
                   </div>
@@ -345,6 +346,7 @@ export function FeedbackTagModal({
                               src={card.author.profileImageUrl}
                               alt={card.author.name}
                               fill
+                              sizes="50px"
                               className="object-cover"
                             />
                           </div>

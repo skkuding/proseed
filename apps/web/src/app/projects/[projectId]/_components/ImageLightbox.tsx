@@ -51,11 +51,13 @@ export function ImageLightbox({ images, currentIndex, isOpen, onClose, onPrev, o
       {/* Image card + dot indicator */}
       <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
         <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
+          {/* 원본 크기로 보는 화면이라 리사이즈 이득이 없다. 옵티마이저를 건너뛰고 S3에서 직접 받는다 */}
           <Image
             src={images[currentIndex]}
             alt=""
             width={1200}
             height={800}
+            unoptimized
             className="min-w-225 max-w-full min-h-126 max-h-full w-auto h-auto object-contain"
           />
         </div>

@@ -31,7 +31,13 @@ export function MyFeedbackCard({
         <div className="flex items-start gap-[6px]">
           <div className="flex items-center gap-2">
             <div className="relative h-6 w-6 overflow-hidden rounded-full bg-[#F5F6F8]">
-              <Image src={projectIconUrl} alt={projectName} fill className="object-cover" />
+              <Image
+                src={projectIconUrl}
+                alt={projectName}
+                fill
+                sizes="24px"
+                className="object-cover"
+              />
             </div>
             <div className="min-w-0">
               <p className="text-sub3_sb_16 text-neutral-20 line-clamp-1">{projectName}</p>

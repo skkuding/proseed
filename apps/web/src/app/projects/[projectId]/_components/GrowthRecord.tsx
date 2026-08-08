@@ -200,7 +200,7 @@ function RecordSection({ record }: { record: GrowthRecordItem }) {
                 className="relative shrink-0 w-95 h-55 rounded-xl overflow-hidden bg-neutral-100 cursor-pointer"
                 onClick={() => setLightboxIndex(idx)}
               >
-                <Image src={img.url} alt="" fill className="object-cover" />
+                <Image src={img.url} alt="" fill sizes="380px" className="object-cover" />
               </div>
             ))}
           </div>

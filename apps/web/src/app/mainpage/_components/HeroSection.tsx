@@ -23,7 +23,14 @@ export default function HeroSection() {
   return (
     <section className="w-full">
       <div className="relative h-[475px] w-full overflow-hidden rounded-[28px]">
-        <Image src="/main.svg" alt="메인 배너 배경" fill priority className="object-cover" />
+        <Image
+          src="/main.svg"
+          alt="메인 배너 배경"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
 
         <div className="absolute inset-0 flex items-start justify-center pt-[108px] text-center">
           <div className="flex w-[566px] flex-col items-center">

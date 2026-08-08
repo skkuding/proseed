@@ -27,6 +27,7 @@ export function FeedbackSubmissionPreview({ card, isOpen }: FeedbackSubmissionPr
               src={card.author.profileImageUrl}
               alt={card.author.name}
               fill
+              sizes="67px"
               className="object-cover"
             />
           </div>

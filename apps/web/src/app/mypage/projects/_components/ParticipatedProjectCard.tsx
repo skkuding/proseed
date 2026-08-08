@@ -25,6 +25,7 @@ export function ParticipatedProjectCard({ project }: { project: ParticipatedProj
             src={project.imageUrl}
             alt={`${project.title} 대표 이미지`}
             fill
+            sizes="60px"
             className="object-cover"
           />
         </div>

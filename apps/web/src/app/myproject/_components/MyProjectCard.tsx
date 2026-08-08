@@ -20,7 +20,13 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
   return (
     <article className="w-full px-2 overflow-hidden rounded-[20px] bg-white shadow-sm flex flex-col pt-2 pb-6 transition-transform duration-300 ease-in-out hover:scale-[1.03]">
       <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-[20px] bg-gray-200">
-        <Image src={project.thumbnailUrl} alt={project.title} fill className="object-cover" />
+        <Image
+          src={project.thumbnailUrl}
+          alt={project.title}
+          fill
+          sizes="(max-width: 1280px) 33vw, 450px"
+          className="object-cover"
+        />
       </div>
 
       <div className="flex flex-1 min-h-0 flex-col gap-6 pt-4 px-2">

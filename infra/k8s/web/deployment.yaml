@@ -39,11 +39,16 @@ spec:
             periodSeconds: 5
           resources:
             limits:
-              cpu: 1
+              # 이미지 최적화(sharp)는 CPU 바운드라 1코어에선 동시 요청이 직렬화된다
+              cpu: 2
               memory: 2Gi
+              # 이미지 최적화 캐시(.next/cache/images)가 여기에 쌓인다.
+              # 한도가 없으면 노드 디스크를 채워 같은 노드의 다른 pod까지 축출된다.
+              ephemeral-storage: 4Gi
             requests:
               cpu: 0.2
               memory: 200Mi
+              ephemeral-storage: 1Gi
           envFrom:
             - configMapRef:
                 name: web-env

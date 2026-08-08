@@ -98,6 +98,7 @@ export function FeedbackSuccessModal({ isOpen, onClose, projectId }: FeedbackSuc
                       src={project.thumbnailUrl}
                       alt={project.title}
                       fill
+                      sizes="336px"
                       className="object-cover rounded-xl"
                     />
                   </div>

@@ -82,7 +82,9 @@ export function FeedbackSubmissionDetail({
                         }}
                         className="relative aspect-video rounded-xl overflow-hidden bg-neutral-100 hover:opacity-90 transition-opacity hover:cursor-pointer"
                       >
-                        <Image src={img} alt="" fill className="object-cover" />
+                        {/* 피드백 이미지는 unlock 게이팅 대상이라 presigned URL이 매번 바뀐다.
+                            옵티마이저를 태우면 캐시가 항상 빗나가 서버 CPU·디스크만 쓰므로 건너뛴다 */}
+                        <Image src={img} alt="" fill unoptimized className="object-cover" />
                       </button>
                     ))}
                   </div>

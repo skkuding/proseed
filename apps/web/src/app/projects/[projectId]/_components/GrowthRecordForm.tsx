@@ -405,7 +405,7 @@ export function GrowthRecordForm() {
                     onClick={() => setImageModalIndex(index)}
                     className="relative w-56.25 h-31.75 shrink-0 rounded-lg overflow-hidden hover:cursor-pointer"
                   >
-                    <Image src={img.preview} alt="" fill className="object-cover" />
+                    <Image src={img.preview} alt="" fill sizes="225px" className="object-cover" />
                     {img.uploading && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -47,7 +47,7 @@ export function ImageDeleteModal({
           <Image src="/arrow2_left.svg" alt="이전" width={24} height={24} />
         </button>
         <div className="relative w-[900px] h-[504px] rounded-2xl overflow-hidden">
-          <Image src={currentImage.preview} alt="" fill className="object-contain" />
+          <Image src={currentImage.preview} alt="" fill sizes="900px" className="object-contain" />
         </div>
         <button
           onClick={onNext}
