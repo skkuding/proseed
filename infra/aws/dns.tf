@@ -22,6 +22,15 @@ resource "aws_route53_record" "root" {
   ttl     = 300
 }
 
+# Staging environment
+resource "aws_route53_record" "stage" {
+  name    = "stage.proseednow.com"
+  zone_id = aws_route53_zone.main.zone_id
+  type    = "A"
+  records = local.lab_cluster_ip
+  ttl     = 300
+}
+
 # Preview environment wildcard subdomain
 # Allows dynamic preview URLs like pr-42.proseednow.com
 resource "aws_route53_record" "preview_wildcard" {
