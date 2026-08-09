@@ -1,0 +1,14 @@
+- op: remove
+  path: /metadata/annotations/cert-manager.io~1cluster-issuer
+- op: add
+  path: /metadata/annotations/traefik.ingress.kubernetes.io~1router.middlewares
+  value: proseed-stage-noindex@kubernetescrd
+- op: replace
+  path: /spec/tls/0/hosts/0
+  value: stage.proseednow.com
+- op: replace
+  path: /spec/tls/0/secretName
+  value: stage-proseednow-tls
+- op: replace
+  path: /spec/rules/0/host
+  value: stage.proseednow.com
