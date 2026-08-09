@@ -41,6 +41,14 @@ const createAuth = (
     emailAndPassword: {
       enabled: configService.get('ENABLE_DEV_LOGIN') === 'true',
     },
+    account: {
+      accountLinking: {
+        //네이버는 이메일 인증 여부를 안 내려줘서 emailVerified가 항상 false로 취급됨 -> 이미 다른
+        //provider로 가입된 이메일로 로그인하면 better-auth가 연동을 거부하고 account_not_linked 에러를 반환.
+        //prod엔 이메일/비밀번호 직접 가입이 없어 이메일 선점 위험이 없으므로 세 provider가 서로 신뢰하도록 허용.
+        trustedProviders: ['google', 'kakao', 'naver'],
+      },
+    },
     databaseHooks: {
       //user:create:before: User를 DB에 저장하기 전 실행되는 hook
       user: {
