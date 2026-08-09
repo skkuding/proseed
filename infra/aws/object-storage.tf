@@ -34,3 +34,49 @@ output "uploads_bucket_name" {
 output "uploads_bucket_arn" {
   value = aws_s3_bucket.uploads.arn
 }
+
+
+
+# Isolated staging bucket for file uploads
+resource "aws_s3_bucket" "stage_uploads" {
+  bucket = "proseed-stage-uploads"
+}
+
+resource "aws_s3_bucket_public_access_block" "stage_uploads" {
+  bucket = aws_s3_bucket.stage_uploads.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "stage_uploads" {
+  bucket = aws_s3_bucket.stage_uploads.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "stage_uploads" {
+  bucket = aws_s3_bucket.stage_uploads.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "PUT", "POST"]
+    allowed_origins = ["https://stage.proseednow.com"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+output "stage_uploads_bucket_name" {
+  value = aws_s3_bucket.stage_uploads.bucket
+}
+
+output "stage_uploads_bucket_arn" {
+  value = aws_s3_bucket.stage_uploads.arn
+}
