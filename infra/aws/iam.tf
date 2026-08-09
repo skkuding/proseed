@@ -42,8 +42,8 @@ resource "aws_iam_user_policy" "proseed" {
           "s3:GetBucketLocation"
         ]
         Resource = [
-          "arn:aws:s3:::proseed-*",
-          "arn:aws:s3:::proseed-*/*"
+          aws_s3_bucket.uploads.arn,
+          "${aws_s3_bucket.uploads.arn}/*"
         ]
       }
     ]
@@ -60,5 +60,53 @@ output "proseed_access_key_id" {
 
 output "proseed_secret_access_key" {
   value     = aws_iam_access_key.proseed.secret
+  sensitive = true
+}
+
+
+# Dedicated staging identity. It cannot access production upload objects.
+resource "aws_iam_user" "proseed_stage" {
+  name = "proseed-stage"
+}
+
+resource "aws_iam_user_policy" "proseed_stage" {
+  name = "proseed-stage-policy"
+  user = aws_iam_user.proseed_stage.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = aws_s3_bucket.stage_uploads.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "${aws_s3_bucket.stage_uploads.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "proseed_stage" {
+  user = aws_iam_user.proseed_stage.name
+}
+
+output "proseed_stage_access_key_id" {
+  value     = aws_iam_access_key.proseed_stage.id
+  sensitive = true
+}
+
+output "proseed_stage_secret_access_key" {
+  value     = aws_iam_access_key.proseed_stage.secret
   sensitive = true
 }

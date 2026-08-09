@@ -1,8 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web-ingress
-  namespace: proseed
+  name: api-server-ingress
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-dns01
     traefik.ingress.kubernetes.io/redirect-entry-point: https
@@ -11,15 +10,15 @@ spec:
   tls:
     - hosts:
         - proseednow.com
-      secretName: web-tls
+      secretName: api-server-tls
   rules:
     - host: proseednow.com
       http:
         paths:
-          - path: /
+          - path: /api/
             pathType: Prefix
             backend:
               service:
-                name: web
+                name: api-server
                 port:
-                  number: 3000
+                  number: 4000

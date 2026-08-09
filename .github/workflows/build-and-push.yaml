@@ -5,16 +5,26 @@ on:
     paths:
       - 'apps/web/**'
       - 'apps/api/**'
-      - 'infra/k8s/postgres/backup/image/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'infra/k8s/postgres/overlays/production/backup/image/**'
       - '.github/workflows/build-and-push.yaml'
     branches:
       - main
+      - release
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   # Client-side OTEL endpoint (injected at build time)
   NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT: 'https://otel.proseednow.com'
+
+# A slower, older build must not overwrite the mutable :stage or :prod tag
+# after a newer commit has already been published.
+concurrency:
+  group: build-and-push-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   changes:
@@ -33,9 +43,15 @@ jobs:
           filters: |
             web:
               - 'apps/web/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
               - '.github/workflows/build-and-push.yaml'
             api:
               - 'apps/api/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
               - '.github/workflows/build-and-push.yaml'
 
       - name: Detect changed Postgres backup image
@@ -44,12 +60,12 @@ jobs:
         with:
           filters: |
             postgres_backup:
-              - 'infra/k8s/postgres/backup/image/**'
+              - 'infra/k8s/postgres/overlays/production/backup/image/**'
               - '.github/workflows/build-and-push.yaml'
 
-  build-and-push:
+  build-and-push-prod:
     needs: changes
-    if: needs.changes.outputs.apps != '[]'
+    if: github.ref_name == 'release' && needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -78,16 +94,54 @@ jobs:
           file: apps/${{ matrix.app }}/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:main
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:${{ github.sha }}-prod
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:prod
           build-args: |
             NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=${{ env.NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT }}
             NEXT_PUBLIC_APP_ENV=production
             NEXT_PUBLIC_API_URL=https://proseednow.com/api
 
+  build-and-push-stage:
+    needs: changes
+    if: github.ref_name == 'main' && needs.changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push stage Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:${{ github.sha }}-stage
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.app }}:stage
+          build-args: |
+            NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT=${{ env.NEXT_PUBLIC_OTEL_EXPORTER_OTLP_ENDPOINT }}
+            NEXT_PUBLIC_APP_ENV=stage
+            NEXT_PUBLIC_API_URL=https://stage.proseednow.com/api
+
   build-and-push-postgres-backup:
     needs: changes
-    if: needs.changes.outputs.postgres_backup == 'true'
+    if: github.ref_name == 'release' && needs.changes.outputs.postgres_backup == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -109,10 +163,10 @@ jobs:
       - name: Build and push Postgres backup image
         uses: docker/build-push-action@v6
         with:
-          context: infra/k8s/postgres/backup/image
-          file: infra/k8s/postgres/backup/image/Dockerfile
+          context: infra/k8s/postgres/overlays/production/backup/image
+          file: infra/k8s/postgres/overlays/production/backup/image/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/postgres-backup:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/postgres-backup:main
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/postgres-backup:${{ github.sha }}-prod
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/postgres-backup:prod

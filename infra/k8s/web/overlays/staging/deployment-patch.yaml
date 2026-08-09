@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  annotations:
+    argocd.argoproj.io/sync-wave: '2'
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/environment: stage
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: APP_ENV
+              value: stage
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi

@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: proseed-postgres
+
+resources:
+  - ../../base
+  - backup
+  - db-credentials.yaml
+  - namespace.yaml
+
+images:
+  - name: ghcr.io/skkuding/proseed/postgres-backup
+    newTag: prod
