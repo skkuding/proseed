@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/environment: stage
+spec:
+  resources:
+    requests:
+      storage: 10Gi

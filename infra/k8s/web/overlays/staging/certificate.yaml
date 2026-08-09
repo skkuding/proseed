@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stage-proseednow-com
+  namespace: proseed-stage
+  annotations:
+    argocd.argoproj.io/sync-wave: '-1'
+spec:
+  secretName: stage-proseednow-tls
+  privateKey:
+    rotationPolicy: Always
+  issuerRef:
+    name: letsencrypt-dns01
+    kind: ClusterIssuer
+  dnsNames:
+    - stage.proseednow.com

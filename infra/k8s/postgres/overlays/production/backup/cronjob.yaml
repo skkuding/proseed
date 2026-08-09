@@ -31,7 +31,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: backup
-              image: ghcr.io/skkuding/proseed/postgres-backup:main
+              image: ghcr.io/skkuding/proseed/postgres-backup:prod
               imagePullPolicy: Always
               command:
                 - /bin/sh

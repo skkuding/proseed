@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api
-  namespace: proseed
 spec:
   replicas: 1
   selector:
@@ -15,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/skkuding/proseed/api:main
+          image: ghcr.io/skkuding/proseed/api:latest
           ports:
             - containerPort: 4000
           startupProbe:

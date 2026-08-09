@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-env
+data:
+  NEXT_URL: https://stage.proseednow.com
+  INTERNAL_API_URL: http://api-server.proseed-stage.svc.cluster.local:4000/api
