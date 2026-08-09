@@ -18,7 +18,7 @@ spec:
           command:
             - sh
             - -c
-            - until pg_isready --dbname="${DATABASE_URL}"; do sleep 2; done
+            - until pg_isready -h postgres-svc -p 5432 -U "${username}" -d skkuding; do sleep 2; done
           envFrom:
             - secretRef:
                 name: database-credentials
