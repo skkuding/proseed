@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'apps/web/**'
+      - 'infra/k8s/web-preview/**'
       - '.github/workflows/preview-build.yaml'
     types: [opened, synchronize, reopened]
 
