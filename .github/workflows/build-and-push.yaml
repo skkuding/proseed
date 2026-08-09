@@ -40,6 +40,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: app_filter
         with:
+          base: ${{ github.event.before }}
           filters: |
             web:
               - 'apps/web/**'
@@ -58,6 +59,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: backup_filter
         with:
+          base: ${{ github.event.before }}
           filters: |
             postgres_backup:
               - 'infra/k8s/postgres/overlays/production/backup/image/**'
