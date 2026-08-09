@@ -8,7 +8,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - 'infra/k8s/postgres/backup/image/**'
+      - 'infra/k8s/postgres/overlays/production/backup/image/**'
       - '.github/workflows/build-and-push.yaml'
     branches:
       - main
@@ -60,7 +60,7 @@ jobs:
         with:
           filters: |
             postgres_backup:
-              - 'infra/k8s/postgres/backup/image/**'
+              - 'infra/k8s/postgres/overlays/production/backup/image/**'
               - '.github/workflows/build-and-push.yaml'
 
   build-and-push-prod:
@@ -163,8 +163,8 @@ jobs:
       - name: Build and push Postgres backup image
         uses: docker/build-push-action@v6
         with:
-          context: infra/k8s/postgres/backup/image
-          file: infra/k8s/postgres/backup/image/Dockerfile
+          context: infra/k8s/postgres/overlays/production/backup/image
+          file: infra/k8s/postgres/overlays/production/backup/image/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |

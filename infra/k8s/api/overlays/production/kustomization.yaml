@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: proseed
+
+resources:
+  - ../../base
+  - aws-credentials.yaml
+  - namespace.yaml
+  - oauth-credentials.yaml
+
+images:
+  - name: ghcr.io/skkuding/proseed/api
+    newTag: prod

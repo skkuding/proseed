@@ -2,7 +2,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: proseed-migrate
-  namespace: proseed
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
@@ -16,7 +15,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: proseed-migrate
-          image: ghcr.io/skkuding/proseed/api:main
+          image: ghcr.io/skkuding/proseed/api:latest
           workingDir: /app/apps/api
           command: ['npx', 'prisma', 'migrate', 'deploy', '--schema', 'prisma/schema.prisma']
           envFrom:
