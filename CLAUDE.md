@@ -108,9 +108,3 @@ Husky pre-commit hook이 변경된 파일에 ESLint, Prettier, `prisma format`�
 - **Branches**: `main` (prod), `feat/*`, `fix/*`, `docs/*`, `chore/*`, `refactor/*`
 - **TypeScript**: strict
 - **File naming**: 컴포넌트 `UpperCamelCase.tsx`, 유틸 `lowerCamelCase.ts`
-
-## Current Status & Remaining Backend Work
-
-현재 구현 상태와 남은 백엔드 작업(P0 즉시 수정 / P1 핵심 미구현 / 명세 결정 대기)은 별도 핸드오프 문서에 정리돼 있다. **백엔드 작업 시작 전 반드시 확인**할 것:
-
-@BACKEND_HANDOFF.md
