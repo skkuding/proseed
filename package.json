@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "prepare": "husky",
-    "dev": "pnpm --filter web dev",
+    "dev": "pnpm -r --parallel --if-present dev",
     "lint": "pnpm -r --if-present lint",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
