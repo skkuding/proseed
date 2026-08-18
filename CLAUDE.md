@@ -27,8 +27,9 @@ pnpm --filter api exec prisma db seed                       # 로컬 시드 (계
 pnpm --filter web codegen:api     # openapi.json 재생성 + web 타입 생성 (apps/web/src/types/api.generated.ts)
 
 # Dev
-pnpm dev                          # Web (port 3000)
-pnpm --filter api start:dev       # API (port 4000) — docker compose up -d 자동 실행
+pnpm dev                          # Web (3000) + API (4000) 동시 실행
+pnpm --filter web dev             # Web만
+pnpm --filter api dev             # API만 (= start:dev, docker compose up -d 자동 실행)
 
 # Build (root에 build 스크립트 없음 — 워크스페이스별 호출)
 pnpm --filter web build           # Web

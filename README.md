@@ -103,8 +103,9 @@ pnpm install
 pnpm --filter api prisma generate
 
 # 개발 서버 실행
-pnpm dev                        # Web (port 3000)
-pnpm --filter api start:dev     # API (port 4000, docker compose 포함)
+pnpm dev                        # Web (3000) + API (4000) 동시 실행
+pnpm --filter web dev           # Web만
+pnpm --filter api dev           # API만 (docker compose 포함)
 ```
 
 ## 로컬 개발 서비스
