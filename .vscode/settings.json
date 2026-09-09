@@ -7,5 +7,8 @@
   "prisma.pinToPrisma6": true,
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#ff754fc9"
   }
 }
